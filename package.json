@@ -1,6 +1,6 @@
 {
   "name": "stars-player",
-  "version": "0.0.1",
+  "version": "0.1.0-alpha",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -8,7 +8,8 @@
   },
   "scripts": {
     "ng": "ng",
-    "start": "ng serve"
+    "start": "ng serve",
+    "build": "ng build --configuration production --output-hashing=none"
   },
   "private": true,
   "dependencies": {
@@ -22,6 +23,9 @@
     "@angular/platform-browser": "^19.1.7",
     "@angular/platform-browser-dynamic": "^19.1.7",
     "@angular/router": "^19.1.7",
+    "@iqb/responses": "^3.7.0",
+    "lottie-web": "^5.12.2",
+    "ngx-lottie": "^13.0.1",
     "rxjs": "~7.8.1",
     "zone.js": "~0.15.0"
   },
@@ -41,7 +45,7 @@
     "@types/node": "^22.13.4",
     "@typescript-eslint/eslint-plugin": "8.24.1",
     "@typescript-eslint/parser": "8.24.1",
-    "chromedriver": "^89.0.0",
+    "chromedriver": "119.0.1",
     "eslint": "9.20.1",
     "eslint-config-prettier": "10.0.1",
     "eslint-plugin-cypress": "^4.1.0",

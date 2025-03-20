@@ -1,0 +1,21 @@
+mat-radio-group {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+mat-label {
+  display: block;
+  padding: 15px;
+
+  img {
+    position: relative;
+    width: 100%;
+    cursor: pointer;
+    background: white;
+  }
+}
+
+mat-radio-button.mat-mdc-radio-checked img {
+  border: solid 2px red;
+}

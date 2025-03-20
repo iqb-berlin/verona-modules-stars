@@ -13,3 +13,11 @@ _**Beispiele**
 "type":"stars-unit-definition",
 "version":"0.1.0",
 ```
+
+## Interaktions-Elemente ##
+
+* Checkbox
+* Checkboxes (MultipleChoice)
+* RadioGroup
+* DragNDrop
+* TextField

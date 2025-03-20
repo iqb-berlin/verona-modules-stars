@@ -1,0 +1,42 @@
+.section-wrapper {
+  display: flex;
+}
+
+.section-wrapper.row-align {
+  flex-direction: row;
+  align-items: baseline;
+}
+
+.section-wrapper.column-align {
+  flex-direction: column;
+}
+
+.dynamic-section {
+  display: grid;
+  position: relative;
+  z-index: 0;
+  flex-grow: 1;
+}
+
+.static-section {
+  position: relative;
+}
+
+.static-element {
+  display: block;
+  position: absolute;
+}
+
+.no-pointer-events {
+  pointer-events: none;
+}
+
+.centered-horizontal {
+  display: flex;
+  justify-content: center;
+}
+
+.centered-vertical {
+  display: flex;
+  align-items: center;
+}

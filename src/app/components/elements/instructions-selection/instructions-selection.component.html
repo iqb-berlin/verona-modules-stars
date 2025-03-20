@@ -1,0 +1,22 @@
+<div class="instructions-container">
+  @switch (elementType) {
+    @case ("text") {
+      <stars-text
+        [elementModel]="elementModelAsTextElement"
+      ></stars-text>
+    }
+    @case ("image") {
+      <stars-image
+        [elementModel]="elementModelAsImageElement"
+      ></stars-image>
+    }
+    @case ("audio") {
+      <stars-audio
+        [elementModel]="elementModelAsAudioElement"
+      ></stars-audio>
+    }
+    @default {
+      Error: Unsupported ElementType
+    }
+  }
+</div>

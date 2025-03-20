@@ -1,0 +1,18 @@
+<div class="stimulus-container">
+  @switch (elementModel().type) {
+    @case ("text") {
+      <stars-text
+        [elementModel]="elementModelAsTextElement"
+        [position]="center"
+      ></stars-text>
+    }
+    @case ("image") {
+      <stars-image
+        [elementModel]="elementModelAsImageElement"
+      ></stars-image>
+    }
+    @default {
+      Error: Unsupported ElementType
+    }
+  }
+</div>

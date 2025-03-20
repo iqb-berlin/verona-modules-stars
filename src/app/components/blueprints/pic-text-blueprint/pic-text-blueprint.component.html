@@ -1,0 +1,14 @@
+<div class="pic-text">
+  <div class="row">
+    @if (stimulus()) {
+      <stimulus-selection [elementModel]="stimulus()">
+
+      </stimulus-selection>
+    }
+    @if (interaction()) {
+      <interaction-selection [elementModel]="interaction()">
+
+      </interaction-selection>
+    }
+  </div>
+</div>

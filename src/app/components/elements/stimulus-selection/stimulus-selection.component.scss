@@ -1,0 +1,11 @@
+.stimulus-container {
+  display: flex;
+  justify-content: center;
+  height: 100%;
+  overflow: hidden;
+}
+
+stars-image, stars-text {
+  object-fit: contain;
+  height: 100%;
+}

@@ -1,0 +1,12 @@
+<div class="checkbox-group" [formGroup]="MultiCheckboxFormGroup">
+  @for (option of elementModel().options; track option; let i = $index) {
+    <mat-checkbox
+      [formControlName]="option.id"
+      (change)="valueChanged($event)">
+      <img #image
+           [src]="option.imgSrc"
+           [alt]="option.altText"
+           fill="">
+    </mat-checkbox>
+  }
+</div>
