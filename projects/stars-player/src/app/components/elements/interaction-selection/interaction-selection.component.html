@@ -1,0 +1,22 @@
+<div class="interaction-container">
+  @switch (elementType) {
+    @case ("radio-group-images") {
+      <stars-radio-group-images
+        [elementModel]="elementModelAsRadioGroupImagesElement"
+        [parentForm]="parentForm()"
+        [position]="'row'"
+        (valueChange)="valueChange.emit($event)"
+      ></stars-radio-group-images>
+    }
+    @case ("multi-choice-images") {
+      <stars-multi-choice-images
+        [elementModel]="elementModelAsMultiChoiceImagesElement"
+        [parentForm]="parentForm()"
+        (valueChange)="valueChange.emit($event)"
+      ></stars-multi-choice-images>
+    }
+    @default {
+      Error: Unsupported ElementType
+    }
+  }
+</div>

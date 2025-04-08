@@ -1,0 +1,21 @@
+pages:
+  - sections:
+      - elements:
+          - image:
+              id: image_2
+              alt: Bild nicht gefunden
+              fileName: Bild-Bild-Test_image_2.png
+          - radio-group-images:
+              id: radio-group-images_1
+              options:
+                - Bild-Bild-Test_radio-group-images_1_0.png
+                - Bild-Bild-Test_radio-group-images_1_1.png
+                - Bild-Bild-Test_radio-group-images_1_2.png
+          - audio:
+              id: audio_1
+              alias: Instruktion
+              fileName: Beispiel_Instruktion.mp3
+          - image:
+              id: image_1
+              alt: Bild nicht gefunden
+              fileName: Bild-Bild-Test_image_1.gif

@@ -14,6 +14,11 @@ _**Beispiele**
 "version":"0.1.0",
 ```
 
+## Aufbau einer Unit-Definition
+
+Eine Unit besteht aus einer oder mehrerer Sections. Eine Section entspricht genau einem Item entsprechend einer Seite.
+Jede Section enthält ein oder mehrere Elemente für Instruktion, Stimulus, Interaktion sowie einem optionalen Weiter Button.
+
 ## Interaktions-Elemente ##
 
 * Checkbox
@@ -21,3 +26,11 @@ _**Beispiele**
 * RadioGroup
 * DragNDrop
 * TextField
+
+## Stimulus-Elemente ##
+
+## Instruktions-Elemente ##
+
+## Sections-Layout ##
+
+

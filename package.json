@@ -1,15 +1,16 @@
 {
-  "name": "stars-player",
-  "version": "0.1.0-alpha",
+  "name": "iqb-player-stars",
+  "version": "0.1.2-beta",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/iqb-berlin/stars-player"
+    "url": "https://github.com/iqb-berlin/verona-modules/stars"
   },
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --configuration production --output-hashing=none"
+    "build": "ng build --configuration production --output-hashing=none",
+    "postbuild": "node projects/tools/distpacker.js dist/stars-player index_packed.html"
   },
   "private": true,
   "dependencies": {

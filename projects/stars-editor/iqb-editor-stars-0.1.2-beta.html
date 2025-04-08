@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IQB-Editor für Text</title>
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://w3id.org/iqb/verona-modules",
+            "@type": "editor",
+            "@id": "iqb-editor-stars",
+            "name": {
+                "de": "IQB-Editor für Stars",
+                "en": "IQB editor for plain text"
+            },
+            "maintainer": {
+                "name": {
+                    "de": "IQB - Institut zur Qualitätsentwicklung im Bildungswesen",
+                    "en": "IQB - Institute for Educational Quality Improvement"
+                },
+                "url": "https://www.iqb.hu-berlin.de",
+                "email": "iqb-tbadev@hu-berlin.de"
+            },
+            "description": {
+                "de": "Dieser Editor verarbeitet Aufgaben-/Seitendefinitionen als Text. Dies ist sinnvoll z. B. für Xml-, Html- oder scriptbasierte Formate, für die kein separater Editor bereitgestellt wird.\n\nAchtung: Für binäre oder JSON-Formate sollten andere Editoren genutzt werden, die die Konsistenz der Daten sicherstellen. Eine Bearbeitung dieser Formate mit diesem Text-Editor kann die Aufgaben-/Seitendefinitionen unbrauchbar machen.",
+                "en": "You can use this Verona Editor for all unit definitions, because the data format of unit definitions is technically always string/text. But be careful: improper changes may damage the definition so it's not usable anymore."
+            },
+            "version": "0.1.2-beta",
+            "apiVersion": "6.0",
+            "repository": {
+                "type": "git",
+                "url": "https://github.com/iqb-berlin/verona-modules-stars"
+            },
+            "notSupportedFeatures": ["report-eager"]
+        }
+    </script>
+
+    <style>
+        body {
+            height: 100vh; overflow: hidden; font-family: sans-serif; margin: 0; padding: 10px; display: flex;
+        }
+
+        #editor-div {
+            flex: 1;
+			display: flex;
+			flex-direction: column;
+        }
+		#editor {
+			resize: none;
+			height: calc(100% - 30px);
+      white-space: nowrap;
+		}
+
+        .info-div {
+            overflow-x: visible;
+            overflow-y: auto;
+            padding: 5px;
+        }
+        p:first-child {
+            text-align: right;
+        }
+        .info-hidden {
+            display: none;
+        }
+        .info-visible {
+            display: block;
+            width: 500px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+<div id="editor-div"><textarea id="editor"></textarea></div>
+<div class="info-div">
+    <p><img alt="Fragezeichen" title="Hilfe/Feedback" onclick="show_info()" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAJ/SURBVHjapJM9aFRbEMd/K6LPr2QVRRA/VnjIgi+6Wq0fxU0Q3EIwEOMTRV+0WhQ0WEkQXBtFbVwbYyEuaJEoUaMgW5jlahXU4soqrr6AqwhamHiugtwzZ8lY3KDR8JrndHOY/+8M/5lJqCq/E9N/fSjeHM0653LiGp6ItFgRRKRqrfjOSflSz8bhyfWJyR0Ub43lnbjOhQsSba3r5jN/VgJVxUTKQOU1T5+9r0SRvdF/dmvvFMCFW2N5cY2O/dsWbXn2bwK/BkE9LsqkwEuHLF/RxNHC3fvW2oF7FztjiKpSvDmaPdf/YWj067iWfFXvmGqprGoiVVXVulHt7lUtlY2+/jSurQeuDW3cczmrqkwDcK6RW71qRlv1VYJSOf7xn63gB7C/CEENCl1Q8uHpy8/s27m+TazLAROARsPLrGzCrwER1A0UB6HQB34txB8OaZ4JyT/gtl9n06plWBHvB8C5ljnTlaAGBqjXoVQGE4GXhkK+mQcvQ4IgwA8MTU0gYlu+j1HEoRoLiMAQQgSZNFw50szgg5Du3gCDIRkbh3OOHx2IVEM7TiYVYqIQjIHI4KXiKXSdr8dwIJNKYsLPiLjqd4AV8V+8+4KXASKDwWAig18znOx/A8RAImj3UjwfCRHn/MkelK/feVFZ/ec8uttjCBi8NJz4e8VEDt27UmxYP5eDhb5Kw7nyT4u09/hQ3lrpONOT2/Lw0VtuDxuCWizMpJO0Z5Ns+msem3ecvy/ODYw9Od07ZZW3Hx7MR9Z27u5Y07Z26WyWLF4QmxuGPB8JOXSyr+LE3fg4IZ4CAGjtupq1YnORFU9sfExWpOqc+CKN8ujjU/99TP8nvg0AOD6BJZa9bgUAAAAASUVORK5CYII="></p>
+    <div id="info-text" class="info-hidden">
+        <h1 id="info-name"></h1>
+        <p id="info-version"></p>
+        <p id="info-description"></p>
+        <p id="info-maintainer"></p>
+        <button onclick="hide_info()">Schließen</button>
+    </div>
+</div>
+
+<script>
+    // some settings, that might be overridden for testing per query-params in URL
+    const editorSettings = Object.assign(
+        {
+            debounceStateMessages: 100,
+            debounceKeyboardEvents: 100
+        },
+        location.search
+            .substr(1)
+            .split("&")
+            .reduce((carry, item) => {const tmp = item.split("="); carry[tmp[0]] = tmp[1]; return carry;}, {})
+    );
+
+    const getMetadata = () => {
+        const metadataElement = document.querySelector('script[type="application/ld+json"]');
+        return JSON.parse(metadataElement.innerText);
+    }
+
+    // verona supported settings
+    let editorConfig = {
+        definitionReportPolicy: 'eager', // "on-demand"
+    }
+
+    let sessionId = "";
+
+    const isDefined = v => (typeof v !== "undefined");
+
+    const Time = new class {
+        throttle = (callback, limit) => {
+            let waiting = false;
+            return function() {
+                if (waiting) return;
+                callback.apply(this, arguments);
+                waiting = true;
+                setTimeout(() => {
+                    waiting = false;
+                }, limit);
+            }
+        }
+
+        debounce = (callback, limit, debounceCallback) => {
+            let handle = null;
+            return function() {
+                if (typeof debounceCallback === "function") {
+                    debounceCallback.apply(this, arguments);
+                }
+                clearTimeout(handle);
+                handle = setTimeout(() => {
+                    callback.apply(this, arguments);
+                }, limit);
+            }
+        }
+    }
+
+    const Message = new class {
+        send = new class {
+            _lastStates = {
+                unitDefinition: null,
+                player: null
+            };
+
+            voeDefinitionChangedNotification = () => {
+                if (editorConfig.definitionReportPolicy === "eager") {
+                    this._sendVoeDefinitionChangedNotification();
+                }
+            };
+
+            _sendVoeDefinitionChangedNotification = Time.debounce(
+                () => {
+                    const message = this._createStateMsg();
+                    if (message.unitDefinition) {
+                        this._send(message);
+                    }
+                },
+                parseInt(editorSettings.debounceStateMessages, 10),
+                () => {
+                    document.dispatchEvent(new CustomEvent('queued:voeDefinitionChangedNotification', {}))
+                }
+            );
+
+            voeGetDefinitionResponse = () => this._send(this._createStateMsg());
+
+            voeReadyNotification = () => {
+				document.querySelector('#editor').focus();
+                this._send(Object.assign(
+                    {type: 'voeReadyNotification'},
+                    getMetadata()
+                ));
+            };
+
+            _send = msg => {
+                window.parent.postMessage(msg, '*');
+                document.dispatchEvent(new CustomEvent('sent:' + msg.type, {detail: msg}));
+            }
+
+            _createStateMsg = () => {
+                const message = {
+                    type: 'voeDefinitionChangedNotification',
+                    sessionId: sessionId,
+                    timeStamp: Date.now(),
+                    unitDefinition: document.querySelector('#editor').value,
+                }
+                return message;
+            }
+        }
+
+        receive = (type, data) => {
+            if (type === "voeStartCommand") {
+				sessionId = data.sessionId;
+                document.querySelector('#editor').value = data.unitDefinition;
+            } else {
+				if (sessionId && (data.sessionId !== sessionId)) {
+					throw new Error("Wrong sessionId");
+				}
+				document.dispatchEvent(new CustomEvent(type, {detail: data}));
+			}
+        };
+    }
+
+    const show_info = () => {
+        const infoDivElement = document.getElementById('info-text');
+        infoDivElement.setAttribute("class", "info-visible");
+        const nameElement = document.getElementById('info-name');
+        if (nameElement.innerText.length === 0) {
+            const metadata = getMetadata();
+            console.log(metadata);
+            const lang = navigator.language;
+            if (typeof metadata['name'][lang] !== 'undefined') {
+                nameElement.innerText = metadata['name'][lang];
+            } else {
+                nameElement.innerText = metadata['name']['en'];
+            }
+            document.getElementById('info-version').innerText = metadata['version'];
+            if (typeof metadata['description'][lang] !== 'undefined') {
+                document.getElementById('info-description').innerText = metadata['description'][lang];
+            } else {
+                document.getElementById('info-description').innerText = metadata['description']['en'];
+            }
+            if (typeof metadata['maintainer'] !== 'undefined') {
+                const maintainerElement = document.getElementById('info-maintainer');
+                let maintainerContent = metadata['maintainer']['name']['en'];
+                if (typeof metadata['maintainer']['name'][lang] !== 'undefined') {
+                    maintainerContent = metadata['maintainer']['name'][lang];
+                }
+                if (typeof metadata['maintainer']['url'] !== 'undefined') {
+                    maintainerContent = '<a href="' + metadata['maintainer']['url'] + '">' + maintainerContent + '</a>';
+                }
+                if (typeof metadata['maintainer']['email'] !== 'undefined') {
+                    maintainerContent = maintainerContent + '; <a href="mailto:' + metadata['maintainer']['email'] + '">email</a>';
+                }
+                maintainerElement.innerHTML = maintainerContent;
+            }
+        }
+    }
+    const hide_info = () => {
+        const infoDivElement = document.getElementById('info-text');
+        infoDivElement.setAttribute("class", "info-hidden");
+    }
+
+	const editorElement = document.querySelector('#editor');
+    window.addEventListener('message', event => {Message.receive(event.data.type, event.data)}, false);
+    document.addEventListener("DOMContentLoaded", Message.send.voeReadyNotification);
+    document.addEventListener("voeGetDefinitionRequest", event => {
+        Message.send.voeGetDefinitionResponse();
+    });
+    editorElement.addEventListener('change', Message.send.voeDefinitionChangedNotification);
+    editorElement.addEventListener('keyup',
+        Time.debounce(Message.send.voeDefinitionChangedNotification, parseInt(editorSettings.debounceKeyboardEvents), 10)
+    );
+</script>
+
+</body>
+</html>
