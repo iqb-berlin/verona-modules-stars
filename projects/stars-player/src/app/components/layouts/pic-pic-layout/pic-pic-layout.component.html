@@ -1,0 +1,31 @@
+<div class="pic-pic container">
+  <div class="side">
+    @if (instructions()) {
+      <instructions-selection
+        [elementModel]="instructions()"
+        (valueChange)="valueChange.emit($event)">
+      </instructions-selection>
+    }
+  </div>
+  <div class="top">
+    @if (stimulus() && stimulus().position == "top") {
+      <stimulus-selection [elementModel]="stimulus()">
+      </stimulus-selection>
+    }
+  </div>
+  <div class="middle">
+    @if (interaction()) {
+      <interaction-selection
+        [elementModel]="interaction()"
+        [parentForm]="parentForm()"
+        (valueChange)="valueChange.emit($event)">
+      </interaction-selection>
+    }
+  </div>
+  <div class="bottom">
+    @if (stimulus() && stimulus().position == "bottom") {
+      <stimulus-selection [elementModel]="stimulus()">
+      </stimulus-selection>
+    }
+  </div>
+</div>

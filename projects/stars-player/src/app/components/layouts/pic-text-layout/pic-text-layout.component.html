@@ -1,0 +1,17 @@
+<div class="pic-text container">
+  <div class="row">
+    @if (stimulus()) {
+      <stimulus-selection [elementModel]="stimulus()">
+
+      </stimulus-selection>
+    }
+    @if (interaction()) {
+      <interaction-selection
+        [elementModel]="interaction()"
+        [parentForm]="parentForm()"
+        (valueChange)="valueChange.emit($event)">
+
+      </interaction-selection>
+    }
+  </div>
+</div>

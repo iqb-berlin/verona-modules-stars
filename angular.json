@@ -5,28 +5,32 @@
   "projects": {
     "stars-player": {
       "projectType": "application",
-      "schematics": {},
-      "root": "",
-      "sourceRoot": "src",
+      "schematics": {
+        "@schematics/angular:application": {
+          "strict": true
+        }
+      },
+      "root": "projects/stars-player",
+      "sourceRoot": "projects/stars-player/src",
       "prefix": "app",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist",
-            "main": "src/main.ts",
-            "index": "src/index.html",
+            "outputPath": "dist/stars-player",
+            "main": "projects/stars-player/src/main.ts",
+            "index": "projects/stars-player/src/index.html",
             "polyfills": [
-              "src/polyfills.ts"
+              "projects/stars-player/src/polyfills.ts"
             ],
-            "tsConfig": "tsconfig.app.json",
+            "tsConfig": "projects/stars-player/tsconfig.app.json",
             "aot": true,
             "assets": [
-              "src/assets"
+              "projects/stars-player/src/assets"
             ],
             "styles": [
               "./node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css",
-              "src/styles.css"
+              "projects/stars-player/src/styles.css"
             ],
             "scripts": []
           },
@@ -34,8 +38,8 @@
             "production": {
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
+                  "replace": "projects/stars-player/src/environments/environment.ts",
+                  "with": "projects/stars-player/src/environments/environment.prod.ts"
                 }
               ],
               "optimization": true,

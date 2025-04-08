@@ -1,0 +1,22 @@
+<div>
+  @switch (section().layoutId) {
+    @case("PicPicLayout") {
+      <pic-pic-layout
+        [interaction]="section().interaction"
+        [instructions]="section().instructions"
+        [stimulus]="section().stimulus"
+        [parentForm]="form"
+        (valueChange)="valueChanged($event)"
+      ></pic-pic-layout>
+    }
+    @case("PicTextLayout") {
+      <pic-text-layout
+        [interaction]="section().interaction"
+        [instructions]="section().instructions"
+        [stimulus]="section().stimulus"
+        [parentForm]="form"
+        (valueChange)="valueChange.emit($event)"
+      ></pic-text-layout>
+    }
+  }
+</div>
