@@ -18,7 +18,8 @@ export type UIElementType =
   | 'drop-list'
   | 'stimulus'
   | 'interaction'
-  | 'instructions';
+  | 'instructions'
+  | 'grapheme-keyboard';
 
 export type UIBlueprintType =
   'PicPicBlueprint'
@@ -30,6 +31,11 @@ export interface JSONObject {
 
 export interface TextLabel {
   text: string;
+}
+
+export interface KeyboardParameter {
+  hasBackspace?: boolean;
+  enableMultiSelect?: boolean;
 }
 
 export interface TextImageLabel extends TextLabel {

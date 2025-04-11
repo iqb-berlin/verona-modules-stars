@@ -6,7 +6,7 @@ import {
 } from "../../interfaces";
 import { environment } from "../../environments/environment";
 import { InstantiationError } from "../../errors";
-import {ImageElement} from "./image";
+import { ImageElement } from "./image";
 
 
 export class AudioElement extends UIElement implements AudioProperties {

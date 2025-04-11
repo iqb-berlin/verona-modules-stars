@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import {Component, input, output} from '@angular/core';
 import { FormGroup } from "@angular/forms";
 
 import {ButtonElement, UIElement} from "../../../models";
@@ -7,13 +7,13 @@ import { VeronaResponse } from "../../../models/verona";
 
 
 @Component({
-  selector: 'pic-pic-layout',
-  templateUrl: './pic-pic-layout.component.html',
-  styleUrls: ['./pic-pic-layout.component.scss'],
+  selector: 'pic-keyboard-layout',
+  templateUrl: './pic-keyboard-layout.component.html',
+  styleUrls: ['./pic-keyboard-layout.component.scss'],
   standalone: false
 })
 
-export class PicPicLayoutComponent extends ElementComponent {
+export class PicKeyboardLayoutComponent extends ElementComponent {
   instructions = input<UIElement>();
   interaction = input<UIElement>();
   stimulus = input<UIElement>();

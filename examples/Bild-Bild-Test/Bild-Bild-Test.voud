@@ -91,6 +91,8 @@
         }
       },
       "continue":{
+        "id":"button_1",
+        "alias":"Weiter",
         "type":"button",
         "text":"Weitergehen"
       }

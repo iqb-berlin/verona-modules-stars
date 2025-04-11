@@ -4,6 +4,7 @@ import {fromEvent, onErrorResumeNextWith, Subject, tap, throttleTime} from "rxjs
 import {takeUntil} from "rxjs/operators";
 
 import {MediaChangeItem, MediaPlayerService} from '../../../services/media-player-service';
+import {VeronaResponse} from "../../../models/verona";
 
 
 @Component({
@@ -17,7 +18,7 @@ export class MediaPlayerComponent implements OnInit, OnDestroy {
   player = input.required<HTMLAudioElement>();
   playerId = input<string>();
   image = input<ImageElement>();
-  elementValueChanged = output();
+  elementValueChanged = output<VeronaResponse>();
 
   currentTime = 0;
 
@@ -33,7 +34,7 @@ export class MediaPlayerComponent implements OnInit, OnDestroy {
         tap(() => {
           this.currentTime = this.player().currentTime / 60;
         }),
-        throttleTime(100)
+        throttleTime(200)
       )
       .subscribe(() => this.sendPlaybackTimeChanged());
   }

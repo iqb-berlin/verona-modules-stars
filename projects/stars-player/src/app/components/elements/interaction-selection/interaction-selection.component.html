@@ -15,6 +15,13 @@
         (valueChange)="valueChange.emit($event)"
       ></stars-multi-choice-images>
     }
+    @case ("grapheme-keyboard") {
+      <stars-grapheme-keyboard
+        [elementModel]="elementModelAsGraphemeKeyboardElement"
+        [parentForm]="parentForm()"
+        (valueChange)="valueChange.emit($event)"
+      ></stars-grapheme-keyboard>
+    }
     @default {
       Error: Unsupported ElementType
     }

@@ -3,7 +3,6 @@ import { takeUntil } from "rxjs/operators";
 import { BehaviorSubject, fromEvent, Subject, tap, throttleTime } from "rxjs";
 
 import { AudioElement } from "../../models";
-import { ElementComponent } from "../../directives/element-component.directive";
 
 import {MediaPlayerElementComponent} from "../../directives/media-player-element-component.directive";
 
@@ -14,7 +13,7 @@ import {MediaPlayerElementComponent} from "../../directives/media-player-element
     @if (elementModel().audioSrc) {
       <stars-media-player [player]="player"
                           [playerId]="elementModel().id"
-                          (elementValueChanged)="valueChanged($event)"
+                          (elementValueChanged)="valueChange.emit($event)"
                           [image]="elementModel().image">
         <audio #player
                [src]="elementModel().audioSrc | safeResourceUrl"
@@ -32,22 +31,4 @@ import {MediaPlayerElementComponent} from "../../directives/media-player-element
 
 export class AudioComponent extends MediaPlayerElementComponent implements OnInit {
   elementModel = input.required<AudioElement>();
-
-  ngOnInit() {
-    // console.log(this.elementModel());
-  }
-
-  valueChanged(event) {
-    // console.log(event);
-  }
-
-  private sendPlaybackTimeChanged() {
-    // if (this.currentTime > 0) {
-      // this.valueChange.emit({
-      //   id: this.elementModel().id,
-      //   value: this.currentTime.toString(),
-      //   status: "VALUE_CHANGED"
-      // });
-    // }
-  }
 }

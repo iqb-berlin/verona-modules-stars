@@ -5,18 +5,20 @@
         [interaction]="section().interaction"
         [instructions]="section().instructions"
         [stimulus]="section().stimulus"
+        [continueButton]="section().continue"
         [parentForm]="form"
         (valueChange)="valueChanged($event)"
       ></pic-pic-layout>
     }
-    @case("PicTextLayout") {
-      <pic-text-layout
+    @case("PicKeyboardLayout") {
+      <pic-keyboard-layout
         [interaction]="section().interaction"
         [instructions]="section().instructions"
         [stimulus]="section().stimulus"
+        [continueButton]="section().continue"
         [parentForm]="form"
         (valueChange)="valueChange.emit($event)"
-      ></pic-text-layout>
+      ></pic-keyboard-layout>
     }
-  }
+ }
 </div>

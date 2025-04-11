@@ -2,6 +2,7 @@ import { Component, input, OnInit } from "@angular/core";
 import { FormGroup } from "@angular/forms";
 
 import {
+  GraphemeKeyboardElement,
   MultiChoiceImagesElement,
   RadioGroupImagesElement,
   UIElement
@@ -24,7 +25,8 @@ export class InteractionSelectionComponent extends ElementComponent implements O
 
   stimulusTypes: UIElementType[] = [
     "radio-group-images",
-    "multi-choice-images"
+    "multi-choice-images",
+    "grapheme-keyboard"
   ];
 
   ngOnInit() {
@@ -37,5 +39,9 @@ export class InteractionSelectionComponent extends ElementComponent implements O
 
   get elementModelAsMultiChoiceImagesElement(): MultiChoiceImagesElement {
     return this.elementModel() as MultiChoiceImagesElement;
+  }
+
+  get elementModelAsGraphemeKeyboardElement(): GraphemeKeyboardElement {
+    return this.elementModel() as GraphemeKeyboardElement;
   }
 }

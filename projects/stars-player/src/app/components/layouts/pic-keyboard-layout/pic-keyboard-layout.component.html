@@ -8,7 +8,7 @@
     }
   </div>
   <div class="top">
-    @if (stimulus() && stimulus().position == "top") {
+    @if (stimulus() && stimulus().position == "bottom") {
       <stimulus-selection [elementModel]="stimulus()">
       </stimulus-selection>
     }
@@ -20,12 +20,6 @@
         [parentForm]="parentForm()"
         (valueChange)="valueChange.emit($event)">
       </interaction-selection>
-    }
-  </div>
-  <div class="bottom">
-    @if (stimulus() && stimulus().position == "bottom") {
-      <stimulus-selection [elementModel]="stimulus()">
-      </stimulus-selection>
     }
   </div>
   <div class="continue">

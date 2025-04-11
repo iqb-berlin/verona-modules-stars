@@ -5,6 +5,7 @@ import {
   ImageElement,
   TextElement,
   AudioElement,
+  ButtonElement,
   CheckboxElement,
   RadioGroupImagesElement,
   MultiChoiceImagesElement,
@@ -14,16 +15,19 @@ import {
   UIElementProperties,
   UIElementType
 } from "../interfaces";
+import {GraphemeKeyboardElement} from "./elements/grapheme-keyboard";
 
 
 export abstract class ElementFactory {
   static ELEMENT_CLASSES: Record<string, Type<UIElement>> = {
     "text": TextElement,
+    "button": ButtonElement,
     "image": ImageElement,
     "checkbox": CheckboxElement,
     "radio-group-images": RadioGroupImagesElement,
     "multi-choice-images": MultiChoiceImagesElement,
-    "audio": AudioElement
+    "audio": AudioElement,
+    "grapheme-keyboard": GraphemeKeyboardElement
   };
 
   static createElement(element: { type: UIElementType } & Partial<UIElementProperties>, idService?: AbstractIDService)

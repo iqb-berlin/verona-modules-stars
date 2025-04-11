@@ -16,6 +16,7 @@ export class Section implements SectionProperties {
   instructions?: UIElement;
   stimulus?: UIElement;
   interaction?: UIElement;
+  continue?: UIElement;
   variant?: string;
   coding?: Coder;
 
@@ -23,7 +24,6 @@ export class Section implements SectionProperties {
 
   constructor(section?: SectionProperties, idService?: AbstractIDService) {
     this.idService = idService;
-    console.log(section);
     if (section) {
       this.layoutId = section.layoutId || "default";
       this.variant = section.variant || undefined;
@@ -37,12 +37,14 @@ export class Section implements SectionProperties {
       this.stimulus = section.stimulus ?
         ElementFactory.createElement(section.stimulus, idService)
         : undefined;
+      this.continue = section.continue ?
+        ElementFactory.createElement(section.continue, idService)
+        : undefined;
     } else {
       if (environment.strictInstantiation) {
         throw new InstantiationError('Error at Section instantiation');
       }
     }
-    console.log(this.instructions);
   }
 
   setProperty(property: string, value: UIElementValue): void {
@@ -62,6 +64,7 @@ export interface SectionProperties {
   instructions?: UIElementProperties;
   stimulus?: UIElementProperties;
   interaction?: UIElementProperties;
+  continue?: UIElementProperties;
   layoutId: string;
   variant?: string;
   coding?: Coder;

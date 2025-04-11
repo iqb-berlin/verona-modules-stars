@@ -26,7 +26,7 @@ export interface StatusChangeElement {
 export interface VeronaResponse {
   id: string;
   alias?: string;
-  value: string;
+  value: VeroneType;
   status: ResponseStatusType;
   subform?: string;
   code?: number;
@@ -161,6 +161,8 @@ export interface VopWindowFocusChangedNotification {
   timeStamp: number;
   hasFocus: boolean;
 }
+
+export type VeroneType = null | number | string | boolean | number[] | string[] | boolean[];
 
 export type VopMessage =
   VopStartCommand |

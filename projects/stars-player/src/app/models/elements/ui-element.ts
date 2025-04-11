@@ -10,7 +10,7 @@ import { InstantiationError } from "../../errors";
 export abstract class UIElement implements UIElementProperties {
   [index: string]: unknown;
   id: string;
-  alias: string;
+  alias?: string;
   type: UIElementType;
   idService?: AbstractIDService;
   hidden: boolean = false;
