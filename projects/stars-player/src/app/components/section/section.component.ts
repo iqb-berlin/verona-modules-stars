@@ -19,18 +19,23 @@ export class SectionComponent {
   valueChange = output<VeronaResponse>();
 
   valueChanged(event: VeronaResponse) {
+    let value = event.value;
+    if (Array.isArray(value)) {
+      value = value.join('');
+    }
+
     if (this.section().coding) {
       if (this.section().coding.fullCredit) {
         let code = 0;
         let score = 0;
         const full = this.section().coding.fullCredit;
 
-        if (full == event.value) {
+        if (full == value) {
           code = 1;
           score = 1;
         } else if (code == 0 && this.section().coding.partialCredit) {
           let partial = this.section().coding.partialCredit as [JSONObject];
-          let credit = partial.find(c => c.partial == event.value);
+          let credit = partial.find(c => c.partial == value);
           if (credit) {
             score = credit.score ? credit.score : 1;
             code = credit.code ? credit.code : 2;

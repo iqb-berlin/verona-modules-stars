@@ -1,21 +1,24 @@
-mat-radio-group {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
+button {
+  background: lightgrey;
+  border: none;
+  padding: 5px;
+  margin: 5px;
+  font-size: 1.8em;
 }
 
-mat-label {
-  display: block;
-  padding: 15px;
-
-  img {
-    position: relative;
-    width: 100%;
-    cursor: pointer;
-    background: white;
-  }
+.input-field {
+  max-width: 300px;
+  border-bottom: 1px solid lightgray;
+  margin-bottom: 15px;
+  font-size: 2.3em;
+  height: 1em;
 }
 
-mat-radio-button.mat-mdc-radio-checked img {
-  border: solid 2px red;
+.center {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
 }

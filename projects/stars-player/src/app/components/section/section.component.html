@@ -17,7 +17,7 @@
         [stimulus]="section().stimulus"
         [continueButton]="section().continue"
         [parentForm]="form"
-        (valueChange)="valueChange.emit($event)"
+        (valueChange)="valueChanged($event)"
       ></pic-keyboard-layout>
     }
  }
