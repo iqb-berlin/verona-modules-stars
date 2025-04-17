@@ -35,9 +35,10 @@ import {
   UnitMenuComponent,
   MediaPlayerComponent
 } from "./components";
-import { ErrorService } from "./services/error.service";
-import { SafeResourceHTMLPipe } from "./pipes/safe-resource-html.pipe";
-import { SafeResourceUrlPipe } from "./pipes/safe-resource-url.pipe";
+
+import { ErrorService } from "../../../common/services/error.service";
+import { SafeResourceHTMLPipe } from "../../../common/pipes/safe-resource-html.pipe";
+import { SafeResourceUrlPipe } from "../../../common/pipes/safe-resource-url.pipe";
 
 
 @NgModule({

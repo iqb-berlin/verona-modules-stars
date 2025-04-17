@@ -162,6 +162,25 @@ export interface VopWindowFocusChangedNotification {
   hasFocus: boolean;
 }
 
+export interface voeDefinitionChangedNotification {
+  type: 'vopDefinitionChangedNotification';
+  sessionId: string;
+  timeStamp: number;
+  unitDefinition: string;
+  unitDefinitionType: string;
+}
+
+export interface voeStartCommand {
+  type: 'voeStartCommand';
+  sessionId: string;
+  unitDefinition: string;
+  unitDefinitionType: string;
+}
+
+export interface voeReadyNotification {
+  type: 'voeReadyNotification';
+  metadata: string;
+}
 export type VeronaType = null | number | string | boolean | number[] | string[] | boolean[];
 
 export type VopMessage =
@@ -174,3 +193,8 @@ export type VopMessage =
   VopStateChangedNotification |
   VopWindowFocusChangedNotification |
   VopUnitNavigationRequestedNotification;
+
+export type VoeMessage =
+  voeReadyNotification |
+  voeStartCommand |
+  voeDefinitionChangedNotification;

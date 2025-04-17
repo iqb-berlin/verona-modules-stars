@@ -8,7 +8,8 @@
   },
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve stars-player",
+    "editor": "ng serve stars-editor",
     "build": "ng build --configuration production --output-hashing=none",
     "postbuild": "node projects/tools/distpacker.js dist/stars-player index_packed.html"
   },
@@ -25,6 +26,8 @@
     "@angular/platform-browser-dynamic": "^19.1.7",
     "@angular/router": "^19.1.7",
     "@iqb/responses": "^3.7.0",
+    "ang-jsoneditor": "^4.0.2",
+    "jsoneditor": "^10.2.0",
     "lottie-web": "^5.12.2",
     "ngx-lottie": "^13.0.1",
     "rxjs": "~7.8.1",
