@@ -18,5 +18,6 @@ export class PicPicLayoutComponent extends ElementComponent {
   interaction = input<UIElement>();
   stimulus = input<UIElement>();
   parentForm = input.required<FormGroup>();
+  variant = input<string>('row_layout');
   valueChange = output<VeronaResponse>();
 }

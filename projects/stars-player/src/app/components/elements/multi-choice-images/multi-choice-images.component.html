@@ -1,4 +1,6 @@
-<div class="checkbox-group" [formGroup]="MultiCheckboxFormGroup">
+<!-- multi-choice-images.component.html -->
+
+<div class="checkbox-group" [ngClass]="getLayoutClass()" [formGroup]="MultiCheckboxFormGroup">
   @for (option of elementModel().options; track option; let i = $index) {
     <mat-checkbox
       [formControlName]="option.id"

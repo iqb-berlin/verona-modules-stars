@@ -20,6 +20,7 @@ import { ElementComponent } from "../../../directives/element-component.directiv
 export class InteractionSelectionComponent extends ElementComponent implements OnInit {
   elementModel = input.required<UIElement>();
   parentForm = input.required<FormGroup>();
+  sectionVariant = input<string>('row_layout');
   elementType: UIElementType | undefined;
 
   stimulusTypes: UIElementType[] = [

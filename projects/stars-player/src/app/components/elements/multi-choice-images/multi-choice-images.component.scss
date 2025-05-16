@@ -1,7 +1,25 @@
+/* multi-choice-images.component.scss */
+
 .checkbox-group {
   display: flex;
-  flex-direction: row;
   justify-content: center;
+}
+
+.checkbox-group.row-layout {
+  flex-direction: row;
+  flex-wrap: nowrap;
+}
+
+.checkbox-group.grid-layout {
+  flex-direction: row;
+  flex-wrap: wrap;
+  max-width: 80%;
+  margin: 0 auto;
+}
+
+.checkbox-group.grid-layout mat-checkbox {
+  width: 45%;
+  box-sizing: border-box;
 }
 
 mat-checkbox {

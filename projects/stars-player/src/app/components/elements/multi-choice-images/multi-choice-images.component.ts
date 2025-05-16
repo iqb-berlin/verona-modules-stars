@@ -18,6 +18,9 @@ export class MultiChoiceImagesComponent extends ElementComponent implements OnIn
   formId = Math.floor(Math.random() * 20000000 + 10000000).toString();
   MultiCheckboxFormGroup = new FormGroup({});
 
+  // New property to store section variant
+  sectionVariant = input<string>('row_layout');
+
   ngOnInit() {
     this.elementModel().options.forEach(option => {
       const formControl = new FormControl();
@@ -45,5 +48,16 @@ export class MultiChoiceImagesComponent extends ElementComponent implements OnIn
     };
 
     this.valueChange.emit(response);
+  }
+
+  // New method to determine the layout class based on variant
+  getLayoutClass(): string {
+    switch (this.sectionVariant()) {
+      case 'grid_layout':
+        return 'grid-layout';
+      case 'row_layout':
+      default:
+        return 'row-layout';
+    }
   }
 }
