@@ -1,12 +1,11 @@
-@if (image) {
-  <stars-image [elementModel]="image()" (click)="play()"></stars-image>
+@if (image()) {
+  <div class="custom-audio-button" (click)="play()">
+    <img [src]="audioIconSrc" [alt]="isPlaying() ? 'Audio playing' : 'Play audio'" />
+  </div>
 } @else {
-  <ng-content></ng-content>
-
-  <button type="button"
-          mat-button
-          class="control-button"
-          (click)="play()">
-    <mat-icon class="player-icon">play_arrow</mat-icon>
-  </button>
+  <div class="custom-audio-button" (click)="play()">
+    <img [src]="audioIconSrc"
+         [alt]="isPlaying() ? 'Audio playing' : 'Play audio'"
+         class="speaker-icon" />
+  </div>
 }

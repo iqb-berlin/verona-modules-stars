@@ -12,6 +12,12 @@ export class Unit implements UnitProperties {
   sections: Section[] = [];
   showUnitNavNext: boolean = false;
 
+  layoutId: string;
+  variant?: string;
+  instructions?: UIElement;
+  interaction?: UIElement;
+  stimulus?: UIElement;
+
   constructor(unit?: UnitProperties, idService?: AbstractIDService) {
     if (unit && isValid(unit)) {
       this.version = unit.version;

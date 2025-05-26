@@ -1,0 +1,49 @@
+<div class="keyboard-container">
+  <div class="keyboard-label">
+    <label [id]="elementModel().id+'-keyboard-label'">
+      {{elementModel().label}}
+    </label>
+  </div>
+
+  <div class="text-display">
+    <div class="text-content" [attr.aria-label]="'Eingegebener Text'">
+      <span *ngIf="currentText">{{currentText}}</span>
+      <span *ngIf="!currentText" class="placeholder">{{elementModel().placeholder}}</span>
+    </div>
+  </div>
+
+  <!-- Single container for all buttons -->
+  <div class="keyboard-buttons">
+    <!-- Letter buttons -->
+    @for (button of elementModel().buttons; track button) {
+      <button type="button"
+              class="keyboard-button"
+              [attr.aria-label]="elementModel().getButtonText(button, textIsEmpty)"
+              (click)="addChar(button)"
+              [disabled]="isSubmitted || (elementModel().maxLength !== null && currentText.length >= elementModel().maxLength)">
+        {{elementModel().getButtonText(button, textIsEmpty)}}
+      </button>
+    }
+
+    <!-- Control buttons (backspace, submit, etc.) -->
+    @if (elementModel().showBackspace) {
+      <button type="button"
+              class="keyboard-button special backspace-button"
+              [attr.aria-label]="elementModel().backspaceButtonText"
+              (click)="deleteChar()"
+              [disabled]="isSubmitted || currentText.length === 0">
+        <svg xmlns="http://www.w3.org/2000/svg" height="32" viewBox="0 -960 960 960" width="32" fill="currentColor"><path d="m456-320 104-104 104 104 56-56-104-104 104-104-56-56-104 104-104-104-56 56 104 104-104 104 56 56Zm-96 160q-19 0-36-8.5T296-192L80-480l216-288q11-15 28-23.5t36-8.5h440q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H360ZM180-480l180 240h440v-480H360L180-480Zm400 0Z"/></svg>
+      </button>
+    }
+
+    @if (elementModel().showSubmit) {
+      <button type="button"
+              class="keyboard-button special submit-button"
+              [attr.aria-label]="elementModel().submitButtonText"
+              (click)="submitText()"
+              [disabled]="isSubmitted">
+        {{elementModel().submitButtonText}}
+      </button>
+    }
+  </div>
+</div>

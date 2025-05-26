@@ -16,3 +16,4 @@ export { RadioGroupImagesComponent } from './elements/radio-group-images/radio-g
 export { MultiChoiceImagesComponent } from './elements/multi-choice-images/multi-choice-images.component';
 export { AudioComponent } from './elements/audio.component';
 export { MediaPlayerComponent } from './elements/media-player/media-player.component';
+export { ReducedKeyboardComponent } from './elements/reduced-keyboard/reduced-keyboard.component';

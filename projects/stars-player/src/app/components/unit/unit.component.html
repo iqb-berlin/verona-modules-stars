@@ -3,4 +3,6 @@
   <stars-section [section]="section"
                  (valueChange)="valueChanged($event)">
   </stars-section>
+
+  <stars-unit-nav-next *ngIf="shouldShowUnitNavNext" (navigate)="navigateToNext()"></stars-unit-nav-next>
 }

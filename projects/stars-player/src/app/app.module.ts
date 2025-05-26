@@ -14,6 +14,7 @@ import { MatButton } from "@angular/material/button";
 import { MatFormField, MatLabel } from "@angular/material/form-field";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { MatRadioButton, MatRadioGroup } from "@angular/material/radio";
+import { UnitNavNextComponent} from "./components/unit-nav-next.component";
 
 import { AppComponent } from "./app.component";
 import {
@@ -31,7 +32,8 @@ import {
   InstructionsSelectionComponent,
   InteractionSelectionComponent,
   UnitMenuComponent,
-  MediaPlayerComponent
+  MediaPlayerComponent,
+  ReducedKeyboardComponent
 } from "./components";
 import { ErrorService } from "./services/error.service";
 import { SafeResourceHTMLPipe } from "./pipes/safe-resource-html.pipe";
@@ -57,7 +59,8 @@ import { SafeResourceUrlPipe } from "./pipes/safe-resource-url.pipe";
     PicTextLayoutComponent,
     MediaPlayerComponent,
     UnitMenuComponent,
-    AudioComponent
+    AudioComponent,
+    ReducedKeyboardComponent
   ],
   imports: [
     BrowserModule,
@@ -77,7 +80,8 @@ import { SafeResourceUrlPipe } from "./pipes/safe-resource-url.pipe";
     MatRadioButton,
     MatButton,
     MatLabel,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    UnitNavNextComponent
   ],
   providers: [
     provideExperimentalZonelessChangeDetection(),

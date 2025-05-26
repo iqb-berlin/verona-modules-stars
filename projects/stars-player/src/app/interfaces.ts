@@ -18,7 +18,8 @@ export type UIElementType =
   | 'drop-list'
   | 'stimulus'
   | 'interaction'
-  | 'instructions';
+  | 'instructions'
+  | 'reduced-keyboard';
 
 export type UIBlueprintType =
   'PicPicBlueprint'

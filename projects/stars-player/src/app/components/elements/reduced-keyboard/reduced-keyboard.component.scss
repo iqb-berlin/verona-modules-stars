@@ -1,0 +1,160 @@
+/* Import Quicksand font from Google Fonts */
+/* Define local Quicksand font faces */
+
+.keyboard-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1rem;
+  font-family: 'Quicksand', sans-serif;
+}
+
+/* ... continue with your existing styles ... */
+
+.keyboard-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1rem;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.keyboard-label {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.text-display {
+  width: 80%;
+  min-height: 60px;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.text-content {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 2rem;
+  font-weight: 500;
+  letter-spacing: 0.15rem;
+  text-align: center;
+  min-height: 2rem;
+}
+
+.placeholder {
+  color: #aaa;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.keyboard-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 85%;
+}
+
+.keyboard-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 55px;
+  height: 55px;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 12px;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+
+  &:hover:not(:disabled) {
+    background-color: #e0e0e0;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 5px rgba(0,0,0,0.15);
+  }
+
+  &:active:not(:disabled) {
+    background-color: #d0d0d0;
+    transform: translateY(1px);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.special {
+  background-color: #e8eaf6;
+
+  &:hover:not(:disabled) {
+    background-color: #c5cae9;
+  }
+
+  &:active:not(:disabled) {
+    background-color: #9fa8da;
+  }
+}
+
+.backspace-button {
+  min-width: 80px;
+  background-color: #ffebee;
+
+  &:hover:not(:disabled) {
+    background-color: #ffcdd2;
+  }
+
+  &:active:not(:disabled) {
+    background-color: #ef9a9a;
+  }
+}
+
+.submit-button {
+  min-width: 120px;
+  background-color: #e8f5e9;
+  font-weight: 600;
+
+  &:hover:not(:disabled) {
+    background-color: #c8e6c9;
+  }
+
+  &:active:not(:disabled) {
+    background-color: #a5d6a7;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .keyboard-buttons {
+    width: 95%;
+  }
+
+  .keyboard-button {
+    min-width: 45px;
+    height: 45px;
+    font-size: 1.2rem;
+  }
+
+  .text-display {
+    width: 90%;
+  }
+}

@@ -4,6 +4,7 @@ import { FormGroup } from "@angular/forms";
 import {
   MultiChoiceImagesElement,
   RadioGroupImagesElement,
+  ReducedKeyboardElement,
   UIElement
 } from "../../../models";
 import { UIElementType } from "../../../interfaces";
@@ -25,7 +26,8 @@ export class InteractionSelectionComponent extends ElementComponent implements O
 
   stimulusTypes: UIElementType[] = [
     "radio-group-images",
-    "multi-choice-images"
+    "multi-choice-images",
+    "reduced-keyboard"
   ];
 
   ngOnInit() {
@@ -38,5 +40,9 @@ export class InteractionSelectionComponent extends ElementComponent implements O
 
   get elementModelAsMultiChoiceImagesElement(): MultiChoiceImagesElement {
     return this.elementModel() as MultiChoiceImagesElement;
+  }
+
+  get elementModelAsReducedKeyboardElement(): ReducedKeyboardElement {
+    return this.elementModel() as ReducedKeyboardElement;
   }
 }

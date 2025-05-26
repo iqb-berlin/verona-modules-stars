@@ -1,8 +1,12 @@
-/* multi-choice-images.component.scss */
-
 .checkbox-group {
   display: flex;
   justify-content: center;
+  align-items: flex-start;
+  gap: 1rem;
+  width: 100%;
+  height: 100%;
+  padding: 1rem;
+  box-sizing: border-box;
 }
 
 .checkbox-group.row-layout {
@@ -13,27 +17,150 @@
 .checkbox-group.grid-layout {
   flex-direction: row;
   flex-wrap: wrap;
-  max-width: 80%;
+  max-width: 90%;
   margin: 0 auto;
 }
 
-.checkbox-group.grid-layout mat-checkbox {
-  width: 45%;
+.checkbox-group mat-checkbox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
   box-sizing: border-box;
+  min-width: 0; /* Allow shrinking */
+  flex: 1; /* Equal width distribution */
 }
 
-mat-checkbox {
-  display: block;
-  padding: 15px;
+.checkbox-group.row-layout mat-checkbox {
+  max-width: calc(100% / var(--option-count));
+  min-width: 120px; /* Minimum size to remain usable */
+}
 
-  img {
-    position: relative;
-    width: 100%;
-    cursor: pointer;
-    background: white;
+.checkbox-group.grid-layout mat-checkbox {
+  width: calc(50% - 0.5rem);
+  max-width: 300px;
+  min-width: 150px;
+}
+
+.checkbox-group.grid-layout.options-1 mat-checkbox,
+.checkbox-group.grid-layout.options-3 mat-checkbox {
+  width: calc(33.333% - 0.67rem);
+}
+
+.checkbox-group.grid-layout.options-5 mat-checkbox,
+.checkbox-group.grid-layout.options-7 mat-checkbox {
+  width: calc(33.333% - 0.67rem);
+}
+
+.image-container {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  transition: transform 0.2s ease;
+}
+
+/* Hover effects */
+.image-container:hover {
+  border-color: #007bff;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+}
+
+.image-container:hover img {
+  transform: scale(1.05);
+}
+
+/* Selected state */
+mat-checkbox.mat-mdc-checkbox-checked .image-container {
+  border-color: #007bff;
+  background-color: #87ceeb;
+  box-shadow: 0 2px 12px rgba(0, 123, 255, 0.4);
+}
+
+mat-checkbox.mat-mdc-checkbox-checked .image-container img {
+  transform: scale(1.02);
+}
+
+mat-checkbox .mdc-checkbox {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 4px;
+  padding: 2px;
+}
+
+.option-text {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #333;
+  word-wrap: break-word;
+  hyphens: auto;
+}
+
+@media (max-width: 768px) {
+  .checkbox-group {
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .checkbox-group.row-layout {
+    flex-wrap: wrap;
+  }
+
+  .checkbox-group.row-layout mat-checkbox {
+    width: calc(50% - 0.25rem);
+    min-width: 100px;
+  }
+
+  .checkbox-group.grid-layout mat-checkbox {
+    width: calc(50% - 0.25rem);
+    min-width: 120px;
+  }
+
+  .image-container {
+    aspect-ratio: 4 / 3; /* Slightly wider on mobile */
   }
 }
 
-mat-checkbox.mat-mdc-checkbox-checked img {
-  border: solid 2px red;
+@media (max-width: 480px) {
+  .checkbox-group.row-layout mat-checkbox,
+  .checkbox-group.grid-layout mat-checkbox {
+    width: 100%;
+    max-width: none;
+  }
+
+  .image-container {
+    aspect-ratio: 3 / 2;
+    max-height: 200px;
+  }
+}
+
+.checkbox-group.aspect-wide .image-container {
+  aspect-ratio: 16 / 9;
+}
+
+.checkbox-group.aspect-portrait .image-container {
+  aspect-ratio: 3 / 4;
+}
+
+.checkbox-group.aspect-square .image-container {
+  aspect-ratio: 1 / 1;
 }

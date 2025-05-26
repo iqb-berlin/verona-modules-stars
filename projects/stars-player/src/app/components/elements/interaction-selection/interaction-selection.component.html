@@ -1,5 +1,3 @@
-<!-- interaction-selection.component.html -->
-
 <div class="interaction-container">
   @switch (elementType) {
     @case ("radio-group-images") {
@@ -17,6 +15,13 @@
         [sectionVariant]="sectionVariant()"
         (valueChange)="valueChange.emit($event)"
       ></stars-multi-choice-images>
+    }
+    @case ("reduced-keyboard") {
+      <stars-reduced-keyboard
+        [elementModel]="elementModelAsReducedKeyboardElement"
+        [parentForm]="parentForm()"
+        (valueChange)="valueChange.emit($event)"
+      ></stars-reduced-keyboard>
     }
     @default {
       Error: Unsupported ElementType

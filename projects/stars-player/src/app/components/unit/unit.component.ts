@@ -28,7 +28,7 @@ export class UnitComponent implements OnInit, OnDestroy {
   playerConfig: PlayerConfig = {};
   showUnitNavNext: boolean = false;
   valueChange= output<VeronaResponse>();
-
+  private reducedKeyboardHasContent: boolean = false;
   presentationProgressStatus: BehaviorSubject<Progress> = new BehaviorSubject<Progress>('none');
 
   constructor(
@@ -111,6 +111,23 @@ export class UnitComponent implements OnInit, OnDestroy {
     // TODO: ErrorDialog
   }
 
+  private hasReducedKeyboardElement(): boolean {
+    return this.sections.some(section =>
+      section.interaction?.type === 'reduced-keyboard'
+    );
+  }
+
+  private isReducedKeyboardElement(elementId: string): boolean {
+    return this.sections.some(section =>
+      section.interaction?.type === 'reduced-keyboard' &&
+      section.interaction?.id === elementId
+    );
+  }
+
+  navigateToNext(): void {
+    this.veronaPostService.sendVopUnitNavigationRequestedNotification('next');
+  }
+
   private reset(): void {
     this.presentationProgressStatus.next('none');
     this.sections = [];
@@ -119,6 +136,20 @@ export class UnitComponent implements OnInit, OnDestroy {
   }
 
   valueChanged(event: VeronaResponse): void {
+    const hasReducedKeyboard = this.hasReducedKeyboardElement();
+
+    if (hasReducedKeyboard && this.isReducedKeyboardElement(event.id)) {
+      this.reducedKeyboardHasContent = !!(event.value && event.value.toString().trim());
+    }
     this.valueChange.emit(event);
+  }
+
+  get shouldShowUnitNavNext(): boolean {
+    const hasReducedKeyboard = this.hasReducedKeyboardElement();
+
+    if (hasReducedKeyboard) {
+      return this.showUnitNavNext && this.reducedKeyboardHasContent;
+    }
+    return this.showUnitNavNext;
   }
 }

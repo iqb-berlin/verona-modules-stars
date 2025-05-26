@@ -1,0 +1,74 @@
+
+.custom-audio-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+
+  .speaker-icon {
+    width: min(400px, 40vw);
+    height: min(400px, 40vh);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    & > svg {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+    }
+  }
+}
+
+@media (min-width: 1024px) {
+  .custom-audio-button {
+    .speaker-icon {
+      width: min(500px, 35vw);
+      height: min(500px, 35vh);
+    }
+  }
+}
+
+@media (min-width: 1440px) {
+  .custom-audio-button {
+    .speaker-icon {
+      width: min(600px, 30vw);
+      height: min(600px, 30vh);
+    }
+  }
+}
+
+@media (max-width: 1023px) and (min-width: 769px) {
+  .custom-audio-button {
+    .speaker-icon {
+      width: min(350px, 35vw);
+      height: min(350px, 35vh);
+    }
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .custom-audio-button {
+    .speaker-icon {
+      width: min(250px, 40vw);
+      height: min(250px, 40vh);
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .custom-audio-button {
+    .speaker-icon {
+      width: min(180px, 45vw);
+      height: min(180px, 45vh);
+    }
+  }
+}
