@@ -8,7 +8,8 @@ import {
   CheckboxElement,
   RadioGroupImagesElement,
   MultiChoiceImagesElement,
-  ReducedKeyboardElement
+  ReducedKeyboardElement,
+  SyllableCounterElement
 } from './index';
 import {
   AbstractIDService,
@@ -25,7 +26,8 @@ export abstract class ElementFactory {
     "radio-group-images": RadioGroupImagesElement,
     "multi-choice-images": MultiChoiceImagesElement,
     "audio": AudioElement,
-    "reduced-keyboard": ReducedKeyboardElement
+    "reduced-keyboard": ReducedKeyboardElement,
+    "syllable-counter": SyllableCounterElement
   };
 
   static createElement(element: { type: UIElementType } & Partial<UIElementProperties>, idService?: AbstractIDService)

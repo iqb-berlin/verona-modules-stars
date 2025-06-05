@@ -19,7 +19,8 @@ export type UIElementType =
   | 'stimulus'
   | 'interaction'
   | 'instructions'
-  | 'reduced-keyboard';
+  | 'reduced-keyboard'
+  | 'syllable-counter';
 
 export type UIBlueprintType =
   'PicPicBlueprint'

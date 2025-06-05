@@ -1,21 +1,21 @@
 import { Component, input, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormControl } from "@angular/forms";
 
-import { RadioGroupImagesElement } from "../../../models";
+import { SyllableCounterElement } from "../../../models/elements/syllable-counter";
 import { ElementComponent } from "../../../directives/element-component.directive";
 import { VeronaResponse, ResponseStatus } from "../../../models/verona";
 import { UnitStateService } from "../../../services/unit-state.service";
 import { ValidationService } from "../../../services/validation.service";
 
 @Component({
-  selector: 'stars-radio-group-images',
-  templateUrl: './radio-group-images.component.html',
-  styleUrls: ['./radio-group-images.component.scss'],
+  selector: 'stars-syllable-counter',
+  templateUrl: './syllable-counter.component.html',
+  styleUrls: ['./syllable-counter.component.scss'],
   standalone: false
 })
-export class RadioGroupImagesComponent extends ElementComponent implements OnInit, OnDestroy {
-  elementModel = input.required<RadioGroupImagesElement>();
-  RadioInputControl = new FormControl();
+export class SyllableCounterComponent extends ElementComponent implements OnInit, OnDestroy {
+  elementModel = input.required<SyllableCounterElement>();
+  SyllableInputControl = new FormControl();
   position = input<string>("row");
 
   private unitStateService = inject(UnitStateService);
@@ -25,28 +25,33 @@ export class RadioGroupImagesComponent extends ElementComponent implements OnIni
     const restoredValue = this.unitStateService.registerElementWithRestore(
       this.elementModel().id,
       this.elementModel().alias || this.elementModel().id,
-      this.elementModel().value /
+      this.elementModel().value
     );
 
     this.elementModel().value = restoredValue;
-    this.RadioInputControl.setValue(restoredValue, { emitEvent: false });
-    this.parentForm()?.addControl(this.elementModel().id, this.RadioInputControl);
+    this.SyllableInputControl.setValue(restoredValue, { emitEvent: false });
+    this.parentForm()?.addControl(this.elementModel().id, this.SyllableInputControl);
 
     if (this.elementModel().required) {
-      this.validationService.registerFormControl(this.RadioInputControl);
+      this.validationService.registerFormControl(this.SyllableInputControl);
     }
 
     this.updateElementStatus(ResponseStatus.DISPLAYED);
 
-    console.log(`Radio component initialized: ${this.elementModel().id}, restored value:`, restoredValue);
+    console.log(`🔄 Syllable counter initialized: ${this.elementModel().id}, restored value:`, restoredValue);
+    console.log(`📊 Generated options:`, this.elementModel().options);
   }
 
   ngOnDestroy() {
     this.parentForm()?.removeControl(this.elementModel().id);
   }
 
+  getHandIndices(count: number): number[] {
+    return Array(count).fill(0).map((_, index) => index);
+  }
+
   valueChanged($event: any) {
-    console.log(`value changed: ${this.elementModel().id} ->`, $event.value);
+    console.log(`Syllable value changed: ${this.elementModel().id} ->`, $event.value);
 
     this.elementModel().value = $event.value;
 

@@ -10,11 +10,12 @@ import {
 import { VeronaSubscriptionService } from '../../services/verona-subscription.service';
 import { VeronaPostService } from '../../services/verona-post.service';
 import { MetaDataService } from '../../services/meta-data.service';
+import { UnitStateService } from '../../services/unit-state.service';
+import { StateVariableStateService } from '../../services/state-variable-state.service';
 import { InstantiationError } from '../../errors';
 import { Section } from "../../models/section";
 import { Unit } from "../../models/unit";
 import { LogService } from "../../services/log.service";
-
 
 @Component({
   selector: 'stars-unit',
@@ -22,20 +23,21 @@ import { LogService } from "../../services/log.service";
   styleUrls: ['./unit.component.scss'],
   standalone: false
 })
-
 export class UnitComponent implements OnInit, OnDestroy {
   sections: Section[] = [];
   playerConfig: PlayerConfig = {};
   showUnitNavNext: boolean = false;
-  valueChange= output<VeronaResponse>();
-  private reducedKeyboardHasContent: boolean = false;
+  valueChange = output<VeronaResponse>();
+
   presentationProgressStatus: BehaviorSubject<Progress> = new BehaviorSubject<Progress>('none');
 
   constructor(
-          private metaDataService: MetaDataService,
-          private veronaPostService: VeronaPostService,
-          private veronaSubscriptionService: VeronaSubscriptionService,
-          private changeDetectorRef: ChangeDetectorRef
+    private metaDataService: MetaDataService,
+    private veronaPostService: VeronaPostService,
+    private veronaSubscriptionService: VeronaSubscriptionService,
+    private changeDetectorRef: ChangeDetectorRef,
+    private unitStateService: UnitStateService,
+    private stateVariableStateService: StateVariableStateService
   ) {}
 
   ngOnInit(): void {
@@ -46,7 +48,7 @@ export class UnitComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-
+    // Cleanup is handled by AppComponent
   }
 
   private configureUnit(message: VopStartCommand): void {
@@ -54,23 +56,26 @@ export class UnitComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       if (message.unitDefinition) {
         try {
-          LogService.debug('player: unitDefinition', message.unitDefinition);
           const unitDefinition = JSON.parse(message.unitDefinition as string);
-          LogService.debug('player: unitDefinition parsed', unitDefinition);
+
           this.checkUnitDefinitionVersion(unitDefinition);
           const unit: Unit = new Unit(unitDefinition);
+
+          this.initElementCodes(message, unit);
+
           this.sections = unit.sections;
-          LogService.debug('player: sections', this.sections);
           this.showUnitNavNext = unit.showUnitNavNext;
           this.setPlayerConfig(message.playerConfig || {});
           this.metaDataService.resourceURL = this.playerConfig.directDownloadUrl;
           this.veronaPostService.sessionID = message.sessionId;
-          this.initElementCodes(message, unit);
+
+          this.presentationProgressStatus.next('some');
+
           this.changeDetectorRef.detectChanges();
         } catch (e: unknown) {
-          console.error(e);
+          console.error('Unit configuration error:', e);
           if (e instanceof InstantiationError) {
-            console.error('Failing element blueprint: ', e.faultyBlueprint);
+            console.error('Failing element blueprint:', e.faultyBlueprint);
             this.showErrorDialog('unitDefinitionIsNotReadable');
           } else if (e instanceof Error) {
             this.showErrorDialog(e.message);
@@ -79,7 +84,7 @@ export class UnitComponent implements OnInit, OnDestroy {
           }
         }
       } else {
-        LogService.warn('player: message has no unitDefinition');
+        LogService.warn('No unit definition in message');
       }
     });
   }
@@ -89,39 +94,58 @@ export class UnitComponent implements OnInit, OnDestroy {
   }
 
   private checkUnitDefinitionVersion(unitDefinition: Record<string, unknown>): void {
+    // Implement version checking if needed
   }
 
-  private initElementCodes(message: VopStartCommand, unitDefinition: Unit): void {
-    // this.unitStateService
-    //   .setElementCodes(message.unitState?.dataParts?.elementCodes ?
-    //     JSON.parse(message.unitState.dataParts.elementCodes) : [],
-    //   unitDefinition.getAllElements().map(element => element.getIdentifiers()).flat());
-    //
-    // this.stateVariableStateService
-    //   .setElementCodes(message.unitState?.dataParts?.stateVariableCodes ?
-    //     JSON.parse(message.unitState.dataParts.stateVariableCodes) : [],
-    //   unitDefinition.stateVariables.map(stateVariable => ({ id: stateVariable.id, alias: stateVariable.alias })));
-    //
-    // unitDefinition.stateVariables
-    //   .map(stateVariable => this.stateVariableStateService
-    //     .registerElementCode(stateVariable.id, stateVariable.alias, stateVariable.value));
+  private initElementCodes(message: VopStartCommand, unit: Unit): void {
+
+
+    const existingElementCodes = message.unitState?.dataParts?.elementCodes ?
+      JSON.parse(message.unitState.dataParts.elementCodes) : [];
+
+    const elementIdentifiers = unit.getAllElements().map(element => ({
+      id: element.id,
+      alias: element.alias || element.id
+    }));
+
+    this.unitStateService.setElementCodes(existingElementCodes, elementIdentifiers);
+
+    const existingStateVariableCodes = message.unitState?.dataParts?.stateVariableCodes ?
+      JSON.parse(message.unitState.dataParts.stateVariableCodes) : [];
+
+    const stateVariableIdentifiers = unit.stateVariables.map(stateVariable => ({
+      id: stateVariable.id,
+      alias: stateVariable.alias
+    }));
+
+    this.stateVariableStateService.setElementCodes(existingStateVariableCodes, stateVariableIdentifiers);
+
+    unit.stateVariables.forEach(stateVariable => {
+      this.stateVariableStateService.registerElementCode(
+        stateVariable.id,
+        stateVariable.alias,
+        stateVariable.value
+      );
+    });
+  }
+
+  get shouldShowUnitNavNext(): boolean {
+    return this.showUnitNavNext && this.hasUserProvidedInput();
+  }
+
+  private hasUserProvidedInput(): boolean {
+    const responses = this.unitStateService.getResponses();
+    return responses.some(response => {
+      return response.value !== null &&
+        response.value !== undefined &&
+        response.value !== '' &&
+        response.status !== 'UNSET';
+    });
   }
 
   private showErrorDialog(text: string): void {
-    // TODO: ErrorDialog
-  }
-
-  private hasReducedKeyboardElement(): boolean {
-    return this.sections.some(section =>
-      section.interaction?.type === 'reduced-keyboard'
-    );
-  }
-
-  private isReducedKeyboardElement(elementId: string): boolean {
-    return this.sections.some(section =>
-      section.interaction?.type === 'reduced-keyboard' &&
-      section.interaction?.id === elementId
-    );
+    console.error('🚨 Error:', text);
+    // TODO: Implement proper error dialog
   }
 
   navigateToNext(): void {
@@ -132,24 +156,12 @@ export class UnitComponent implements OnInit, OnDestroy {
     this.presentationProgressStatus.next('none');
     this.sections = [];
     this.playerConfig = {};
+    this.unitStateService.reset();
+    this.stateVariableStateService.reset();
     this.changeDetectorRef.detectChanges();
   }
 
   valueChanged(event: VeronaResponse): void {
-    const hasReducedKeyboard = this.hasReducedKeyboardElement();
-
-    if (hasReducedKeyboard && this.isReducedKeyboardElement(event.id)) {
-      this.reducedKeyboardHasContent = !!(event.value && event.value.toString().trim());
-    }
     this.valueChange.emit(event);
-  }
-
-  get shouldShowUnitNavNext(): boolean {
-    const hasReducedKeyboard = this.hasReducedKeyboardElement();
-
-    if (hasReducedKeyboard) {
-      return this.showUnitNavNext && this.reducedKeyboardHasContent;
-    }
-    return this.showUnitNavNext;
   }
 }

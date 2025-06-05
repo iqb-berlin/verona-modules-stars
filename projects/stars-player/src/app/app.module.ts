@@ -15,7 +15,7 @@ import { MatFormField, MatLabel } from "@angular/material/form-field";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { MatRadioButton, MatRadioGroup } from "@angular/material/radio";
 import { UnitNavNextComponent} from "./components/unit-nav-next.component";
-
+import {SyllableCounterComponent} from "./components/elements/syllable-counter/syllable-counter.component";
 import { AppComponent } from "./app.component";
 import {
   UnitComponent,
@@ -36,9 +36,11 @@ import {
   ReducedKeyboardComponent
 } from "./components";
 import { ErrorService } from "./services/error.service";
+import { UnitStateService } from "./services/unit-state.service";
+import { StateVariableStateService } from "./services/state-variable-state.service";
+import { ValidationService } from "./services/validation.service";
 import { SafeResourceHTMLPipe } from "./pipes/safe-resource-html.pipe";
 import { SafeResourceUrlPipe } from "./pipes/safe-resource-url.pipe";
-
 
 @NgModule({
   declarations: [
@@ -60,7 +62,8 @@ import { SafeResourceUrlPipe } from "./pipes/safe-resource-url.pipe";
     MediaPlayerComponent,
     UnitMenuComponent,
     AudioComponent,
-    ReducedKeyboardComponent
+    ReducedKeyboardComponent,
+    SyllableCounterComponent
   ],
   imports: [
     BrowserModule,
@@ -85,7 +88,10 @@ import { SafeResourceUrlPipe } from "./pipes/safe-resource-url.pipe";
   ],
   providers: [
     provideExperimentalZonelessChangeDetection(),
-    {provide: ErrorHandler, useClass: ErrorService}
+    { provide: ErrorHandler, useClass: ErrorService },
+    UnitStateService,
+    StateVariableStateService,
+    ValidationService
   ],
   exports: [
     TextComponent,
@@ -93,5 +99,4 @@ import { SafeResourceUrlPipe } from "./pipes/safe-resource-url.pipe";
   ],
   bootstrap: [AppComponent]
 })
-
 export class AppModule { }

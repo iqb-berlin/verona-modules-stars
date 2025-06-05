@@ -1,0 +1,44 @@
+<div class="syllable-counter-container">
+  @if (elementModel()) {
+    @if (elementModel().label && elementModel().label.trim()) {
+      <label [id]="elementModel().id+'-syllable-label'"
+             class="syllable-label"
+             [innerHTML]="elementModel().label | safeResourceHTML">
+      </label>
+    }
+
+    <mat-radio-group [attr.aria-labelledby]="elementModel().label ? elementModel().id+'-syllable-label' : null"
+                     [attr.aria-label]="!elementModel().label ? 'Silben zählen' : null"
+                     [value]="elementModel().value"
+                     (change)="valueChanged($event)"
+                     class="syllable-options">
+      @if (elementModel().options && elementModel().options.length > 0) {
+        @for (option of elementModel().options; track option; let i = $index) {
+          <mat-label class="syllable-option">
+            <mat-radio-button class="syllable-radio"
+                              [style.pointer-events]="elementModel().readOnly ? 'none' : 'unset'"
+                              [attr.aria-label]="option.altText"
+                              [value]="i">
+              <div class="hands-container">
+                @for (handIndex of getHandIndices(i + 1); track handIndex) {
+                  <img [src]="elementModel().handImageSrc"
+                       [alt]="'Klatschende Hand ' + (handIndex + 1)"
+                       class="hand-image"
+                       loading="lazy">
+                }
+              </div>
+            </mat-radio-button>
+          </mat-label>
+        }
+      } @else {
+        <div class="error-message">
+          No options available! Check console for debug info.
+        </div>
+      }
+    </mat-radio-group>
+  } @else {
+    <div class="error-message">
+      Element model is undefined! Component not properly initialized.
+    </div>
+  }
+</div>

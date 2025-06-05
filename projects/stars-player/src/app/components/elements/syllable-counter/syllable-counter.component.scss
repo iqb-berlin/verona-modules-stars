@@ -1,0 +1,133 @@
+.syllable-counter-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 1rem;
+  box-sizing: border-box;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.syllable-label {
+  display: block;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.syllable-options {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 2rem;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.syllable-option {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  width: auto;
+  cursor: pointer;
+}
+
+.syllable-radio {
+  ::ng-deep .mdc-radio {
+    display: none !important;
+  }
+
+  ::ng-deep .mat-mdc-radio-button {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.hands-container {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5rem;
+  border: 3px solid transparent;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  background-color: transparent;
+
+  &:hover {
+    border-color: #007bff;
+    transform: scale(1.05);
+    background-color: rgba(0, 123, 255, 0.05);
+  }
+}
+
+.hand-image {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+mat-radio-button.mat-mdc-radio-checked .hands-container {
+  border-color: #007bff !important;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+  background-color: rgba(0, 123, 255, 0.08);
+}
+
+mat-radio-button.mat-mdc-radio-checked .hand-image {
+  animation: bounce 0.3s ease-out;
+}
+
+@keyframes bounce {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0); }
+}
+
+.error-message {
+  color: #dc3545;
+  padding: 20px;
+  background: #ffe6e6;
+  border: 1px solid #ff9999;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .syllable-options {
+    gap: 1.5rem;
+    max-width: 100%;
+  }
+
+  .hand-image {
+    height: 50px;
+  }
+
+  .hands-container {
+    gap: 0.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .syllable-options {
+    gap: 1rem;
+  }
+
+  .hand-image {
+    height: 40px;
+  }
+
+  .hands-container {
+    gap: 0.3rem;
+    padding: 0.4rem;
+  }
+}

@@ -17,3 +17,4 @@ export { MultiChoiceImagesComponent } from './elements/multi-choice-images/multi
 export { AudioComponent } from './elements/audio.component';
 export { MediaPlayerComponent } from './elements/media-player/media-player.component';
 export { ReducedKeyboardComponent } from './elements/reduced-keyboard/reduced-keyboard.component';
+export { SyllableCounterComponent} from './elements/syllable-counter/syllable-counter.component';

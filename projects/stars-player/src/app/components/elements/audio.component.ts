@@ -1,4 +1,3 @@
-// src/app/components/elements/audio.component.ts
 import { Component, ElementRef, input, OnInit, output, viewChild } from '@angular/core';
 import { takeUntil } from "rxjs/operators";
 import { BehaviorSubject, fromEvent, Subject, tap, throttleTime } from "rxjs";

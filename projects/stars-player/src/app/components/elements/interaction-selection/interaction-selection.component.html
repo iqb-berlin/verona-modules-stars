@@ -23,6 +23,13 @@
         (valueChange)="valueChange.emit($event)"
       ></stars-reduced-keyboard>
     }
+    @case ("syllable-counter") {
+      <stars-syllable-counter
+        [elementModel]="elementModelAsSyllableCounterElement"
+        [parentForm]="parentForm()"
+        (valueChange)="valueChange.emit($event)"
+      ></stars-syllable-counter>
+    }
     @default {
       Error: Unsupported ElementType
     }

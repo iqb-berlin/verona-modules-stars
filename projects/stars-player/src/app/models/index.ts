@@ -10,3 +10,4 @@ export { CheckboxElement } from './elements/checkbox';
 export { RadioGroupImagesElement } from './elements/radio-group-images';
 export { MultiChoiceImagesElement } from './elements/multi-choice-images';
 export { ReducedKeyboardElement } from './elements/reduced-keyboard';
+export { SyllableCounterElement  } from './elements/syllable-counter'

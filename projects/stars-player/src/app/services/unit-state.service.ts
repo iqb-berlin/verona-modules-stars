@@ -30,7 +30,6 @@ export class UnitStateService {
   private _pagePresented = new Subject<number>();
   private presentedPages: Set<number> = new Set();
 
-  // Observable streams for external subscription
   get elementCodeChanged() {
     return this._elementCodeChanged.asObservable();
   }
@@ -39,7 +38,6 @@ export class UnitStateService {
     return this._pagePresented.asObservable();
   }
 
-  // Register an element with initial state
   registerElementCode(
     id: string,
     alias: string,
@@ -50,7 +48,6 @@ export class UnitStateService {
     const existingCode = this.elementCodes.get(id);
 
     if (existingCode) {
-      // Update existing with new DOM element but keep saved value and status
       existingCode.domElement = domElement;
       if (pageIndex !== undefined) existingCode.pageIndex = pageIndex;
       this._elementCodeChanged.next(existingCode);
@@ -71,7 +68,6 @@ export class UnitStateService {
     this._elementCodeChanged.next(elementCode);
   }
 
-  // Update element value and status
   changeElementCodeValue(change: {
     id: string;
     value: any;
@@ -93,18 +89,7 @@ export class UnitStateService {
     }
   }
 
-  // Get element by ID
-  getElementCodeById(id: string): ElementCode | undefined {
-    return this.elementCodes.get(id);
-  }
 
-  // Get initial value for restoration
-  getInitialValue(elementId: string): any {
-    const elementCode = this.elementCodes.get(elementId);
-    return elementCode ? elementCode.value : null;
-  }
-
-  // Register element and restore if saved state exists
   registerElementWithRestore(
     id: string,
     alias: string,
@@ -115,19 +100,24 @@ export class UnitStateService {
     const existingState = this.elementCodes.get(id);
 
     if (existingState) {
-      // Update DOM element but restore existing value
       existingState.domElement = domElement;
       if (pageIndex !== undefined) existingState.pageIndex = pageIndex;
       return existingState.value;
     } else {
-      // Create new state with default value
       this.registerElementCode(id, alias, defaultValue, domElement, pageIndex);
       return defaultValue;
     }
   }
 
-  // Get all responses for state notification
-  getResponses(): VeronaResponse[] {
+  getResponses(): {
+    timeStamp: number;
+    score: number;
+    code: number;
+    alias: string;
+    id: string;
+    value: string | number | boolean;
+    status: ResponseStatus
+  }[] {
     return Array.from(this.elementCodes.values()).map(elementCode => ({
       id: elementCode.id,
       alias: elementCode.alias,
@@ -139,26 +129,17 @@ export class UnitStateService {
     }));
   }
 
-  // Mark page as presented
-  markPagePresented(pageIndex: number): void {
-    this.presentedPages.add(pageIndex);
-    this._pagePresented.next(pageIndex);
-  }
-
-  // Get presentation progress
   get presentedPagesProgress(): Progress {
     if (this.presentedPages.size === 0) return 'none';
     // You can implement more sophisticated logic here based on total pages
     return this.presentedPages.size > 0 ? 'some' : 'none';
   }
 
-  // Reset state (for new unit)
   reset(): void {
     this.elementCodes.clear();
     this.presentedPages.clear();
   }
 
-  // Set element codes from unit state (for restoration)
   setElementCodes(elementCodes: any[], elementIdentifiers: ElementIdentifier[]): void {
     elementCodes.forEach(code => {
       this.elementCodes.set(code.id, {

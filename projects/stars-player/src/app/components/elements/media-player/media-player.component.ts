@@ -1,6 +1,3 @@
-// Alternative: Inline SVG approach
-// src/app/components/elements/media-player/media-player.component.ts
-
 import {Component, input, OnDestroy, OnInit, output} from "@angular/core";
 import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
 import {ImageElement} from "../../../models";
