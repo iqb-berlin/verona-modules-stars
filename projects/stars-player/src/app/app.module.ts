@@ -16,6 +16,7 @@ import { MatCheckbox } from "@angular/material/checkbox";
 import { MatRadioButton, MatRadioGroup } from "@angular/material/radio";
 import { UnitNavNextComponent} from "./components/unit-nav-next.component";
 import {SyllableCounterComponent} from "./components/elements/syllable-counter/syllable-counter.component";
+import { RadioGroupTextComponent} from "./components/elements/radio-group-text/radio-group-text.component";
 import { AppComponent } from "./app.component";
 import {
   UnitComponent,
@@ -33,7 +34,8 @@ import {
   InteractionSelectionComponent,
   UnitMenuComponent,
   MediaPlayerComponent,
-  ReducedKeyboardComponent
+  ReducedKeyboardComponent,
+  BinaryChoiceComponent
 } from "./components";
 import { ErrorService } from "./services/error.service";
 import { UnitStateService } from "./services/unit-state.service";
@@ -63,7 +65,9 @@ import { SafeResourceUrlPipe } from "./pipes/safe-resource-url.pipe";
     UnitMenuComponent,
     AudioComponent,
     ReducedKeyboardComponent,
-    SyllableCounterComponent
+    SyllableCounterComponent,
+    RadioGroupTextComponent,
+    BinaryChoiceComponent
   ],
   imports: [
     BrowserModule,

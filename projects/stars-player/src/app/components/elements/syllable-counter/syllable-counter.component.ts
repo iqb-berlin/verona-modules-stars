@@ -1,5 +1,5 @@
 import { Component, input, OnDestroy, OnInit, inject } from '@angular/core';
-import { FormControl } from "@angular/forms";
+import { FormControl, FormGroup } from "@angular/forms";
 
 import { SyllableCounterElement } from "../../../models/elements/syllable-counter";
 import { ElementComponent } from "../../../directives/element-component.directive";
@@ -15,7 +15,10 @@ import { ValidationService } from "../../../services/validation.service";
 })
 export class SyllableCounterComponent extends ElementComponent implements OnInit, OnDestroy {
   elementModel = input.required<SyllableCounterElement>();
-  SyllableInputControl = new FormControl();
+
+  SyllableInputControl = new FormControl(); // For vertical (radio group)
+  MultiChoiceFormGroup = new FormGroup({}); // For row (multi-choice)
+
   position = input<string>("row");
 
   private unitStateService = inject(UnitStateService);
@@ -27,19 +30,43 @@ export class SyllableCounterComponent extends ElementComponent implements OnInit
       this.elementModel().alias || this.elementModel().id,
       this.elementModel().value
     );
-
     this.elementModel().value = restoredValue;
-    this.SyllableInputControl.setValue(restoredValue, { emitEvent: false });
-    this.parentForm()?.addControl(this.elementModel().id, this.SyllableInputControl);
+    this.initializeFormControls(restoredValue);
 
     if (this.elementModel().required) {
-      this.validationService.registerFormControl(this.SyllableInputControl);
+      if (this.elementModel().layout === 'vertical') {
+        this.validationService.registerFormControl(this.SyllableInputControl);
+      } else {
+        this.validationService.registerFormControl(this.MultiChoiceFormGroup);
+      }
     }
-
     this.updateElementStatus(ResponseStatus.DISPLAYED);
 
-    console.log(`🔄 Syllable counter initialized: ${this.elementModel().id}, restored value:`, restoredValue);
-    console.log(`📊 Generated options:`, this.elementModel().options);
+    console.log(`Syllable counter initialized: ${this.elementModel().id}, layout: ${this.elementModel().layout}, restored value:`, restoredValue);
+  }
+
+  private initializeFormControls(restoredValue: any): void {
+    if (this.elementModel().layout === 'vertical') {
+      let selectedIndex = null;
+      if (typeof restoredValue === 'number' && restoredValue >= 1 && restoredValue <= this.elementModel().maxSyllables) {
+        selectedIndex = restoredValue - 1;
+      }
+      this.SyllableInputControl.setValue(selectedIndex, { emitEvent: false });
+      this.parentForm()?.addControl(this.elementModel().id, this.SyllableInputControl);
+    } else {
+      const binaryString = typeof restoredValue === 'number' && restoredValue > 0
+        ? SyllableCounterElement.syllableCountToBinaryString(restoredValue, this.elementModel().maxSyllables)
+        : '';
+
+      this.elementModel().options.forEach((option, index) => {
+        const isChecked = binaryString.length > index && binaryString[index] === '1';
+        const formControl = new FormControl();
+        formControl.setValue(isChecked, { emitEvent: false });
+        this.MultiChoiceFormGroup.addControl(option.id, formControl);
+      });
+
+      this.parentForm()?.addControl(this.elementModel().id, this.MultiChoiceFormGroup);
+    }
   }
 
   ngOnDestroy() {
@@ -50,23 +77,34 @@ export class SyllableCounterComponent extends ElementComponent implements OnInit
     return Array(count).fill(0).map((_, index) => index);
   }
 
-  valueChanged($event: any) {
-    console.log(`Syllable value changed: ${this.elementModel().id} ->`, $event.value);
+  valueChangedVertical($event: any) {
+    const syllableCount = $event.value + 1;
+    this.saveValue(syllableCount);
+  }
 
-    this.elementModel().value = $event.value;
+  valueChangedRow() {
+    let syllableCount = 0;
+    for (const field in this.MultiChoiceFormGroup.controls) {
+      if (this.MultiChoiceFormGroup.controls[field].value === true) {
+        syllableCount++;
+      }
+    }
+    this.saveValue(syllableCount);
+  }
 
+  private saveValue(syllableCount: number): void {
+    console.log(`Syllable value changed: ${this.elementModel().id} -> syllable count: ${syllableCount}`);
+    this.elementModel().value = syllableCount;
     this.unitStateService.changeElementCodeValue({
       id: this.elementModel().id,
-      value: $event.value,
+      value: syllableCount,
       status: ResponseStatus.VALUE_CHANGED
     });
-
     const response: VeronaResponse = {
       id: this.elementModel().id,
       alias: this.elementModel().alias || this.elementModel().id,
-      value: $event.value,
-      status: ResponseStatus.VALUE_CHANGED,
-      timeStamp: Date.now()
+      value: syllableCount.toString(),
+      status: ResponseStatus.VALUE_CHANGED
     };
 
     this.valueChange.emit(response);

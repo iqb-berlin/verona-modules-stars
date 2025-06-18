@@ -1,23 +1,26 @@
-
 .custom-audio-button {
   display: inline-flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-start;
+  align-items: flex-start;
   cursor: pointer;
   padding: 8px;
   border-radius: 4px;
   transition: background-color 0.2s ease;
+  width: auto;
+  height: auto;
 
   &:hover {
     background-color: rgba(0, 0, 0, 0.04);
   }
 
   .speaker-icon {
-    width: min(400px, 40vw);
-    height: min(400px, 40vh);
+    width: auto;
+    height: auto;
+    max-width: min(200px, 25vw, 20vh);
+    max-height: min(200px, 25vh, 20vh);
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-start;
+    align-items: flex-start;
 
     & > svg {
       width: 100% !important;
@@ -30,45 +33,35 @@
 @media (min-width: 1024px) {
   .custom-audio-button {
     .speaker-icon {
-      width: min(500px, 35vw);
-      height: min(500px, 35vh);
+      max-width: min(220px, 28vw, 25vh);
+      max-height: min(220px, 28vh, 25vh);
     }
   }
 }
 
-@media (min-width: 1440px) {
-  .custom-audio-button {
-    .speaker-icon {
-      width: min(600px, 30vw);
-      height: min(600px, 30vh);
-    }
-  }
-}
 
 @media (max-width: 1023px) and (min-width: 769px) {
   .custom-audio-button {
     .speaker-icon {
-      width: min(350px, 35vw);
-      height: min(350px, 35vh);
+      max-width: min(180px, 28vw, 18vh);
+      max-height: min(180px, 28vh, 18vh);
     }
   }
 }
 
-/* Mobile */
-@media (max-width: 768px) {
-  .custom-audio-button {
-    .speaker-icon {
-      width: min(250px, 40vw);
-      height: min(250px, 40vh);
-    }
-  }
-}
 
-@media (max-width: 480px) {
-  .custom-audio-button {
-    .speaker-icon {
-      width: min(180px, 45vw);
-      height: min(180px, 45vh);
-    }
+.custom-audio-button .speaker-icon {
+  width: clamp(120px, 20vw, 250px);
+  height: clamp(80px, 15vw, 180px);
+  margin: 0;
+  overflow: visible;
+
+  --scale-factor: clamp(4, calc(4 + 5vw / 100), 8);
+
+  & > svg {
+    width: 100% !important;
+    height: 100% !important;
+    transform: scale(var(--scale-factor));
+    transform-origin: center;
   }
 }

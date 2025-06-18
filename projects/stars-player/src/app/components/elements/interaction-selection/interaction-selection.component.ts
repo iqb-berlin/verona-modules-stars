@@ -6,6 +6,8 @@ import {
   RadioGroupImagesElement,
   ReducedKeyboardElement,
   SyllableCounterElement,
+  RadioGroupTextElement,
+  BinaryChoiceElement,
   UIElement
 } from "../../../models";
 import { UIElementType } from "../../../interfaces";
@@ -28,8 +30,10 @@ export class InteractionSelectionComponent extends ElementComponent implements O
   stimulusTypes: UIElementType[] = [
     "radio-group-images",
     "multi-choice-images",
+    "radio-group-text",
     "reduced-keyboard",
-    "syllable-counter"
+    "syllable-counter",
+    "binary-choice"
   ];
 
   ngOnInit() {
@@ -50,5 +54,13 @@ export class InteractionSelectionComponent extends ElementComponent implements O
 
   get elementModelAsSyllableCounterElement(): SyllableCounterElement {
     return this.elementModel() as SyllableCounterElement;
+  }
+
+  get elementModelAsRadioGroupTextElement(): RadioGroupTextElement {
+    return this.elementModel() as RadioGroupTextElement;
+  }
+
+  get elementModelAsBinaryChoiceElement(): BinaryChoiceElement {
+    return this.elementModel() as BinaryChoiceElement;
   }
 }

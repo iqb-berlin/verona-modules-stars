@@ -1,166 +1,260 @@
-.checkbox-group {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 1rem;
+.multi-choice-wrapper {
   width: 100%;
   height: 100%;
-  padding: 1rem;
-  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.four-option-center {
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 100% !important;
+
+    .checkbox-group {
+      position: static !important;
+      margin: 0 !important;
+      transform: none !important;
+    }
+  }
 }
 
-.checkbox-group.row-layout {
-  flex-direction: row;
-  flex-wrap: nowrap;
+.multi-choice-wrapper.four-option-center {
+  display: grid !important;
+  place-items: center !important;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+  height: 100vh;
 }
 
 .checkbox-group.grid-layout {
-  flex-direction: row;
-  flex-wrap: wrap;
-  max-width: 90%;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem 0.75rem;
+  padding: clamp(0.5rem, 1.5vw, 1.5rem);
+  place-items: center;
+  max-width: clamp(280px, 50vw, 450px);
   margin: 0 auto;
-}
-
-.checkbox-group mat-checkbox {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem;
   box-sizing: border-box;
-  min-width: 0; /* Allow shrinking */
-  flex: 1; /* Equal width distribution */
-}
+  width: 100%;
+  height: auto;
+  max-height: clamp(400px, 80vh, 800px);
+  align-self: center;
+  justify-self: center;
 
-.checkbox-group.row-layout mat-checkbox {
-  max-width: calc(100% / var(--option-count));
-  min-width: 120px; /* Minimum size to remain usable */
+  &[style*="--option-count='1'"] {
+    grid-template-columns: 1fr;
+    max-width: clamp(180px, 30vw, 250px);
+  }
+
+  &[style*="--option-count='2'"] {
+    max-width: clamp(250px, 40vw, 350px);
+  }
+
+  &[style*="--option-count='3'"] {
+    max-width: clamp(280px, 45vw, 400px);
+  }
+
+  &[style*="--option-count='4'"] {
+    max-width: clamp(240px, 25vw, 300px);
+    gap: 0.4rem 0.4rem;
+    margin: 0;
+    width: fit-content;
+  }
+
+  &[style*="--option-count='5'"],
+  &[style*="--option-count='6'"] {
+    max-width: clamp(300px, 50vw, 450px);
+  }
+
+  &[style*="--option-count='7'"],
+  &[style*="--option-count='8'"] {
+    max-width: clamp(320px, 55vw, 500px);
+  }
 }
 
 .checkbox-group.grid-layout mat-checkbox {
-  width: calc(50% - 0.5rem);
-  max-width: 300px;
-  min-width: 150px;
-}
+  width: clamp(120px, min(20vw, 20vh), 220px);
+  height: clamp(120px, min(20vw, 20vh), 220px);
 
-.checkbox-group.grid-layout.options-1 mat-checkbox,
-.checkbox-group.grid-layout.options-3 mat-checkbox {
-  width: calc(33.333% - 0.67rem);
-}
-
-.checkbox-group.grid-layout.options-5 mat-checkbox,
-.checkbox-group.grid-layout.options-7 mat-checkbox {
-  width: calc(33.333% - 0.67rem);
-}
-
-.image-container {
-  width: 100%;
   aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  border: 2px solid transparent;
-  border-radius: 8px;
-  background-color: #f8f9fa;
-  transition: all 0.3s ease;
-  position: relative;
 }
 
-.image-container img {
+.checkbox-group.grid-layout[style*="--option-count='4'"] mat-checkbox {
+  width: clamp(70px, min(10vw, 10vh), 100px);
+  height: clamp(70px, min(10vw, 10vh), 100px);
+}
+
+.checkbox-group.grid-layout .image-container {
+  width: clamp(100px, min(18vw, 18vh), 190px);
+  height: clamp(100px, min(18vw, 18vh), 190px);
+
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 6px solid transparent;
+  border-radius: clamp(4px, 1vw, 12px);
+  background-color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.checkbox-group.grid-layout[style*="--option-count='4'"] .image-container {
+  width: clamp(55px, 8vw, 85px);
+  height: clamp(55px, 8vh, 85px);
+}
+
+.checkbox-group.grid-layout .image-container img {
   width: 100%;
   height: 100%;
   object-fit: contain;
   object-position: center;
-  transition: transform 0.2s ease;
 }
 
-/* Hover effects */
-.image-container:hover {
-  border-color: #007bff;
-  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+::ng-deep .checkbox-group.grid-layout mat-checkbox .mdc-checkbox {
+  display: none !important;
 }
 
-.image-container:hover img {
-  transform: scale(1.05);
+::ng-deep .checkbox-group.grid-layout mat-checkbox .mat-mdc-checkbox {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 
-/* Selected state */
+.checkbox-group.row-layout {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: clamp(0.25rem, 2vw, 1rem);
+  padding: 0.75rem;
+  width: 100%;
+  height: 100%;
+  max-width: 95%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.checkbox-group.row-layout mat-checkbox {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  padding: 0.25rem;
+  max-width: none;
+}
+
+::ng-deep .checkbox-group.row-layout mat-checkbox .mdc-checkbox {
+  display: none !important;
+}
+
+::ng-deep .checkbox-group.row-layout mat-checkbox .mat-mdc-checkbox {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.checkbox-group.row-layout .image-container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 6px solid transparent;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  transition: all 0.3s ease;
+  height: 100%;
+  min-height: 80px;
+  aspect-ratio: 1 / 1;
+  min-width: 0;
+}
+
+.checkbox-group.row-layout .image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  cursor: pointer;
+}
+
+.interaction-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  padding: clamp(0.5rem, 2vw, 2rem);
+}
+
+.interaction-container:has(.checkbox-group[style*="--option-count='4'"]) {
+  align-items: center;
+  justify-content: center;
+}
+
 mat-checkbox.mat-mdc-checkbox-checked .image-container {
-  border-color: #007bff;
-  background-color: #87ceeb;
-  box-shadow: 0 2px 12px rgba(0, 123, 255, 0.4);
+  border-color: #0050E5 !important;
 }
 
 mat-checkbox.mat-mdc-checkbox-checked .image-container img {
   transform: scale(1.02);
 }
 
-mat-checkbox .mdc-checkbox {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 10;
-  background-color: rgba(255, 255, 255, 0.9);
-  border-radius: 4px;
-  padding: 2px;
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
-.option-text {
-  margin-top: 0.5rem;
-  text-align: center;
-  font-size: 0.9rem;
-  color: #333;
-  word-wrap: break-word;
-  hyphens: auto;
-}
-
-@media (max-width: 768px) {
-  .checkbox-group {
-    gap: 0.5rem;
+@media (max-width: 1023px) and (orientation: landscape) {
+  .checkbox-group.row-layout {
+    gap: clamp(0.15rem, 0.8vw, 0.3rem);
+    max-width: 90%;
     padding: 0.5rem;
   }
 
+  .checkbox-group.row-layout .image-container {
+    min-height: 75px;
+  }
+}
+
+@media (max-width: 900px) {
   .checkbox-group.row-layout {
-    flex-wrap: wrap;
+
+    max-width: 95%;
+    padding: 0.4rem;
   }
 
-  .checkbox-group.row-layout mat-checkbox {
-    width: calc(50% - 0.25rem);
-    min-width: 100px;
-  }
-
-  .checkbox-group.grid-layout mat-checkbox {
-    width: calc(50% - 0.25rem);
-    min-width: 120px;
-  }
-
-  .image-container {
-    aspect-ratio: 4 / 3; /* Slightly wider on mobile */
+  .checkbox-group.row-layout .image-container {
+    min-height: 70px;
   }
 }
-
-@media (max-width: 480px) {
-  .checkbox-group.row-layout mat-checkbox,
-  .checkbox-group.grid-layout mat-checkbox {
-    width: 100%;
-    max-width: none;
+.checkbox-group.grid-layout {
+  &[style*="--option-count: 3"] mat-checkbox:last-child {
+    grid-column: 1 / -1 !important;
+    justify-self: center !important;
   }
 
-  .image-container {
-    aspect-ratio: 3 / 2;
-    max-height: 200px;
+  &[style*="--option-count: 5"] mat-checkbox:last-child {
+    grid-column: 1 / -1 !important;
+    justify-self: center !important;
   }
-}
 
-.checkbox-group.aspect-wide .image-container {
-  aspect-ratio: 16 / 9;
-}
-
-.checkbox-group.aspect-portrait .image-container {
-  aspect-ratio: 3 / 4;
-}
-
-.checkbox-group.aspect-square .image-container {
-  aspect-ratio: 1 / 1;
+  &[style*="--option-count: 7"] mat-checkbox:last-child {
+    grid-column: 1 / -1 !important;
+    justify-self: center !important;
+  }
 }

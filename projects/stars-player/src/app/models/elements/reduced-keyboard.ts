@@ -19,12 +19,12 @@ export interface KeyboardButton {
 
 export class ReducedKeyboardElement extends InputElement {
   type: UIElementType = 'reduced-keyboard';
-  label: string = 'Schreibe das Wort';
+  label: string = '';
   buttons: KeyboardButton[] = [];
   showBackspace: boolean = true;
   showSubmit: boolean = true;
   maxLength: number | null = null; // Optional character limit
-  submitButtonText: string = 'Prüfen';
+  submitButtonText: string = '';
   backspaceButtonText: string = 'Löschen';
   placeholder: string = '';
 

@@ -13,6 +13,7 @@ export type UIElementType =
   | 'audio'
   | 'video'
   | 'radio-group-images'
+  | 'radio-group-text'
   | 'multi-choice-images'
   | 'hotspot-image'
   | 'drop-list'
@@ -20,7 +21,8 @@ export type UIElementType =
   | 'interaction'
   | 'instructions'
   | 'reduced-keyboard'
-  | 'syllable-counter';
+  | 'syllable-counter'
+  | 'binary-choice';
 
 export type UIBlueprintType =
   'PicPicBlueprint'
@@ -153,4 +155,12 @@ export interface PlayerProperties {
   showRestTime: boolean;
   playbackTime: number;
   fileName: string;
+}
+
+export type SectionLayoutVariant = 'grid_layout' | 'row_layout';
+
+export interface SectionVariantConfig {
+  variant?: SectionLayoutVariant;
+  columns?: number; // For future customization of grid columns
+  aspectRatio?: 'square' | 'wide' | 'portrait'; // For future image aspect ratio control
 }

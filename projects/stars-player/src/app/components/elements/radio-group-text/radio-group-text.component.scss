@@ -1,0 +1,209 @@
+
+.radio-group-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  &.four-option-center {
+    display: grid !important;
+    place-items: center !important;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    height: 100%;
+
+    mat-radio-group {
+      align-self: center;
+      justify-self: center;
+    }
+  }
+}
+
+.radio-group-label {
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+mat-radio-group {
+  display: flex;
+  width: 100%;
+  height: calc(100% - 3rem);
+  overflow: hidden;
+
+  &.grid-layout {
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+mat-radio-group.row-layout {
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  box-sizing: border-box;
+}
+
+mat-radio-group.grid-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(180px, 25vmin));
+  grid-template-rows: repeat(2, minmax(180px, 25vmin));
+
+  gap: clamp(15px, 2vmin, 30px);
+  padding: clamp(15px, 2vmin, 30px);
+  place-items: center;
+  justify-content: center;
+
+  width: fit-content;
+  height: fit-content;
+  margin: 0 auto;
+  box-sizing: border-box;
+
+  align-self: center;
+  justify-self: center;
+
+  &[style*="--option-count='3'"] {
+    grid-template-columns: repeat(2, minmax(180px, 25vmin));
+    grid-template-rows: repeat(2, minmax(180px, 25vmin));
+    gap: clamp(15px, 2vmin, 30px);
+  }
+
+  &[style*="--option-count='4'"] {
+    grid-template-columns: repeat(2, minmax(180px, 25vmin));
+    grid-template-rows: repeat(2, minmax(180px, 25vmin));
+    gap: clamp(15px, 2vmin, 30px);
+    width: fit-content;
+  }
+
+  &[style*="--option-count='5'"],
+  &[style*="--option-count='6'"] {
+    grid-template-columns: repeat(2, minmax(180px, 25vmin));
+    grid-template-rows: repeat(3, minmax(180px, 25vmin));
+    gap: clamp(15px, 2vmin, 30px);
+  }
+}
+
+mat-radio-group.grid-layout mat-radio-button {
+  width: clamp(180px, 25vmin, 280px);
+  height: clamp(180px, 25vmin, 280px);
+  min-width: 180px;
+  min-height: 180px;
+
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0; // Prevent shrinking
+}
+
+mat-radio-group.grid-layout[style*="--option-count='4'"] mat-radio-button {
+  width: clamp(180px, 25vmin, 280px);
+  height: clamp(180px, 25vmin, 280px);
+  min-width: 180px;
+  min-height: 180px;
+
+  aspect-ratio: 1 / 1;
+  flex-shrink: 0;
+}
+
+mat-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 0;
+}
+
+mat-radio-button {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+::ng-deep mat-radio-button .mdc-radio {
+  display: none !important;
+}
+
+::ng-deep mat-radio-button .mat-mdc-radio-button .mdc-radio {
+  display: none !important;
+}
+
+.large-letter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: clamp(160px, 22vmin, 240px);
+  height: clamp(160px, 22vmin, 240px);
+  min-width: 160px;
+  min-height: 160px;
+
+  aspect-ratio: 1 / 1;
+  cursor: pointer;
+  background: #ffffff;
+  border: 3px solid transparent;
+  border-radius: clamp(12px, 2vmin, 20px);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+
+  font-size: clamp(80px, 15vmin, 140px);
+  font-weight: bold;
+  font-family: 'Quicksand', sans-serif;
+  color: #333;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+mat-radio-button.mat-mdc-radio-checked .large-letter {
+  border-color: #0050E5 !important;
+  background-color: #0050E5 !important;
+  box-shadow: 0 2px 12px rgba(0, 123, 255, 0.4);
+  color: white;
+}
+
+.option-text {
+  display: none;
+}
+
+@media (orientation: landscape) and (max-height: 600px) {
+  mat-radio-group.grid-layout mat-radio-button {
+    width: clamp(150px, 20vmin, 220px);
+    height: clamp(150px, 20vmin, 220px);
+    min-width: 150px;
+    min-height: 150px;
+    aspect-ratio: 1 / 1;
+  }
+
+  mat-radio-group.grid-layout[style*="--option-count='4'"] mat-radio-button {
+    width: clamp(150px, 20vmin, 220px);
+    height: clamp(150px, 20vmin, 220px);
+    min-width: 150px;
+    min-height: 150px;
+    aspect-ratio: 1 / 1;
+  }
+
+  .large-letter {
+    width: clamp(130px, 18vmin, 190px);
+    height: clamp(130px, 18vmin, 190px);
+    min-width: 130px;
+    min-height: 130px;
+    font-size: clamp(65px, 12vmin, 110px);
+    border-radius: clamp(10px, 1.5vmin, 16px);
+  }
+
+  mat-radio-group.grid-layout {
+    grid-template-columns: repeat(2, minmax(150px, 20vmin));
+    grid-template-rows: repeat(2, minmax(150px, 20vmin));
+    gap: clamp(10px, 1.5vmin, 20px);
+    padding: clamp(10px, 1.5vmin, 20px);
+  }
+}

@@ -1,6 +1,5 @@
 import { Component, input, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormControl, FormGroup } from "@angular/forms";
-
 import { MultiChoiceImagesElement } from "../../../models";
 import { ElementComponent } from "../../../directives/element-component.directive";
 import { VeronaResponse, ResponseStatus } from "../../../models/verona";
@@ -18,19 +17,21 @@ export class MultiChoiceImagesComponent extends ElementComponent implements OnIn
   formId = Math.floor(Math.random() * 20000000 + 10000000).toString();
   MultiCheckboxFormGroup = new FormGroup({});
   sectionVariant = input<string>('row_layout');
+  layoutClass: string = 'row-layout';
 
   private unitStateService = inject(UnitStateService);
   private validationService = inject(ValidationService);
 
   ngOnInit() {
+    this.layoutClass = this.getLayoutClass();
+
     const restoredValue = this.unitStateService.registerElementWithRestore(
       this.elementModel().id,
       this.elementModel().alias || this.elementModel().id,
-      this.elementModel().value || ""
+      this.elementModel().value || "" // default empty string
     );
 
     this.elementModel().value = restoredValue;
-
     this.elementModel().options.forEach((option, index) => {
       const formControl = new FormControl();
 
@@ -38,16 +39,12 @@ export class MultiChoiceImagesComponent extends ElementComponent implements OnIn
         const isChecked = restoredValue[index] === '1';
         formControl.setValue(isChecked, { emitEvent: false });
       }
-
       this.MultiCheckboxFormGroup.addControl(option.id, formControl, { emitEvent: false });
     });
-
     this.parentForm()?.addControl(this.formId, this.MultiCheckboxFormGroup);
-
     if (this.elementModel().required) {
       this.validationService.registerFormControl(this.MultiCheckboxFormGroup);
     }
-
     this.updateElementStatus(ResponseStatus.DISPLAYED);
 
   }
@@ -58,10 +55,11 @@ export class MultiChoiceImagesComponent extends ElementComponent implements OnIn
 
   valueChanged(event: any) {
     let value = "";
-    for (const field in this.MultiCheckboxFormGroup.controls) {
-      value += this.MultiCheckboxFormGroup.controls[field].value == true ? 1 : 0;
+    for (let i = 0; i < this.elementModel().options.length; i++) {
+      const option = this.elementModel().options[i];
+      const formControl = this.MultiCheckboxFormGroup.controls[option.id];
+      value += formControl.value === true ? '1' : '0';
     }
-
     this.elementModel().value = value;
 
     this.unitStateService.changeElementCodeValue({
@@ -74,8 +72,7 @@ export class MultiChoiceImagesComponent extends ElementComponent implements OnIn
       id: this.elementModel().id,
       alias: this.elementModel().alias || this.elementModel().id,
       value: value,
-      status: ResponseStatus.VALUE_CHANGED,
-      timeStamp: Date.now()
+      status: ResponseStatus.VALUE_CHANGED
     };
 
     this.valueChange.emit(response);
@@ -90,7 +87,10 @@ export class MultiChoiceImagesComponent extends ElementComponent implements OnIn
   }
 
   getLayoutClass(): string {
-    switch (this.sectionVariant()) {
+    const variant = this.sectionVariant();
+    console.log(`Section variant for multi-choice: ${variant}`);
+
+    switch (variant) {
       case 'grid_layout':
         return 'grid-layout';
       case 'row_layout':

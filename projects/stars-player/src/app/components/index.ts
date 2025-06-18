@@ -1,3 +1,6 @@
+import {bindCallback} from "rxjs";
+import {BinaryChoiceElement} from "../models";
+
 export { UnitComponent } from './unit/unit.component';
 export { SectionComponent } from './section/section.component';
 export { UnitMenuComponent } from './menu/unit-menu.component';
@@ -18,3 +21,4 @@ export { AudioComponent } from './elements/audio.component';
 export { MediaPlayerComponent } from './elements/media-player/media-player.component';
 export { ReducedKeyboardComponent } from './elements/reduced-keyboard/reduced-keyboard.component';
 export { SyllableCounterComponent} from './elements/syllable-counter/syllable-counter.component';
+export { BinaryChoiceComponent } from './elements/binary-choice/binary-choice.component';

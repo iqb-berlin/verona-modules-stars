@@ -13,6 +13,7 @@ export class AudioElement extends UIElement implements AudioProperties {
   type: UIElementType = 'audio';
   audioSrc: string | null = null;
   fileName: string = '';
+  text?: string = '';
   image?: ImageElement | null = null;
 
   static title: string = 'Audio';
@@ -23,6 +24,7 @@ export class AudioElement extends UIElement implements AudioProperties {
     if (isAudioProperties(element)) {
       this.audioSrc = element.audioSrc;
       this.fileName = element.fileName;
+      this.text = element.text;
       this.image =  element.image;
     } else {
       if (environment.strictInstantiation) {
@@ -30,6 +32,7 @@ export class AudioElement extends UIElement implements AudioProperties {
       }
       if (element?.audioSrc !== undefined) this.src = element.audioSrc;
       if (element?.fileName !== undefined) this.fileName = element.fileName;
+      if (element?.text !== undefined) this.text = element.text;
     }
   }
 }
@@ -37,6 +40,7 @@ export class AudioElement extends UIElement implements AudioProperties {
 export interface AudioProperties extends UIElementProperties {
   audioSrc: string | null;
   fileName: string;
+  text?: string;
   image?: ImageElement;
 }
 

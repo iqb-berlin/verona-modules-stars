@@ -17,28 +17,40 @@ export class RadioGroupImagesComponent extends ElementComponent implements OnIni
   elementModel = input.required<RadioGroupImagesElement>();
   RadioInputControl = new FormControl();
   position = input<string>("row");
+  sectionVariant = input<string>('row_layout'); // Add variant input
+
+  layoutClass: string = 'row-layout';
 
   private unitStateService = inject(UnitStateService);
   private validationService = inject(ValidationService);
 
   ngOnInit() {
+    this.layoutClass = this.getLayoutClass();
+
     const restoredValue = this.unitStateService.registerElementWithRestore(
       this.elementModel().id,
       this.elementModel().alias || this.elementModel().id,
-      this.elementModel().value /
+      this.elementModel().value
     );
 
+    let internalValue = null;
+    if (typeof restoredValue === 'number' && restoredValue >= 1) {
+      internalValue = restoredValue - 1; //
+    }
+
+    // Set the restored value in both model and form control
     this.elementModel().value = restoredValue;
-    this.RadioInputControl.setValue(restoredValue, { emitEvent: false });
+    this.RadioInputControl.setValue(internalValue, { emitEvent: false });
     this.parentForm()?.addControl(this.elementModel().id, this.RadioInputControl);
 
+    // Register for validation if required
     if (this.elementModel().required) {
       this.validationService.registerFormControl(this.RadioInputControl);
     }
 
+    // Mark as displayed when component initializes
     this.updateElementStatus(ResponseStatus.DISPLAYED);
 
-    console.log(`Radio component initialized: ${this.elementModel().id}, restored value:`, restoredValue);
   }
 
   ngOnDestroy() {
@@ -46,22 +58,18 @@ export class RadioGroupImagesComponent extends ElementComponent implements OnIni
   }
 
   valueChanged($event: any) {
-    console.log(`value changed: ${this.elementModel().id} ->`, $event.value);
-
-    this.elementModel().value = $event.value;
 
     this.unitStateService.changeElementCodeValue({
       id: this.elementModel().id,
-      value: $event.value,
+      value: $event.value + 1,
       status: ResponseStatus.VALUE_CHANGED
     });
 
     const response: VeronaResponse = {
       id: this.elementModel().id,
       alias: this.elementModel().alias || this.elementModel().id,
-      value: $event.value,
-      status: ResponseStatus.VALUE_CHANGED,
-      timeStamp: Date.now()
+      value: $event.value + 1,
+      status: ResponseStatus.VALUE_CHANGED
     };
 
     this.valueChange.emit(response);
@@ -73,5 +81,18 @@ export class RadioGroupImagesComponent extends ElementComponent implements OnIni
       value: this.elementModel().value,
       status: status
     });
+  }
+
+  getLayoutClass(): string {
+    const variant = this.sectionVariant();
+    console.log(`🎨 Section variant for radio-group: ${variant}`);
+
+    switch (variant) {
+      case 'grid_layout':
+        return 'grid-layout';
+      case 'row_layout':
+      default:
+        return 'row-layout';
+    }
   }
 }

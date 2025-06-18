@@ -1,4 +1,7 @@
-<div class="pic-pic container">
+<div class="pic-pic container"
+     [class.no-stimulus]="!stimulus()"
+     [class.large-interaction]="!stimulus()">
+
   <div class="side">
     @if (instructions()) {
       <instructions-selection
@@ -7,12 +10,14 @@
       </instructions-selection>
     }
   </div>
-  <div class="top">
-    @if (stimulus() && stimulus().position == "top") {
+
+  @if (stimulus() && stimulus().position == "top") {
+    <div class="top">
       <stimulus-selection [elementModel]="stimulus()">
       </stimulus-selection>
-    }
-  </div>
+    </div>
+  }
+
   <div class="middle">
     @if (interaction()) {
       <interaction-selection

@@ -1,6 +1,5 @@
 import { Component, input, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormControl } from "@angular/forms";
-
 import { ReducedKeyboardElement } from "../../../models/elements/reduced-keyboard";
 import { ElementComponent } from "../../../directives/element-component.directive";
 import { ResponseStatus, VeronaResponse } from "../../../models/verona";
@@ -30,7 +29,7 @@ export class ReducedKeyboardComponent extends ElementComponent implements OnInit
       this.elementModel().value || ""
     );
 
-    this.currentText = restoredValue as string || '';
+    this.currentText = typeof restoredValue === 'string' ? restoredValue : '';
     this.elementModel().value = this.currentText;
     this.KeyboardInputControl.setValue(this.currentText, { emitEvent: false });
 
@@ -51,6 +50,7 @@ export class ReducedKeyboardComponent extends ElementComponent implements OnInit
   }
 
   addChar(button: any) {
+    if (this.isSubmitted) return;
     if (this.elementModel().maxLength !== null &&
       this.currentText.length >= this.elementModel().maxLength) {
       return;
@@ -68,11 +68,6 @@ export class ReducedKeyboardComponent extends ElementComponent implements OnInit
     }
   }
 
-  clearText() {
-    this.currentText = '';
-    this.updateStateAndModel();
-
-  }
 
   submitText() {
     this.isSubmitted = true;
@@ -113,8 +108,7 @@ export class ReducedKeyboardComponent extends ElementComponent implements OnInit
       id: this.elementModel().id,
       alias: this.elementModel().alias || this.elementModel().id,
       value: this.currentText,
-      status: status,
-      timeStamp: Date.now()
+      status: status
     };
 
     this.valueChange.emit(response);

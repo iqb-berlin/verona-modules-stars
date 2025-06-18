@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit, output } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, output, ElementRef, Renderer2 } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 import {
@@ -14,8 +14,9 @@ import { UnitStateService } from '../../services/unit-state.service';
 import { StateVariableStateService } from '../../services/state-variable-state.service';
 import { InstantiationError } from '../../errors';
 import { Section } from "../../models/section";
-import { Unit } from "../../models/unit";
+import {Unit, UnitNavNextButtonMode} from "../../models/unit";
 import { LogService } from "../../services/log.service";
+import { AudioComponent } from "../elements/audio.component";
 
 @Component({
   selector: 'stars-unit',
@@ -26,7 +27,7 @@ import { LogService } from "../../services/log.service";
 export class UnitComponent implements OnInit, OnDestroy {
   sections: Section[] = [];
   playerConfig: PlayerConfig = {};
-  showUnitNavNext: boolean = false;
+  navNextButtonMode: UnitNavNextButtonMode = 'always'
   valueChange = output<VeronaResponse>();
 
   presentationProgressStatus: BehaviorSubject<Progress> = new BehaviorSubject<Progress>('none');
@@ -37,7 +38,9 @@ export class UnitComponent implements OnInit, OnDestroy {
     private veronaSubscriptionService: VeronaSubscriptionService,
     private changeDetectorRef: ChangeDetectorRef,
     private unitStateService: UnitStateService,
-    private stateVariableStateService: StateVariableStateService
+    private stateVariableStateService: StateVariableStateService,
+    private elementRef: ElementRef,
+    private renderer: Renderer2
   ) {}
 
   ngOnInit(): void {
@@ -48,7 +51,6 @@ export class UnitComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Cleanup is handled by AppComponent
   }
 
   private configureUnit(message: VopStartCommand): void {
@@ -62,9 +64,10 @@ export class UnitComponent implements OnInit, OnDestroy {
           const unit: Unit = new Unit(unitDefinition);
 
           this.initElementCodes(message, unit);
+          this.applyBackgroundColor(unit.backgroundColor);
 
           this.sections = unit.sections;
-          this.showUnitNavNext = unit.showUnitNavNext;
+          this.navNextButtonMode = unit.navNextButtonMode;
           this.setPlayerConfig(message.playerConfig || {});
           this.metaDataService.resourceURL = this.playerConfig.directDownloadUrl;
           this.veronaPostService.sessionID = message.sessionId;
@@ -89,6 +92,27 @@ export class UnitComponent implements OnInit, OnDestroy {
     });
   }
 
+  get shouldShowUnitNavNext(): boolean {
+    switch (this.navNextButtonMode) {
+      case 'always':
+        return true;
+      case 'onInteraction':
+        return this.hasUserProvidedInput();
+      default:
+        return false;
+    }
+  }
+
+  private applyBackgroundColor(backgroundColor?: string): void {
+    if (backgroundColor) {
+      this.renderer.setStyle(this.elementRef.nativeElement, 'background-color', backgroundColor);
+      this.renderer.setStyle(document.body, 'background-color', backgroundColor);
+    } else {
+      this.renderer.removeStyle(this.elementRef.nativeElement, 'background-color');
+      this.renderer.removeStyle(document.body, 'background-color');
+    }
+  }
+
   private setPlayerConfig(playerConfig: PlayerConfig): void {
     this.playerConfig = playerConfig;
   }
@@ -98,8 +122,6 @@ export class UnitComponent implements OnInit, OnDestroy {
   }
 
   private initElementCodes(message: VopStartCommand, unit: Unit): void {
-
-
     const existingElementCodes = message.unitState?.dataParts?.elementCodes ?
       JSON.parse(message.unitState.dataParts.elementCodes) : [];
 
@@ -129,10 +151,6 @@ export class UnitComponent implements OnInit, OnDestroy {
     });
   }
 
-  get shouldShowUnitNavNext(): boolean {
-    return this.showUnitNavNext && this.hasUserProvidedInput();
-  }
-
   private hasUserProvidedInput(): boolean {
     const responses = this.unitStateService.getResponses();
     return responses.some(response => {
@@ -156,8 +174,13 @@ export class UnitComponent implements OnInit, OnDestroy {
     this.presentationProgressStatus.next('none');
     this.sections = [];
     this.playerConfig = {};
+    this.navNextButtonMode = 'always'
     this.unitStateService.reset();
     this.stateVariableStateService.reset();
+
+    this.applyBackgroundColor();
+    AudioComponent.reset()
+
     this.changeDetectorRef.detectChanges();
   }
 

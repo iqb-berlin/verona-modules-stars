@@ -1,18 +1,20 @@
-<div class="checkbox-group"
-     [ngClass]="getLayoutClass()"
-     [formGroup]="MultiCheckboxFormGroup"
-     [style.--option-count]="elementModel().options.length">
-  @for (option of elementModel().options; track option; let i = $index) {
-    <mat-checkbox
-      [formControlName]="option.id"
-      [attr.aria-label]="option.text"
-      (change)="valueChanged($event)">
-
-      <div class="image-container">
-        <img [src]="option.imgSrc"
-             [alt]="option.altText"
-             loading="lazy">
-      </div>
-    </mat-checkbox>
-  }
+<div class="multi-choice-wrapper"
+     [class.four-option-center]="elementModel().options.length === 4">
+  <div class="checkbox-group"
+       [ngClass]="getLayoutClass()"
+       [style.--option-count]="elementModel().options.length"
+       [formGroup]="MultiCheckboxFormGroup">
+    @for (option of elementModel().options; track option; let i = $index) {
+      <mat-checkbox
+        [formControlName]="option.id"
+        [attr.aria-label]="option.text"
+        (change)="valueChanged($event)">
+        <div class="image-container">
+          <img [src]="option.imgSrc"
+               [alt]="option.altText"
+               loading="lazy">
+        </div>
+      </mat-checkbox>
+    }
+  </div>
 </div>

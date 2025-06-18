@@ -131,7 +131,6 @@ export class UnitStateService {
 
   get presentedPagesProgress(): Progress {
     if (this.presentedPages.size === 0) return 'none';
-    // You can implement more sophisticated logic here based on total pages
     return this.presentedPages.size > 0 ? 'some' : 'none';
   }
 

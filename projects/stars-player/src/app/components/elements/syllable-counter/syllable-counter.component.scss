@@ -4,41 +4,50 @@
   align-items: center;
   width: 100%;
   height: 100%;
-  padding: 1rem;
+  padding: 0.5rem;
   box-sizing: border-box;
   font-family: 'Quicksand', sans-serif;
+  justify-content: center;
 }
 
 .syllable-label {
   display: block;
   text-align: center;
-  margin-bottom: 2rem;
-  font-size: 1.4rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: #333;
+  flex-shrink: 0;
+  line-height: 1.2;
 }
 
-.syllable-options {
+.syllable-options.vertical-layout {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: flex-start;
-  gap: 2rem;
+  gap: clamp(0.25rem, 1.2vh, 0.5rem);
   width: 100%;
-  max-width: 600px;
+  max-width: clamp(400px, 80vw, 600px);  // ← Wider for full-width container
   margin: 0 auto;
+  justify-self: center;  // ← Ensure it centers in the grid
+  flex: 1;
+  overflow: hidden;
+  padding: clamp(0.25rem, 1vh, 0.5rem);
 }
 
-.syllable-option {
+.vertical-layout .syllable-option {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
-  width: auto;
+  width: 100%;
   cursor: pointer;
+  max-width: none;
+  min-width: 0;
 }
 
-.syllable-radio {
+.vertical-layout .syllable-radio {
   ::ng-deep .mdc-radio {
     display: none !important;
   }
@@ -47,43 +56,125 @@
     display: flex !important;
     align-items: center;
     justify-content: center;
+    width: 100%;
   }
 }
 
-.hands-container {
+.hands-container.vertical {
   display: flex;
   flex-direction: row;
-  gap: 0.5rem;
+  gap: clamp(0.2rem, 0.8vw, 0.4rem);
   align-items: center;
-  padding: 0.5rem;
-  border: 3px solid transparent;
-  border-radius: 12px;
+  justify-content: flex-start;
+  padding: clamp(0.4rem, 1vh, 0.6rem) clamp(0.5rem, 1vw, 0.8rem);
+  border: 6px solid transparent;
+  border-radius: 10px;
   transition: all 0.3s ease;
-  background-color: transparent;
+  background-color: #ffffff;
+  min-height: clamp(40px, 6vh, 60px);
+  width: 100%;
+  max-width: clamp(220px, 55vw, 350px);
+  overflow: hidden;
+}
 
-  &:hover {
-    border-color: #007bff;
-    transform: scale(1.05);
-    background-color: rgba(0, 123, 255, 0.05);
-  }
+.syllable-options.row-layout {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 0.6rem;
+  padding: 0.75rem;
+  width: 100%;
+  height: 100%;
+  max-width: 95%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  overflow: hidden;
+  flex: 1;
+}
+
+.syllable-checkbox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  padding: 0.25rem;
+  max-width: none;
+}
+
+::ng-deep .row-layout .syllable-checkbox .mdc-checkbox {
+  display: none !important;
+}
+
+::ng-deep .row-layout .syllable-checkbox .mat-mdc-checkbox {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.hands-container.row {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 6px solid transparent;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  transition: all 0.3s ease;
+  height: 100%;
+  min-height: 80px;
+  aspect-ratio: 1 / 1;
+  min-width: 0;
 }
 
 .hand-image {
-  height: 60px;
-  width: auto;
   object-fit: contain;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  transition: transform 0.2s ease;
+  flex-shrink: 1;
+
+  .vertical-layout & {
+    height: clamp(30px, 5vh, 50px);
+    width: clamp(30px, 5vh, 50px);
+    min-height: 30px;
+    min-width: 30px;
+    max-height: 50px;
+    max-width: 50px;
+  }
+
+  .row-layout & {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    object-fit: contain;
+    cursor: pointer;
+  }
 }
 
-mat-radio-button.mat-mdc-radio-checked .hands-container {
-  border-color: #007bff !important;
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
-  background-color: rgba(0, 123, 255, 0.08);
+mat-radio-button.mat-mdc-radio-checked .hands-container.vertical {
+  border-color: #0050E5;
 }
 
 mat-radio-button.mat-mdc-radio-checked .hand-image {
   animation: bounce 0.3s ease-out;
+}
+
+mat-checkbox.mat-mdc-checkbox-checked .hands-container.row {
+  border-color: #0050E5;
+}
+
+mat-checkbox.mat-mdc-checkbox-checked .hand-image {
+  transform: scale(0.98);
 }
 
 @keyframes bounce {
@@ -94,40 +185,31 @@ mat-radio-button.mat-mdc-radio-checked .hand-image {
 
 .error-message {
   color: #dc3545;
-  padding: 20px;
+  padding: 15px;
   background: #ffe6e6;
   border: 1px solid #ff9999;
   border-radius: 8px;
   text-align: center;
   font-weight: 500;
+  margin: 1rem;
 }
 
-@media (max-width: 768px) {
-  .syllable-options {
-    gap: 1.5rem;
-    max-width: 100%;
+@media (orientation: landscape) {
+  .syllable-options.vertical-layout {
+    gap: 0.35rem;
+    max-width: 320px;
+  }
+
+  .hands-container.vertical {
+    min-height: 45px;
+    padding: 0.5rem 0.7rem;
   }
 
   .hand-image {
-    height: 50px;
-  }
-
-  .hands-container {
-    gap: 0.4rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .syllable-options {
-    gap: 1rem;
-  }
-
-  .hand-image {
-    height: 40px;
-  }
-
-  .hands-container {
-    gap: 0.3rem;
-    padding: 0.4rem;
+    .vertical-layout & {
+      height: 38px;
+      max-height: 50px;
+    }
   }
 }
+
