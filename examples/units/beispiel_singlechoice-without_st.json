@@ -2,7 +2,7 @@
   "type": "stars-unit-definition",
   "version": "0.1.0",
   "stateVariables": [],
-  "showUnitNavNext": true,
+  "navNextButtonMode": "onInteraction",
   "backgroundColor": "#2895d3",
   "sections": [
     {

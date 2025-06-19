@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "stateVariables": [],
   "backgroundColor": "#2895d3",
-  "showUnitNavNext": true,
+  "navNextButtonMode": "onInteraction",
   "sections": [
     {
       "id": "section1",

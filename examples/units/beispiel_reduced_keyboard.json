@@ -1,7 +1,7 @@
 {
   "type": "stars-unit-definition",
   "version": "0.1.0",
-  "navNextButtonMode": "onInteraction",
+  "navNextButtonMode": "always",
   "backgroundColor": "#FFC7B1",
   "sections": [{
     "id": "section1",
