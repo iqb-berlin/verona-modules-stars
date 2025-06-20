@@ -39,6 +39,7 @@ export interface VeronaResponse {
   subform?: string;
   code?: number;
   score?: number;
+  label?: string;
   timeStamp?: number;
 }
 

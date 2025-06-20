@@ -258,3 +258,25 @@ mat-checkbox.mat-mdc-checkbox-checked .image-container img {
     justify-self: center !important;
   }
 }
+
+:host ::ng-deep .checkbox-group.grid-layout[style*="--option-count: 4"] mat-checkbox {
+  width: clamp(160px, 23vmin, 200px) !important;
+  height: clamp(160px, 23vmin, 200px) !important;
+  min-width: 160px !important;
+  min-height: 160px !important;
+  max-width: none !important;
+  max-height: none !important;
+}
+
+:host ::ng-deep .checkbox-group.grid-layout[style*="--option-count: 4"] .image-container {
+  width: clamp(140px, 20vmin, 180px) !important;
+  height: clamp(140px, 20vmin, 180px) !important;
+}
+
+// Also update the grid container
+:host ::ng-deep .checkbox-group.grid-layout[style*="--option-count: 4"] {
+  grid-template-columns: repeat(2, minmax(160px, 23vmin)) !important;
+  grid-template-rows: repeat(2, minmax(160px, 23vmin)) !important;
+  gap: clamp(15px, 2vmin, 30px) !important;
+  max-width: none !important;
+}

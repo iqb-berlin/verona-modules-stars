@@ -1,0 +1,43 @@
+.pic-text.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr;
+  gap: 2rem;
+  padding: 2rem;
+  height: 100vh;
+  width: 100vw;
+  box-sizing: border-box;
+  align-items: center;
+}
+
+.row {
+  display: contents;
+}
+
+stimulus-selection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+interaction-selection {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 1rem;
+}
+
+/* Responsive design */
+@media (orientation: portrait) or (max-width: 768px) {
+  .pic-text.container {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  interaction-selection {
+    justify-content: center;
+  }
+}

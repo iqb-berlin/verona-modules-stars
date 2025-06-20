@@ -1,6 +1,8 @@
 <div class="pic-pic container"
-     [class.no-stimulus]="!stimulus()"
-     [class.large-interaction]="!stimulus()">
+     [class.no-stimulus]="!hasStimulus"
+     [class.top-stimulus]="hasTopStimulus"
+     [class.bottom-stimulus]="hasBottomStimulus"
+     [class.large-interaction]="!hasStimulus">
 
   <div class="side">
     @if (instructions()) {
@@ -11,7 +13,7 @@
     }
   </div>
 
-  @if (stimulus() && stimulus().position == "top") {
+  @if (hasTopStimulus) {
     <div class="top">
       <stimulus-selection [elementModel]="stimulus()">
       </stimulus-selection>
@@ -28,4 +30,11 @@
       </interaction-selection>
     }
   </div>
+
+  @if (hasBottomStimulus) {
+    <div class="bottom">
+      <stimulus-selection [elementModel]="stimulus()">
+      </stimulus-selection>
+    </div>
+  }
 </div>

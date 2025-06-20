@@ -1,4 +1,3 @@
-
 .radio-group-container {
   width: 100%;
   height: 100%;
@@ -70,11 +69,13 @@ mat-radio-group.grid-layout {
   }
 
   &[style*="--option-count='4'"] {
-    max-width: clamp(180px, 25vw, 240px);
-    gap: 0.4rem 0.4rem;
-    margin: 0;
+    grid-template-columns: repeat(2, minmax(160px, 23vmin));
+    grid-template-rows: repeat(2, minmax(160px, 23vmin));
+    gap: clamp(15px, 2vmin, 30px);
+    padding: clamp(15px, 2vmin, 30px);
     width: fit-content;
-    grid-template-rows: repeat(2, 1fr);
+    height: fit-content;
+    margin: 0 auto;
     align-self: center;
     justify-self: center;
   }
@@ -99,8 +100,11 @@ mat-radio-group.grid-layout mat-radio-button {
 }
 
 mat-radio-group.grid-layout[style*="--option-count='4'"] mat-radio-button {
-  width: clamp(70px, min(10vw, 10vh), 100px);
-  height: clamp(70px, min(10vw, 10vh), 100px);
+  width: clamp(160px, 23vmin, 200px);
+  height: clamp(160px, 23vmin, 200px);
+  min-width: 160px;
+  min-height: 160px;
+  aspect-ratio: 1 / 1;
 }
 
 mat-label {
@@ -126,9 +130,6 @@ mat-radio-button {
   display: none !important;
 }
 
-::ng-deep mat-radio-button .mat-mdc-radio-button .mdc-radio {
-  display: none !important;
-}
 
 .image-wrapper {
   width: 100%;
@@ -141,8 +142,8 @@ mat-radio-button {
 }
 
 mat-radio-group.grid-layout[style*="--option-count='4'"] .image-wrapper {
-  width: clamp(55px, 8vw, 85px);
-  height: clamp(55px, 8vw, 85px);
+  width: clamp(140px, 20vmin, 180px);
+  height: clamp(140px, 20vmin, 180px);
 }
 
 img {
@@ -179,3 +180,23 @@ mat-radio-button.mat-mdc-radio-checked img {
   }
 }
 
+:host ::ng-deep mat-radio-group.grid-layout[style*="--option-count: 4"] mat-radio-button {
+  width: clamp(160px, 23vmin, 200px) !important;
+  height: clamp(160px, 23vmin, 200px) !important;
+  min-width: 160px !important;
+  min-height: 160px !important;
+  max-width: none !important;
+  max-height: none !important;
+}
+
+:host ::ng-deep mat-radio-group.grid-layout[style*="--option-count: 4"] .image-wrapper {
+  width: clamp(140px, 20vmin, 180px) !important;
+  height: clamp(140px, 20vmin, 180px) !important;
+}
+
+:host ::ng-deep mat-radio-group.grid-layout[style*="--option-count: 4"] {
+  grid-template-columns: repeat(2, minmax(160px, 23vmin)) !important;
+  grid-template-rows: repeat(2, minmax(160px, 23vmin)) !important;
+  gap: clamp(15px, 2vmin, 30px) !important;
+  max-width: none !important;
+}

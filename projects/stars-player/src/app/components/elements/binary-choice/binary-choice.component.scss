@@ -23,16 +23,13 @@
     border: 6px solid transparent;
     border-radius: 26px;
     box-sizing: border-box;
+    margin: 6px;
     transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out, border-color 0.2s ease-in-out;
 
     & ::ng-deep svg {
       width: 100%;
       height: 100%;
     }
-  }
-
-  &:hover .option-icon {
-    transform: scale(1.05);
   }
 }
 
@@ -41,6 +38,5 @@
 }
 
 .mat-mdc-radio-checked .option-icon {
-  transform: scale(1.1);
   border-color: #0050E5;
 }

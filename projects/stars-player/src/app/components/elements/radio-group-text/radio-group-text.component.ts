@@ -34,14 +34,12 @@ export class RadioGroupTextComponent extends ElementComponent implements OnInit,
     );
 
     this.elementModel().value = restoredValue;
-    this.RadioInputControl.setValue(restoredValue, { emitEvent: false });
+    this.RadioInputControl.setValue(restoredValue -1 , { emitEvent: false });
     this.parentForm()?.addControl(this.elementModel().id, this.RadioInputControl);
     if (this.elementModel().required) {
       this.validationService.registerFormControl(this.RadioInputControl);
     }
-
     this.updateElementStatus(ResponseStatus.DISPLAYED);
-
   }
 
   ngOnDestroy() {
@@ -49,17 +47,22 @@ export class RadioGroupTextComponent extends ElementComponent implements OnInit,
   }
 
   valueChanged($event: any) {
+    const selectedIndex = $event.value;
+    const selectedValue = selectedIndex + 1;
+    const selectedOption = this.elementModel().options[selectedIndex];
+    const selectedText = selectedOption ? selectedOption.text : '';
 
     this.unitStateService.changeElementCodeValue({
       id: this.elementModel().id,
-      value: $event.value,
+      value: selectedValue,
       status: ResponseStatus.VALUE_CHANGED
     });
 
     const response: VeronaResponse = {
       id: this.elementModel().id,
       alias: this.elementModel().alias || this.elementModel().id,
-      value: $event.value,
+      value: selectedValue,
+      label: selectedText,
       status: ResponseStatus.VALUE_CHANGED
     };
 
@@ -76,14 +79,16 @@ export class RadioGroupTextComponent extends ElementComponent implements OnInit,
 
   getLayoutClass(): string {
     const variant = this.sectionVariant();
-    console.log(`🎨 Section variant for radio-group: ${variant}`);
-
+    const hasWords = this.elementModel().options.some(option => option.text.length > 1);
     switch (variant) {
       case 'grid_layout':
-        return 'grid-layout';
+        return hasWords ? 'grid-layout words-grid' : 'grid-layout';
       case 'row_layout':
       default:
-        return 'row-layout';
+        if (this.elementModel().options.length === 4) {
+          return hasWords ? 'grid-layout words-grid' : 'grid-layout';
+        }
+        return hasWords ? 'row-layout words-layout' : 'row-layout';
     }
   }
 }
