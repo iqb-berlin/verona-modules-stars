@@ -30,4 +30,10 @@ export class PicPicLayoutComponent extends ElementComponent {
   get hasStimulus(): boolean {
     return !!this.stimulus();
   }
+
+  get hasVerticalSyllableCounter(): boolean {
+    return !!(this.interaction() &&
+      this.interaction()?.type === 'syllable-counter' &&
+      (this.interaction() as any).layout === 'vertical');
+  }
 }

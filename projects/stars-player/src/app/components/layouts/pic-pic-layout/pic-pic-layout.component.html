@@ -1,7 +1,9 @@
+<!-- pic-pic-layout.component.html - Complete with syllable vertical support -->
 <div class="pic-pic container"
      [class.no-stimulus]="!hasStimulus"
-     [class.top-stimulus]="hasTopStimulus"
-     [class.bottom-stimulus]="hasBottomStimulus"
+     [class.top-stimulus]="hasTopStimulus && !hasVerticalSyllableCounter"
+     [class.bottom-stimulus]="hasBottomStimulus && !hasVerticalSyllableCounter"
+     [class.syllable-vertical]="hasVerticalSyllableCounter"
      [class.large-interaction]="!hasStimulus">
 
   <div class="side">
@@ -13,8 +15,15 @@
     }
   </div>
 
-  @if (hasTopStimulus) {
+  @if (hasTopStimulus && !hasVerticalSyllableCounter) {
     <div class="top">
+      <stimulus-selection [elementModel]="stimulus()">
+      </stimulus-selection>
+    </div>
+  }
+
+  @if (hasVerticalSyllableCounter && stimulus()) {
+    <div class="side-stimulus">
       <stimulus-selection [elementModel]="stimulus()">
       </stimulus-selection>
     </div>
@@ -31,7 +40,7 @@
     }
   </div>
 
-  @if (hasBottomStimulus) {
+  @if (hasBottomStimulus && !hasVerticalSyllableCounter) {
     <div class="bottom">
       <stimulus-selection [elementModel]="stimulus()">
       </stimulus-selection>

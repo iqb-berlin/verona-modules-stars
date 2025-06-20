@@ -28,9 +28,8 @@
   align-items: flex-start;
   gap: clamp(0.25rem, 1.2vh, 0.5rem);
   width: 100%;
-  max-width: clamp(400px, 80vw, 600px);  // ← Wider for full-width container
   margin: 0 auto;
-  justify-self: center;  // ← Ensure it centers in the grid
+  justify-self: center;
   flex: 1;
   overflow: hidden;
   padding: clamp(0.25rem, 1vh, 0.5rem);
@@ -72,8 +71,7 @@
   transition: all 0.3s ease;
   background-color: #ffffff;
   min-height: clamp(40px, 6vh, 60px);
-  width: 100%;
-  max-width: clamp(220px, 55vw, 350px);
+  max-width: 90%;
   overflow: hidden;
 }
 
@@ -161,6 +159,33 @@
   }
 }
 
+.syllable-counter-container[data-max-syllables="6"],
+.syllable-counter-container[data-max-syllables="7"],
+.syllable-counter-container[data-max-syllables="8"],
+.syllable-counter-container[data-max-syllables="9"] {
+  .vertical-layout .hand-image {
+    height: clamp(20px, 3vh, 30px) !important;
+    width: clamp(20px, 3vh, 30px) !important;
+    min-height: 20px !important;
+    min-width: 20px !important;
+    max-height: 30px !important;
+    max-width: 30px !important;
+  }
+
+  .hands-container.vertical {
+    gap: clamp(0.05rem, 0.2vw, 0.12rem) !important;
+    padding: clamp(0.3rem, 0.6vh, 0.4rem) clamp(0.2rem, 0.4vw, 0.3rem) !important;
+    justify-content: flex-start !important;
+    max-width: 90% !important;
+    margin: 0 auto !important;
+  }
+
+  .syllable-options.vertical-layout {
+    align-items: center !important;
+    width: 100% !important;
+  }
+}
+
 mat-radio-button.mat-mdc-radio-checked .hands-container.vertical {
   border-color: #0050E5;
 }
@@ -212,4 +237,3 @@ mat-checkbox.mat-mdc-checkbox-checked .hand-image {
     }
   }
 }
-

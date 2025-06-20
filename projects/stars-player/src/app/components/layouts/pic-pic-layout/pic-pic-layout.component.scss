@@ -212,3 +212,25 @@
   width: 100%;
   height: 100%;
 }
+
+/* ONLY ADDITION: Syllable counter vertical layout */
+.container.syllable-vertical {
+  grid-template-columns: max-content 1fr;
+  grid-template-rows: 1fr 1fr;
+  grid-template-areas:
+    "instructions interaction"
+    "stimulus interaction";
+}
+
+.side-stimulus {
+  grid-area: stimulus;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 2rem;
+  margin-top: -50%;
+  width: auto;
+}
+

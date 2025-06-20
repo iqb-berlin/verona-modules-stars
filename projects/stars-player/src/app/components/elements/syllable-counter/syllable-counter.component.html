@@ -1,4 +1,6 @@
-<div class="syllable-counter-container" [ngClass]="'layout-' + elementModel().layout">
+<div class="syllable-counter-container"
+     [ngClass]="'layout-' + elementModel().layout"
+     [attr.data-max-syllables]="elementModel().maxSyllables">
   @if (elementModel()) {
     @if (elementModel().label && elementModel().label.trim()) {
       <label [id]="elementModel().id+'-syllable-label'"
