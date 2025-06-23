@@ -28,69 +28,32 @@
 
 .checkbox-group.grid-layout {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.5rem 0.75rem;
-  padding: clamp(0.5rem, 1.5vw, 1.5rem);
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: clamp(20px, 3vmin, 35px);
+  padding: clamp(20px, 3vmin, 35px);
   place-items: center;
-  max-width: clamp(280px, 50vw, 450px);
+  max-width: min(90vw, 800px);
   margin: 0 auto;
   box-sizing: border-box;
   width: 100%;
   height: auto;
-  max-height: clamp(400px, 80vh, 800px);
   align-self: center;
   justify-self: center;
-
-  &[style*="--option-count='1'"] {
-    grid-template-columns: 1fr;
-    max-width: clamp(180px, 30vw, 250px);
-  }
-
-  &[style*="--option-count='2'"] {
-    max-width: clamp(250px, 40vw, 350px);
-  }
-
-  &[style*="--option-count='3'"] {
-    max-width: clamp(280px, 45vw, 400px);
-  }
-
-  &[style*="--option-count='4'"] {
-    max-width: clamp(240px, 25vw, 300px);
-    gap: 0.4rem 0.4rem;
-    margin: 0;
-    width: fit-content;
-  }
-
-  &[style*="--option-count='5'"],
-  &[style*="--option-count='6'"] {
-    max-width: clamp(300px, 50vw, 450px);
-  }
-
-  &[style*="--option-count='7'"],
-  &[style*="--option-count='8'"] {
-    max-width: clamp(320px, 55vw, 500px);
-  }
 }
 
 .checkbox-group.grid-layout mat-checkbox {
   width: clamp(120px, min(20vw, 20vh), 220px);
   height: clamp(120px, min(20vw, 20vh), 220px);
-
   aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.checkbox-group.grid-layout[style*="--option-count='4'"] mat-checkbox {
-  width: clamp(70px, min(10vw, 10vh), 100px);
-  height: clamp(70px, min(10vw, 10vh), 100px);
-}
-
 .checkbox-group.grid-layout .image-container {
   width: clamp(100px, min(18vw, 18vh), 190px);
   height: clamp(100px, min(18vw, 18vh), 190px);
-
   aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
@@ -99,11 +62,6 @@
   border-radius: clamp(4px, 1vw, 12px);
   background-color: #ffffff;
   transition: all 0.3s ease;
-}
-
-.checkbox-group.grid-layout[style*="--option-count='4'"] .image-container {
-  width: clamp(55px, 8vw, 85px);
-  height: clamp(55px, 8vh, 85px);
 }
 
 .checkbox-group.grid-layout .image-container img {
@@ -138,6 +96,8 @@
   max-width: 95%;
   margin: 0 auto;
   box-sizing: border-box;
+  overflow: hidden;
+  flex: 1;
 }
 
 .checkbox-group.row-layout mat-checkbox {
@@ -200,11 +160,6 @@
   padding: clamp(0.5rem, 2vw, 2rem);
 }
 
-.interaction-container:has(.checkbox-group[style*="--option-count='4'"]) {
-  align-items: center;
-  justify-content: center;
-}
-
 mat-checkbox.mat-mdc-checkbox-checked .image-container {
   border-color: #0050E5 !important;
 }
@@ -233,7 +188,6 @@ mat-checkbox.mat-mdc-checkbox-checked .image-container img {
 
 @media (max-width: 900px) {
   .checkbox-group.row-layout {
-
     max-width: 95%;
     padding: 0.4rem;
   }
@@ -241,42 +195,4 @@ mat-checkbox.mat-mdc-checkbox-checked .image-container img {
   .checkbox-group.row-layout .image-container {
     min-height: 70px;
   }
-}
-.checkbox-group.grid-layout {
-  &[style*="--option-count: 3"] mat-checkbox:last-child {
-    grid-column: 1 / -1 !important;
-    justify-self: center !important;
-  }
-
-  &[style*="--option-count: 5"] mat-checkbox:last-child {
-    grid-column: 1 / -1 !important;
-    justify-self: center !important;
-  }
-
-  &[style*="--option-count: 7"] mat-checkbox:last-child {
-    grid-column: 1 / -1 !important;
-    justify-self: center !important;
-  }
-}
-
-:host ::ng-deep .checkbox-group.grid-layout[style*="--option-count: 4"] mat-checkbox {
-  width: clamp(160px, 23vmin, 200px) !important;
-  height: clamp(160px, 23vmin, 200px) !important;
-  min-width: 160px !important;
-  min-height: 160px !important;
-  max-width: none !important;
-  max-height: none !important;
-}
-
-:host ::ng-deep .checkbox-group.grid-layout[style*="--option-count: 4"] .image-container {
-  width: clamp(140px, 20vmin, 180px) !important;
-  height: clamp(140px, 20vmin, 180px) !important;
-}
-
-// Also update the grid container
-:host ::ng-deep .checkbox-group.grid-layout[style*="--option-count: 4"] {
-  grid-template-columns: repeat(2, minmax(160px, 23vmin)) !important;
-  grid-template-rows: repeat(2, minmax(160px, 23vmin)) !important;
-  gap: clamp(15px, 2vmin, 30px) !important;
-  max-width: none !important;
 }
