@@ -1,0 +1,26 @@
+<div class="multi-choice-circles-wrapper">
+  <div class="checkbox-group"
+       [ngClass]="layoutClass"
+       [style.--option-count]="elementModel().circles.length"
+       [formGroup]="MultiCheckboxFormGroup">
+
+    @for (circle of elementModel().circles; track circle; let i = $index) {
+      <mat-checkbox
+        [formControlName]="circle.id"
+        [attr.aria-label]="circle.text"
+        (change)="valueChanged($event)">
+        <div class="circle-container">
+          <div class="circle"
+               [style.background-color]="circle.color || defaultColor"
+               [style.width.px]="circle.size || defaultSize"
+               [style.height.px]="circle.size || defaultSize"
+               [style.border-color]="option.borderColor || defaultBorderColor"
+               [style.border-style]="'solid'"
+               [style.opacity]="option.opacity || defaultOpacity">
+          </div>
+
+        </div>
+      </mat-checkbox>
+    }
+  </div>
+</div>

@@ -1,23 +1,20 @@
-import { Type } from '@angular/core';
+import {Type} from '@angular/core';
 
 import {
-  UIElement,
-  ImageElement,
-  TextElement,
   AudioElement,
+  BinaryChoiceElement,
   CheckboxElement,
+  ImageElement,
+  MultiChoiceCirclesElement,
+  MultiChoiceImagesElement,
   RadioGroupImagesElement,
   RadioGroupTextElement,
-  MultiChoiceImagesElement,
   ReducedKeyboardElement,
   SyllableCounterElement,
-  BinaryChoiceElement
+  TextElement,
+  UIElement
 } from './index';
-import {
-  AbstractIDService,
-  UIElementProperties,
-  UIElementType
-} from "../interfaces";
+import {AbstractIDService, UIElementProperties, UIElementType} from "../interfaces";
 
 
 export abstract class ElementFactory {
@@ -27,6 +24,7 @@ export abstract class ElementFactory {
     "checkbox": CheckboxElement,
     "radio-group-images": RadioGroupImagesElement,
     "multi-choice-images": MultiChoiceImagesElement,
+    "multi-choice-circles": MultiChoiceCirclesElement,
     "radio-group-text": RadioGroupTextElement,
     "audio": AudioElement,
     "reduced-keyboard": ReducedKeyboardElement,

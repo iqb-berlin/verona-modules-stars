@@ -1,17 +1,18 @@
-import { Component, input, OnInit } from "@angular/core";
-import { FormGroup } from "@angular/forms";
+import {Component, input, OnInit} from "@angular/core";
+import {FormGroup} from "@angular/forms";
 
 import {
+  BinaryChoiceElement,
+  MultiChoiceCirclesElement,
   MultiChoiceImagesElement,
   RadioGroupImagesElement,
+  RadioGroupTextElement,
   ReducedKeyboardElement,
   SyllableCounterElement,
-  RadioGroupTextElement,
-  BinaryChoiceElement,
   UIElement
 } from "../../../models";
-import { UIElementType } from "../../../interfaces";
-import { ElementComponent } from "../../../directives/element-component.directive";
+import {UIElementType} from "../../../interfaces";
+import {ElementComponent} from "../../../directives/element-component.directive";
 
 
 @Component({
@@ -30,6 +31,7 @@ export class InteractionSelectionComponent extends ElementComponent implements O
   stimulusTypes: UIElementType[] = [
     "radio-group-images",
     "multi-choice-images",
+    "multi-choice-circles",
     "radio-group-text",
     "reduced-keyboard",
     "syllable-counter",
@@ -37,7 +39,7 @@ export class InteractionSelectionComponent extends ElementComponent implements O
   ];
 
   ngOnInit() {
-    this.elementType = this.stimulusTypes.find(type => type === this.elementModel().type );
+    this.elementType = this.stimulusTypes.find(type => type === this.elementModel().type);
   }
 
   get elementModelAsRadioGroupImagesElement(): RadioGroupImagesElement {
@@ -46,6 +48,10 @@ export class InteractionSelectionComponent extends ElementComponent implements O
 
   get elementModelAsMultiChoiceImagesElement(): MultiChoiceImagesElement {
     return this.elementModel() as MultiChoiceImagesElement;
+  }
+
+  get elementModelAsMultiChoiceCirclesElement(): MultiChoiceCirclesElement {
+    return this.elementModel() as MultiChoiceCirclesElement;
   }
 
   get elementModelAsReducedKeyboardElement(): ReducedKeyboardElement {
