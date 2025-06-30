@@ -95,7 +95,7 @@ export class AppComponent implements OnInit, OnDestroy {
         elementCodes: JSON.stringify(this.unitStateService.getResponses()),
         stateVariableCodes: JSON.stringify(this.stateVariableStateService.getResponses())
       },
-      presentationProgress: this.getPresentationProgress(),
+      // presentationProgress: this.getPresentationProgress(),
       responseProgress: this.validationService.responseProgress
     };
 
@@ -103,9 +103,9 @@ export class AppComponent implements OnInit, OnDestroy {
     this.veronaPostService.sendVopStateChangedNotification({ unitState });
   }
 
-  private getPresentationProgress(): Progress {
+  /* private getPresentationProgress(): Progress {
     return this.unitStateService.presentedPagesProgress;
-  }
+  } */
 
   @HostListener('window:blur')
   onBlur(): void {

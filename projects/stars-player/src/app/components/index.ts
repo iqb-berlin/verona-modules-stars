@@ -1,6 +1,3 @@
-import {bindCallback} from "rxjs";
-import {BinaryChoiceElement} from "../models";
-
 export { UnitComponent } from './unit/unit.component';
 export { SectionComponent } from './section/section.component';
 export { UnitMenuComponent } from './menu/unit-menu.component';

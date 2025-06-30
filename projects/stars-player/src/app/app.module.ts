@@ -3,19 +3,19 @@ import { ErrorHandler, NgModule, provideExperimentalZonelessChangeDetection } fr
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { ReactiveFormsModule } from "@angular/forms";
+
 import {
   MatMenu,
   MatMenuItem,
   MatMenuTrigger
 } from "@angular/material/menu";
 import { MatIcon } from "@angular/material/icon";
-import { MatIconButton } from "@angular/material/button";
-import { MatButton } from "@angular/material/button";
+import { MatIconButton, MatButton } from "@angular/material/button";
 import { MatFormField, MatLabel } from "@angular/material/form-field";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { MatRadioButton, MatRadioGroup } from "@angular/material/radio";
+
 import { UnitNavNextComponent} from "./components/unit-nav-next.component";
-import {SyllableCounterComponent} from "./components/elements/syllable-counter/syllable-counter.component";
 import { RadioGroupTextComponent} from "./components/elements/radio-group-text/radio-group-text.component";
 import { AppComponent } from "./app.component";
 import {
@@ -35,7 +35,8 @@ import {
   UnitMenuComponent,
   MediaPlayerComponent,
   ReducedKeyboardComponent,
-  BinaryChoiceComponent
+  BinaryChoiceComponent,
+  SyllableCounterComponent
 } from "./components";
 import { ErrorService } from "./services/error.service";
 import { UnitStateService } from "./services/unit-state.service";

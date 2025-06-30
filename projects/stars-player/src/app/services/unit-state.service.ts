@@ -1,5 +1,3 @@
-
-
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { VeronaResponse, ResponseStatus, Progress } from '../models/verona';
@@ -28,7 +26,7 @@ export class UnitStateService {
   private elementCodes: Map<string, ElementCode> = new Map();
   private _elementCodeChanged = new Subject<ElementCode>();
   private _pagePresented = new Subject<number>();
-  private presentedPages: Set<number> = new Set();
+  // private presentedPages: Set<number> = new Set();
 
   get elementCodeChanged() {
     return this._elementCodeChanged.asObservable();
@@ -129,14 +127,14 @@ export class UnitStateService {
     }));
   }
 
-  get presentedPagesProgress(): Progress {
+/*  get presentedPagesProgress(): Progress {
     if (this.presentedPages.size === 0) return 'none';
     return this.presentedPages.size > 0 ? 'some' : 'none';
-  }
+  } */
 
   reset(): void {
     this.elementCodes.clear();
-    this.presentedPages.clear();
+    // this.presentedPages.clear();
   }
 
   setElementCodes(elementCodes: any[], elementIdentifiers: ElementIdentifier[]): void {

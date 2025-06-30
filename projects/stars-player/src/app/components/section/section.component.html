@@ -15,8 +15,9 @@
         [interaction]="section().interaction"
         [instructions]="section().instructions"
         [stimulus]="section().stimulus"
+        [variant]="section().variant"
         [parentForm]="form"
-        (valueChange)="valueChange.emit($event)"
+        (valueChange)="valueChanged($event)"
       ></pic-text-layout>
     }
   }

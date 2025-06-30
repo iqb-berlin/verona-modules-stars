@@ -16,10 +16,10 @@ import { ValidationService } from "../../../services/validation.service";
 export class RadioGroupTextComponent extends ElementComponent implements OnInit, OnDestroy {
   elementModel = input.required<RadioGroupTextElement>();
   RadioInputControl = new FormControl();
-  position = input<string>("row");
-  sectionVariant = input<string>('row_layout');
+  // position = input<string>("row");
+  sectionVariant = input<string>('col_layout');
 
-  layoutClass: string = 'row-layout';
+  layoutClass: string = 'col-layout';
 
   private unitStateService = inject(UnitStateService);
   private validationService = inject(ValidationService);
@@ -78,12 +78,15 @@ export class RadioGroupTextComponent extends ElementComponent implements OnInit,
   }
 
   getLayoutClass(): string {
-    const variant = this.sectionVariant();
+    console.log(this.sectionVariant());
     const hasWords = this.elementModel().options.some(option => option.text.length > 1);
-    switch (variant) {
+    switch (this.sectionVariant()) {
       case 'grid_layout':
         return hasWords ? 'grid-layout words-grid' : 'grid-layout';
+      case 'col_layout':
+        return hasWords ? 'col-layout words-grid' : 'col-layout';
       case 'row_layout':
+        return hasWords ? 'row-layout words-layout' : 'row-layout';
       default:
         if (this.elementModel().options.length === 4) {
           return hasWords ? 'grid-layout words-grid' : 'grid-layout';

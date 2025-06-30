@@ -15,12 +15,6 @@ export class Unit implements UnitProperties {
   navNextButtonMode?: UnitNavNextButtonMode;
   backgroundColor?: string;
 
-  layoutId: string;
-  variant?: string;
-  instructions?: UIElement;
-  interaction?: UIElement;
-  stimulus?: UIElement;
-
   constructor(unit?: UnitProperties, idService?: AbstractIDService) {
     if (unit && isValid(unit)) {
       this.version = unit.version;

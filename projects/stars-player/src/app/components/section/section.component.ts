@@ -25,12 +25,15 @@ export class SectionComponent {
       const coding = this.section().coding;
       let code = 0;
       let score = 0;
+      let status = ResponseStatus.NO_CODING;
 
       if (coding.fullCredit) {
         if (coding.fullCredit == event.value) {
           code = 1;
           score = 1;
-        } else if (code === 0 && coding.partialCredit) {
+        }
+        // no partial credits atm
+        /*else if (code === 0 && coding.partialCredit) {
           let partialCredits: JSONObject[];
 
           if (Array.isArray(coding.partialCredit)) {
@@ -46,17 +49,17 @@ export class SectionComponent {
             score = typeof creditMatch['score'] === 'number' ? creditMatch['score'] : 0.5;
             code = typeof creditMatch['code'] === 'number' ? creditMatch['code'] : 2;
           }
-        }
-      }
+        }*/
 
-      event.code = code;
-      event.score = score;
-      event.status = ResponseStatus.CODING_COMPLETE;
+        event.code = code;
+        event.score = score;
+        event.status = status = ResponseStatus.CODING_COMPLETE;
+      }
 
       this.unitStateService.changeElementCodeValue({
         id: event.id,
         value: event.value,
-        status: ResponseStatus.CODING_COMPLETE,
+        status: status,
         code: code,
         score: score
       });

@@ -42,7 +42,6 @@ export class Section implements SectionProperties {
         throw new InstantiationError('Error at Section instantiation');
       }
     }
-    console.log(this.instructions);
   }
 
   setProperty(property: string, value: UIElementValue): void {

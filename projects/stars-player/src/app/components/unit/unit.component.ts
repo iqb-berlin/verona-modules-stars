@@ -3,7 +3,8 @@ import { BehaviorSubject } from 'rxjs';
 
 import {
   PlayerConfig,
-  Progress, VeronaResponse,
+  Progress,
+  VeronaResponse,
   VopPlayerConfigChangedNotification,
   VopStartCommand
 } from '../../models/verona';
@@ -14,7 +15,7 @@ import { UnitStateService } from '../../services/unit-state.service';
 import { StateVariableStateService } from '../../services/state-variable-state.service';
 import { InstantiationError } from '../../errors';
 import { Section } from "../../models/section";
-import {Unit, UnitNavNextButtonMode} from "../../models/unit";
+import { Unit, UnitNavNextButtonMode } from "../../models/unit";
 import { LogService } from "../../services/log.service";
 import { AudioComponent } from "../elements/audio.component";
 
@@ -92,7 +93,7 @@ export class UnitComponent implements OnInit, OnDestroy {
     });
   }
 
-  get shouldShowUnitNavNext(): boolean {
+  get showUnitNavNext(): boolean {
     switch (this.navNextButtonMode) {
       case 'always':
         return true;

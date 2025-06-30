@@ -24,10 +24,10 @@ import { ElementComponent } from "../../../directives/element-component.directiv
 export class InteractionSelectionComponent extends ElementComponent implements OnInit {
   elementModel = input.required<UIElement>();
   parentForm = input.required<FormGroup>();
-  sectionVariant = input<string>('row_layout');
+  sectionVariant = input<string>('grid_layout');
   elementType: UIElementType | undefined;
 
-  stimulusTypes: UIElementType[] = [
+  interactionTypes: UIElementType[] = [
     "radio-group-images",
     "multi-choice-images",
     "radio-group-text",
@@ -37,7 +37,8 @@ export class InteractionSelectionComponent extends ElementComponent implements O
   ];
 
   ngOnInit() {
-    this.elementType = this.stimulusTypes.find(type => type === this.elementModel().type );
+    this.elementType = this.interactionTypes.find(type => type === this.elementModel().type );
+    console.log(this.sectionVariant());
   }
 
   get elementModelAsRadioGroupImagesElement(): RadioGroupImagesElement {

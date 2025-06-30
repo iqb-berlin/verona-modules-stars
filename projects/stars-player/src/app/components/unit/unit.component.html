@@ -1,8 +1,11 @@
 <ng-content></ng-content>
+
 @for (section of this.sections; track section) {
   <stars-section [section]="section"
                  (valueChange)="valueChanged($event)">
   </stars-section>
+}
 
-  <stars-unit-nav-next *ngIf="shouldShowUnitNavNext" (navigate)="navigateToNext()"></stars-unit-nav-next>
+@if (showUnitNavNext) {
+  <stars-unit-nav-next (navigate)="navigateToNext()"></stars-unit-nav-next>
 }

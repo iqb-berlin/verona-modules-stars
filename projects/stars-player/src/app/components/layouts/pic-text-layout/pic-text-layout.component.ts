@@ -19,4 +19,5 @@ export class PicTextLayoutComponent extends ElementComponent {
   stimulus = input<UIElement>();
   parentForm = input.required<FormGroup>();
   valueChange = output<VeronaResponse>();
+  variant = input<string>('col_layout');
 }
