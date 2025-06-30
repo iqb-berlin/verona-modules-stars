@@ -6,11 +6,9 @@ import {InstantiationError} from "../../errors";
 export class MultiChoiceCirclesElement extends InputElement {
   type: UIElementType = 'multi-choice-circles';
   label: string = '';
-  circles: CircleOption[] = [];
-  defaultColor: string = '#000000';
-  defaultSize: number = 50;
-  defaultBorderColor: string = '#000000';
-  defaultOpacity: number = 1;
+  options: CircleOption[] = [];
+  defaultColor: string = '#FFFFFF';
+  defaultSize: number = 100;
 
   static title: string = 'MultipleChoiceCircles';
   static icon: string = 'radio_button_checked';
@@ -27,15 +25,13 @@ export class MultiChoiceCirclesElement extends InputElement {
     // Common property assignments
     const properties: (keyof MultiChoiceCirclesProperties)[] = [
       'label',
-      'circles',
+      'options',
       'defaultColor',
       'defaultSize',
-      'defaultBorderColor',
-      'defaultOpacity'
     ];
 
     properties.forEach(prop => {
-      if (prop === 'circles' && element[prop]) {
+      if (prop === 'options' && element[prop]) {
         this[prop] = [...element[prop]!];
       } else if (element[prop] !== undefined) {
         (this as any)[prop] = element[prop];
@@ -47,6 +43,6 @@ export class MultiChoiceCirclesElement extends InputElement {
 function isMultiChoiceCirclesProperties(blueprint?: Partial<MultiChoiceCirclesProperties>): blueprint is MultiChoiceCirclesProperties {
   if (!blueprint) return false;
   return blueprint.label !== undefined &&
-    blueprint.circles !== undefined;
+    blueprint.options !== undefined;
 }
 

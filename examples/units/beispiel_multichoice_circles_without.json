@@ -18,51 +18,48 @@
         "type": "multi-choice-circles",
         "required": true,
         "value": null,
-        "circles": [
+        "options": [
           {
             "id": "circle_1",
             "text": "circle 1",
-            "color": "red",
-            "size": 60,
-            "borderWidth": 3,
-            "borderColor": "#990000",
-            "opacity": 0.9
+            "color": "#FFFFFF",
+            "size": 100
           },
           {
             "id": "circle_2",
             "text": "circle 2",
-            "color": "pink",
-            "size": 60,
-            "borderWidth": 3,
-            "borderColor": "#990000",
-            "opacity": 0.9
+            "color": "#FFFFFF",
+            "size": 100
           },
           {
             "id": "circle_3",
             "text": "circle 3",
-            "color": "black",
-            "size": 60,
-            "borderWidth": 3,
-            "borderColor": "#990000",
-            "opacity": 0.9
+            "color": "#FFFFFF",
+            "size": 100
           },
           {
             "id": "circle_4",
             "text": "circle 4",
-            "color": "red",
-            "size": 60,
-            "borderWidth": 3,
-            "borderColor": "#990000",
-            "opacity": 0.9
+            "color": "#FFFFFF",
+            "size": 100
           },
           {
             "id": "circle_5",
             "text": "circle 5",
-            "color": "green",
-            "size": 60,
-            "borderWidth": 3,
-            "borderColor": "#990000",
-            "opacity": 0.9
+            "color": "#FFFFFF",
+            "size": 100
+          },
+          {
+            "id": "circle_6",
+            "text": "circle 6",
+            "color": "#FFFFFF",
+            "size": 100
+          },
+          {
+            "id": "circle_7",
+            "text": "circle 7",
+            "color": "#FFFFFF",
+            "size": 100
           }
         ]
       },

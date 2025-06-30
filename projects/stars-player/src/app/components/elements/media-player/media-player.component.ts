@@ -26,6 +26,7 @@ export class MediaPlayerComponent implements OnInit, OnDestroy {
   playerId = input<string>();
   image = input<ImageElement>();
   isPlaying = input<boolean>(false);
+  disabled = input<boolean>(false);
   elementValueChanged = output();
 
   currentTime = 0;
@@ -104,7 +105,8 @@ export class MediaPlayerComponent implements OnInit, OnDestroy {
   constructor(
     private mediaPlayerService: MediaPlayerService,
     private sanitizer: DomSanitizer
-  ) {}
+  ) {
+  }
 
   ngOnInit() {
     fromEvent(this.player(), 'timeupdate')

@@ -172,16 +172,12 @@ export interface CircleOption {
   text: string;
   color?: string;
   size?: number;
-  borderColor?: string;
-  opacity?: number;
 }
 
 export interface MultiChoiceCirclesProperties extends InputElementProperties {
   label: string;
-  circles: CircleOption[];
+  options: CircleOption[];
   defaultColor?: string;
   defaultSize?: number;
-  defaultBorderColor?: string;
-  defaultOpacity?: number;
 }
 
