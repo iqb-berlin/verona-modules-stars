@@ -16,7 +16,7 @@ import {MediaPlayerService} from "../../services/media-player-service";
     }
   `,
   styles: [
-    'img { object-fit: contain; width: clamp(100px, 30vw, 400px); height: clamp(100px, 30vh, 400px); max-width: 100%; max-height: 100%; }'
+    'img { object-fit: contain; width: clamp(100px, 30vw, 400px); max-width: 100%; max-height: 100%; }'
   ],
   standalone: false
 })
