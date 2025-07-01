@@ -1,10 +1,11 @@
 import { Component, input, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormGroup } from "@angular/forms";
+
 import { ElementComponent } from "../../../directives/element-component.directive";
 import { MultiChoiceCirclesElement } from "../../../models";
-import { ResponseStatus, VeronaResponse } from "../../../models/verona";
 import { MultiChoiceService } from "../../../services/multi-choice.service";
 import { UnitStateService } from "../../../services/unit-state.service";
+import { ResponseStatus, VeronaResponse } from "../../../../../../common/models/verona";
 
 
 @Component({

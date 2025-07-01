@@ -1,9 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { UnitStateService } from './unit-state.service';
-import { ResponseStatus } from '../models/verona';
 import { InputElementValue } from "../interfaces";
 import { ValidationService } from './validation.service';
+import { ResponseStatus } from "../../../../common/models/verona";
 
 @Injectable({
   providedIn: 'root'

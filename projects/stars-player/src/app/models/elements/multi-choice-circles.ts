@@ -2,7 +2,7 @@ import { AbstractIDService, InputElementProperties, UIElementType } from "../../
 import { InputElement } from "./input-element";
 import { environment } from "../../environments/environment";
 import { InstantiationError } from "../../errors";
-import { CircleOption } from "../../../app/components/elements/multi-choice-circles/multi-choice-circles.component";
+import { CircleOption } from "../../components/elements/multi-choice-circles/multi-choice-circles.component";
 
 export class MultiChoiceCirclesElement extends InputElement {
   type: UIElementType = 'multi-choice-circles';

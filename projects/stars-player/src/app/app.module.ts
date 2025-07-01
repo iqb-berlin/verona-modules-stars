@@ -37,8 +37,6 @@ import {
   StimulusSelectionComponent,
   TextComponent,
   UnitComponent,
-  UnitMenuComponent
-  BinaryChoiceComponent,
   SyllableCounterComponent
 } from "./components";
 

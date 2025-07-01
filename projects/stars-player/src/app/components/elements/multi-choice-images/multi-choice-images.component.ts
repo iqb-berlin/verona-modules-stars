@@ -3,7 +3,6 @@ import { FormControl, FormGroup } from "@angular/forms";
 import { MultiChoiceImagesElement } from "../../../models";
 import { ElementComponent } from "../../../directives/element-component.directive";
 import { VeronaResponse, ResponseStatus } from "../../../../../../common/models/verona";
-import { ResponseStatus, VeronaResponse } from "../../../models/verona";
 import { MultiChoiceService } from '../../../services/multi-choice.service';
 import { UnitStateService } from "../../../services/unit-state.service";
 

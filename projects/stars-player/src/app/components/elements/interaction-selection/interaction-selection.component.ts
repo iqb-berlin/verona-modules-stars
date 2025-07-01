@@ -9,7 +9,6 @@ import {
   ReducedKeyboardElement,
   SyllableCounterElement,
   RadioGroupTextElement,
-  BinaryChoiceElement,
   UIElement
 } from "../../../models";
 import { UIElementType } from "../../../interfaces";
@@ -40,7 +39,7 @@ export class InteractionSelectionComponent extends ElementComponent implements O
   ];
 
   ngOnInit() {
-    this.elementType = this.stimulusTypes.find(type => type === this.elementModel().type );
+    this.elementType = this.interactionTypes.find(type => type === this.elementModel().type );
   }
 
   get elementModelAsRadioGroupImagesElement(): RadioGroupImagesElement {
