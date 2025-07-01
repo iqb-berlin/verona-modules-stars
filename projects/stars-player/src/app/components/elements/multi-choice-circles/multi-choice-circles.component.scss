@@ -17,6 +17,9 @@
 
 
 .circle {
+  width: 100px;
+  height: 100px;
+  background-color: $white;
   border-radius: 50%;
   transition: all 0.3s ease;
   border: none;
@@ -29,7 +32,7 @@
   }
 }
 
-::ng-deep .checkbox-group.row-layout .mat-mdc-checkbox .mdc-form-field .mdc-checkbox {
+::ng-deep .checkbox-group.multi-choice-circles .mat-mdc-checkbox .mdc-form-field .mdc-checkbox {
   display: none !important;
 }
 
@@ -37,19 +40,28 @@
   .circle {
     background-color: #0050E5 !important;
     transform: scale(1.05);
-    //box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
   }
 }
 
 @media (max-width: 900px) {
   .circles-container {
     max-width: 95%;
-    padding: 0.4rem;
+    padding: 0.5rem;
   }
 
-  // Add touch-specific styles
   .circle {
-    -webkit-tap-highlight-color: transparent; // Removes the default mobile tap highlight
+    width: 80px;
+    height: 80px;
+    box-shadow: 4px 4px 0 3px rgba(0, 0, 0, 0.2);
+  }
+}
+
+@media (max-width: 768px) {
+  .circle {
+    width: 70px;
+    height: 70px;
+    box-shadow: 3px 3px 0 2px rgba(0, 0, 0, 0.2);
+    -webkit-tap-highlight-color: transparent;
 
     &:active {
       background-color: #0050E5 !important;

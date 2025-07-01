@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { UnitStateService } from './unit-state.service';
-import { ResponseStatus, VeronaResponse } from '../models/verona';
+import { ResponseStatus } from '../models/verona';
 import { InputElementValue } from "../interfaces";
 import { ValidationService } from './validation.service';
 
@@ -50,37 +50,37 @@ export class MultiChoiceService {
   }
 
 
-  valueChanged(params: {
-    formGroup: FormGroup,
-    options: Array<any>,
-    elementId: string,
-    elementAlias: string,
-    elementValue: InputElementValue
-  }): VeronaResponse {
-    const { formGroup, options, elementId, elementAlias } = params;
-    let value = "";
-
-    for (let i = 0; i < options.length; i++) {
-      const option = options[i];
-      const formControl = formGroup.controls[option.id];
-      value += formControl.value === true ? '1' : '0';
-    }
-
-    this.unitStateService.changeElementCodeValue({
-      id: elementId,
-      value: value,
-      status: ResponseStatus.VALUE_CHANGED
-    });
-
-    const response: VeronaResponse = {
-      id: elementId,
-      alias: elementAlias || elementId,
-      value: value,
-      status: ResponseStatus.VALUE_CHANGED
-    };
-
-    return response;
-  }
+  // valueChanged(params: {
+  //   formGroup: FormGroup,
+  //   options: Array<any>,
+  //   elementId: string,
+  //   elementAlias: string,
+  //   elementValue: InputElementValue
+  // }): VeronaResponse {
+  //   const { formGroup, options, elementId, elementAlias } = params;
+  //   let value = "";
+  //
+  //   for (let i = 0; i < options.length; i++) {
+  //     const option = options[i];
+  //     const formControl = formGroup.controls[option.id];
+  //     value += formControl.value === true ? '1' : '0';
+  //   }
+  //
+  //   this.unitStateService.changeElementCodeValue({
+  //     id: elementId,
+  //     value: value,
+  //     status: ResponseStatus.VALUE_CHANGED
+  //   });
+  //
+  //   const response: VeronaResponse = {
+  //     id: elementId,
+  //     alias: elementAlias || elementId,
+  //     value: value,
+  //     status: ResponseStatus.VALUE_CHANGED
+  //   };
+  //
+  //   return response;
+  // }
 
   updateElementStatus(params: {
     elementId: string,

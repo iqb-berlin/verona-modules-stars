@@ -1,6 +1,6 @@
 <div class="multi-choice-circles-wrapper">
   <div class="checkbox-group"
-       [ngClass]="layoutClass"
+       [ngClass]="'multi-choice-circles'"
        [style.--option-count]="elementModel().optionsCount"
        [formGroup]="MultiCheckboxFormGroup">
 
@@ -11,12 +11,8 @@
         (change)="valueChanged($event)">
         <div class="circles-container">
           <div class="circle"
-               [class.selected]="MultiCheckboxFormGroup.get(option.id)?.value"
-               [style.background-color]="defaultColor"
-               [style.width.px]="defaultSize"
-               [style.height.px]="defaultSize">
+               [class.selected]="MultiCheckboxFormGroup.get(option.id)?.value">
           </div>
-
         </div>
       </mat-checkbox>
     }

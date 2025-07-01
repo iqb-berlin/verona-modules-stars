@@ -159,7 +159,7 @@ export interface PlayerProperties {
   fileName: string;
 }
 
-export type SectionLayoutVariant = 'grid_layout' | 'row_layout';
+export type SectionLayoutVariant = 'grid_layout' | 'row_layout' | 'col_layout';
 
 export interface SectionVariantConfig {
   variant?: SectionLayoutVariant;
@@ -167,16 +167,4 @@ export interface SectionVariantConfig {
   aspectRatio?: 'square' | 'wide' | 'portrait'; // For future image aspect ratio control
 }
 
-export interface CircleOption {
-  id: string;
-  text: string;
-}
-
-export interface MultiChoiceCirclesProperties extends InputElementProperties {
-  label: string;
-  optionsCount: number;
-  options: CircleOption[];
-  defaultColor?: string;
-  defaultSize?: number;
-}
 

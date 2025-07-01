@@ -1,7 +1,8 @@
-import { AbstractIDService, CircleOption, MultiChoiceCirclesProperties, UIElementType } from "../../interfaces";
+import { AbstractIDService, InputElementProperties, UIElementType } from "../../interfaces";
 import { InputElement } from "./input-element";
 import { environment } from "../../environments/environment";
 import { InstantiationError } from "../../errors";
+import { CircleOption } from "../../../app/components/elements/multi-choice-circles/multi-choice-circles.component";
 
 export class MultiChoiceCirclesElement extends InputElement {
   type: UIElementType = 'multi-choice-circles';
@@ -22,7 +23,7 @@ export class MultiChoiceCirclesElement extends InputElement {
     if (!isMultiChoiceCirclesProperties(element) && environment.strictInstantiation) {
       throw new InstantiationError('Error at MultiChoiceCirclesElement instantiation', element);
     }
-    
+
     /* Common property assignments */
     const properties: (keyof MultiChoiceCirclesProperties)[] = [
       'label',
@@ -51,3 +52,10 @@ function isMultiChoiceCirclesProperties(blueprint?: Partial<MultiChoiceCirclesPr
     blueprint.options !== undefined;
 }
 
+interface MultiChoiceCirclesProperties extends InputElementProperties {
+  label: string;
+  optionsCount: number;
+  options: CircleOption[];
+  defaultColor?: string;
+  defaultSize?: number;
+}

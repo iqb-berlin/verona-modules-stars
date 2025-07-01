@@ -1,10 +1,11 @@
-import { Component, inject, input, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, input, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormGroup } from "@angular/forms";
 import { ElementComponent } from "../../../directives/element-component.directive";
 import { MultiChoiceCirclesElement } from "../../../models";
-import { ResponseStatus } from "../../../models/verona";
-import { MultiChoiceService } from '../../../services/multi-choice.service';
-import { CircleOption } from "../../../interfaces";
+import { ResponseStatus, VeronaResponse } from "../../../models/verona";
+import { MultiChoiceService } from "../../../services/multi-choice.service";
+import { UnitStateService } from "../../../services/unit-state.service";
+
 
 @Component({
   selector: 'stars-multi-choice-circles',
@@ -12,15 +13,19 @@ import { CircleOption } from "../../../interfaces";
   styleUrls: ['multi-choice-circles.component.scss'],
   standalone: false
 })
+
 export class MultiChoiceCirclesComponent extends ElementComponent implements OnInit, OnDestroy {
   elementModel = input.required<MultiChoiceCirclesElement>();
-
-  options = signal([]);
-  formId = Math.floor(Math.random() * 20000000 + 10000000).toString();
+  options = signal<CircleOption[]>([]);
+  formId = `mc-circles-${crypto.randomUUID()}`;
   MultiCheckboxFormGroup = new FormGroup({});
-  sectionVariant = input<string>('row_layout');
-  layoutClass: string = 'row-layout';
-  private multiChoiceService = inject(MultiChoiceService);
+
+  constructor(
+    private multiChoiceService: MultiChoiceService,
+    private unitStateService: UnitStateService
+  ) {
+    super();
+  }
 
   private getInitParams() {
     return {
@@ -33,14 +38,6 @@ export class MultiChoiceCirclesComponent extends ElementComponent implements OnI
       parentForm: () => this.parentForm() ?? null,
       required: !!this.elementModel().required
     };
-  }
-
-  get defaultColor(): string {
-    return this.elementModel().defaultColor;
-  }
-
-  get defaultSize(): number {
-    return this.elementModel().defaultSize;
   }
 
   ngOnInit() {
@@ -64,16 +61,33 @@ export class MultiChoiceCirclesComponent extends ElementComponent implements OnI
     this.parentForm()?.removeControl(this.formId);
   }
 
-  valueChanged(event: any) {
-    const response = this.multiChoiceService.valueChanged({
-      formGroup: this.MultiCheckboxFormGroup,
-      options: this.elementModel().options,
-      elementId: this.elementModel().id,
-      elementAlias: this.elementModel().alias,
-      elementValue: this.elementModel().value
+  valueChanged(event: any): VeronaResponse {
+    const selectedCount = this.countSelectedCircles();
+    const value = selectedCount.toString();
+
+    /* Convert to string */
+    this.unitStateService.changeElementCodeValue({
+      id: this.elementModel().id,
+      value: value,
+      status: ResponseStatus.VALUE_CHANGED
     });
-    this.elementModel().value = response.value;
+
+    const response: VeronaResponse = {
+      id: this.elementModel().id,
+      alias: this.elementModel().alias || this.elementModel().id,
+      value: value,
+      status: ResponseStatus.VALUE_CHANGED
+    };
+
     this.valueChange.emit(response);
+    return response;
+  }
+
+  private countSelectedCircles(): number {
+    return this.elementModel().options.reduce((count, option) => {
+      const control = this.MultiCheckboxFormGroup.controls[option.id];
+      return control?.value === true ? count + 1 : count;
+    }, 0);
   }
 
   private updateElementStatus(status: ResponseStatus) {
@@ -83,4 +97,9 @@ export class MultiChoiceCirclesComponent extends ElementComponent implements OnI
       status: status
     });
   }
+}
+
+export interface CircleOption {
+  id: string;
+  text: string;
 }

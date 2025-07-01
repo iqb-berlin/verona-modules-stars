@@ -1,9 +1,10 @@
-import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
+import { Component, input, OnDestroy, OnInit } from '@angular/core';
 import { FormGroup } from "@angular/forms";
 import { MultiChoiceImagesElement } from "../../../models";
 import { ElementComponent } from "../../../directives/element-component.directive";
-import { ResponseStatus } from "../../../models/verona";
+import { ResponseStatus, VeronaResponse } from "../../../models/verona";
 import { MultiChoiceService } from '../../../services/multi-choice.service';
+import { UnitStateService } from "../../../services/unit-state.service";
 
 @Component({
   selector: 'stars-multi-choice-images',
@@ -13,11 +14,17 @@ import { MultiChoiceService } from '../../../services/multi-choice.service';
 })
 export class MultiChoiceImagesComponent extends ElementComponent implements OnInit, OnDestroy {
   elementModel = input.required<MultiChoiceImagesElement>();
-  formId = Math.floor(Math.random() * 20000000 + 10000000).toString();
+  formId = `mc-circles-${crypto.randomUUID()}`;
   MultiCheckboxFormGroup = new FormGroup({});
   sectionVariant = input<string>('row_layout');
   layoutClass: string = 'row-layout';
-  private multiChoiceService = inject(MultiChoiceService);
+
+  constructor(
+    private multiChoiceService: MultiChoiceService,
+    private unitStateService: UnitStateService
+  ) {
+    super();
+  }
 
   private getInitParams() {
     return {
@@ -44,18 +51,32 @@ export class MultiChoiceImagesComponent extends ElementComponent implements OnIn
     this.parentForm()?.removeControl(this.formId);
   }
 
-  valueChanged(event: any) {
-    const response = this.multiChoiceService.valueChanged({
-      formGroup: this.MultiCheckboxFormGroup,
-      options: this.elementModel().options,
-      elementId: this.elementModel().id,
-      elementAlias: this.elementModel().alias,
-      elementValue: this.elementModel().value
+  valueChanged(event: any): VeronaResponse {
+    let value = "";
+    for (let i = 0; i < this.elementModel().options.length; i++) {
+      const option = this.elementModel().options[i];
+      const formControl = this.MultiCheckboxFormGroup.controls[option.id];
+      value += formControl.value === true ? '1' : '0';
+    }
+    this.elementModel().value = value;
+
+    this.unitStateService.changeElementCodeValue({
+      id: this.elementModel().id,
+      value: value,
+      status: ResponseStatus.VALUE_CHANGED
     });
 
-    this.elementModel().value = response.value;
+    const response: VeronaResponse = {
+      id: this.elementModel().id,
+      alias: this.elementModel().alias || this.elementModel().id,
+      value: value,
+      status: ResponseStatus.VALUE_CHANGED
+    };
+
     this.valueChange.emit(response);
+    return response;
   }
+
 
   private updateElementStatus(status: ResponseStatus) {
     this.multiChoiceService.updateElementStatus({
