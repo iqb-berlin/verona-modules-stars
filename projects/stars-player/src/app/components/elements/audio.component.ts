@@ -1,6 +1,6 @@
-import {Component, ElementRef, input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {AudioElement} from "../../models";
-import {MediaPlayerElementComponent} from "../../directives/media-player-element-component.directive";
+import { Component, ElementRef, input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AudioElement } from "../../models";
+import { MediaPlayerElementComponent } from "../../directives/media-player-element-component.directive";
 
 @Component({
   selector: 'stars-audio',
@@ -94,7 +94,7 @@ import {MediaPlayerElementComponent} from "../../directives/media-player-element
 })
 export class AudioComponent extends MediaPlayerElementComponent implements OnInit, OnDestroy {
   elementModel = input.required<AudioElement>();
-  @ViewChild('player', {static: false}) audioElementRef!: ElementRef<HTMLAudioElement>;
+  @ViewChild('player', { static: false }) audioElementRef!: ElementRef<HTMLAudioElement>;
   private static hasUserInteracted = false;
   private static firstTouchListenersAdded = false;
   private static currentOverlay: HTMLElement | null = null;
@@ -192,11 +192,11 @@ export class AudioComponent extends MediaPlayerElementComponent implements OnIni
         this.removeOverlay();
       }
     };
-    overlay.addEventListener('click', handleFirstInteraction, {capture: true});
-    overlay.addEventListener('touchstart', handleFirstInteraction, {capture: true});
-    overlay.addEventListener('touchend', handleFirstInteraction, {capture: true});
-    overlay.addEventListener('pointerdown', handleFirstInteraction, {capture: true});
-    overlay.addEventListener('mousedown', handleFirstInteraction, {capture: true});
+    overlay.addEventListener('click', handleFirstInteraction, { capture: true });
+    overlay.addEventListener('touchstart', handleFirstInteraction, { capture: true });
+    overlay.addEventListener('touchend', handleFirstInteraction, { capture: true });
+    overlay.addEventListener('pointerdown', handleFirstInteraction, { capture: true });
+    overlay.addEventListener('mousedown', handleFirstInteraction, { capture: true });
   }
 
   private removeOverlay(): void {

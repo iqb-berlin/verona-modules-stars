@@ -1,5 +1,5 @@
-import {StateVariable} from './models/state-variable';
-import {UIElement} from './models';
+import { StateVariable } from './models/state-variable';
+import { UIElement } from './models';
 
 export type UIElementType =
   'text'
@@ -170,12 +170,11 @@ export interface SectionVariantConfig {
 export interface CircleOption {
   id: string;
   text: string;
-  color?: string;
-  size?: number;
 }
 
 export interface MultiChoiceCirclesProperties extends InputElementProperties {
   label: string;
+  optionsCount: number;
   options: CircleOption[];
   defaultColor?: string;
   defaultSize?: number;

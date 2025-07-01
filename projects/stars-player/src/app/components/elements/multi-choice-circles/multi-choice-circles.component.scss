@@ -1,3 +1,5 @@
+@import '_colors.scss';
+
 .multi-choice-circles-wrapper {
   width: 100%;
   height: 100%;
@@ -20,12 +22,12 @@
   border: none;
   box-shadow: 5px 5px 0 4px rgba(0, 0, 0, 0.2);
 
-  &:hover {
-    background-color: #0050E5 !important;
+  @media (hover: hover) {
+    &:hover {
+      background-color: $highlight !important;
+    }
   }
-
 }
-
 
 ::ng-deep .checkbox-group.row-layout .mat-mdc-checkbox .mdc-form-field .mdc-checkbox {
   display: none !important;
@@ -35,82 +37,22 @@
   .circle {
     background-color: #0050E5 !important;
     transform: scale(1.05);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    //box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
   }
 }
 
+@media (max-width: 900px) {
+  .circles-container {
+    max-width: 95%;
+    padding: 0.4rem;
+  }
 
-//
-//::ng-deep .checkbox-group.grid-layout mat-checkbox .mat-mdc-checkbox {
-//  display: flex !important;
-//  align-items: center;
-//  justify-content: center;
-//  width: 100%;
-//  height: 100%;
-//}
-//
-//.checkbox-group.row-layout {
-//  display: flex;
-//  flex-direction: row;
-//  justify-content: center;
-//  align-items: center;
-//  flex-wrap: wrap;
-//  gap: clamp(0.25rem, 2vw, 1rem);
-//  padding: 0.75rem;
-//  width: 100%;
-//  height: auto;
-//  max-width: 95%;
-//  margin: 0 auto;
-//  box-sizing: border-box;
-//  flex: 1;
-//}
-//
-//.checkbox-group.row-layout mat-checkbox {
-//  flex: 0 1 auto;
-//  display: flex;
-//  flex-direction: row;
-//  align-items: center;
-//  justify-content: center;
-//  cursor: pointer;
-//  width: 100%;
-//  height: 100%;
-//  min-width: 0;
-//  padding: 0.25rem;
-//  max-width: none;
-//}
-//
+  // Add touch-specific styles
+  .circle {
+    -webkit-tap-highlight-color: transparent; // Removes the default mobile tap highlight
 
-
-//.interaction-container {
-//  display: flex;
-//  align-items: center;
-//  justify-content: center;
-//  height: 100%;
-//  width: 100%;
-//  padding: clamp(0.5rem, 2vw, 2rem);
-//}
-//
-
-//
-//:host {
-//  display: block;
-//  width: 100%;
-//  height: 100%;
-//}
-//
-//@media (max-width: 1023px) and (orientation: landscape) {
-//  .checkbox-group.row-layout {
-//    gap: clamp(0.15rem, 0.8vw, 0.3rem);
-//    max-width: 90%;
-//    padding: 0.5rem;
-//  }
-//
-
-//
-//@media (max-width: 900px) {
-//  .checkbox-group.row-layout {
-//    max-width: 95%;
-//    padding: 0.4rem;
-//  }
-//
-
+    &:active {
+      background-color: #0050E5 !important;
+    }
+  }
+}

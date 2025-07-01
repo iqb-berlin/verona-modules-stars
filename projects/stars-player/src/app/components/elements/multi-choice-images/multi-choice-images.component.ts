@@ -1,10 +1,9 @@
-import { Component, input, OnDestroy, OnInit, inject } from '@angular/core';
-import { FormControl, FormGroup } from "@angular/forms";
+import { Component, inject, input, OnDestroy, OnInit } from '@angular/core';
+import { FormGroup } from "@angular/forms";
 import { MultiChoiceImagesElement } from "../../../models";
 import { ElementComponent } from "../../../directives/element-component.directive";
-import { VeronaResponse, ResponseStatus } from "../../../models/verona";
-import { UnitStateService } from "../../../services/unit-state.service";
-import { ValidationService } from "../../../services/validation.service";
+import { ResponseStatus } from "../../../models/verona";
+import { MultiChoiceService } from '../../../services/multi-choice.service';
 
 @Component({
   selector: 'stars-multi-choice-images',
@@ -18,33 +17,25 @@ export class MultiChoiceImagesComponent extends ElementComponent implements OnIn
   MultiCheckboxFormGroup = new FormGroup({});
   sectionVariant = input<string>('row_layout');
   layoutClass: string = 'row-layout';
+  private multiChoiceService = inject(MultiChoiceService);
 
-  private unitStateService = inject(UnitStateService);
-  private validationService = inject(ValidationService);
+  private getInitParams() {
+    return {
+      elementId: this.elementModel().id,
+      elementAlias: this.elementModel().alias ?? this.elementModel().id,
+      elementValue: this.elementModel().value ?? '',
+      options: this.elementModel().options ?? [],
+      formGroup: this.MultiCheckboxFormGroup,
+      formId: this.formId,
+      parentForm: () => this.parentForm() ?? null,
+      required: !!this.elementModel().required
+    };
+  }
 
   ngOnInit() {
     this.layoutClass = this.getLayoutClass();
+    this.elementModel().value = this.multiChoiceService.initializeFormControls(this.getInitParams());
 
-    const restoredValue = this.unitStateService.registerElementWithRestore(
-      this.elementModel().id,
-      this.elementModel().alias || this.elementModel().id,
-      this.elementModel().value || "" // default empty string
-    );
-
-    this.elementModel().value = restoredValue;
-    this.elementModel().options.forEach((option, index) => {
-      const formControl = new FormControl();
-
-      if (typeof restoredValue === 'string' && restoredValue.length > index) {
-        const isChecked = restoredValue[index] === '1';
-        formControl.setValue(isChecked, { emitEvent: false });
-      }
-      this.MultiCheckboxFormGroup.addControl(option.id, formControl, { emitEvent: false });
-    });
-    this.parentForm()?.addControl(this.formId, this.MultiCheckboxFormGroup);
-    if (this.elementModel().required) {
-      this.validationService.registerFormControl(this.MultiCheckboxFormGroup);
-    }
     this.updateElementStatus(ResponseStatus.DISPLAYED);
 
   }
@@ -54,34 +45,22 @@ export class MultiChoiceImagesComponent extends ElementComponent implements OnIn
   }
 
   valueChanged(event: any) {
-    let value = "";
-    for (let i = 0; i < this.elementModel().options.length; i++) {
-      const option = this.elementModel().options[i];
-      const formControl = this.MultiCheckboxFormGroup.controls[option.id];
-      value += formControl.value === true ? '1' : '0';
-    }
-    this.elementModel().value = value;
-
-    this.unitStateService.changeElementCodeValue({
-      id: this.elementModel().id,
-      value: value,
-      status: ResponseStatus.VALUE_CHANGED
+    const response = this.multiChoiceService.valueChanged({
+      formGroup: this.MultiCheckboxFormGroup,
+      options: this.elementModel().options,
+      elementId: this.elementModel().id,
+      elementAlias: this.elementModel().alias,
+      elementValue: this.elementModel().value
     });
 
-    const response: VeronaResponse = {
-      id: this.elementModel().id,
-      alias: this.elementModel().alias || this.elementModel().id,
-      value: value,
-      status: ResponseStatus.VALUE_CHANGED
-    };
-
+    this.elementModel().value = response.value;
     this.valueChange.emit(response);
   }
 
   private updateElementStatus(status: ResponseStatus) {
-    this.unitStateService.changeElementCodeValue({
-      id: this.elementModel().id,
-      value: this.elementModel().value,
+    this.multiChoiceService.updateElementStatus({
+      elementId: this.elementModel().id,
+      elementValue: this.elementModel().value,
       status: status
     });
   }

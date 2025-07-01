@@ -1,9 +1,9 @@
-import {Component, input, OnDestroy, OnInit, output} from "@angular/core";
-import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
-import {ImageElement} from "../../../models";
-import {fromEvent, Subject, tap, throttleTime} from "rxjs";
-import {takeUntil} from "rxjs/operators";
-import {MediaChangeItem, MediaPlayerService} from '../../../services/media-player-service';
+import { Component, input, OnDestroy, OnInit, output } from "@angular/core";
+import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
+import { ImageElement } from "../../../models";
+import { fromEvent, Subject, tap, throttleTime } from "rxjs";
+import { takeUntil } from "rxjs/operators";
+import { MediaChangeItem, MediaPlayerService } from '../../../services/media-player-service';
 
 @Component({
   selector: 'stars-media-player',

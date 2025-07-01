@@ -32,7 +32,12 @@
               "./node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css",
               "projects/stars-player/src/styles.css"
             ],
-            "scripts": []
+            "scripts": [],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "projects/stars-player/src/styles"
+              ]
+            }
           },
           "configurations": {
             "production": {
