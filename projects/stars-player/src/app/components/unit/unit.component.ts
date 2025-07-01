@@ -18,6 +18,7 @@ import { Section } from "../../models";
 import { Unit, UnitNavNextButtonMode } from "../../models/unit";
 import { LogService } from "../../services/log.service";
 import { AudioComponent } from "../elements/audio.component";
+import { Colors } from "../../../../../common/interfaces/colors";
 
 @Component({
   selector: 'stars-unit',
@@ -106,6 +107,9 @@ export class UnitComponent implements OnInit, OnDestroy {
 
   private applyBackgroundColor(backgroundColor?: string): void {
     if (backgroundColor) {
+      if (!backgroundColor.startsWith("#")) {
+        backgroundColor = Colors[backgroundColor.toUpperCase()] || "#DDDDDD";
+      }
       this.renderer.setStyle(this.elementRef.nativeElement, 'background-color', backgroundColor);
       this.renderer.setStyle(document.body, 'background-color', backgroundColor);
     } else {

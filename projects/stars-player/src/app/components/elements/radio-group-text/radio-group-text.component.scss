@@ -163,7 +163,7 @@ mat-radio-button {
 }
 
 mat-radio-group.col-layout .large-letter {
-  width: 300px;
+  width: clamp(300px,50vh,400px);
   height: 100px;
   font-size: 32px;
   min-height: 100px;
