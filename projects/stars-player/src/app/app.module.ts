@@ -19,22 +19,25 @@ import { UnitNavNextComponent} from "./components/unit-nav-next.component";
 import { RadioGroupTextComponent} from "./components/elements/radio-group-text/radio-group-text.component";
 import { AppComponent } from "./app.component";
 import {
-  UnitComponent,
-  SectionComponent,
-  PicPicLayoutComponent,
-  PicTextLayoutComponent,
-  ImageComponent,
-  CheckboxComponent,
-  TextComponent,
   AudioComponent,
-  RadioGroupImagesComponent,
-  MultiChoiceImagesComponent,
-  StimulusSelectionComponent,
+  BinaryChoiceComponent,
+  CheckboxComponent,
+  ImageComponent,
   InstructionsSelectionComponent,
   InteractionSelectionComponent,
   UnitMenuComponent,
   MediaPlayerComponent,
+  MultiChoiceCirclesComponent,
+  MultiChoiceImagesComponent,
+  PicPicLayoutComponent,
+  PicTextLayoutComponent,
+  RadioGroupImagesComponent,
   ReducedKeyboardComponent,
+  SectionComponent,
+  StimulusSelectionComponent,
+  TextComponent,
+  UnitComponent,
+  UnitMenuComponent
   BinaryChoiceComponent,
   SyllableCounterComponent
 } from "./components";
@@ -70,7 +73,8 @@ import { SafeResourceUrlPipe } from "./pipes/safe-resource-url.pipe";
     ReducedKeyboardComponent,
     SyllableCounterComponent,
     RadioGroupTextComponent,
-    BinaryChoiceComponent
+    BinaryChoiceComponent,
+    MultiChoiceCirclesComponent
   ],
   imports: [
     BrowserModule,

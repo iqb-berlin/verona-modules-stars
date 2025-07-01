@@ -16,6 +16,11 @@
       "dom"
     ],
     "useDefineForClassFields": false,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "paths": {
+      "@styles/*": [
+        "src/styles/*"
+      ]
+    }
   }
 }

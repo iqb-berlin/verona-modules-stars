@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/icon?family=Material+Icons");
+@import 'styles/_colors.scss';
 
 @font-face {
   font-family: 'Quicksand';
@@ -40,8 +41,14 @@
   font-display: swap;
 }
 
-html { height: 100%; }
-body { margin: 0; font-family: 'Quicksand', sans-serif; }
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Quicksand', sans-serif;
+}
 
 
 player-sub-form {
@@ -56,6 +63,7 @@ player-sub-form {
   justify-content: space-between;
   align-items: center;
 }
+
 .fx-row-space-between-start {
   display: flex;
   flex-direction: row;
@@ -63,6 +71,7 @@ player-sub-form {
   justify-content: space-between;
   align-items: flex-start;
 }
+
 .fx-row-space-around-center {
   display: flex;
   flex-direction: row;
@@ -70,6 +79,7 @@ player-sub-form {
   justify-content: space-around;
   align-items: center;
 }
+
 .fx-row-start-center {
   display: flex;
   flex-direction: row;
@@ -77,6 +87,7 @@ player-sub-form {
   justify-content: flex-start;
   align-items: center;
 }
+
 .fx-row-start-start {
   display: flex;
   flex-direction: row;
@@ -84,6 +95,7 @@ player-sub-form {
   justify-content: flex-start;
   align-items: flex-start;
 }
+
 .fx-row-center-center {
   display: flex;
   flex-direction: row;
@@ -91,6 +103,7 @@ player-sub-form {
   justify-content: center;
   align-items: center;
 }
+
 .fx-row-stretch-stretch {
   display: flex;
   flex-direction: row;
@@ -114,9 +127,10 @@ player-sub-form {
 }
 
 mat-form-field {
-  .mat-mdc-form-field-hint-wrapper,  .mat-mdc-form-field-error-wrapper {
+  .mat-mdc-form-field-hint-wrapper, .mat-mdc-form-field-error-wrapper {
     position: relative;
   }
+
   .mat-mdc-form-field-bottom-align::before {
     content: none;
   }

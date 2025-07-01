@@ -1,4 +1,4 @@
-import { Component, ElementRef, input, OnInit,OnDestroy, ViewChild } from '@angular/core';
+import { Component, ElementRef, input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { AudioElement } from "../../models";
 import { MediaPlayerElementComponent } from "../../directives/media-player-element-component.directive";
 
@@ -11,6 +11,7 @@ import { MediaPlayerElementComponent } from "../../directives/media-player-eleme
           <stars-media-player [player]="player"
                               [playerId]="elementModel().id"
                               [isPlaying]="isPlaying"
+                              [disabled]="isPlayDisabled"
                               (elementValueChanged)="valueChanged($event)"
                               [image]="elementModel().image">
             <audio #player
@@ -98,6 +99,8 @@ export class AudioComponent extends MediaPlayerElementComponent implements OnIni
   private static firstTouchListenersAdded = false;
   private static currentOverlay: HTMLElement | null = null;
   private audioElement: HTMLAudioElement | null = null;
+  private playCount: number = 0;
+  private maxPlays: number = 3; // Set your desired maximum plays here
   isPlaying: boolean = false;
 
   ngOnInit() {
@@ -125,6 +128,13 @@ export class AudioComponent extends MediaPlayerElementComponent implements OnIni
   }
 
   onPlay() {
+    if (this.playCount >= this.maxPlays) {
+      this.audioElement?.pause();
+      console.warn('Maximum play limit reached');
+      return;
+    }
+
+    this.playCount++;
     this.isPlaying = true;
   }
 
@@ -134,6 +144,15 @@ export class AudioComponent extends MediaPlayerElementComponent implements OnIni
 
   valueChanged(event) {
     // console.log(event);
+  }
+
+  get isPlayDisabled(): boolean {
+    return this.playCount >= this.maxPlays;
+  }
+
+
+  private canPlay(): boolean {
+    return this.playCount < this.maxPlays;
   }
 
   private setupFirstTouchListeners(): void {
@@ -157,14 +176,14 @@ export class AudioComponent extends MediaPlayerElementComponent implements OnIni
       if (!AudioComponent.hasUserInteracted) {
         AudioComponent.hasUserInteracted = true;
 
-        if (this.audioElement) {
+        if (this.audioElement && this.canPlay()) {
           this.audioElement.play().then(() => {
           }).catch(error => {
             console.warn('Could not play audio on first touch:', error);
           });
         } else {
           const audioElement = document.querySelector('audio') as HTMLAudioElement;
-          if (audioElement) {
+          if (audioElement && this.canPlay()) {
             audioElement.play().catch(error => {
               console.warn('Fallback audio play failed:', error);
             });

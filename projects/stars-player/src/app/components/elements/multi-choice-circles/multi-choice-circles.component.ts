@@ -1,24 +1,24 @@
-import { Component, input, OnDestroy, OnInit, inject } from '@angular/core';
-import { FormControl, FormGroup } from "@angular/forms";
-import { MultiChoiceImagesElement } from "../../../models";
+import { Component, input, OnDestroy, OnInit, signal } from '@angular/core';
+import { FormGroup } from "@angular/forms";
 import { ElementComponent } from "../../../directives/element-component.directive";
-import { VeronaResponse, ResponseStatus } from "../../../../../../common/models/verona";
+import { MultiChoiceCirclesElement } from "../../../models";
 import { ResponseStatus, VeronaResponse } from "../../../models/verona";
-import { MultiChoiceService } from '../../../services/multi-choice.service';
+import { MultiChoiceService } from "../../../services/multi-choice.service";
 import { UnitStateService } from "../../../services/unit-state.service";
 
+
 @Component({
-  selector: 'stars-multi-choice-images',
-  templateUrl: 'multi-choice-images.component.html',
-  styleUrls: ['multi-choice-images.component.scss'],
+  selector: 'stars-multi-choice-circles',
+  templateUrl: 'multi-choice-circles.component.html',
+  styleUrls: ['multi-choice-circles.component.scss'],
   standalone: false
 })
-export class MultiChoiceImagesComponent extends ElementComponent implements OnInit, OnDestroy {
-  elementModel = input.required<MultiChoiceImagesElement>();
+
+export class MultiChoiceCirclesComponent extends ElementComponent implements OnInit, OnDestroy {
+  elementModel = input.required<MultiChoiceCirclesElement>();
+  options = signal<CircleOption[]>([]);
   formId = `mc-circles-${crypto.randomUUID()}`;
   MultiCheckboxFormGroup = new FormGroup({});
-  sectionVariant = input<string>('row_layout');
-  layoutClass: string = 'row-layout';
 
   constructor(
     private multiChoiceService: MultiChoiceService,
@@ -41,11 +41,20 @@ export class MultiChoiceImagesComponent extends ElementComponent implements OnIn
   }
 
   ngOnInit() {
-    this.layoutClass = this.getLayoutClass();
+    const circleOptions: CircleOption[] = Array.from(
+      { length: this.elementModel().optionsCount },
+      (_, index) => ({
+        id: `circle_${index}`,
+        text: `Circle ${index + 1}`
+      })
+    );
+
+    this.options.set(circleOptions);
+    this.elementModel().options = circleOptions;
+
     this.elementModel().value = this.multiChoiceService.initializeFormControls(this.getInitParams());
 
     this.updateElementStatus(ResponseStatus.DISPLAYED);
-
   }
 
   ngOnDestroy() {
@@ -53,14 +62,10 @@ export class MultiChoiceImagesComponent extends ElementComponent implements OnIn
   }
 
   valueChanged(event: any): VeronaResponse {
-    let value = "";
-    for (let i = 0; i < this.elementModel().options.length; i++) {
-      const option = this.elementModel().options[i];
-      const formControl = this.MultiCheckboxFormGroup.controls[option.id];
-      value += formControl.value === true ? '1' : '0';
-    }
-    this.elementModel().value = value;
+    const selectedCount = this.countSelectedCircles();
+    const value = selectedCount.toString();
 
+    /* Convert to string */
     this.unitStateService.changeElementCodeValue({
       id: this.elementModel().id,
       value: value,
@@ -78,6 +83,12 @@ export class MultiChoiceImagesComponent extends ElementComponent implements OnIn
     return response;
   }
 
+  private countSelectedCircles(): number {
+    return this.elementModel().options.reduce((count, option) => {
+      const control = this.MultiCheckboxFormGroup.controls[option.id];
+      return control?.value === true ? count + 1 : count;
+    }, 0);
+  }
 
   private updateElementStatus(status: ResponseStatus) {
     this.multiChoiceService.updateElementStatus({
@@ -86,17 +97,9 @@ export class MultiChoiceImagesComponent extends ElementComponent implements OnIn
       status: status
     });
   }
+}
 
-  getLayoutClass(): string {
-    const variant = this.sectionVariant();
-    console.log(`Section variant for multi-choice: ${variant}`);
-
-    switch (variant) {
-      case 'grid_layout':
-        return 'grid-layout';
-      case 'row_layout':
-      default:
-        return 'row-layout';
-    }
-  }
+export interface CircleOption {
+  id: string;
+  text: string;
 }

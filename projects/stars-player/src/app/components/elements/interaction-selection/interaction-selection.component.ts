@@ -2,6 +2,8 @@ import { Component, input, OnInit } from "@angular/core";
 import { FormGroup } from "@angular/forms";
 
 import {
+  BinaryChoiceElement,
+  MultiChoiceCirclesElement,
   MultiChoiceImagesElement,
   RadioGroupImagesElement,
   ReducedKeyboardElement,
@@ -30,6 +32,7 @@ export class InteractionSelectionComponent extends ElementComponent implements O
   interactionTypes: UIElementType[] = [
     "radio-group-images",
     "multi-choice-images",
+    "multi-choice-circles",
     "radio-group-text",
     "reduced-keyboard",
     "syllable-counter",
@@ -37,8 +40,7 @@ export class InteractionSelectionComponent extends ElementComponent implements O
   ];
 
   ngOnInit() {
-    this.elementType = this.interactionTypes.find(type => type === this.elementModel().type );
-    console.log(this.sectionVariant());
+    this.elementType = this.stimulusTypes.find(type => type === this.elementModel().type );
   }
 
   get elementModelAsRadioGroupImagesElement(): RadioGroupImagesElement {

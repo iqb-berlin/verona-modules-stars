@@ -1,9 +1,9 @@
-import {Component, input, OnDestroy, OnInit, output} from "@angular/core";
-import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
-import {ImageElement} from "../../../models";
-import {fromEvent, Subject, tap, throttleTime} from "rxjs";
-import {takeUntil} from "rxjs/operators";
-import {MediaChangeItem, MediaPlayerService} from '../../../services/media-player-service';
+import { Component, input, OnDestroy, OnInit, output } from "@angular/core";
+import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
+import { ImageElement } from "../../../models";
+import { fromEvent, Subject, tap, throttleTime } from "rxjs";
+import { takeUntil } from "rxjs/operators";
+import { MediaChangeItem, MediaPlayerService } from '../../../services/media-player-service';
 
 @Component({
   selector: 'stars-media-player',
@@ -26,6 +26,7 @@ export class MediaPlayerComponent implements OnInit, OnDestroy {
   playerId = input<string>();
   image = input<ImageElement>();
   isPlaying = input<boolean>(false);
+  disabled = input<boolean>(false);
   elementValueChanged = output();
 
   currentTime = 0;
@@ -104,7 +105,8 @@ export class MediaPlayerComponent implements OnInit, OnDestroy {
   constructor(
     private mediaPlayerService: MediaPlayerService,
     private sanitizer: DomSanitizer
-  ) {}
+  ) {
+  }
 
   ngOnInit() {
     fromEvent(this.player(), 'timeupdate')

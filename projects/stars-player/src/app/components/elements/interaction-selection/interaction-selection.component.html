@@ -26,6 +26,13 @@
         (valueChange)="valueChange.emit($event)"
       ></stars-multi-choice-images>
     }
+    @case ("multi-choice-circles") {
+      <stars-multi-choice-circles
+        [elementModel]="elementModelAsMultiChoiceCirclesElement"
+        [parentForm]="parentForm()"
+        (valueChange)="valueChange.emit($event)"
+      ></stars-multi-choice-circles>
+    }
     @case ("reduced-keyboard") {
       <stars-reduced-keyboard
         [elementModel]="elementModelAsReducedKeyboardElement"
