@@ -2,7 +2,7 @@ import { Component, input, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormControl } from "@angular/forms";
 import { ReducedKeyboardElement } from "../../../models/elements/reduced-keyboard";
 import { ElementComponent } from "../../../directives/element-component.directive";
-import { ResponseStatus, VeronaResponse } from "../../../models/verona";
+import { ResponseStatus, VeronaResponse } from "../../../../../../common/models/verona";
 import { UnitStateService } from "../../../services/unit-state.service";
 import { ValidationService } from "../../../services/validation.service";
 

@@ -1,3 +1,6 @@
+export { Unit } from './unit';
+export { Section } from './section';
+
 export { StimulusElement } from  './stimulus';
 export { InteractionElement } from  './interaction';
 export { InstructionsElement } from  './instructions';

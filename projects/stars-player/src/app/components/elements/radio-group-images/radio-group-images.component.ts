@@ -3,7 +3,7 @@ import { FormControl } from "@angular/forms";
 
 import { RadioGroupImagesElement } from "../../../models";
 import { ElementComponent } from "../../../directives/element-component.directive";
-import { VeronaResponse, ResponseStatus } from "../../../models/verona";
+import { VeronaResponse, ResponseStatus } from "../../../../../../common/models/verona";
 import { UnitStateService } from "../../../services/unit-state.service";
 import { ValidationService } from "../../../services/validation.service";
 

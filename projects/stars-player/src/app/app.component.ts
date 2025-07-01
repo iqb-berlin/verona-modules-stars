@@ -3,14 +3,14 @@ import { FormGroup } from '@angular/forms';
 import { debounceTime, Subject, merge } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import { VeronaPostService } from './services/verona-post.service';
+import { VeronaPostService } from '../../../common/services/verona-post.service';
 import { NativeEventService } from './services/native-event.service';
 import { MetaDataService } from './services/meta-data.service';
-import { VeronaSubscriptionService } from "./services/verona-subscription.service";
+import { VeronaSubscriptionService } from "../../../common/services/verona-subscription.service";
 import { UnitStateService } from './services/unit-state.service';
 import { StateVariableStateService } from './services/state-variable-state.service';
 import { ValidationService } from './services/validation.service';
-import { UnitState, UnitStateDataType, VeronaResponse, Progress } from "./models/verona";
+import { UnitState, UnitStateDataType, VeronaResponse, Progress } from "../../../common/models/verona";
 import { LogService } from './services/log.service';
 
 @Component({

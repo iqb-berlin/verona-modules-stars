@@ -1,9 +1,9 @@
 import { Component, input, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormControl, FormGroup } from "@angular/forms";
 
-import { SyllableCounterElement } from "../../../models/elements/syllable-counter";
+import { SyllableCounterElement } from "../../../models";
 import { ElementComponent } from "../../../directives/element-component.directive";
-import { VeronaResponse, ResponseStatus } from "../../../models/verona";
+import { VeronaResponse, ResponseStatus } from "../../../../../../common/models/verona";
 import { UnitStateService } from "../../../services/unit-state.service";
 import { ValidationService } from "../../../services/validation.service";
 

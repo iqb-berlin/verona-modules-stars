@@ -2,7 +2,7 @@ import {
   AbstractIDService,
   UIElementType
 } from '../../interfaces';
-import { VeronaResponse } from '../verona';
+import { VeronaResponse } from '../../../../../common/models/verona';
 import { UIElementProperties } from "../../interfaces";
 import { environment } from "../../environments/environment";
 import { InstantiationError } from "../../errors";

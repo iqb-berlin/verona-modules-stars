@@ -1,6 +1,6 @@
 import { UIElementType } from '../../interfaces';
 import { UIElement } from './ui-element';
-import { VeronaResponse } from '../verona';
+import { VeronaResponse } from '../../../../../common/models/verona';
 import {
   AbstractIDService,
   UIElementProperties

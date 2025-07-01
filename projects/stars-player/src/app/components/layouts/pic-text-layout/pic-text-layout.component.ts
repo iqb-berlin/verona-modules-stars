@@ -3,7 +3,7 @@ import { FormGroup } from "@angular/forms";
 
 import { UIElement } from "../../../models";
 import { ElementComponent } from "../../../directives/element-component.directive";
-import { VeronaResponse } from "../../../models/verona";
+import { VeronaResponse } from "../../../../../../common/models/verona";
 
 
 @Component({

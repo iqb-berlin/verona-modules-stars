@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
-import { VeronaResponse, ResponseStatus } from '../models/verona';
+import { VeronaResponse, ResponseStatus } from '../../../../common/models/verona';
 
 export interface StateVariableCode {
   id: string;

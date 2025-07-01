@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { LogService } from './log.service';
+import { LogService } from '../../stars-player/src/app/services/log.service';
 import {
   LogData,
   NavigationTarget,

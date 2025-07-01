@@ -38,10 +38,12 @@ import {
   BinaryChoiceComponent,
   SyllableCounterComponent
 } from "./components";
-import { ErrorService } from "./services/error.service";
+
+import { ErrorService } from "../../../common/services/error.service";
 import { UnitStateService } from "./services/unit-state.service";
 import { StateVariableStateService } from "./services/state-variable-state.service";
 import { ValidationService } from "./services/validation.service";
+
 import { SafeResourceHTMLPipe } from "./pipes/safe-resource-html.pipe";
 import { SafeResourceUrlPipe } from "./pipes/safe-resource-url.pipe";
 

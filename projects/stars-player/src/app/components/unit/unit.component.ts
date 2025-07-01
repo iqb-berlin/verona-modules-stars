@@ -7,14 +7,14 @@ import {
   VeronaResponse,
   VopPlayerConfigChangedNotification,
   VopStartCommand
-} from '../../models/verona';
-import { VeronaSubscriptionService } from '../../services/verona-subscription.service';
-import { VeronaPostService } from '../../services/verona-post.service';
+} from '../../../../../common/models/verona';
+import { VeronaSubscriptionService } from '../../../../../common/services/verona-subscription.service';
+import { VeronaPostService } from '../../../../../common/services/verona-post.service';
 import { MetaDataService } from '../../services/meta-data.service';
 import { UnitStateService } from '../../services/unit-state.service';
 import { StateVariableStateService } from '../../services/state-variable-state.service';
 import { InstantiationError } from '../../errors';
-import { Section } from "../../models/section";
+import { Section } from "../../models";
 import { Unit, UnitNavNextButtonMode } from "../../models/unit";
 import { LogService } from "../../services/log.service";
 import { AudioComponent } from "../elements/audio.component";

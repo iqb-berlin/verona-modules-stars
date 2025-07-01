@@ -8,7 +8,7 @@ import {
   VopPlayerConfigChangedNotification,
   VopStartCommand
 } from '../models/verona';
-import { LogService } from "./log.service";
+import { LogService } from "../../stars-player/src/app/services/log.service";
 
 
 @Injectable({

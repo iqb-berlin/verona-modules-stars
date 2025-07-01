@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { VeronaResponse, ResponseStatus, Progress } from '../models/verona';
+import { VeronaResponse, ResponseStatus, Progress } from '../../../../common/models/verona';
 
 export interface ElementCode {
   id: string;

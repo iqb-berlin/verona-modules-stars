@@ -4,7 +4,7 @@ import { DomSanitizer, SafeHtml } from "@angular/platform-browser";
 
 import { BinaryChoiceElement } from "../../../models/elements/binary-choice";
 import { ElementComponent } from "../../../directives/element-component.directive";
-import { VeronaResponse, ResponseStatus } from "../../../models/verona";
+import { VeronaResponse, ResponseStatus } from "../../../../../../common/models/verona";
 import { UnitStateService } from "../../../services/unit-state.service";
 import { ValidationService } from "../../../services/validation.service";
 

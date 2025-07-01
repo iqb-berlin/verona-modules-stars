@@ -2,7 +2,7 @@ import { Component, input, output, inject } from '@angular/core';
 import { FormGroup } from "@angular/forms";
 
 import { Section } from "../../models/section";
-import { ResponseStatus, VeronaResponse } from "../../models/verona";
+import { ResponseStatus, VeronaResponse } from "../../../../../common/models/verona";
 import { JSONObject } from "../../interfaces";
 import { UnitStateService } from "../../services/unit-state.service";
 
