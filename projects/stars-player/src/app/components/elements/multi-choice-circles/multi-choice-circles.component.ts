@@ -66,7 +66,6 @@ export class MultiChoiceCirclesComponent extends ElementComponent implements OnI
     const selectedCount = this.countSelectedCircles();
     const value = selectedCount.toString();
 
-    /* Convert to string */
     this.unitStateService.changeElementCodeValue({
       id: this.elementModel().id,
       value: value,

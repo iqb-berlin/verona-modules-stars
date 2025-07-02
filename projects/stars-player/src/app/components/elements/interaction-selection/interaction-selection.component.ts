@@ -6,9 +6,9 @@ import {
   MultiChoiceCirclesElement,
   MultiChoiceImagesElement,
   RadioGroupImagesElement,
+  RadioGroupTextElement,
   ReducedKeyboardElement,
   SyllableCounterElement,
-  RadioGroupTextElement,
   UIElement
 } from "../../../models";
 import { UIElementType } from "../../../interfaces";
@@ -39,7 +39,7 @@ export class InteractionSelectionComponent extends ElementComponent implements O
   ];
 
   ngOnInit() {
-    this.elementType = this.interactionTypes.find(type => type === this.elementModel().type );
+    this.elementType = this.interactionTypes.find(type => type === this.elementModel().type);
   }
 
   get elementModelAsRadioGroupImagesElement(): RadioGroupImagesElement {
@@ -48,6 +48,10 @@ export class InteractionSelectionComponent extends ElementComponent implements O
 
   get elementModelAsMultiChoiceImagesElement(): MultiChoiceImagesElement {
     return this.elementModel() as MultiChoiceImagesElement;
+  }
+
+  get elementModelAsMultiChoiceCirclesElement(): MultiChoiceCirclesElement {
+    return this.elementModel() as MultiChoiceCirclesElement;
   }
 
   get elementModelAsReducedKeyboardElement(): ReducedKeyboardElement {

@@ -1,8 +1,8 @@
-import { Component, input, OnDestroy, OnInit, inject } from '@angular/core';
-import { FormControl, FormGroup } from "@angular/forms";
+import { Component, input, OnDestroy, OnInit } from '@angular/core';
+import { FormGroup } from "@angular/forms";
 import { MultiChoiceImagesElement } from "../../../models";
 import { ElementComponent } from "../../../directives/element-component.directive";
-import { VeronaResponse, ResponseStatus } from "../../../../../../common/models/verona";
+import { ResponseStatus, VeronaResponse } from "../../../../../../common/models/verona";
 import { MultiChoiceService } from '../../../services/multi-choice.service';
 import { UnitStateService } from "../../../services/unit-state.service";
 
@@ -14,7 +14,7 @@ import { UnitStateService } from "../../../services/unit-state.service";
 })
 export class MultiChoiceImagesComponent extends ElementComponent implements OnInit, OnDestroy {
   elementModel = input.required<MultiChoiceImagesElement>();
-  formId = `mc-circles-${crypto.randomUUID()}`;
+  formId = `mc-images-${crypto.randomUUID()}`;
   MultiCheckboxFormGroup = new FormGroup({});
   sectionVariant = input<string>('row_layout');
   layoutClass: string = 'row-layout';
@@ -44,7 +44,6 @@ export class MultiChoiceImagesComponent extends ElementComponent implements OnIn
     this.elementModel().value = this.multiChoiceService.initializeFormControls(this.getInitParams());
 
     this.updateElementStatus(ResponseStatus.DISPLAYED);
-
   }
 
   ngOnDestroy() {
