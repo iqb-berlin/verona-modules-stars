@@ -1,3 +1,5 @@
+@import '_colors.scss';
+
 .radio-group-container {
   width: 100%;
   height: 100%;
@@ -163,7 +165,7 @@ mat-radio-button {
 }
 
 mat-radio-group.col-layout .large-letter {
-  width: clamp(300px,50vh,400px);
+  width: clamp(300px, 50vh, 400px);
   height: 100px;
   font-size: 32px;
   min-height: 100px;
@@ -175,8 +177,8 @@ mat-radio-group.grid-layout[style*="--option-count='4'"] .large-letter {
 }
 
 mat-radio-button.mat-mdc-radio-checked .large-letter {
-  border-color: #0050E5 !important;
-  background-color: #0050E5 !important;
+  border-color: $highlight !important;
+  background-color: $highlight !important;
   box-shadow: 0 2px 12px rgba(0, 123, 255, 0.4);
   color: white;
 }
@@ -268,8 +270,8 @@ mat-radio-group.grid-layout.words-grid .large-letter {
 
 
 mat-radio-group.grid-layout.words-grid mat-radio-button.mat-mdc-radio-checked .large-letter {
-  border-color: #0050E5 !important;
-  background-color: #0050E5 !important;
+  border-color: $highlight !important;
+  background-color: $highlight !important;
   color: white !important;
   transform: scale(1.05) !important;
   box-shadow: 0 4px 12px rgba(0, 80, 229, 0.3) !important;

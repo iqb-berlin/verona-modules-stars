@@ -1,3 +1,5 @@
+@import '_colors.scss';
+
 .syllable-counter-container {
   display: flex;
   flex-direction: column;
@@ -187,7 +189,7 @@
 }
 
 mat-radio-button.mat-mdc-radio-checked .hands-container.vertical {
-  border-color: #0050E5;
+  border-color: $highlight;
 }
 
 mat-radio-button.mat-mdc-radio-checked .hand-image {
@@ -195,7 +197,7 @@ mat-radio-button.mat-mdc-radio-checked .hand-image {
 }
 
 mat-checkbox.mat-mdc-checkbox-checked .hands-container.row {
-  border-color: #0050E5;
+  border-color: $highlight;
 }
 
 mat-checkbox.mat-mdc-checkbox-checked .hand-image {
@@ -203,9 +205,15 @@ mat-checkbox.mat-mdc-checkbox-checked .hand-image {
 }
 
 @keyframes bounce {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-  100% { transform: translateY(0); }
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+  100% {
+    transform: translateY(0);
+  }
 }
 
 .error-message {
