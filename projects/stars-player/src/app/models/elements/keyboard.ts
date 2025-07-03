@@ -17,23 +17,23 @@ export interface KeyboardButton {
   lowerCaseText?: string; // Lower case version of text (for case switching)
 }
 
-export class ReducedKeyboardElement extends InputElement {
-  type: UIElementType = 'reduced-keyboard';
-  label: string = '';
+export class KeyboardElement extends InputElement {
+  type: UIElementType = 'keyboard';
+  label?: string;
   buttons: KeyboardButton[] = [];
   showBackspace: boolean = true;
-  showSubmit: boolean = true;
+  showSubmit: boolean = false;
   maxLength: number | null = null; // Optional character limit
-  submitButtonText: string = '';
+  submitButtonText?: string;
   backspaceButtonText: string = 'Löschen';
-  placeholder: string = '';
+  placeholder?: string;
 
-  static title: string = 'Reduzierte Tastatur';
+  static title: string = 'Grapheme Tastatur';
   static icon: string = 'keyboard';
 
-  constructor(element?: Partial<ReducedKeyboardProperties>, idService?: AbstractIDService) {
-    super({ type: 'reduced-keyboard', ...element }, idService);
-    if (isReducedKeyboardProperties(element)) {
+  constructor(element?: Partial<KeyboardProperties>, idService?: AbstractIDService) {
+    super({ type: 'keyboard', ...element }, idService);
+    if (isKeyboardProperties(element)) {
       this.label = element.label;
       this.buttons = [...element.buttons];
       this.showBackspace = element.showBackspace;
@@ -51,7 +51,7 @@ export class ReducedKeyboardElement extends InputElement {
       });
     } else {
       if (environment.strictInstantiation) {
-        throw new InstantiationError('Error at ReducedKeyboardElement instantiation', element);
+        throw new InstantiationError('Error at KeyboardElement instantiation', element);
       }
       if (element?.label !== undefined) this.label = element.label;
       if (element?.buttons) {
@@ -94,19 +94,19 @@ export class ReducedKeyboardElement extends InputElement {
   }
 }
 
-export interface ReducedKeyboardProperties extends InputElementProperties {
-  label: string;
+export interface KeyboardProperties extends InputElementProperties {
+  label?: string;
   buttons: KeyboardButton[];
   showBackspace: boolean;
   showSubmit: boolean;
   maxLength: number | null;
-  submitButtonText: string;
+  submitButtonText?: string;
   backspaceButtonText: string;
   placeholder?: string;
 }
 
-function isReducedKeyboardProperties(blueprint?: Partial<ReducedKeyboardProperties>)
-  : blueprint is ReducedKeyboardProperties {
+function isKeyboardProperties(blueprint?: Partial<KeyboardProperties>)
+  : blueprint is KeyboardProperties {
   if (!blueprint) return false;
   return blueprint.label !== undefined &&
     blueprint.buttons !== undefined &&

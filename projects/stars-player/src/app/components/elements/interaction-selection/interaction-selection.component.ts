@@ -7,7 +7,7 @@ import {
   MultiChoiceImagesElement,
   RadioGroupImagesElement,
   RadioGroupTextElement,
-  ReducedKeyboardElement,
+  KeyboardElement,
   SyllableCounterElement,
   UIElement
 } from "../../../models";
@@ -33,7 +33,7 @@ export class InteractionSelectionComponent extends ElementComponent implements O
     "multi-choice-images",
     "multi-choice-circles",
     "radio-group-text",
-    "reduced-keyboard",
+    "keyboard",
     "syllable-counter",
     "binary-choice"
   ];
@@ -54,8 +54,8 @@ export class InteractionSelectionComponent extends ElementComponent implements O
     return this.elementModel() as MultiChoiceCirclesElement;
   }
 
-  get elementModelAsReducedKeyboardElement(): ReducedKeyboardElement {
-    return this.elementModel() as ReducedKeyboardElement;
+  get elementModelAsKeyboardElement(): KeyboardElement {
+    return this.elementModel() as KeyboardElement;
   }
 
   get elementModelAsSyllableCounterElement(): SyllableCounterElement {

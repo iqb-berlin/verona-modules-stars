@@ -1,26 +1,30 @@
-import { Component, input, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, input, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from "@angular/forms";
-import { ReducedKeyboardElement } from "../../../models/elements/reduced-keyboard";
+
+import { KeyboardElement } from "../../../models";
 import { ElementComponent } from "../../../directives/element-component.directive";
 import { ResponseStatus, VeronaResponse } from "../../../../../../common/models/verona";
 import { UnitStateService } from "../../../services/unit-state.service";
-import { ValidationService } from "../../../services/validation.service";
+
 
 @Component({
-  selector: 'stars-reduced-keyboard',
-  templateUrl: './reduced-keyboard.component.html',
-  styleUrls: ['./reduced-keyboard.component.scss'],
+  selector: 'stars-keyboard',
+  templateUrl: './keyboard.component.html',
+  styleUrls: ['./keyboard.component.scss'],
   standalone: false
 })
-export class ReducedKeyboardComponent extends ElementComponent implements OnInit, OnDestroy {
-  elementModel = input.required<ReducedKeyboardElement>();
+
+export class KeyboardComponent extends ElementComponent implements OnInit, OnDestroy {
+  elementModel = input.required<KeyboardElement>();
   KeyboardInputControl = new FormControl('');
   currentText: string = '';
-  isSubmitted: boolean = false;
-  position = input<string>("row");
 
-  private unitStateService = inject(UnitStateService);
-  private validationService = inject(ValidationService);
+  characterList: String[] = [...'abcdefghijklmnopqrstuvwxyz'];
+  graphemeList = ['ch','sch','ng','ei','au','eu','le','pf','chs'];
+
+  constructor(private unitStateService: UnitStateService) {
+    super();
+  }
 
   ngOnInit() {
     const restoredValue = this.unitStateService.registerElementWithRestore(
@@ -35,10 +39,7 @@ export class ReducedKeyboardComponent extends ElementComponent implements OnInit
 
     this.parentForm()?.addControl(this.elementModel().id, this.KeyboardInputControl);
 
-    if (this.elementModel().required) {
-      this.validationService.registerFormControl(this.KeyboardInputControl);
-    }
-    this.updateElementStatus(ResponseStatus.DISPLAYED);
+    this.valueChanged(ResponseStatus.DISPLAYED);
   }
 
   ngOnDestroy() {
@@ -49,61 +50,38 @@ export class ReducedKeyboardComponent extends ElementComponent implements OnInit
     return this.currentText.length === 0;
   }
 
-  addChar(button: any) {
-    if (this.isSubmitted) return;
+  capitalize(s: String) {
+    return String(s[0]).toUpperCase() + String(s).slice(1);
+  }
+
+  addChar(button: String) {
     if (this.elementModel().maxLength !== null &&
       this.currentText.length >= this.elementModel().maxLength) {
       return;
     }
 
-    const charToAdd = this.elementModel().getButtonValue(button, this.textIsEmpty);
+    const charToAdd = this.textIsEmpty ? button.toUpperCase() : button;
     this.currentText += charToAdd;
-    this.updateStateAndModel();
+    this.valueChanged();
   }
 
   deleteChar() {
     if (this.currentText.length > 0) {
       this.currentText = this.currentText.slice(0, -1);
-      this.updateStateAndModel();
+      this.valueChanged();
     }
   }
 
-
-  submitText() {
-    this.isSubmitted = true;
-    this.elementModel().value = this.currentText;
-
-    this.unitStateService.changeElementCodeValue({
-      id: this.elementModel().id,
-      value: this.currentText,
-      status: ResponseStatus.CODING_COMPLETE
-    });
-
-    this.emitStateChange(ResponseStatus.CODING_COMPLETE);
-  }
-
-  private updateStateAndModel() {
+  private valueChanged(status?: ResponseStatus | ResponseStatus.VALUE_CHANGED) {
     this.elementModel().value = this.currentText;
     this.KeyboardInputControl.setValue(this.currentText);
 
     this.unitStateService.changeElementCodeValue({
       id: this.elementModel().id,
       value: this.currentText,
-      status: ResponseStatus.VALUE_CHANGED
-    });
-
-    this.emitStateChange(ResponseStatus.VALUE_CHANGED);
-  }
-
-  private updateElementStatus(status: ResponseStatus) {
-    this.unitStateService.changeElementCodeValue({
-      id: this.elementModel().id,
-      value: this.currentText,
       status: status
     });
-  }
 
-  private emitStateChange(status: ResponseStatus) {
     const response: VeronaResponse = {
       id: this.elementModel().id,
       alias: this.elementModel().alias || this.elementModel().id,

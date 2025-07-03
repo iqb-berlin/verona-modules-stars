@@ -21,7 +21,7 @@ export type UIElementType =
   | 'stimulus'
   | 'interaction'
   | 'instructions'
-  | 'reduced-keyboard'
+  | 'keyboard'
   | 'syllable-counter'
   | 'binary-choice';
 
