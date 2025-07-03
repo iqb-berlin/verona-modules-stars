@@ -15,7 +15,6 @@
   padding: 10px;
 }
 
-
 .circle {
   width: 100px;
   height: 100px;
@@ -38,7 +37,7 @@
 
 ::ng-deep .mat-mdc-checkbox-checked {
   .circle {
-    background-color: #0050E5 !important;
+    background-color: $highlight !important;
     transform: scale(1.05);
   }
 }
@@ -64,7 +63,7 @@
     -webkit-tap-highlight-color: transparent;
 
     &:active {
-      background-color: #0050E5 !important;
+      background-color: $highlight !important;
     }
   }
 }
