@@ -7,9 +7,6 @@ import { InputElement } from "./input-element";
 import { environment } from "../../environments/environment";
 import { InstantiationError } from "../../errors";
 
-/**
- * Interface representing a keyboard button option (letter or grapheme)
- */
 export interface KeyboardButton {
   id: string;
   text: string; // Can be single character or grapheme (multiple characters) - uppercase
@@ -27,6 +24,7 @@ export class KeyboardElement extends InputElement {
   submitButtonText?: string;
   backspaceButtonText: string = 'Löschen';
   placeholder?: string;
+  graphemeList?: string[];
 
   static title: string = 'Grapheme Tastatur';
   static icon: string = 'keyboard';
@@ -42,6 +40,7 @@ export class KeyboardElement extends InputElement {
       this.submitButtonText = element.submitButtonText;
       this.backspaceButtonText = element.backspaceButtonText;
       this.placeholder = element.placeholder || '';
+      if (element.graphemeList) this.graphemeList = element.graphemeList;
 
       // Generate lowercase versions for buttons that don't have them explicitly defined
       this.buttons.forEach(button => {
@@ -69,6 +68,7 @@ export class KeyboardElement extends InputElement {
       if (element?.submitButtonText !== undefined) this.submitButtonText = element.submitButtonText;
       if (element?.backspaceButtonText !== undefined) this.backspaceButtonText = element.backspaceButtonText;
       if (element?.placeholder !== undefined) this.placeholder = element.placeholder;
+      if (element?.graphemeList !== undefined) this.graphemeList = element.graphemeList;
     }
   }
 
@@ -103,6 +103,7 @@ export interface KeyboardProperties extends InputElementProperties {
   submitButtonText?: string;
   backspaceButtonText: string;
   placeholder?: string;
+  graphemeList?: string[];
 }
 
 function isKeyboardProperties(blueprint?: Partial<KeyboardProperties>)
@@ -114,5 +115,6 @@ function isKeyboardProperties(blueprint?: Partial<KeyboardProperties>)
     blueprint.showSubmit !== undefined &&
     blueprint.maxLength !== undefined &&
     blueprint.submitButtonText !== undefined &&
-    blueprint.backspaceButtonText !== undefined;
+    blueprint.backspaceButtonText !== undefined &&
+    blueprint.graphemeList !== undefined;
 }

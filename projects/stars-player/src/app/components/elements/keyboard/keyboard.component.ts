@@ -1,16 +1,16 @@
-import { Component, input, OnDestroy, OnInit } from '@angular/core';
-import { FormControl } from "@angular/forms";
+import {Component, input, OnDestroy, OnInit} from '@angular/core';
+import {FormControl} from "@angular/forms";
 
-import { KeyboardElement } from "../../../models";
-import { ElementComponent } from "../../../directives/element-component.directive";
-import { ResponseStatus, VeronaResponse } from "../../../../../../common/models/verona";
-import { UnitStateService } from "../../../services/unit-state.service";
+import {KeyboardElement} from "../../../models";
+import {ElementComponent} from "../../../directives/element-component.directive";
+import {ResponseStatus, VeronaResponse} from "../../../../../../common/models/verona";
+import {UnitStateService} from "../../../services/unit-state.service";
 
 
 @Component({
   selector: 'stars-keyboard',
   templateUrl: './keyboard.component.html',
-  styleUrls: ['./keyboard.component.scss'],
+  styleUrls: [ './keyboard.component.scss' ],
   standalone: false
 })
 
@@ -19,8 +19,8 @@ export class KeyboardComponent extends ElementComponent implements OnInit, OnDes
   KeyboardInputControl = new FormControl('');
   currentText: string = '';
 
-  characterList: String[] = [...'abcdefghijklmnopqrstuvwxyz'];
-  graphemeList = ['ch','sch','ng','ei','au','eu','le','pf','chs'];
+  characterList: String[] = [ ...'abcdefghijklmnopqrstuvwxyz' ];
+  graphemeList = [ 'ch', 'sch', 'ng', 'ei', 'au', 'eu', 'le', 'pf', 'chs' ];
 
   constructor(private unitStateService: UnitStateService) {
     super();
@@ -28,12 +28,13 @@ export class KeyboardComponent extends ElementComponent implements OnInit, OnDes
 
   ngOnInit() {
     const restoredValue = this.unitStateService.registerElementWithRestore(
-      this.elementModel().id,
-      this.elementModel().alias || this.elementModel().id,
-      this.elementModel().value || ""
+        this.elementModel().id,
+        this.elementModel().alias || this.elementModel().id,
+        this.elementModel().value || ""
     );
 
     this.currentText = typeof restoredValue === 'string' ? restoredValue : '';
+    if (this.elementModel().graphemeList) this.graphemeList = this.elementModel().graphemeList;
     this.elementModel().value = this.currentText;
     this.KeyboardInputControl.setValue(this.currentText, { emitEvent: false });
 
@@ -56,7 +57,7 @@ export class KeyboardComponent extends ElementComponent implements OnInit, OnDes
 
   addChar(button: String) {
     if (this.elementModel().maxLength !== null &&
-      this.currentText.length >= this.elementModel().maxLength) {
+        this.currentText.length >= this.elementModel().maxLength) {
       return;
     }
 

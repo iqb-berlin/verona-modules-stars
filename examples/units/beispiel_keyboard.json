@@ -2,6 +2,7 @@
   "type": "stars-unit-definition",
   "version": "0.1.0",
   "backgroundColor": "#FFC7B1",
+  "navNextButtonMode": "onInteraction",
   "sections": [{
     "id": "section1",
     "layoutId": "PicPicLayout",
@@ -24,7 +25,15 @@
       "showBackspace": true,
       "showSubmit": false,
       "maxLength": 10,
-      "placeholder": ""
+      "placeholder": "",
+      "graphemeList": [
+        "eu",
+        "au",
+        "ei",
+        "ch",
+        "sch",
+        "ng"
+      ]
     },
     "instructions": {
       "id": "audio_instruction",
