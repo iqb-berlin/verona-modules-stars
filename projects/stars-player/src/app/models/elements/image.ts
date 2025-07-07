@@ -4,7 +4,7 @@ import {
   UIElementProperties,
   UIElementType
 } from "../../interfaces";
-import { environment } from "../../environments/environment";
+import { environment } from "../../../environments/environment";
 import { InstantiationError } from "../../errors";
 
 export class ImageElement extends UIElement implements ImageProperties {

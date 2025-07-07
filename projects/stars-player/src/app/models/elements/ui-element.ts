@@ -4,7 +4,7 @@ import {
 } from '../../interfaces';
 import { VeronaResponse } from '../../../../../common/models/verona';
 import { UIElementProperties } from "../../interfaces";
-import { environment } from "../../environments/environment";
+import { environment } from "../../../environments/environment";
 import { InstantiationError } from "../../errors";
 
 export abstract class UIElement implements UIElementProperties {

@@ -1,7 +1,7 @@
 import { Section, SectionProperties } from './section';
 import { UIElement } from './elements/ui-element';
 import { StateVariable } from './state-variable';
-import { environment } from '../environments/environment';
+import { environment } from '../../environments/environment';
 import { AbstractIDService } from '../interfaces';
 import { InstantiationError } from '../errors';
 

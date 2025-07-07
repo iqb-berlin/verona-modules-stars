@@ -1,6 +1,6 @@
 import { UIElement } from './elements/ui-element';
 import { ElementFactory } from './element.factory';
-import { environment } from '../environments/environment';
+import { environment } from '../../environments/environment';
 import {
   AbstractIDService,
   Coder,
