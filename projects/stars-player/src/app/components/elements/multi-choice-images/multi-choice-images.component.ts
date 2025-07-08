@@ -14,7 +14,7 @@ import { UnitStateService } from "../../../services/unit-state.service";
 })
 export class MultiChoiceImagesComponent extends ElementComponent implements OnInit, OnDestroy {
   elementModel = input.required<MultiChoiceImagesElement>();
-  formId = `mc-images-${crypto.randomUUID()}`;
+  formId = `mc-images-`+ Math.floor(Math.random() * 20000000 + 10000000).toString();
   MultiCheckboxFormGroup = new FormGroup({});
   sectionVariant = input<string>('row_layout');
   layoutClass: string = 'row-layout';
