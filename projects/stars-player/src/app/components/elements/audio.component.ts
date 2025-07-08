@@ -45,7 +45,6 @@ import { MediaPlayerElementComponent } from "../../directives/media-player-eleme
     .audio-button-wrapper {
       display: block;
       width: auto;
-      max-width: clamp(150px, 15vw, 300px);
       margin-bottom: 0.75rem;
     }
 

@@ -1,4 +1,5 @@
 @import '_colors.scss';
+@import "_variables.scss";
 
 .radio-group-container {
   width: 100%;
@@ -92,11 +93,8 @@ mat-radio-group.grid-layout {
 }
 
 mat-radio-group.grid-layout mat-radio-button {
-  width: 100%;
-  height: 100%;
-  max-width: 150px;
-  max-height: 150px;
-  min-height: 100px;
+  width: $image-size;
+  height: $image-size;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -135,8 +133,8 @@ mat-radio-button {
 
 
 .image-wrapper {
-  width: 100%;
-  height: 100%;
+  width: $image-size;
+  height: $image-size;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -150,10 +148,9 @@ mat-radio-group.grid-layout[style*="--option-count='4'"] .image-wrapper {
 }
 
 img {
-  width: 100%;
-  height: 100%;
+  width: $image-size;
+  height: $image-size;
   max-height: min(200px, 25vh);
-  max-width: 100%;
   object-fit: contain;
   cursor: pointer;
   background: #ffffff;
@@ -184,17 +181,17 @@ mat-radio-button.mat-mdc-radio-checked img {
 }
 
 :host ::ng-deep mat-radio-group.grid-layout[style*="--option-count: 4"] mat-radio-button {
-  width: clamp(160px, 23vmin, 200px) !important;
-  height: clamp(160px, 23vmin, 200px) !important;
-  min-width: 160px !important;
-  min-height: 160px !important;
+  //width: clamp(160px, 23vmin, 200px) !important;
+  //height: clamp(160px, 23vmin, 200px) !important;
+  width: $image-size;
+  height: $image-size;
   max-width: none !important;
   max-height: none !important;
 }
 
 :host ::ng-deep mat-radio-group.grid-layout[style*="--option-count: 4"] .image-wrapper {
-  width: clamp(140px, 20vmin, 180px) !important;
-  height: clamp(140px, 20vmin, 180px) !important;
+  width: $image-size;
+  height: $image-size;
 }
 
 :host ::ng-deep mat-radio-group.grid-layout[style*="--option-count: 4"] {

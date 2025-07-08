@@ -1,5 +1,6 @@
 @import url("https://fonts.googleapis.com/icon?family=Material+Icons");
 @import 'styles/_colors.scss';
+@import "styles/_variables.scss";
 
 @font-face {
   font-family: 'Quicksand';
