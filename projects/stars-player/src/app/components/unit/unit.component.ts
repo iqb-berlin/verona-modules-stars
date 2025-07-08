@@ -29,7 +29,7 @@ import { Colors } from "../../../../../common/interfaces/colors";
 export class UnitComponent implements OnInit, OnDestroy {
   sections: Section[] = [];
   playerConfig: PlayerConfig = {};
-  navNextButtonMode: UnitNavNextButtonMode = 'always'
+  navNextButtonMode: UnitNavNextButtonMode = 'always';
   valueChange = output<VeronaResponse>();
 
   presentationProgressStatus: BehaviorSubject<Progress> = new BehaviorSubject<Progress>('none');
@@ -99,10 +99,15 @@ export class UnitComponent implements OnInit, OnDestroy {
       case 'always':
         return true;
       case 'onInteraction':
+      case 'practice':
         return this.hasUserProvidedInput();
       default:
         return false;
     }
+  }
+
+  get isPracticedInput(): boolean {
+    return this.navNextButtonMode === 'practice';
   }
 
   private applyBackgroundColor(backgroundColor?: string): void {
@@ -158,6 +163,14 @@ export class UnitComponent implements OnInit, OnDestroy {
 
   private hasUserProvidedInput(): boolean {
     const responses = this.unitStateService.getResponses();
+    if (this.navNextButtonMode == 'practice') {
+      return responses.some(response => {
+        return response.code !== null &&
+          response.code !== undefined &&
+          response.code !== 0 &&
+          response.status !== 'UNSET';
+      });
+    }
     return responses.some(response => {
       return response.value !== null &&
         response.value !== undefined &&

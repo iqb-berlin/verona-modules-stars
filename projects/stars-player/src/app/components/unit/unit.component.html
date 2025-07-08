@@ -2,7 +2,9 @@
 
 @for (section of this.sections; track section) {
   <stars-section [section]="section"
-                 (valueChange)="valueChanged($event)">
+                 (valueChange)="valueChanged($event)"
+                 [class.practice]="isPracticedInput">
+  >
   </stars-section>
 }
 

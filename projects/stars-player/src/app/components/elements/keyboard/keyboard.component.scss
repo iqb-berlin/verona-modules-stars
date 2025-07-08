@@ -17,14 +17,29 @@
   font-family: 'Quicksand', sans-serif;
 }
 
+.text-wrapper {
+  display: block;
+  margin-bottom: 1.5rem;
+  width: 100%;
+
+  .move-left {
+    float: left;
+    width: 85%;
+    min-height: 120px;
+  }
+
+  .placeholder {
+    width: 14%;
+    content: "";
+  }
+}
+
 .text-display {
+  display: block;
   width: 60%;
   min-height: 120px;
+  margin: 0 auto;
   border-bottom: 4px solid #000;
-  margin-bottom: 1.5rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .text-content {

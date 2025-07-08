@@ -19,7 +19,8 @@ export class KeyboardComponent extends ElementComponent implements OnInit, OnDes
   KeyboardInputControl = new FormControl('');
   currentText: string = '';
 
-  characterList: String[] = [ ...'abcdefghijklmnopqrstuvwxyz' ];
+  characterList = [ ...'abcdefghijklmnopqrstuvwxyz' ];
+  umlautListChars = [...'äöü'];
   graphemeList = [ 'ch', 'sch', 'ng', 'ei', 'au', 'eu', 'le', 'pf', 'chs' ];
 
   constructor(private unitStateService: UnitStateService) {

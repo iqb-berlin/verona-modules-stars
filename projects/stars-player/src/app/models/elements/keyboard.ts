@@ -25,6 +25,7 @@ export class KeyboardElement extends InputElement {
   backspaceButtonText: string = 'Löschen';
   placeholder?: string;
   graphemeList?: string[];
+  umlautList?: boolean;
 
   static title: string = 'Grapheme Tastatur';
   static icon: string = 'keyboard';
@@ -40,6 +41,7 @@ export class KeyboardElement extends InputElement {
       this.submitButtonText = element.submitButtonText;
       this.backspaceButtonText = element.backspaceButtonText;
       this.placeholder = element.placeholder || '';
+      this.umlautList = element.umlautList || false;
       if (element.graphemeList) this.graphemeList = element.graphemeList;
 
       // Generate lowercase versions for buttons that don't have them explicitly defined
@@ -69,6 +71,7 @@ export class KeyboardElement extends InputElement {
       if (element?.backspaceButtonText !== undefined) this.backspaceButtonText = element.backspaceButtonText;
       if (element?.placeholder !== undefined) this.placeholder = element.placeholder;
       if (element?.graphemeList !== undefined) this.graphemeList = element.graphemeList;
+      if (element?.umlautList !== undefined) this.umlautList = element.umlautList;
     }
   }
 
@@ -104,6 +107,7 @@ export interface KeyboardProperties extends InputElementProperties {
   backspaceButtonText: string;
   placeholder?: string;
   graphemeList?: string[];
+  umlautList?: boolean;
 }
 
 function isKeyboardProperties(blueprint?: Partial<KeyboardProperties>)
@@ -116,5 +120,6 @@ function isKeyboardProperties(blueprint?: Partial<KeyboardProperties>)
     blueprint.maxLength !== undefined &&
     blueprint.submitButtonText !== undefined &&
     blueprint.backspaceButtonText !== undefined &&
-    blueprint.graphemeList !== undefined;
+    blueprint.graphemeList !== undefined &&
+    blueprint.umlautList !== undefined;
 }

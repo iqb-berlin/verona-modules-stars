@@ -37,6 +37,7 @@
       "showSubmit": false,
       "maxLength": 10,
       "placeholder": "",
+      "umlautList": true,
       "graphemeList": [
         "eu",
         "au",

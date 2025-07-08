@@ -5,14 +5,19 @@
     </label>
   </div>
 
-  <div class="text-display">
-    <div class="text-content" [attr.aria-label]="'Eingegebener Text'">
-      @if (currentText) {
-        <span>{{ currentText }}</span>
-      } @else {
-        <span class="placeholder">{{ elementModel().placeholder || "" }}</span>
-      }
+  <div class="text-wrapper">
+    <div class="move-left">
+      <div class="text-display">
+        <div class="text-content" [attr.aria-label]="'Eingegebener Text'">
+          @if (currentText) {
+            <span>{{ currentText }}</span>
+          } @else {
+            <span class="placeholder">{{ elementModel().placeholder || "" }}</span>
+          }
+        </div>
+      </div>
     </div>
+    <div class="placeholder"></div>
   </div>
 
   <div class="keyboard-buttons">
@@ -30,6 +35,17 @@
       </div>
 
       <div class="grapheme-list">
+        @if (elementModel().umlautList) {
+          @for (button of umlautListChars; track button) {
+            <button type="button"
+                    class="keyboard-button"
+                    [attr.aria-label]="textIsEmpty ? button.toUpperCase() : button"
+                    (click)="addChar(button)"
+                    [disabled]="elementModel().maxLength !== null && currentText.length >= elementModel().maxLength">
+              {{ textIsEmpty ? button.toUpperCase() : button }}
+            </button>
+          }
+        }
         @for (button of graphemeList; track button) {
           <button type="button"
                   class="keyboard-button"

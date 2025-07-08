@@ -23,7 +23,6 @@ export class Section implements SectionProperties {
 
   constructor(section?: SectionProperties, idService?: AbstractIDService) {
     this.idService = idService;
-    console.log(section);
     if (section) {
       this.layoutId = section.layoutId || "default";
       this.variant = section.variant || undefined;
