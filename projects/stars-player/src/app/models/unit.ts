@@ -1,11 +1,11 @@
 import { Section, SectionProperties } from './section';
 import { UIElement } from './elements/ui-element';
 import { StateVariable } from './state-variable';
-import { environment } from '../environments/environment';
+import { environment } from '../../environments/environment';
 import { AbstractIDService } from '../interfaces';
 import { InstantiationError } from '../errors';
 
-export type UnitNavNextButtonMode = 'always' | 'onInteraction';
+export type UnitNavNextButtonMode = 'always' | 'onInteraction' | 'practice';
 
 export class Unit implements UnitProperties {
   type = 'stars-unit-definition';
@@ -14,11 +14,13 @@ export class Unit implements UnitProperties {
   sections: Section[] = [];
   navNextButtonMode?: UnitNavNextButtonMode;
   backgroundColor?: string;
+  practice?: boolean;
 
   constructor(unit?: UnitProperties, idService?: AbstractIDService) {
     if (unit && isValid(unit)) {
       this.version = unit.version;
       this.backgroundColor = unit.backgroundColor;
+      this.practice = unit.practice || false;
       this.stateVariables = unit.stateVariables
         .map(variable => new StateVariable(variable.id, variable.alias ?? variable.id, variable.value));
       this.sections = unit.sections
@@ -55,7 +57,8 @@ function isValid(blueprint?: UnitProperties): boolean {
     blueprint.stateVariables !== undefined &&
     blueprint.type !== undefined &&
     blueprint.sections !== undefined &&
-    blueprint.navNextButtonMode !== undefined;
+    blueprint.navNextButtonMode !== undefined &&
+    blueprint.practice !== undefined;
 }
 
 export interface UnitProperties {
@@ -65,4 +68,5 @@ export interface UnitProperties {
   sections: SectionProperties[];
   navNextButtonMode?: UnitNavNextButtonMode;
   backgroundColor?: string;
+  practice?: boolean;
 }

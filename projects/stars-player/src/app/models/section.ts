@@ -1,6 +1,6 @@
 import { UIElement } from './elements/ui-element';
 import { ElementFactory } from './element.factory';
-import { environment } from '../environments/environment';
+import { environment } from '../../environments/environment';
 import {
   AbstractIDService,
   Coder,
@@ -23,7 +23,6 @@ export class Section implements SectionProperties {
 
   constructor(section?: SectionProperties, idService?: AbstractIDService) {
     this.idService = idService;
-    console.log(section);
     if (section) {
       this.layoutId = section.layoutId || "default";
       this.variant = section.variant || undefined;

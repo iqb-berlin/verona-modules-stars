@@ -1,6 +1,6 @@
 import { AbstractIDService, InputElementProperties, UIElementType } from "../../interfaces";
 import { InputElement } from "./input-element";
-import { environment } from "../../environments/environment";
+import { environment } from "../../../environments/environment";
 import { InstantiationError } from "../../errors";
 import { CircleOption } from "../../components/elements/multi-choice-circles/multi-choice-circles.component";
 

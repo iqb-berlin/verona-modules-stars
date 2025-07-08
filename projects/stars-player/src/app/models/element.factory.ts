@@ -9,7 +9,7 @@ import {
   MultiChoiceImagesElement,
   RadioGroupImagesElement,
   RadioGroupTextElement,
-  ReducedKeyboardElement,
+  KeyboardElement,
   SyllableCounterElement,
   TextElement,
   UIElement
@@ -27,7 +27,7 @@ export abstract class ElementFactory {
     "multi-choice-circles": MultiChoiceCirclesElement,
     "radio-group-text": RadioGroupTextElement,
     "audio": AudioElement,
-    "reduced-keyboard": ReducedKeyboardElement,
+    "keyboard": KeyboardElement,
     "syllable-counter": SyllableCounterElement,
     "binary-choice": BinaryChoiceElement
   };

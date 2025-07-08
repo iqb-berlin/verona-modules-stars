@@ -17,24 +17,35 @@
   font-family: 'Quicksand', sans-serif;
 }
 
-.text-display {
-  width: 80%;
-  min-height: 70px;
-  border: 2px solid #ddd;
-  border-radius: 12px;
+.text-wrapper {
+  display: block;
   margin-bottom: 1.5rem;
-  padding: 0.5rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  width: 100%;
+
+  .move-left {
+    float: left;
+    width: 85%;
+    min-height: 120px;
+  }
+
+  .placeholder {
+    width: 14%;
+    content: "";
+  }
+}
+
+.text-display {
+  display: block;
+  width: 60%;
+  min-height: 120px;
+  margin: 0 auto;
+  border-bottom: 4px solid #000;
 }
 
 .text-content {
   font-family: 'Quicksand', sans-serif;
-  font-size: 3.5rem;
-  font-weight: 500;
+  font-size: 5rem;
+  font-weight: 400;
   letter-spacing: 0.15rem;
   text-align: center;
   min-height: 2rem;
@@ -47,15 +58,26 @@
 }
 
 .keyboard-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.6rem;
-  width: 85%;
+  display: block;
+  width: 100%;
+
+  > div {
+    float: left;
+    width: 85%;
+  }
+
+  .character-list, .grapheme-list {
+    width: calc(65px * 9);
+  }
+
+  .grapheme-list {
+    float: left;
+  }
 }
 
 .keyboard-button {
-  display: flex;
+  margin: 2px;
+  float: left;
   justify-content: center;
   align-items: center;
   min-width: 55px;
@@ -68,18 +90,18 @@
   background-color: #f0f0f0;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
 
   &:hover:not(:disabled) {
     background-color: #e0e0e0;
     transform: translateY(-2px);
-    box-shadow: 0 3px 5px rgba(0,0,0,0.15);
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.15);
   }
 
   &:active:not(:disabled) {
     background-color: #d0d0d0;
     transform: translateY(1px);
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 
   &:disabled {
@@ -101,7 +123,9 @@
 }
 
 .backspace-button {
-  min-width: 80px;
+  width: 14%;
+  float: right;
+  min-width: 40px;
   background-color: #ffebee;
 
   &:hover:not(:disabled) {

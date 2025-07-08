@@ -5,7 +5,7 @@ import {
   UIElementType
 } from "../../interfaces";
 import { InputElement } from "./input-element";
-import { environment } from "../../environments/environment";
+import { environment } from "../../../environments/environment";
 import { InstantiationError } from "../../errors";
 
 export type SyllableCounterLayout = 'vertical' | 'row';

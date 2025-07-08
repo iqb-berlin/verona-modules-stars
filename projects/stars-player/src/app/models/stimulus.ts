@@ -4,7 +4,7 @@ import {
   UIElementType
 } from "../interfaces";
 import { InstantiationError } from "../errors";
-import { environment } from "../environments/environment";
+import { environment } from "../../environments/environment";
 import { UIElement } from "./elements/ui-element";
 
 

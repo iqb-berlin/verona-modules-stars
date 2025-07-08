@@ -6,7 +6,7 @@ import {
   UIElementProperties
 } from "../../interfaces";
 import { InstantiationError } from "../../errors";
-import { environment } from "../../environments/environment";
+import { environment } from "../../../environments/environment";
 
 export class TextElement extends UIElement implements TextProperties {
   type: UIElementType = "text";

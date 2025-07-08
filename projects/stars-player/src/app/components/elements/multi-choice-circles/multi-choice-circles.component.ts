@@ -18,7 +18,7 @@ import { ResponseStatus, VeronaResponse } from "../../../../../../common/models/
 export class MultiChoiceCirclesComponent extends ElementComponent implements OnInit, OnDestroy {
   elementModel = input.required<MultiChoiceCirclesElement>();
   options = signal<CircleOption[]>([]);
-  formId = `mc-circles-${crypto.randomUUID()}`;
+  formId = `mc-circles-` + Math.floor(Math.random() * 20000000 + 10000000).toString();
   MultiCheckboxFormGroup = new FormGroup({});
 
   constructor(
