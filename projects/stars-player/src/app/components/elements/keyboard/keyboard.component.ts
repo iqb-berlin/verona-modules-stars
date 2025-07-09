@@ -52,17 +52,17 @@ export class KeyboardComponent extends ElementComponent implements OnInit, OnDes
     return this.currentText.length === 0;
   }
 
-  capitalize(s: String) {
-    return String(s[0]).toUpperCase() + String(s).slice(1);
+  capitalize(s: string): string {
+    return String(s[0].toUpperCase() + s.slice(1));
   }
 
-  addChar(button: String) {
+  addChar(button: string) {
     if (this.elementModel().maxLength !== null &&
         this.currentText.length >= this.elementModel().maxLength) {
       return;
     }
 
-    const charToAdd = this.textIsEmpty ? button.toUpperCase() : button;
+    const charToAdd = this.textIsEmpty ? this.capitalize(button) : button;
     this.currentText += charToAdd;
     this.valueChanged();
   }
