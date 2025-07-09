@@ -1,6 +1,8 @@
 @import '_colors.scss';
 @import "_variables.scss";
 
+$img-border: 6px;
+
 .radio-group-container {
   width: 100%;
   height: 100%;
@@ -46,7 +48,7 @@ mat-radio-group.row-layout {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  gap: 0.25rem;
+  gap: $default-gap;
   padding: 0.5rem;
   box-sizing: border-box;
 }
@@ -55,7 +57,7 @@ mat-radio-group.grid-layout {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: repeat(2, 1fr);
-  gap: 0.5rem 0.75rem;
+  gap: $default-gap;
   padding: clamp(0.5rem, 1.5vw, 1.5rem);
   place-items: center;
   max-width: clamp(280px, 50vw, 450px);
@@ -68,14 +70,13 @@ mat-radio-group.grid-layout {
 
   &[style*="--option-count='3'"] {
     grid-template-rows: repeat(2, 1fr);
-    gap: 0.5rem 0.75rem;
+    gap: $default-gap;
     max-width: clamp(280px, 45vw, 400px);
   }
 
   &[style*="--option-count='4'"] {
     grid-template-columns: repeat(2, minmax(160px, 23vmin));
     grid-template-rows: repeat(2, minmax(160px, 23vmin));
-    gap: clamp(15px, 2vmin, 30px);
     padding: clamp(15px, 2vmin, 30px);
     width: fit-content;
     height: fit-content;
@@ -87,7 +88,6 @@ mat-radio-group.grid-layout {
   &[style*="--option-count='5'"],
   &[style*="--option-count='6'"] {
     grid-template-rows: repeat(3, 1fr);
-    gap: 0.5rem 0.75rem;
     max-width: clamp(300px, 50vw, 450px);
   }
 }
@@ -143,6 +143,7 @@ mat-radio-button {
 }
 
 mat-radio-group.grid-layout[style*="--option-count='4'"] .image-wrapper {
+  background-color: deeppink;
   width: clamp(140px, 20vmin, 180px);
   height: clamp(140px, 20vmin, 180px);
 }
@@ -150,11 +151,10 @@ mat-radio-group.grid-layout[style*="--option-count='4'"] .image-wrapper {
 img {
   width: $image-size;
   height: $image-size;
-  max-height: min(200px, 25vh);
   object-fit: contain;
   cursor: pointer;
   background: #ffffff;
-  border: 6px solid transparent;
+  border: $img-border solid transparent;
   border-radius: clamp(4px, 1vw, 12px);
   transition: border-color 0.2s ease;
 }
@@ -169,7 +169,7 @@ mat-radio-button.mat-mdc-radio-checked img {
 
 @media (orientation: landscape) and (max-height: 600px) {
   mat-radio-group.grid-layout {
-    gap: 0.5rem 0.75rem;
+    gap: $default-gap + ($img-border * 2);
     padding: 0.5rem;
   }
 
@@ -181,12 +181,15 @@ mat-radio-button.mat-mdc-radio-checked img {
 }
 
 :host ::ng-deep mat-radio-group.grid-layout[style*="--option-count: 4"] mat-radio-button {
-  //width: clamp(160px, 23vmin, 200px) !important;
-  //height: clamp(160px, 23vmin, 200px) !important;
+  @include default-box-shadow;
   width: $image-size;
   height: $image-size;
   max-width: none !important;
   max-height: none !important;
+
+  &.mat-mdc-radio-checked {
+    box-shadow: none;
+  }
 }
 
 :host ::ng-deep mat-radio-group.grid-layout[style*="--option-count: 4"] .image-wrapper {
@@ -195,8 +198,7 @@ mat-radio-button.mat-mdc-radio-checked img {
 }
 
 :host ::ng-deep mat-radio-group.grid-layout[style*="--option-count: 4"] {
-  grid-template-columns: repeat(2, minmax(160px, 23vmin)) !important;
-  grid-template-rows: repeat(2, minmax(160px, 23vmin)) !important;
-  gap: clamp(15px, 2vmin, 30px) !important;
-  max-width: none !important;
+  grid-template-columns: repeat(2, minmax(160px, min(23vmin, 170px))) !important;
+  grid-template-rows: repeat(2, minmax(160px, min(23vmin, 170px))) !important;
+  gap: $default-gap + ($img-border * 2);
 }

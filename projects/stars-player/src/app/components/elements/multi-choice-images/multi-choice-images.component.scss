@@ -46,12 +46,17 @@
 }
 
 .checkbox-group.grid-layout mat-checkbox {
+  @include default-box-shadow;
   width: $image-size;
   height: $image-size;
   aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
   justify-content: center;
+
+  &.mat-mdc-checkbox-checked {
+    box-shadow: none;
+  }
 }
 
 .checkbox-group.grid-layout .image-container {

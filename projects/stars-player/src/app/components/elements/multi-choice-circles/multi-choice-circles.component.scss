@@ -1,4 +1,5 @@
 @import '_colors.scss';
+@import '_variables.scss';
 
 .multi-choice-circles-wrapper {
   width: 100%;
@@ -16,13 +17,13 @@
 }
 
 .circle {
+  @include circle-box-shadow;
   width: 100px;
   height: 100px;
   background-color: $white;
   border-radius: 50%;
   transition: all 0.3s ease;
   border: none;
-  box-shadow: 5px 5px 0 4px rgba(0, 0, 0, 0.2);
 
   @media (hover: hover) {
     &:hover {
@@ -49,17 +50,17 @@
   }
 
   .circle {
+    @include circle-box-shadow;
     width: 80px;
     height: 80px;
-    box-shadow: 4px 4px 0 3px rgba(0, 0, 0, 0.2);
   }
 }
 
 @media (max-width: 768px) {
   .circle {
+    @include circle-box-shadow;
     width: 70px;
     height: 70px;
-    box-shadow: 3px 3px 0 2px rgba(0, 0, 0, 0.2);
     -webkit-tap-highlight-color: transparent;
 
     &:active {

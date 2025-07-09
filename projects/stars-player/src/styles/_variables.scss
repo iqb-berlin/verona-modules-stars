@@ -1,1 +1,37 @@
 $image-size: 170px;
+$default-gap: 20px;
+
+/* Breakpoints */
+
+$breakpoint-mobile: 480px;
+$breakpoint-tablet: 768px;
+$breakpoint-desktop: 900px;
+$breakpoint-large: 1200px;
+
+/* Mixins */
+
+@mixin default-box-shadow {
+  box-shadow: 12px 10px 8px 5px rgba(0, 0, 0, 0.2);
+
+  @media (max-width: $breakpoint-desktop) {
+    box-shadow: 9px 8px 6px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  @media (max-width: $breakpoint-tablet) {
+    box-shadow: 6px 5px 4px 3px rgba(0, 0, 0, 0.2);
+  }
+}
+
+@mixin circle-box-shadow {
+  box-shadow: 5px 5px 0 4px rgba(0, 0, 0, 0.2);
+
+  @media (max-width: $breakpoint-desktop) {
+    box-shadow: 4px 4px 0 3px rgba(0, 0, 0, 0.2);
+  }
+
+  @media (max-width: $breakpoint-tablet) {
+    box-shadow: 3px 3px 0 2px rgba(0, 0, 0, 0.2);
+  }
+}
+
+
