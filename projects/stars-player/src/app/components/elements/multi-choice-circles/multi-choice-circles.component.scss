@@ -43,7 +43,7 @@
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: $breakpoint-desktop) {
   .circles-container {
     max-width: 95%;
     padding: 0.5rem;
@@ -56,7 +56,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: $breakpoint-tablet) {
   .circle {
     @include circle-box-shadow;
     width: 70px;

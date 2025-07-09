@@ -194,7 +194,7 @@ mat-checkbox.mat-mdc-checkbox-checked .image-container img {
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: $breakpoint-desktop) {
   .checkbox-group.row-layout {
     max-width: 95%;
     padding: 0.4rem;
