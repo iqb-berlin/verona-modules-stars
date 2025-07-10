@@ -1,11 +1,13 @@
 $image-size: 170px;
 $default-gap: 20px;
+$img-border: 6px;
 
 /* Breakpoints */
 
 $breakpoint-mobile: 480px;
 $breakpoint-tablet: 768px;
 $breakpoint-desktop: 900px;
+$breakpoint-landscape-tablet: 1024px;
 $breakpoint-large: 1200px;
 
 /* Mixins */
