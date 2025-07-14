@@ -31,7 +31,6 @@
 
 .checkbox-group.grid-layout {
   display: grid;
-  background-color: purple;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(2, 1fr);
   gap: $default-gap + ($img-border * 2);
