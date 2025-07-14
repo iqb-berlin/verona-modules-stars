@@ -11,9 +11,17 @@ export enum ElementCodeStatusValue {
 
 export enum ResponseStatus {
   UNSET = 'UNSET',
+  NOT_REACHED = 'NOT_REACHED',
   DISPLAYED = 'DISPLAYED',
   VALUE_CHANGED = 'VALUE_CHANGED',
-  CODING_COMPLETE = 'CODING_COMPLETE'
+  INVALID = 'INVALID',
+  DERIVE_ERROR = 'DERIVE_ERROR',
+  CODING_COMPLETE = 'CODING_COMPLETE',
+  NO_CODING = 'NO_CODING',
+  CODING_INCOMPLETE = 'CODING_INCOMPLETE',
+  CODING_ERROR = 'CODING_ERROR',
+  PARTLY_DISPLAYED = 'PARTLY_DISPLAYED',
+  DERIVE_PENDING = 'DERIVE_PENDING'
 }
 
 export const UnitStateDataType = 'iqb-standard@1.1';
@@ -31,6 +39,8 @@ export interface VeronaResponse {
   subform?: string;
   code?: number;
   score?: number;
+  label?: string;
+  timeStamp?: number;
 }
 
 export interface PlayerConfig {

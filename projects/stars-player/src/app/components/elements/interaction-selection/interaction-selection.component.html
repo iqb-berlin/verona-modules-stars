@@ -5,15 +5,54 @@
         [elementModel]="elementModelAsRadioGroupImagesElement"
         [parentForm]="parentForm()"
         [position]="'row'"
+        [sectionVariant]="sectionVariant()"
         (valueChange)="valueChange.emit($event)"
       ></stars-radio-group-images>
+    }
+    @case ("radio-group-text") {
+      <stars-radio-group-text
+        [elementModel]="elementModelAsRadioGroupTextElement"
+        [parentForm]="parentForm()"
+        [position]="'row'"
+        [sectionVariant]="sectionVariant()"
+        (valueChange)="valueChange.emit($event)"
+      ></stars-radio-group-text>
     }
     @case ("multi-choice-images") {
       <stars-multi-choice-images
         [elementModel]="elementModelAsMultiChoiceImagesElement"
         [parentForm]="parentForm()"
+        [sectionVariant]="sectionVariant()"
         (valueChange)="valueChange.emit($event)"
       ></stars-multi-choice-images>
+    }
+    @case ("multi-choice-circles") {
+      <stars-multi-choice-circles
+        [elementModel]="elementModelAsMultiChoiceCirclesElement"
+        [parentForm]="parentForm()"
+        (valueChange)="valueChange.emit($event)"
+      ></stars-multi-choice-circles>
+    }
+    @case ("keyboard") {
+      <stars-keyboard
+        [elementModel]="elementModelAsKeyboardElement"
+        [parentForm]="parentForm()"
+        (valueChange)="valueChange.emit($event)"
+      ></stars-keyboard>
+    }
+    @case ("syllable-counter") {
+      <stars-syllable-counter
+        [elementModel]="elementModelAsSyllableCounterElement"
+        [parentForm]="parentForm()"
+        (valueChange)="valueChange.emit($event)"
+      ></stars-syllable-counter>
+    }
+    @case ("binary-choice") {
+      <stars-binary-choice
+        [elementModel]="elementModelAsBinaryChoiceElement"
+        [parentForm]="parentForm()"
+        (valueChange)="valueChange.emit($event)"
+      ></stars-binary-choice>
     }
     @default {
       Error: Unsupported ElementType

@@ -1,0 +1,11 @@
+<mat-radio-group
+  class="options-container"
+  [formControl]="RadioInputControl"
+  (change)="valueChanged($event)">
+  <mat-radio-button [value]="1" class="option-button">
+    <div class="option-icon" [innerHTML]="option1Icon"></div>
+  </mat-radio-button>
+  <mat-radio-button [value]="0" class="option-button">
+    <div class="option-icon" [innerHTML]="option2Icon"></div>
+  </mat-radio-button>
+</mat-radio-group>

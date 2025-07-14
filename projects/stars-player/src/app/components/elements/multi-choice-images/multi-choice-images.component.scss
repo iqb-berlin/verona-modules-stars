@@ -1,21 +1,206 @@
-.checkbox-group {
+@import '_colors.scss';
+@import '_variables.scss';
+
+.multi-choice-wrapper {
+  width: 100%;
+  height: 100%;
   display: flex;
-  flex-direction: row;
+  align-items: center;
   justify-content: center;
-}
 
-mat-checkbox {
-  display: block;
-  padding: 15px;
+  &.four-option-center {
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 100% !important;
 
-  img {
-    position: relative;
-    width: 100%;
-    cursor: pointer;
-    background: white;
+    .checkbox-group {
+      position: static !important;
+      margin: 0 !important;
+      transform: none !important;
+    }
   }
 }
 
-mat-checkbox.mat-mdc-checkbox-checked img {
-  border: solid 2px red;
+.multi-choice-wrapper.four-option-center {
+  display: grid !important;
+  place-items: center !important;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+  height: 100vh;
+}
+
+.checkbox-group.grid-layout {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: $default-gap + ($img-border * 2);
+  padding: clamp(20px, 3vmin, 35px);
+  place-items: center;
+  max-width: min(90vw, 800px);
+  margin: 0 auto;
+  box-sizing: border-box;
+  width: 100%;
+  height: auto;
+  align-self: center;
+  justify-self: center;
+}
+
+.checkbox-group.grid-layout mat-checkbox {
+  @include default-box-shadow;
+  width: $image-size;
+  height: $image-size;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.mat-mdc-checkbox-checked {
+    box-shadow: none;
+  }
+}
+
+.checkbox-group.grid-layout .image-container {
+  width: $image-size;
+  height: $image-size;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: $img-border solid transparent;
+  border-radius: clamp(4px, 1vw, 12px);
+  background-color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.checkbox-group.grid-layout .image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+::ng-deep .checkbox-group.grid-layout mat-checkbox .mdc-checkbox {
+  display: none !important;
+}
+
+::ng-deep .checkbox-group.grid-layout mat-checkbox .mat-mdc-checkbox {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.checkbox-group.row-layout {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: $default-gap;
+  padding: 0.75rem;
+  width: 100%;
+  height: 100%;
+  max-width: 95%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  overflow: hidden;
+  flex: 1;
+}
+
+.checkbox-group.row-layout mat-checkbox {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  padding: 0.25rem;
+  max-width: none;
+}
+
+::ng-deep .checkbox-group.row-layout mat-checkbox .mdc-checkbox {
+  display: none !important;
+}
+
+::ng-deep .checkbox-group.row-layout mat-checkbox .mat-mdc-checkbox {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.checkbox-group.row-layout .image-container {
+  position: relative;
+  width: $image-size;
+  height: $image-size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: $img-border solid transparent;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  transition: all 0.3s ease;
+  aspect-ratio: 1 / 1;
+  min-width: $image-size;
+  min-height: $image-size;
+}
+
+.checkbox-group.row-layout .image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  cursor: pointer;
+}
+
+.interaction-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  padding: clamp(0.5rem, 2vw, 2rem);
+}
+
+mat-checkbox.mat-mdc-checkbox-checked .image-container {
+  border-color: $highlight !important;
+}
+
+mat-checkbox.mat-mdc-checkbox-checked .image-container img {
+  transform: scale(1.02);
+}
+
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 1023px) and (orientation: landscape) {
+  .checkbox-group.row-layout {
+    gap: $default-gap + ($img-border * 2);
+    max-width: 90%;
+    padding: 0.5rem;
+  }
+
+  .checkbox-group.row-layout .image-container {
+    min-height: 75px;
+  }
+}
+
+@media (max-width: $breakpoint-desktop) {
+  .checkbox-group.row-layout {
+    max-width: 95%;
+    padding: 0.4rem;
+  }
+
+  .checkbox-group.row-layout .image-container {
+    min-height: 70px;
+  }
 }

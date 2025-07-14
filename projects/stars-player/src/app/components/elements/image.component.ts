@@ -16,7 +16,7 @@ import {MediaPlayerService} from "../../services/media-player-service";
     }
   `,
   styles: [
-    'img { object-fit: contain; height: 100%; width: 100%; }',
+    'img { object-fit: contain; width: clamp(100px, 30vw, 400px); max-width: 100%; max-height: 100%; }'
   ],
   standalone: false
 })
@@ -27,7 +27,6 @@ export class ImageComponent extends ElementComponent {
   constructor(private mediaPlayerService: MediaPlayerService) {
     super();
     mediaPlayerService.durationChange.subscribe(value => {
-      console.log(value.currentDuration);
       if (value.currentDuration > 2) {
 
       }

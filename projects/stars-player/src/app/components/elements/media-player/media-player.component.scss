@@ -1,0 +1,40 @@
+.custom-audio-button {
+  display: inline-flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  width: auto;
+  height: auto;
+  overflow: visible;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+
+
+  .speaker-icon {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    overflow: visible;
+    width: clamp(220px, 30vw, 350px); // increased to accommodate the waves
+    height: clamp(80px, 15vw, 180px);
+    margin: 0;
+
+
+    ::ng-deep .white-circle {
+      filter: drop-shadow(5px 5px 0 rgba(0, 0, 0, 0.2));
+    }
+
+    ::ng-deep .animated-audio-button {
+      transition: all 0.3s ease-out;
+      transform-origin: left center;
+      transform: scale(1);
+    }
+  }
+}
+
+

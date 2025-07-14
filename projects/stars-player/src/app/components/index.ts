@@ -16,3 +16,7 @@ export { RadioGroupImagesComponent } from './elements/radio-group-images/radio-g
 export { MultiChoiceImagesComponent } from './elements/multi-choice-images/multi-choice-images.component';
 export { AudioComponent } from './elements/audio.component';
 export { MediaPlayerComponent } from './elements/media-player/media-player.component';
+export { KeyboardComponent } from './elements/keyboard/keyboard.component';
+export { SyllableCounterComponent } from './elements/syllable-counter/syllable-counter.component';
+export { BinaryChoiceComponent } from './elements/binary-choice/binary-choice.component';
+export { MultiChoiceCirclesComponent } from './elements/multi-choice-circles/multi-choice-circles.component';

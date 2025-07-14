@@ -1,10 +1,11 @@
-<div>
+<div class="section-wrapper">
   @switch (section().layoutId) {
     @case("PicPicLayout") {
       <pic-pic-layout
         [interaction]="section().interaction"
         [instructions]="section().instructions"
         [stimulus]="section().stimulus"
+        [variant]="section().variant"
         [parentForm]="form"
         (valueChange)="valueChanged($event)"
       ></pic-pic-layout>
@@ -14,8 +15,9 @@
         [interaction]="section().interaction"
         [instructions]="section().instructions"
         [stimulus]="section().stimulus"
+        [variant]="section().variant"
         [parentForm]="form"
-        (valueChange)="valueChange.emit($event)"
+        (valueChange)="valueChanged($event)"
       ></pic-text-layout>
     }
   }

@@ -1,36 +1,43 @@
 import { Section, SectionProperties } from './section';
 import { UIElement } from './elements/ui-element';
 import { StateVariable } from './state-variable';
-import { environment } from '../environments/environment';
+import { environment } from '../../environments/environment';
 import { AbstractIDService } from '../interfaces';
 import { InstantiationError } from '../errors';
 
+export type UnitNavNextButtonMode = 'always' | 'onInteraction' | 'practice';
+
 export class Unit implements UnitProperties {
-  type = 'aspect-unit-definition';
+  type = 'stars-unit-definition';
   version: string;
   stateVariables: StateVariable[] = [];
   sections: Section[] = [];
-  showUnitNavNext: boolean = false;
+  navNextButtonMode?: UnitNavNextButtonMode;
+  backgroundColor?: string;
+  practice?: boolean;
 
   constructor(unit?: UnitProperties, idService?: AbstractIDService) {
     if (unit && isValid(unit)) {
       this.version = unit.version;
+      this.backgroundColor = unit.backgroundColor;
+      this.practice = unit.practice || false;
       this.stateVariables = unit.stateVariables
         .map(variable => new StateVariable(variable.id, variable.alias ?? variable.id, variable.value));
       this.sections = unit.sections
         .map(section => new Section(section, idService));
-      this.showUnitNavNext = unit.showUnitNavNext;
+      this.navNextButtonMode = unit.navNextButtonMode || 'always';
     } else {
       if (environment.strictInstantiation) {
         throw new InstantiationError('Error at unit instantiation');
       }
+      if (unit?.backgroundColor !== undefined) this.backgroundColor = unit.backgroundColor;
       if (unit?.stateVariables !== undefined) {
         this.stateVariables = unit.stateVariables
           .map(variable => new StateVariable(variable.id, variable.alias ?? variable.id, variable.value));
       }
       this.sections = unit?.sections
         .map(section => new Section(section, idService)) || [new Section(undefined, idService)];
-      if (unit?.showUnitNavNext !== undefined) this.showUnitNavNext = unit.showUnitNavNext;
+      if (unit?.navNextButtonMode !== undefined) this.navNextButtonMode = unit.navNextButtonMode;
     }
   }
 
@@ -42,15 +49,16 @@ export class Unit implements UnitProperties {
 function isValid(blueprint?: UnitProperties): boolean {
   if (!blueprint) return false;
   if (blueprint.stateVariables !== undefined &&
-      blueprint.stateVariables.length > 0 &&
-      blueprint.stateVariables[0].alias === undefined) {
+    blueprint.stateVariables.length > 0 &&
+    blueprint.stateVariables[0].alias === undefined) {
     return false;
   }
   return blueprint.version !== undefined &&
     blueprint.stateVariables !== undefined &&
     blueprint.type !== undefined &&
     blueprint.sections !== undefined &&
-    blueprint.showUnitNavNext !== undefined;
+    blueprint.navNextButtonMode !== undefined &&
+    blueprint.practice !== undefined;
 }
 
 export interface UnitProperties {
@@ -58,5 +66,7 @@ export interface UnitProperties {
   version: string;
   stateVariables: StateVariable[];
   sections: SectionProperties[];
-  showUnitNavNext: boolean;
+  navNextButtonMode?: UnitNavNextButtonMode;
+  backgroundColor?: string;
+  practice?: boolean;
 }

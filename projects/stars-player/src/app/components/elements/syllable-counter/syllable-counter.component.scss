@@ -1,0 +1,259 @@
+@import '_colors.scss';
+@import '_variables.scss';
+
+.syllable-counter-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 0.5rem;
+  box-sizing: border-box;
+  font-family: 'Quicksand', sans-serif;
+  justify-content: center;
+}
+
+.syllable-label {
+  display: block;
+  text-align: center;
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  flex-shrink: 0;
+  line-height: 1.2;
+}
+
+.syllable-options.vertical-layout {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: clamp(0.25rem, 1.2vh, 0.5rem);
+  width: 100%;
+  margin: 0 auto;
+  justify-self: center;
+  flex: 1;
+  overflow: hidden;
+  padding: clamp(0.25rem, 1vh, 0.5rem);
+}
+
+.vertical-layout .syllable-option {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  cursor: pointer;
+  max-width: none;
+  min-width: 0;
+}
+
+.vertical-layout .syllable-radio {
+  ::ng-deep .mdc-radio {
+    display: none !important;
+  }
+
+  ::ng-deep .mat-mdc-radio-button {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+.hands-container.vertical {
+  display: flex;
+  flex-direction: row;
+  gap: clamp(0.2rem, 0.8vw, 0.4rem);
+  align-items: center;
+  justify-content: flex-start;
+  padding: clamp(0.4rem, 1vh, 0.6rem) clamp(0.5rem, 1vw, 0.8rem);
+  border: $img-border solid transparent;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  background-color: #ffffff;
+  min-height: clamp(40px, 6vh, 60px);
+  max-width: 90%;
+  overflow: hidden;
+}
+
+.syllable-options.row-layout {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: $default-gap;
+  padding: 0.75rem;
+  max-width: 95%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  overflow: hidden;
+  flex: 1;
+}
+
+.syllable-checkbox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  padding: 0.25rem;
+  max-width: none;
+}
+
+::ng-deep .row-layout .syllable-checkbox .mdc-checkbox {
+  display: none !important;
+}
+
+::ng-deep .row-layout .syllable-checkbox .mat-mdc-checkbox {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.hands-container.row {
+  @include default-box-shadow;
+  position: relative;
+  width: clamp(80px, 20vw, $image-size + ($img-border * 2));
+  height: clamp(80px, 20vw, $image-size + ($img-border * 2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: $img-border solid transparent;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  transition: all 0.3s ease;
+  min-height: 80px;
+  aspect-ratio: 1 / 1;
+  min-width: 0;
+}
+
+.hand-image {
+  width: clamp(70px, 18vw, $image-size);
+  height: clamp(70px, 18vw, $image-size);
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  transition: transform 0.2s ease;
+  flex-shrink: 1;
+
+  .vertical-layout & {
+    height: clamp(30px, 5vh, 50px);
+    width: clamp(30px, 5vh, 50px);
+    min-height: 30px;
+    min-width: 30px;
+    max-height: 50px;
+    max-width: 50px;
+  }
+
+  .row-layout & {
+    width: clamp(70px, 18vw, $image-size);
+    height: clamp(70px, 18vw, $image-size);
+    object-fit: contain;
+    cursor: pointer;
+  }
+}
+
+.syllable-counter-container[data-max-syllables="6"],
+.syllable-counter-container[data-max-syllables="7"],
+.syllable-counter-container[data-max-syllables="8"],
+.syllable-counter-container[data-max-syllables="9"] {
+  .vertical-layout .hand-image {
+    width: clamp(30px, 15vw, $image-size);
+    height: clamp(30px, 15vw, $image-size);
+    min-width: 30px;
+    min-height: 30px;
+    max-width: min($image-size, 15vw);
+    max-height: min($image-size, 15vw);
+
+    @media (max-width: $breakpoint-desktop) {
+      width: clamp(25px, 12vw, 100px);
+      height: clamp(25px, 12vw, 100px);
+    }
+
+    @media (max-width: $breakpoint-tablet) {
+      width: clamp(20px, 10vw, 80px);
+      height: clamp(20px, 10vw, 80px);
+    }
+  }
+
+
+  .hands-container.vertical {
+    gap: clamp(0.05rem, 0.2vw, 0.12rem) !important;
+    padding: clamp(0.3rem, 0.6vh, 0.4rem) clamp(0.2rem, 0.4vw, 0.3rem) !important;
+    justify-content: flex-start !important;
+    max-width: 90% !important;
+    margin: 0 auto !important;
+  }
+
+  .syllable-options.vertical-layout {
+    align-items: center !important;
+    width: 100% !important;
+  }
+}
+
+mat-radio-button.mat-mdc-radio-checked .hands-container.vertical {
+  border-color: $highlight;
+}
+
+mat-radio-button.mat-mdc-radio-checked .hand-image {
+  animation: bounce 0.3s ease-out;
+}
+
+mat-checkbox.mat-mdc-checkbox-checked .hands-container.row {
+  border-color: $highlight;
+}
+
+mat-checkbox.mat-mdc-checkbox-checked .hand-image {
+  transform: scale(0.98);
+}
+
+@keyframes bounce {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.error-message {
+  color: #dc3545;
+  padding: 15px;
+  background: #ffe6e6;
+  border: 1px solid #ff9999;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 500;
+  margin: 1rem;
+}
+
+@media (orientation: landscape) {
+  .syllable-options.vertical-layout {
+    gap: $default-gap;
+    max-width: 320px;
+  }
+
+  .hands-container.vertical {
+    min-height: 45px;
+    padding: 0.5rem 0.7rem;
+  }
+
+  .hand-image {
+    .vertical-layout & {
+      height: 38px;
+      max-height: 50px;
+    }
+  }
+}

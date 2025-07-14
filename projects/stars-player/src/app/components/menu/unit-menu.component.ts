@@ -6,7 +6,7 @@ import {
   VopPageNavigationCommand,
   VopPlayerConfigChangedNotification,
   VopStartCommand
-} from '../../models/verona';
+} from '../../../../../common/models/verona';
 
 
 @Component({

@@ -1,12 +1,12 @@
 import { UIElementType } from '../../interfaces';
 import { UIElement } from './ui-element';
-import { VeronaResponse } from '../verona';
+import { VeronaResponse } from '../../../../../common/models/verona';
 import {
   AbstractIDService,
   UIElementProperties
 } from "../../interfaces";
 import { InstantiationError } from "../../errors";
-import { environment } from "../../environments/environment";
+import { environment } from "../../../environments/environment";
 
 export class TextElement extends UIElement implements TextProperties {
   type: UIElementType = "text";

@@ -1,1 +1,21 @@
 
+:host {
+  display: block;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+::ng-deep stars-section {
+  display: block;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+stars-section.practice {
+  height: calc(100vh - 50px);
+  border-bottom: 25px double orange;
+  border-top: 25px double orange;
+}

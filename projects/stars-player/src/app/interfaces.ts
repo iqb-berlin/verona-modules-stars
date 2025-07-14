@@ -13,12 +13,17 @@ export type UIElementType =
   | 'audio'
   | 'video'
   | 'radio-group-images'
+  | 'radio-group-text'
   | 'multi-choice-images'
+  | 'multi-choice-circles'
   | 'hotspot-image'
   | 'drop-list'
   | 'stimulus'
   | 'interaction'
-  | 'instructions';
+  | 'instructions'
+  | 'keyboard'
+  | 'syllable-counter'
+  | 'binary-choice';
 
 export type UIBlueprintType =
   'PicPicBlueprint'
@@ -94,10 +99,10 @@ export interface ValueChangeElement {
 }
 
 export type UIElementValue = string | number | boolean | undefined | UIElementType | InputElementValue |
-TextLabel | TextLabel[] | StateVariable | UIElement[];
+  TextLabel | TextLabel[] | StateVariable | UIElement[];
 
 export type InputAssistancePreset = null | 'french' | 'numbers' | 'numbersAndOperators' | 'numbersAndBasicOperators'
-| 'comparisonOperators' | 'squareDashDot' | 'placeValue' | 'space' | 'comma' | 'custom';
+  | 'comparisonOperators' | 'squareDashDot' | 'placeValue' | 'space' | 'comma' | 'custom';
 
 export interface UIElementProperties {
   type: UIElementType;
@@ -130,6 +135,7 @@ export interface PlayerElementBlueprint extends UIElementProperties {
 
 export interface PlayerProperties {
   [index: string]: unknown;
+
   autostart: boolean;
   autostartDelay: number;
   loop: boolean;
@@ -152,3 +158,13 @@ export interface PlayerProperties {
   playbackTime: number;
   fileName: string;
 }
+
+export type SectionLayoutVariant = 'grid_layout' | 'row_layout' | 'col_layout';
+
+export interface SectionVariantConfig {
+  variant?: SectionLayoutVariant;
+  columns?: number; // For future customization of grid columns
+  aspectRatio?: 'square' | 'wide' | 'portrait'; // For future image aspect ratio control
+}
+
+

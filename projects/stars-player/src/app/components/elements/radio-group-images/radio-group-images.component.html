@@ -1,20 +1,34 @@
-<label [id]="elementModel().id+'-radio-group-label'"
-       [innerHTML]="elementModel().label | safeResourceHTML">
-</label>
-<mat-radio-group [attr.aria-labelledby]="elementModel().id+'-radio-group-label'"
-                 [value]="elementModel().value"
-                 (change)="valueChanged($event)">
-  @for (option of elementModel().options; track option; let i = $index) {
-    <mat-label>
-      <mat-radio-button class="button-radio"
-                        [style.pointer-events]="elementModel().readOnly ? 'none' : 'unset'"
-                        [aria-label]="option.text"
-                        [value]="i">
-        <img #image
-             [src]="option.imgSrc"
-             [alt]="option.altText"
-             fill="">
-      </mat-radio-button>
-    </mat-label>
-  }
-</mat-radio-group>
+
+<div class="radio-group-container"
+     [class.four-option-center]="elementModel().options.length === 4">
+  <label [id]="elementModel().id+'-radio-group-label'"
+         class="radio-group-label"
+         [innerHTML]="elementModel().label | safeResourceHTML">
+  </label>
+
+  <mat-radio-group [attr.aria-labelledby]="elementModel().id+'-radio-group-label'"
+                   [value]="elementModel().value"
+                   [ngClass]="getLayoutClass()"
+                   [style.--option-count]="elementModel().options.length"
+                   (change)="valueChanged($event)">
+    @for (option of elementModel().options; track option; let i = $index) {
+      <mat-label>
+        <mat-radio-button class="button-radio"
+                          [style.pointer-events]="elementModel().readOnly ? 'none' : 'unset'"
+                          [aria-label]="option.text"
+                          [value]="i">
+            <div class="image-wrapper">
+              <img #image
+                   [src]="option.imgSrc"
+                   [alt]="option.altText"
+                   fill="">
+            </div>
+        </mat-radio-button>
+      </mat-label>
+    }
+  </mat-radio-group>
+</div>
+
+
+
+IGNORE_WHEN_COPYING_START

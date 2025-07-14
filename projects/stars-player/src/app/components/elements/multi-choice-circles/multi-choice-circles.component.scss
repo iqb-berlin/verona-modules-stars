@@ -1,0 +1,70 @@
+@import '_colors.scss';
+@import '_variables.scss';
+
+.multi-choice-circles-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circles-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+}
+
+.circle {
+  @include circle-box-shadow;
+  width: 100px;
+  height: 100px;
+  background-color: $white;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  border: none;
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: $highlight !important;
+    }
+  }
+}
+
+::ng-deep .checkbox-group.multi-choice-circles .mat-mdc-checkbox .mdc-form-field .mdc-checkbox {
+  display: none !important;
+}
+
+::ng-deep .mat-mdc-checkbox-checked {
+  .circle {
+    background-color: $highlight !important;
+    transform: scale(1.05);
+  }
+}
+
+@media (max-width: $breakpoint-desktop) {
+  .circles-container {
+    max-width: 95%;
+    padding: 0.5rem;
+  }
+
+  .circle {
+    @include circle-box-shadow;
+    width: 80px;
+    height: 80px;
+  }
+}
+
+@media (max-width: $breakpoint-tablet) {
+  .circle {
+    @include circle-box-shadow;
+    width: 70px;
+    height: 70px;
+    -webkit-tap-highlight-color: transparent;
+
+    &:active {
+      background-color: $highlight !important;
+    }
+  }
+}

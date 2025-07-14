@@ -1,19 +1,20 @@
-import { Type } from '@angular/core';
+import {Type} from '@angular/core';
 
 import {
-  UIElement,
-  ImageElement,
-  TextElement,
   AudioElement,
+  BinaryChoiceElement,
   CheckboxElement,
-  RadioGroupImagesElement,
+  ImageElement,
+  MultiChoiceCirclesElement,
   MultiChoiceImagesElement,
+  RadioGroupImagesElement,
+  RadioGroupTextElement,
+  KeyboardElement,
+  SyllableCounterElement,
+  TextElement,
+  UIElement
 } from './index';
-import {
-  AbstractIDService,
-  UIElementProperties,
-  UIElementType
-} from "../interfaces";
+import {AbstractIDService, UIElementProperties, UIElementType} from "../interfaces";
 
 
 export abstract class ElementFactory {
@@ -23,7 +24,12 @@ export abstract class ElementFactory {
     "checkbox": CheckboxElement,
     "radio-group-images": RadioGroupImagesElement,
     "multi-choice-images": MultiChoiceImagesElement,
-    "audio": AudioElement
+    "multi-choice-circles": MultiChoiceCirclesElement,
+    "radio-group-text": RadioGroupTextElement,
+    "audio": AudioElement,
+    "keyboard": KeyboardElement,
+    "syllable-counter": SyllableCounterElement,
+    "binary-choice": BinaryChoiceElement
   };
 
   static createElement(element: { type: UIElementType } & Partial<UIElementProperties>, idService?: AbstractIDService)

@@ -1,6 +1,13 @@
 <ng-content></ng-content>
+
 @for (section of this.sections; track section) {
   <stars-section [section]="section"
-                 (valueChange)="valueChanged($event)">
+                 (valueChange)="valueChanged($event)"
+                 [class.practice]="isPracticedInput">
+  >
   </stars-section>
+}
+
+@if (showUnitNavNext) {
+  <stars-unit-nav-next (navigate)="navigateToNext()"></stars-unit-nav-next>
 }

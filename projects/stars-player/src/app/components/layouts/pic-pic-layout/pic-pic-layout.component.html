@@ -1,4 +1,11 @@
-<div class="pic-pic container">
+<!-- pic-pic-layout.component.html - Complete with syllable vertical support -->
+<div class="pic-pic container"
+     [class.no-stimulus]="!hasStimulus"
+     [class.top-stimulus]="hasTopStimulus && !hasVerticalSyllableCounter"
+     [class.bottom-stimulus]="hasBottomStimulus && !hasVerticalSyllableCounter"
+     [class.syllable-vertical]="hasVerticalSyllableCounter"
+     [class.large-interaction]="!hasStimulus">
+
   <div class="side">
     @if (instructions()) {
       <instructions-selection
@@ -7,25 +14,36 @@
       </instructions-selection>
     }
   </div>
-  <div class="top">
-    @if (stimulus() && stimulus().position == "top") {
+
+  @if (hasTopStimulus && !hasVerticalSyllableCounter) {
+    <div class="top">
       <stimulus-selection [elementModel]="stimulus()">
       </stimulus-selection>
-    }
-  </div>
+    </div>
+  }
+
+  @if (hasVerticalSyllableCounter && stimulus()) {
+    <div class="side-stimulus">
+      <stimulus-selection [elementModel]="stimulus()">
+      </stimulus-selection>
+    </div>
+  }
+
   <div class="middle">
     @if (interaction()) {
       <interaction-selection
         [elementModel]="interaction()"
         [parentForm]="parentForm()"
+        [sectionVariant]="variant()"
         (valueChange)="valueChange.emit($event)">
       </interaction-selection>
     }
   </div>
-  <div class="bottom">
-    @if (stimulus() && stimulus().position == "bottom") {
+
+  @if (hasBottomStimulus && !hasVerticalSyllableCounter) {
+    <div class="bottom">
       <stimulus-selection [elementModel]="stimulus()">
       </stimulus-selection>
-    }
-  </div>
+    </div>
+  }
 </div>

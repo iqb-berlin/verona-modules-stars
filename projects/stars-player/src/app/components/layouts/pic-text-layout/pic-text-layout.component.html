@@ -9,8 +9,9 @@
       <interaction-selection
         [elementModel]="interaction()"
         [parentForm]="parentForm()"
-        (valueChange)="valueChange.emit($event)">
-
+        (valueChange)="valueChange.emit($event)"
+        [sectionVariant]="variant()"
+      >
       </interaction-selection>
     }
   </div>

@@ -5,12 +5,12 @@ import {
   UIElementType
 } from "../../interfaces";
 import { InputElement } from "./input-element";
-import { environment } from "../../environments/environment";
+import { environment } from "../../../environments/environment";
 import { InstantiationError } from "../../errors";
 
 export class RadioGroupImagesElement extends InputElement {
   type: UIElementType = 'radio-group-images';
-  label: string = 'Beschriftung';
+  label: string = '';
   options: TextImageLabel[] = [];
 
   static title: string = 'Optionsfelder';

@@ -1,0 +1,42 @@
+:host {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.options-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  max-width: 80%;
+}
+
+.option-button {
+  .option-icon {
+    width: clamp(100px, 15vw, 200px);
+    height: clamp(100px, 15vw, 200px);
+    cursor: pointer;
+    border: 6px solid transparent;
+    border-radius: 26px;
+    box-sizing: border-box;
+    margin: 6px;
+    transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out, border-color 0.2s ease-in-out;
+
+    & ::ng-deep svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
+
+::ng-deep .mat-mdc-radio-button .mdc-radio {
+  display: none !important;
+}
+
+.mat-mdc-radio-checked .option-icon {
+  border-color: #0050E5;
+}

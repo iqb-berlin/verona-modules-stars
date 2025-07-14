@@ -3,7 +3,7 @@ import { FormGroup } from "@angular/forms";
 
 import { UIElement } from "../../../models";
 import { ElementComponent } from "../../../directives/element-component.directive";
-import { VeronaResponse } from "../../../models/verona";
+import { VeronaResponse } from "../../../../../../common/models/verona";
 
 
 @Component({
@@ -19,4 +19,5 @@ export class PicTextLayoutComponent extends ElementComponent {
   stimulus = input<UIElement>();
   parentForm = input.required<FormGroup>();
   valueChange = output<VeronaResponse>();
+  variant = input<string>('col_layout');
 }

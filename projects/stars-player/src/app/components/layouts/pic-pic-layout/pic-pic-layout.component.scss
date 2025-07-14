@@ -1,39 +1,236 @@
+.top {
+  grid-area: stimulus;
+  grid-column: 1 / -1;
+  justify-self: center;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-height: 25vh;
+  min-height: 80px;
+  padding: 0 5%;
+  margin-top: 4vh;
+}
+
 .container {
   display: grid;
-  grid-template-columns: minmax(150px, 25%) 1fr;
-  grid-template-rows: 25% 55% 20%;
-  height: calc(100vh - 4rem);
-  gap: 2rem;
+  width: 100vw;
+  height: 100vh;
+  padding: 0.75rem;
+  gap: 0.75rem;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  grid-template-columns: max-content 1fr;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "instructions stimulus"
+    "instructions  interaction";
+}
+
+.container.no-stimulus {
+  grid-template-columns: max-content 1fr;
+  grid-template-rows: 1fr;
+  grid-template-areas: "instructions interaction";
+
+  .middle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+}
+
+.container.bottom-stimulus {
+  grid-template-columns: max-content 1fr;
+  grid-template-rows: 1fr auto;
+  grid-template-areas:
+    "instructions interaction"
+    "instructions stimulus";
 }
 
 .side {
-  grid-column-start: 1;
-  grid-column-end: 2;
-  grid-row-start: 1;
-  grid-row-end: 4;
-  background-color: #d4a6a6;
-}
-
-.top {
-  grid-column-start: 2;
-  grid-column-end: 3;
-  grid-row-start: 1;
-  grid-row-end: 2;
-  background-color: #d4cea6;
+  grid-area: instructions;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 0.5rem;
+  width: auto;
 }
 
 .middle {
-  grid-column-start: 2;
-  grid-column-end: 3;
-  grid-row-start: 2;
-  grid-row-end: 3;
-  background-color: #d4cea6;
+  grid-area: interaction;
+  grid-column: 1 / -1;
+  justify-self: center;
+  overflow: hidden;
+  padding: 0 10%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* ONLY ADDITION: Bottom area styling */
 .bottom {
-  grid-column-start: 2;
-  grid-column-end: 3;
-  grid-row-start: 3;
-  grid-row-end: 4;
-  background-color: #d4cea6;
+  grid-area: stimulus;
+  grid-column: 1 / -1;
+  justify-self: center;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-height: 20vh;
+  min-height: 120px;
+  padding: 1rem 5%;
+  margin-bottom: 1vh;
 }
+
+::ng-deep .bottom stars-text {
+  height: auto !important;
+  object-fit: unset !important;
+  width: 100% !important;
+}
+
+::ng-deep .bottom stars-text p {
+  font-size: clamp(1.5rem, 3vw, 2.2rem) !important;
+  font-weight: 700 !important;
+  font-family: 'Quicksand', sans-serif !important;
+  text-align: center !important;
+  line-height: 1.3 !important;
+  color: #333 !important;
+  margin: 0 !important;
+}
+
+.container.bottom-stimulus ::ng-deep .middle mat-radio-group.grid-layout {
+  grid-template-columns: repeat(2, minmax(220px, 30vmin)) !important;
+  grid-template-rows: repeat(2, minmax(220px, 30vmin)) !important;
+  gap: clamp(20px, 3vmin, 35px) !important;
+  padding: clamp(20px, 3vmin, 35px) !important;
+  max-width: 90vw !important;
+  max-height: 70vh !important;
+}
+
+.container.bottom-stimulus ::ng-deep .middle mat-radio-group.grid-layout mat-radio-button {
+  width: clamp(220px, 30vmin, 300px) !important;
+  height: clamp(220px, 30vmin, 300px) !important;
+  min-width: 220px !important;
+  min-height: 220px !important;
+  max-width: 300px !important;
+  max-height: 300px !important;
+}
+
+.container.bottom-stimulus ::ng-deep .middle mat-radio-group.grid-layout .image-wrapper {
+  width: clamp(200px, 28vmin, 280px) !important;
+  height: clamp(200px, 28vmin, 280px) !important;
+  max-width: 280px !important;
+  max-height: 280px !important;
+}
+
+.container.bottom-stimulus ::ng-deep .middle mat-radio-group.grid-layout img {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+}
+
+@media (orientation: portrait) {
+  .container {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      "instructions"
+      "stimulus"
+      "interaction";
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .container.no-stimulus {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "instructions"
+      "interaction";
+
+    .side {
+      align-items: center;
+    }
+  }
+
+  .container.bottom-stimulus {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:
+      "instructions"
+      "interaction"
+      "stimulus";
+  }
+
+  .side {
+    padding: 0.25rem;
+    min-height: 60px;
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
+
+  .top {
+    min-height: 100px;
+  }
+}
+
+.side > *, .top > *, .middle > * {
+  max-width: 100%;
+  max-height: 100%;
+  width: 100%;
+  height: 100%;
+}
+
+.top > stimulus-selection,
+.side > instructions-selection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.side > instructions-selection {
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.bottom > stimulus-selection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.side > *, .top > *, .bottom > *, .middle > * {
+  max-width: 100%;
+  max-height: 100%;
+  width: 100%;
+  height: 100%;
+}
+
+/* ONLY ADDITION: Syllable counter vertical layout */
+.container.syllable-vertical {
+  grid-template-columns: max-content 1fr;
+  grid-template-rows: 1fr 1fr;
+  grid-template-areas:
+    "instructions interaction"
+    "stimulus interaction";
+}
+
+.side-stimulus {
+  grid-area: stimulus;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 2rem;
+  margin-top: -50%;
+  width: auto;
+}
+

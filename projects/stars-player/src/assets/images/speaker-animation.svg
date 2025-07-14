@@ -1,0 +1,66 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Speaker body group -->
+  <g class="speaker-body">
+    <!-- Main speaker/megaphone shape -->
+    <path d="M20,35 L35,20 L35,80 L20,65 Z" fill="#222"/>
+    <rect x="10" y="35" width="20" height="30" fill="#222"/>
+  </g>
+
+  <!-- Sound waves - these will be animated -->
+  <g class="sound-waves">
+    <!-- First (smallest) wave -->
+    <path class="wave wave1" d="M45,50 C55,35 55,65 45,50"
+          stroke="#222"
+          stroke-width="2.5"
+          fill="none">
+      <animate attributeName="opacity"
+               values="0;1;0"
+               dur="1.5s"
+               repeatCount="indefinite" />
+      <animate attributeName="d"
+               values="M45,50 C55,35 55,65 45,50;
+                      M45,50 C60,30 60,70 45,50;
+                      M45,50 C55,35 55,65 45,50"
+               dur="1.5s"
+               repeatCount="indefinite" />
+    </path>
+
+    <!-- Second (medium) wave -->
+    <path class="wave wave2" d="M45,50 C65,25 65,75 45,50"
+          stroke="#222"
+          stroke-width="2.5"
+          fill="none">
+      <animate attributeName="opacity"
+               values="0;1;0"
+               dur="1.5s"
+               repeatCount="indefinite"
+               begin="0.3s" />
+      <animate attributeName="d"
+               values="M45,50 C65,25 65,75 45,50;
+                      M45,50 C70,20 70,80 45,50;
+                      M45,50 C65,25 65,75 45,50"
+               dur="1.5s"
+               repeatCount="indefinite"
+               begin="0.3s" />
+    </path>
+
+    <!-- Third (largest) wave -->
+    <path class="wave wave3" d="M45,50 C75,15 75,85 45,50"
+          stroke="#222"
+          stroke-width="2.5"
+          fill="none">
+      <animate attributeName="opacity"
+               values="0;1;0"
+               dur="1.5s"
+               repeatCount="indefinite"
+               begin="0.6s" />
+      <animate attributeName="d"
+               values="M45,50 C75,15 75,85 45,50;
+                      M45,50 C80,10 80,90 45,50;
+                      M45,50 C75,15 75,85 45,50"
+               dur="1.5s"
+               repeatCount="indefinite"
+               begin="0.6s" />
+    </path>
+  </g>
+</svg>

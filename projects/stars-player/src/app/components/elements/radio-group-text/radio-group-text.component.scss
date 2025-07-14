@@ -1,0 +1,279 @@
+@import '_colors.scss';
+
+.radio-group-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  mat-radio-group {
+    align-self: center;
+    justify-self: center;
+  }
+}
+
+.radio-group-label {
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+mat-radio-group {
+  display: flex;
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+
+  &.grid-layout {
+    align-items: flex-start;
+    justify-content: center;
+  }
+}
+
+mat-radio-group.row-layout {
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  box-sizing: border-box;
+}
+
+mat-radio-group.col-layout {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  padding: 0.5rem;
+  box-sizing: border-box;
+}
+
+mat-radio-group.grid-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(180px, 25vmin));
+  grid-template-rows: repeat(2, minmax(180px, 25vmin));
+  gap: clamp(15px, 2vmin, 30px);
+  padding: clamp(15px, 2vmin, 30px);
+  place-items: center;
+  justify-content: center;
+  max-width: clamp(280px, 50vw, 450px);
+  margin: 0 auto;
+  box-sizing: border-box;
+  height: auto;
+  max-height: clamp(400px, 80vh, 800px);
+  align-self: center;
+  justify-self: center;
+
+  mat-radio-button {
+    width: 100%;
+    height: 100%;
+    max-width: 150px;
+    max-height: 150px;
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &[style*="--option-count='3'"] {
+    grid-template-rows: repeat(2, 1fr);
+    gap: clamp(15px, 2vmin, 30px);
+    max-width: clamp(280px, 45vw, 400px);
+  }
+
+  &[style*="--option-count='4'"] {
+    grid-template-columns: repeat(2, minmax(160px, 23vmin));
+    grid-template-rows: repeat(2, minmax(160px, 23vmin));
+    gap: clamp(15px, 2vmin, 30px);
+    padding: clamp(15px, 2vmin, 30px);
+    width: fit-content;
+    height: fit-content;
+    margin: 0 auto;
+    align-self: center;
+    justify-self: center;
+
+    mat-radio-button {
+      width: clamp(160px, 23vmin, 200px);
+      height: clamp(160px, 23vmin, 200px);
+      min-width: 160px;
+      min-height: 160px;
+      aspect-ratio: 1 / 1;
+    }
+  }
+
+  &[style*="--option-count='5'"],
+  &[style*="--option-count='6'"] {
+    grid-template-rows: repeat(3, 1fr);
+    gap: clamp(15px, 2vmin, 30px);
+    max-width: clamp(300px, 50vw, 450px);
+  }
+}
+
+mat-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 0;
+}
+
+mat-radio-button {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+::ng-deep mat-radio-button .mdc-radio {
+  display: none !important;
+}
+
+::ng-deep mat-radio-button .mat-mdc-radio-button .mdc-radio {
+  display: none !important;
+}
+
+.large-letter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: clamp(160px, 22vmin, 240px);
+  height: clamp(160px, 22vmin, 240px);
+  min-width: 160px;
+  min-height: 160px;
+
+  aspect-ratio: 1 / 1;
+  cursor: pointer;
+  background: #ffffff;
+  border: 3px solid transparent;
+  border-radius: clamp(12px, 2vmin, 20px);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+
+  font-size: clamp(80px, 15vmin, 140px);
+  font-weight: bold;
+  font-family: 'Quicksand', sans-serif;
+  color: #333;
+  line-height: 1;
+}
+
+mat-radio-group.col-layout .large-letter {
+  width: clamp(300px, 50vh, 400px);
+  height: 100px;
+  font-size: 32px;
+  min-height: 100px;
+}
+
+mat-radio-group.grid-layout[style*="--option-count='4'"] .large-letter {
+  width: clamp(140px, 20vmin, 180px);
+  height: clamp(140px, 20vmin, 180px);
+}
+
+mat-radio-button.mat-mdc-radio-checked .large-letter {
+  border-color: $highlight !important;
+  background-color: $highlight !important;
+  box-shadow: 0 2px 12px rgba(0, 123, 255, 0.4);
+  color: white;
+}
+
+.option-text {
+  display: none;
+}
+
+@media (orientation: landscape) and (max-height: 600px) {
+  mat-radio-group.grid-layout {
+    gap: 0.5rem 0.75rem;
+    padding: 0.5rem;
+  }
+
+  mat-radio-group.grid-layout mat-radio-button {
+    max-width: 130px;
+    max-height: 100px;
+    min-height: 70px;
+  }
+}
+
+:host ::ng-deep mat-radio-group.grid-layout[style*="--option-count: 4"] mat-radio-button {
+  width: clamp(160px, 23vmin, 200px) !important;
+  height: clamp(160px, 23vmin, 200px) !important;
+  min-width: 160px !important;
+  min-height: 160px !important;
+  max-width: none !important;
+  max-height: none !important;
+}
+
+:host ::ng-deep mat-radio-group.grid-layout[style*="--option-count: 4"] .large-letter {
+  width: clamp(140px, 20vmin, 180px) !important;
+  height: clamp(140px, 20vmin, 180px) !important;
+}
+
+:host ::ng-deep mat-radio-group.grid-layout[style*="--option-count: 4"] {
+  grid-template-columns: repeat(2, minmax(160px, 23vmin)) !important;
+  grid-template-rows: repeat(2, minmax(160px, 23vmin)) !important;
+  gap: clamp(15px, 2vmin, 30px) !important;
+  max-width: none !important;
+}
+
+mat-radio-group.grid-layout.words-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(180px, 28vmin));
+  grid-template-rows: repeat(2, minmax(100px, 16vmin));
+  gap: clamp(25px, 2.5vmin, 45px);
+  padding: clamp(25px, 3.5vmin, 45px);
+  place-items: center;
+  justify-content: center;
+  width: fit-content;
+  height: fit-content;
+  margin: 0 auto;
+  align-self: center;
+  justify-self: center;
+}
+
+mat-radio-group.grid-layout.words-grid mat-radio-button {
+  width: clamp(180px, 28vmin, 280px);
+  height: clamp(100px, 16vmin, 150px);
+  min-width: 180px;
+  min-height: 100px;
+  aspect-ratio: unset;
+}
+
+mat-radio-group.grid-layout.words-grid .large-letter {
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 170px !important;
+  min-height: 90px !important;
+
+  padding: clamp(16px, 2.5vmin, 26px) !important;
+  font-size: clamp(20px, 4vmin, 30px) !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  line-height: 1.2 !important;
+
+  border-radius: clamp(8px, 1.5vmin, 16px) !important;
+  border: 3px solid #ddd !important;
+  background-color: #ffffff !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+
+  transition: all 0.2s ease !important;
+}
+
+
+mat-radio-group.grid-layout.words-grid mat-radio-button.mat-mdc-radio-checked .large-letter {
+  border-color: $highlight !important;
+  background-color: $highlight !important;
+  color: white !important;
+  transform: scale(1.05) !important;
+  box-shadow: 0 4px 12px rgba(0, 80, 229, 0.3) !important;
+}
+

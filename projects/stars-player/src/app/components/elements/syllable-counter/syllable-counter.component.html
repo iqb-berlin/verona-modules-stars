@@ -1,0 +1,76 @@
+<div class="syllable-counter-container"
+     [ngClass]="'layout-' + elementModel().layout"
+     [attr.data-max-syllables]="elementModel().maxSyllables">
+  @if (elementModel()) {
+    @if (elementModel().label && elementModel().label.trim()) {
+      <label [id]="elementModel().id+'-syllable-label'"
+             class="syllable-label"
+             [innerHTML]="elementModel().label | safeResourceHTML">
+      </label>
+    }
+
+    <!-- Vertical Layout: Radio Group with Multiple Hands -->
+    @if (elementModel().layout === 'vertical') {
+      <mat-radio-group [attr.aria-labelledby]="elementModel().label ? elementModel().id+'-syllable-label' : null"
+                       [attr.aria-label]="!elementModel().label ? 'Silben zählen' : null"
+                       [value]="elementModel().value ? elementModel().value - 1 : null"
+                       (change)="valueChangedVertical($event)"
+                       class="syllable-options vertical-layout">
+        @if (elementModel().options && elementModel().options.length > 0) {
+          @for (option of elementModel().options; track option; let i = $index) {
+            <mat-label class="syllable-option">
+              <mat-radio-button class="syllable-radio"
+                                [style.pointer-events]="elementModel().readOnly ? 'none' : 'unset'"
+                                [attr.aria-label]="option.altText"
+                                [value]="i">
+                <div class="hands-container vertical">
+                  @for (handIndex of getHandIndices(i + 1); track handIndex) {
+                    <img [src]="elementModel().imgSrc"
+                         [alt]="'Klatschende Hand ' + (handIndex + 1)"
+                         class="hand-image"
+                         loading="lazy">
+                  }
+                </div>
+              </mat-radio-button>
+            </mat-label>
+          }
+        }
+      </mat-radio-group>
+    }
+
+    <!-- Row Layout: Multi-Choice with Single Hands -->
+    @if (elementModel().layout === 'row') {
+      <div class="syllable-options row-layout"
+           [formGroup]="MultiChoiceFormGroup">
+        @if (elementModel().options && elementModel().options.length > 0) {
+          @for (option of elementModel().options; track option; let i = $index) {
+            <mat-checkbox
+              [formControlName]="option.id"
+              [attr.aria-label]="option.altText"
+              [style.pointer-events]="elementModel().readOnly ? 'none' : 'unset'"
+              (change)="valueChangedRow()"
+              class="syllable-checkbox">
+
+              <div class="hands-container row">
+                <img [src]="elementModel().imgSrc"
+                     [alt]="option.altText"
+                     class="hand-image single"
+                     loading="lazy">
+              </div>
+            </mat-checkbox>
+          }
+        }
+      </div>
+    }
+
+    @if (!elementModel().options || elementModel().options.length === 0) {
+      <div class="error-message">
+        No options available! Check console for debug info.
+      </div>
+    }
+  } @else {
+    <div class="error-message">
+      Element model is undefined! Component not properly initialized.
+    </div>
+  }
+</div>

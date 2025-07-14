@@ -1,20 +1,24 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit, output } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, output, ElementRef, Renderer2 } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 import {
   PlayerConfig,
-  Progress, VeronaResponse,
+  Progress,
+  VeronaResponse,
   VopPlayerConfigChangedNotification,
   VopStartCommand
-} from '../../models/verona';
-import { VeronaSubscriptionService } from '../../services/verona-subscription.service';
-import { VeronaPostService } from '../../services/verona-post.service';
+} from '../../../../../common/models/verona';
+import { VeronaSubscriptionService } from '../../../../../common/services/verona-subscription.service';
+import { VeronaPostService } from '../../../../../common/services/verona-post.service';
 import { MetaDataService } from '../../services/meta-data.service';
+import { UnitStateService } from '../../services/unit-state.service';
+import { StateVariableStateService } from '../../services/state-variable-state.service';
 import { InstantiationError } from '../../errors';
-import { Section } from "../../models/section";
-import { Unit } from "../../models/unit";
+import { Section } from "../../models";
+import { Unit, UnitNavNextButtonMode } from "../../models/unit";
 import { LogService } from "../../services/log.service";
-
+import { AudioComponent } from "../elements/audio.component";
+import { Colors } from "../../../../../common/interfaces/colors";
 
 @Component({
   selector: 'stars-unit',
@@ -22,20 +26,23 @@ import { LogService } from "../../services/log.service";
   styleUrls: ['./unit.component.scss'],
   standalone: false
 })
-
 export class UnitComponent implements OnInit, OnDestroy {
   sections: Section[] = [];
   playerConfig: PlayerConfig = {};
-  showUnitNavNext: boolean = false;
-  valueChange= output<VeronaResponse>();
+  navNextButtonMode: UnitNavNextButtonMode = 'always';
+  valueChange = output<VeronaResponse>();
 
   presentationProgressStatus: BehaviorSubject<Progress> = new BehaviorSubject<Progress>('none');
 
   constructor(
-          private metaDataService: MetaDataService,
-          private veronaPostService: VeronaPostService,
-          private veronaSubscriptionService: VeronaSubscriptionService,
-          private changeDetectorRef: ChangeDetectorRef
+    private metaDataService: MetaDataService,
+    private veronaPostService: VeronaPostService,
+    private veronaSubscriptionService: VeronaSubscriptionService,
+    private changeDetectorRef: ChangeDetectorRef,
+    private unitStateService: UnitStateService,
+    private stateVariableStateService: StateVariableStateService,
+    private elementRef: ElementRef,
+    private renderer: Renderer2
   ) {}
 
   ngOnInit(): void {
@@ -46,7 +53,6 @@ export class UnitComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-
   }
 
   private configureUnit(message: VopStartCommand): void {
@@ -54,23 +60,27 @@ export class UnitComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       if (message.unitDefinition) {
         try {
-          LogService.debug('player: unitDefinition', message.unitDefinition);
           const unitDefinition = JSON.parse(message.unitDefinition as string);
-          LogService.debug('player: unitDefinition parsed', unitDefinition);
+
           this.checkUnitDefinitionVersion(unitDefinition);
           const unit: Unit = new Unit(unitDefinition);
+
+          this.initElementCodes(message, unit);
+          this.applyBackgroundColor(unit.backgroundColor);
+
           this.sections = unit.sections;
-          LogService.debug('player: sections', this.sections);
-          this.showUnitNavNext = unit.showUnitNavNext;
+          this.navNextButtonMode = unit.navNextButtonMode;
           this.setPlayerConfig(message.playerConfig || {});
           this.metaDataService.resourceURL = this.playerConfig.directDownloadUrl;
           this.veronaPostService.sessionID = message.sessionId;
-          this.initElementCodes(message, unit);
+
+          this.presentationProgressStatus.next('some');
+
           this.changeDetectorRef.detectChanges();
         } catch (e: unknown) {
-          console.error(e);
+          console.error('Unit configuration error:', e);
           if (e instanceof InstantiationError) {
-            console.error('Failing element blueprint: ', e.faultyBlueprint);
+            console.error('Failing element blueprint:', e.faultyBlueprint);
             this.showErrorDialog('unitDefinitionIsNotReadable');
           } else if (e instanceof Error) {
             this.showErrorDialog(e.message);
@@ -79,9 +89,38 @@ export class UnitComponent implements OnInit, OnDestroy {
           }
         }
       } else {
-        LogService.warn('player: message has no unitDefinition');
+        LogService.warn('No unit definition in message');
       }
     });
+  }
+
+  get showUnitNavNext(): boolean {
+    switch (this.navNextButtonMode) {
+      case 'always':
+        return true;
+      case 'onInteraction':
+      case 'practice':
+        return this.hasUserProvidedInput();
+      default:
+        return false;
+    }
+  }
+
+  get isPracticedInput(): boolean {
+    return this.navNextButtonMode === 'practice';
+  }
+
+  private applyBackgroundColor(backgroundColor?: string): void {
+    if (backgroundColor) {
+      if (!backgroundColor.startsWith("#")) {
+        backgroundColor = Colors[backgroundColor.toUpperCase()] || "#DDDDDD";
+      }
+      this.renderer.setStyle(this.elementRef.nativeElement, 'background-color', backgroundColor);
+      this.renderer.setStyle(document.body, 'background-color', backgroundColor);
+    } else {
+      this.renderer.removeStyle(this.elementRef.nativeElement, 'background-color');
+      this.renderer.removeStyle(document.body, 'background-color');
+    }
   }
 
   private setPlayerConfig(playerConfig: PlayerConfig): void {
@@ -89,32 +128,77 @@ export class UnitComponent implements OnInit, OnDestroy {
   }
 
   private checkUnitDefinitionVersion(unitDefinition: Record<string, unknown>): void {
+    // Implement version checking if needed
   }
 
-  private initElementCodes(message: VopStartCommand, unitDefinition: Unit): void {
-    // this.unitStateService
-    //   .setElementCodes(message.unitState?.dataParts?.elementCodes ?
-    //     JSON.parse(message.unitState.dataParts.elementCodes) : [],
-    //   unitDefinition.getAllElements().map(element => element.getIdentifiers()).flat());
-    //
-    // this.stateVariableStateService
-    //   .setElementCodes(message.unitState?.dataParts?.stateVariableCodes ?
-    //     JSON.parse(message.unitState.dataParts.stateVariableCodes) : [],
-    //   unitDefinition.stateVariables.map(stateVariable => ({ id: stateVariable.id, alias: stateVariable.alias })));
-    //
-    // unitDefinition.stateVariables
-    //   .map(stateVariable => this.stateVariableStateService
-    //     .registerElementCode(stateVariable.id, stateVariable.alias, stateVariable.value));
+  private initElementCodes(message: VopStartCommand, unit: Unit): void {
+    const existingElementCodes = message.unitState?.dataParts?.elementCodes ?
+      JSON.parse(message.unitState.dataParts.elementCodes) : [];
+
+    const elementIdentifiers = unit.getAllElements().map(element => ({
+      id: element.id,
+      alias: element.alias || element.id
+    }));
+
+    this.unitStateService.setElementCodes(existingElementCodes, elementIdentifiers);
+
+    const existingStateVariableCodes = message.unitState?.dataParts?.stateVariableCodes ?
+      JSON.parse(message.unitState.dataParts.stateVariableCodes) : [];
+
+    const stateVariableIdentifiers = unit.stateVariables.map(stateVariable => ({
+      id: stateVariable.id,
+      alias: stateVariable.alias
+    }));
+
+    this.stateVariableStateService.setElementCodes(existingStateVariableCodes, stateVariableIdentifiers);
+
+    unit.stateVariables.forEach(stateVariable => {
+      this.stateVariableStateService.registerElementCode(
+        stateVariable.id,
+        stateVariable.alias,
+        stateVariable.value
+      );
+    });
+  }
+
+  private hasUserProvidedInput(): boolean {
+    const responses = this.unitStateService.getResponses();
+    if (this.navNextButtonMode == 'practice') {
+      return responses.some(response => {
+        return response.code !== null &&
+          response.code !== undefined &&
+          response.code !== 0 &&
+          response.status !== 'UNSET';
+      });
+    }
+    return responses.some(response => {
+      return response.value !== null &&
+        response.value !== undefined &&
+        response.value !== '' &&
+        response.status !== 'UNSET';
+    });
   }
 
   private showErrorDialog(text: string): void {
-    // TODO: ErrorDialog
+    console.error('🚨 Error:', text);
+    // TODO: Implement proper error dialog
+  }
+
+  navigateToNext(): void {
+    this.veronaPostService.sendVopUnitNavigationRequestedNotification('next');
   }
 
   private reset(): void {
     this.presentationProgressStatus.next('none');
     this.sections = [];
     this.playerConfig = {};
+    this.navNextButtonMode = 'always'
+    this.unitStateService.reset();
+    this.stateVariableStateService.reset();
+
+    this.applyBackgroundColor();
+    AudioComponent.reset()
+
     this.changeDetectorRef.detectChanges();
   }
 

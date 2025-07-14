@@ -1,8 +1,8 @@
 import { Directive, input, output } from '@angular/core';
 import { FormGroup } from "@angular/forms";
 
-import { AspectError } from "../models/aspect-error";
-import { VeronaResponse } from "../models/verona";
+import { AspectError } from "../../../../common/models/aspect-error";
+import { VeronaResponse } from "../../../../common/models/verona";
 
 
 @Directive()
