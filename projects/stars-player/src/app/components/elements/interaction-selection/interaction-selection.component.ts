@@ -9,7 +9,8 @@ import {
   RadioGroupTextElement,
   KeyboardElement,
   SyllableCounterElement,
-  UIElement
+  UIElement,
+  DropListElement
 } from "../../../models";
 import { UIElementType } from "../../../interfaces";
 import { ElementComponent } from "../../../directives/element-component.directive";
@@ -35,7 +36,8 @@ export class InteractionSelectionComponent extends ElementComponent implements O
     "radio-group-text",
     "keyboard",
     "syllable-counter",
-    "binary-choice"
+    "binary-choice",
+    "drop-list"
   ];
 
   ngOnInit() {
@@ -68,5 +70,9 @@ export class InteractionSelectionComponent extends ElementComponent implements O
 
   get elementModelAsBinaryChoiceElement(): BinaryChoiceElement {
     return this.elementModel() as BinaryChoiceElement;
+  }
+
+  get elementModelAsDropListElement(): DropListElement {
+    return this.elementModel() as DropListElement;
   }
 }

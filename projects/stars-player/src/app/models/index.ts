@@ -17,3 +17,4 @@ export { KeyboardElement } from './elements/keyboard';
 export { SyllableCounterElement } from './elements/syllable-counter'
 export { RadioGroupTextElement } from './elements/radio-group-text';
 export { BinaryChoiceElement } from './elements/binary-choice';
+export { DropListElement } from './elements/drop-list';

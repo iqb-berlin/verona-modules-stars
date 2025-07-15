@@ -1,0 +1,28 @@
+{
+  "type": "stars-unit-definition",
+  "version": "0.1.0",
+  "backgroundColor": "#FFC7B1" | "sun" ...,
+  "navButtonMode": "onInteraction" | "show" ...,
+  "coding": {
+    "fullCredit": "2"
+  },
+  "instruction":  {
+    "type":  "audio",
+    "audioSrc":  ...
+    "audioFileName":  "BSK_BD01"
+  },
+  "interaction": "buttons" | "syllabify" ...,
+  "parameters": {
+    "options": [
+      ...
+    ],
+    "id"?: "id_01",
+    "buttonSize"?:
+    "multiselect": true,
+    "stimulus": {
+      "type": text | image
+      "imgSrc": ...
+    },
+    "layout": "grid" | "row" | "column"
+  }
+}

@@ -1,0 +1,100 @@
+@import '_colors.scss';
+@import "_variables.scss";
+
+.radio-group-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  &.four-option-center {
+    display: grid !important;
+    place-items: center !important;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    height: 100%;
+
+    mat-radio-group {
+      align-self: center;
+      justify-self: center;
+    }
+  }
+}
+
+.radio-group-label {
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+mat-radio-group {
+  display: flex;
+  width: 100%;
+  height: calc(100% - 3rem);
+  overflow: hidden;
+}
+
+mat-radio-group.row-layout {
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: $default-gap;
+  padding: 0.5rem;
+  box-sizing: border-box;
+}
+
+mat-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 0;
+}
+
+mat-radio-button {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+::ng-deep mat-radio-button .mdc-radio {
+  display: none !important;
+}
+
+
+.image-wrapper {
+  width: $image-size;
+  height: $image-size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+img {
+  width: $image-size;
+  height: $image-size;
+  object-fit: contain;
+  cursor: pointer;
+  background: #ffffff;
+  border: $img-border solid transparent;
+  border-radius: clamp(4px, 1vw, 12px);
+  transition: border-color 0.2s ease;
+}
+
+mat-radio-button.mat-mdc-radio-checked img {
+  border-color: $highlight;
+}
+
+.option-text {
+  display: none;
+}

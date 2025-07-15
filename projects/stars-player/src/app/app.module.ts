@@ -37,7 +37,8 @@ import {
   StimulusSelectionComponent,
   TextComponent,
   UnitComponent,
-  SyllableCounterComponent
+  SyllableCounterComponent,
+  DropListComponent
 } from "./components";
 
 import { ErrorService } from "../../../common/services/error.service";
@@ -72,7 +73,8 @@ import { SafeResourceUrlPipe } from "./pipes/safe-resource-url.pipe";
     SyllableCounterComponent,
     RadioGroupTextComponent,
     BinaryChoiceComponent,
-    MultiChoiceCirclesComponent
+    MultiChoiceCirclesComponent,
+    DropListComponent
   ],
   imports: [
     BrowserModule,

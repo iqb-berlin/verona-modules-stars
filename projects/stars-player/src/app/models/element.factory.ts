@@ -12,7 +12,8 @@ import {
   KeyboardElement,
   SyllableCounterElement,
   TextElement,
-  UIElement
+  UIElement,
+  DropListElement
 } from './index';
 import {AbstractIDService, UIElementProperties, UIElementType} from "../interfaces";
 
@@ -29,7 +30,8 @@ export abstract class ElementFactory {
     "audio": AudioElement,
     "keyboard": KeyboardElement,
     "syllable-counter": SyllableCounterElement,
-    "binary-choice": BinaryChoiceElement
+    "binary-choice": BinaryChoiceElement,
+    "drop-list": DropListElement
   };
 
   static createElement(element: { type: UIElementType } & Partial<UIElementProperties>, idService?: AbstractIDService)

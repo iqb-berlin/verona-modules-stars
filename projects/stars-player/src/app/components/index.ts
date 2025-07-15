@@ -20,3 +20,4 @@ export { KeyboardComponent } from './elements/keyboard/keyboard.component';
 export { SyllableCounterComponent } from './elements/syllable-counter/syllable-counter.component';
 export { BinaryChoiceComponent } from './elements/binary-choice/binary-choice.component';
 export { MultiChoiceCirclesComponent } from './elements/multi-choice-circles/multi-choice-circles.component';
+export { DropListComponent } from './elements/drop-list/drop-list.component';

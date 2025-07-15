@@ -4,7 +4,6 @@
       <stars-radio-group-images
         [elementModel]="elementModelAsRadioGroupImagesElement"
         [parentForm]="parentForm()"
-        [position]="'row'"
         [sectionVariant]="sectionVariant()"
         (valueChange)="valueChange.emit($event)"
       ></stars-radio-group-images>
@@ -13,7 +12,6 @@
       <stars-radio-group-text
         [elementModel]="elementModelAsRadioGroupTextElement"
         [parentForm]="parentForm()"
-        [position]="'row'"
         [sectionVariant]="sectionVariant()"
         (valueChange)="valueChange.emit($event)"
       ></stars-radio-group-text>
@@ -53,6 +51,13 @@
         [parentForm]="parentForm()"
         (valueChange)="valueChange.emit($event)"
       ></stars-binary-choice>
+    }
+    @case ("drop-list") {
+      <stars-drop-list
+        [elementModel]="elementModelAsDropListElement"
+        [parentForm]="parentForm()"
+        (valueChange)="valueChange.emit($event)"
+      ></stars-drop-list>
     }
     @default {
       Error: Unsupported ElementType
