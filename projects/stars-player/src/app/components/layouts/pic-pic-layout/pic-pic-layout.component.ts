@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 import { FormGroup } from "@angular/forms";
 
 import { UIElement } from "../../../models";
@@ -12,28 +12,64 @@ import { VeronaResponse } from "../../../../../../common/models/verona";
   standalone: false
 })
 export class PicPicLayoutComponent extends ElementComponent {
+  // Input signals
   instructions = input<UIElement>();
   interaction = input<UIElement>();
   stimulus = input<UIElement>();
   parentForm = input.required<FormGroup>();
   variant = input<string>('row_layout');
+
+  // Output signal
   valueChange = output<VeronaResponse>();
 
-  get hasTopStimulus(): boolean {
-    return !!(this.stimulus() && this.stimulus()?.position === "top");
-  }
+  // Computed signals for derived state
+  readonly hasTopStimulus = computed(() =>
+    !!(this.stimulus() && this.stimulus()?.position === "top")
+  );
 
-  get hasBottomStimulus(): boolean {
-    return !!(this.stimulus() && this.stimulus()?.position === "bottom");
-  }
+  readonly hasBottomStimulus = computed(() =>
+    !!(this.stimulus() && this.stimulus()?.position === "bottom")
+  );
 
-  get hasStimulus(): boolean {
-    return !!this.stimulus();
-  }
+  readonly hasStimulus = computed(() =>
+    !!this.stimulus()
+  );
 
-  get hasVerticalSyllableCounter(): boolean {
-    return !!(this.interaction() &&
+  readonly hasVerticalSyllableCounter = computed(() =>
+    !!(this.interaction() &&
       this.interaction()?.type === 'syllable-counter' &&
-      (this.interaction() as any).layout === 'vertical');
+      (this.interaction() as any).layout === 'vertical')
+  );
+
+  readonly layoutClasses = computed(() => ({
+    'no-stimulus': !this.hasStimulus(),
+    'top-stimulus': this.hasTopStimulus() && !this.hasVerticalSyllableCounter(),
+    'bottom-stimulus': this.hasBottomStimulus() && !this.hasVerticalSyllableCounter(),
+    'syllable-vertical': this.hasVerticalSyllableCounter(),
+    'large-interaction': !this.hasStimulus()
+  }));
+
+  // Event handler
+  onValueChange(event: VeronaResponse): void {
+    this.valueChange.emit(event);
   }
+
+
+  // get hasTopStimulus(): boolean {
+  //   return !!(this.stimulus() && this.stimulus()?.position === "top");
+  // }
+  //
+  // get hasBottomStimulus(): boolean {
+  //   return !!(this.stimulus() && this.stimulus()?.position === "bottom");
+  // }
+  //
+  // get hasStimulus(): boolean {
+  //   return !!this.stimulus();
+  // }
+  //
+  // get hasVerticalSyllableCounter(): boolean {
+  //   return !!(this.interaction() &&
+  //     this.interaction()?.type === 'syllable-counter' &&
+  //     (this.interaction() as any).layout === 'vertical');
+  // }
 }

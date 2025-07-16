@@ -1,28 +1,21 @@
-<!-- pic-pic-layout.component.html - Complete with syllable vertical support -->
-<div class="pic-pic container"
-     [class.no-stimulus]="!hasStimulus"
-     [class.top-stimulus]="hasTopStimulus && !hasVerticalSyllableCounter"
-     [class.bottom-stimulus]="hasBottomStimulus && !hasVerticalSyllableCounter"
-     [class.syllable-vertical]="hasVerticalSyllableCounter"
-     [class.large-interaction]="!hasStimulus">
-
+<div class="pic-pic container" [ngClass]="layoutClasses()">
   <div class="side">
     @if (instructions()) {
       <instructions-selection
         [elementModel]="instructions()"
-        (valueChange)="valueChange.emit($event)">
+        (valueChange)="onValueChange($event)">
       </instructions-selection>
     }
   </div>
 
-  @if (hasTopStimulus && !hasVerticalSyllableCounter) {
+  @if (hasTopStimulus() && !hasVerticalSyllableCounter()) {
     <div class="top">
       <stimulus-selection [elementModel]="stimulus()">
       </stimulus-selection>
     </div>
   }
 
-  @if (hasVerticalSyllableCounter && stimulus()) {
+  @if (hasVerticalSyllableCounter() && stimulus()) {
     <div class="side-stimulus">
       <stimulus-selection [elementModel]="stimulus()">
       </stimulus-selection>
@@ -35,12 +28,12 @@
         [elementModel]="interaction()"
         [parentForm]="parentForm()"
         [sectionVariant]="variant()"
-        (valueChange)="valueChange.emit($event)">
+        (valueChange)="onValueChange($event)">
       </interaction-selection>
     }
   </div>
 
-  @if (hasBottomStimulus && !hasVerticalSyllableCounter) {
+  @if (hasBottomStimulus() && !hasVerticalSyllableCounter()) {
     <div class="bottom">
       <stimulus-selection [elementModel]="stimulus()">
       </stimulus-selection>
