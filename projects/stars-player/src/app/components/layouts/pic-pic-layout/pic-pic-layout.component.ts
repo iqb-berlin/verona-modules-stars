@@ -5,6 +5,16 @@ import { UIElement } from "../../../models";
 import { ElementComponent } from "../../../directives/element-component.directive";
 import { VeronaResponse } from "../../../../../../common/models/verona";
 
+/**
+ * PicPicLayoutComponent is a specialized layout component that manages the arrangement
+ * of three main content areas: instructions, stimulus, and interaction elements.
+ * The component supports different layout configurations based on:
+ * - Presence/absence of stimulus
+ * - Position of stimulus (top/bottom/side)
+ * - Special handling for vertical syllable counter
+ * - Different variants (row/grid layouts)
+ */
+
 @Component({
   selector: 'pic-pic-layout',
   templateUrl: './pic-pic-layout.component.html',
@@ -53,23 +63,4 @@ export class PicPicLayoutComponent extends ElementComponent {
   onValueChange(event: VeronaResponse): void {
     this.valueChange.emit(event);
   }
-
-
-  // get hasTopStimulus(): boolean {
-  //   return !!(this.stimulus() && this.stimulus()?.position === "top");
-  // }
-  //
-  // get hasBottomStimulus(): boolean {
-  //   return !!(this.stimulus() && this.stimulus()?.position === "bottom");
-  // }
-  //
-  // get hasStimulus(): boolean {
-  //   return !!this.stimulus();
-  // }
-  //
-  // get hasVerticalSyllableCounter(): boolean {
-  //   return !!(this.interaction() &&
-  //     this.interaction()?.type === 'syllable-counter' &&
-  //     (this.interaction() as any).layout === 'vertical');
-  // }
 }
