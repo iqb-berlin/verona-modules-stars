@@ -141,7 +141,7 @@
 /* Apply box-shadows only to the bottom wrapper item to give a depth effect. */
 .tens-wrapper .icon-item:first-child:not(.moved),
 .ones-wrapper .icon-item:first-child:not(.moved) {
-  @include variables.tens-and-ones-box-shadow;
+  @include variables.default-box-shadow;
 }
 
 .tens-wrapper .icon-item:not(.moved),
@@ -150,6 +150,6 @@
 }
 
 .icon-item.moved {
-  @include variables.tens-and-ones-box-shadow;
+  @include variables.default-box-shadow;
 }
 

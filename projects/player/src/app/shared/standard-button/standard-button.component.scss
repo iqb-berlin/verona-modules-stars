@@ -56,8 +56,6 @@
     -webkit-tap-highlight-color: transparent;
     position: relative;
 
-    @include variables.rounded-box-shadow;
-
     input {
       width: 100%;
       height: 100%;
@@ -103,7 +101,9 @@
   }
 
   &.has-smiley-icon {
-    @include variables.rounded-box-shadow;
+    input, label {
+      box-shadow: none;
+    }
 
     input:checked + label {
       box-shadow: none;
