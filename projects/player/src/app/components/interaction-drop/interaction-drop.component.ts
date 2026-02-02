@@ -16,6 +16,7 @@ import { StarsResponse } from '../../services/responses.service';
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
 import { InteractionDropParams } from '../../models/unit-definition';
 import { StandardButtonComponent } from '../../shared/standard-button/standard-button.component';
+import { parseTranslate, updateTransitionDisabledSet } from '../../shared/utils/drag-drop.util';
 import {
   calculateButtonCenter, getDropLandingArgs,
   getDropLandingTranslate
@@ -53,8 +54,8 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
   /** Current transform values for each button */
   buttonTransforms = signal<Record<number, string>>({});
 
-  /** Set of button indices that should have transitions disabled */
-  private transitionDisabledButtons = signal<Set<number>>(new Set());
+  /** Set of item/button IDs for which CSS transitions should be disabled */
+  readonly transitionDisabledIds = signal<Set<number>>(new Set());
 
   /** Tracks if the current drag started from a previously settled position */
   private lastDragWasFromSettled = false;
@@ -78,7 +79,7 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
   private resizeObserver: ResizeObserver | undefined;
 
   /** Debounce timer for recalculation */
-  private recalcTimer: any;
+  private recalcTimer: ReturnType<typeof setTimeout> | undefined;
 
   /** Window resize listener reference for cleanup */
   private windowResizeHandler: (() => void) | undefined;
@@ -86,8 +87,6 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
   constructor() {
     super();
     effect(() => {
-      // this.resetSelection();
-
       const parameters = this.parameters() as InteractionDropParams;
       this.localParameters = InteractionDropComponent.createDefaultParameters();
       this.hasRestoredFromFormerState = false;
@@ -233,7 +232,22 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
   /** Returns the free-drag position for the given index, derived from buttonTransforms */
   freeDragPositionFor(index: number): { x: number; y: number } {
     const transform = this.buttonTransforms()[index] ?? '';
-    return this.parseTranslate(transform);
+    return parseTranslate(transform);
+  }
+
+  /** Returns whether transitions should be disabled for the given ID */
+  shouldDisableTransition(id: number): boolean {
+    return this.transitionDisabledIds().has(id);
+  }
+
+  /** Adds an ID to the transition-disabled set */
+  protected addTransitionDisabled(id: number): void {
+    this.transitionDisabledIds.update(set => updateTransitionDisabledSet(set, id, 'add'));
+  }
+
+  /** Removes an ID from the transition-disabled set */
+  protected removeTransitionDisabled(id: number): void {
+    this.transitionDisabledIds.update(set => updateTransitionDisabledSet(set, id, 'remove'));
   }
 
   onDragStarted(event: CdkDragStart, index: number): void {
@@ -273,6 +287,7 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
     if (this.selectedValue() !== index) return;
     this.draggingIndex.set(null);
     const transforms = this.preCalculatedTransforms();
+    // eslint-disable-next-line max-len
     const shouldReturnToOrigin = (this.settledButtonIndex() === index && !!this.settledTransform()) && this.lastDragWasFromSettled;
     const targetTransform = shouldReturnToOrigin ? '' : (transforms[index] ?? '');
     const freePos = (event?.source as CdkDrag)?.getFreeDragPosition?.() ?? { x: 0, y: 0 };
@@ -315,28 +330,13 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
       disabled.add(i);
     }
     this.buttonTransforms.set(transforms);
-    this.transitionDisabledButtons.set(disabled);
+    this.transitionDisabledIds.set(disabled);
 
     setTimeout(() => {
-      this.transitionDisabledButtons.set(new Set());
+      this.transitionDisabledIds.set(new Set());
     }, 0);
 
     this.draggingIndex.set(null);
-  }
-
-  /**
-   * Helper to parse translate(x, y) string from a CSS transform value
-   * @param transform - The CSS transform string to parse (e.g., "translate(10px, 20px)")
-   * @returns An object containing the x and y coordinates in pixels
-   */
-  // eslint-disable-next-line class-methods-use-this
-  private parseTranslate(transform: string | undefined | null): { x: number, y: number } {
-    if (!transform) return { x: 0, y: 0 };
-    const match = /translate\(([-\d.]+)px?,\s*([-\d.]+)px?\)/.exec(transform);
-    if (match) {
-      return { x: parseFloat(match[1] ?? '0'), y: parseFloat(match[2] ?? '0') };
-    }
-    return { x: 0, y: 0 };
   }
 
   /**
@@ -363,7 +363,7 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
           } = getDropLandingArgs(imgElement, buttonElement, containerElement);
 
           const { xPx, yPx } = getDropLandingTranslate(
-            this.localParameters.imageLandingXY,
+            this.localParameters.imageLandingXY ?? '',
             buttonCenterX,
             imgWidth,
             imgHeight,
@@ -432,31 +432,6 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
   }
 
   /**
-   * Determines if transitions should be disabled for a specific button
-   */
-  shouldDisableTransition(index: number): boolean {
-    return this.transitionDisabledButtons().has(index);
-  }
-
-  /**
-   * Adds a button to the transition-disabled set
-   */
-  private addTransitionDisabled(index: number): void {
-    this.transitionDisabledButtons.update(set => new Set([...set, index]));
-  }
-
-  /**
-   * Removes a button from the transition-disabled set
-   */
-  private removeTransitionDisabled(index: number): void {
-    this.transitionDisabledButtons.update(set => {
-      const newSet = new Set(set);
-      newSet.delete(index);
-      return newSet;
-    });
-  }
-
-  /**
    * Toggles button selection (radio button behavior)
    */
   private toggleButtonSelection(index: number): void {
@@ -469,7 +444,7 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
    */
   private emitSelectionResponse(): void {
     const response: StarsResponse = {
-      id: this.localParameters.variableId,
+      id: this.localParameters.variableId ?? 'DROP',
       status: 'VALUE_CHANGED',
       value: this.selectedValue() + 1,
       relevantForResponsesProgress: true

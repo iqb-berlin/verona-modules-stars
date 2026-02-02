@@ -1,7 +1,5 @@
 <svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <g filter="url(#filter0_d_1047_1063)">
-    <rect width="50" height="50" rx="16" fill="white"/>
-    <rect x="0.5" y="0.5" width="49" height="49" rx="15.5" stroke="#DBDDE7"/>
-  </g>
+  <rect width="50" height="50" rx="16" fill="white"/>
+  <rect x="0.5" y="0.5" width="50" height="50" rx="16" stroke="#DBDDE7"/>
   <circle cx="25" cy="25" r="15" fill="#0050E5"/>
 </svg>
