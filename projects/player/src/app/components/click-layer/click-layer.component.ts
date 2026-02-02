@@ -1,11 +1,9 @@
-import {
-  AfterViewInit, Component, output, ViewChild
-} from '@angular/core';
+import { Component, output } from '@angular/core';
 
 @Component({
   selector: 'stars-click-layer',
   template: `
-    <div #starsClickLayer class="layer" data-cy="click-layer"></div>
+    <div #starsClickLayer class="layer" data-cy="click-layer" (click)="handleClick()"></div>
   `,
   styles: `
     .layer {
@@ -22,19 +20,8 @@ import {
   `
 })
 
-export class ClickLayerComponent implements AfterViewInit {
-  @ViewChild('starsClickLayer') layerElement: HTMLDivElement;
+export class ClickLayerComponent {
   click = output();
-
-  ngAfterViewInit() {
-    if (this.layerElement) {
-      this.layerElement.addEventListener('click', this.handleClick, { capture: true });
-      this.layerElement.addEventListener('touchstart', this.handleClick, { capture: true });
-      this.layerElement.addEventListener('touchend', this.handleClick, { capture: true });
-      this.layerElement.addEventListener('pointerdown', this.handleClick, { capture: true });
-      this.layerElement.addEventListener('mousedown', this.handleClick, { capture: true });
-    }
-  }
 
   handleClick() {
     this.click.emit();
