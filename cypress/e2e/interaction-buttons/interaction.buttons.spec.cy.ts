@@ -2,11 +2,7 @@ import {
   InteractionButtonParams,
   UnitDefinition
 } from '../../../projects/player/src/app/models/unit-definition';
-import { testMainAudioFeatures } from '../shared/main-audio.spec.cy';
-import { testContinueButtonFeatures } from '../shared/continue-button.spec.cy';
-import { testRibbonBars } from '../shared/ribbon-bar.spec.cy';
-import { testAudioFeedback } from '../shared/audio-feedback.spec.cy';
-import { testOpeningImageFeatures } from '../shared/opening-image.spec.cy';
+import { testBaseFeatures } from '../shared/base-features.spec.cy';
 
 describe('Interaction BUTTONS Component', () => {
   const interactionType = 'buttons';
@@ -18,7 +14,6 @@ describe('Interaction BUTTONS Component', () => {
   };
   const setupAndAssert = (file: string) => {
     cy.setupTestData(file, interactionType);
-    assertButtonExists();
   };
   const assertRowHasButtons = (rowIndex: number, expected: number) => {
     cy.get(`[data-cy="button-row-${rowIndex}"]`).should('exist').within(() => {
@@ -29,7 +24,7 @@ describe('Interaction BUTTONS Component', () => {
   describe('Selection behavior', () => {
     it('selects a single button when multiSelect is false', () => {
       setupAndAssert(`${defaultTestFile}.json`);
-      cy.removeClickLayer();
+      assertButtonExists();
 
       cy.clickButtonAtIndexOne();
       cy.get('[data-cy="button-1"] input').should('have.attr', 'data-selected', 'true');
@@ -155,7 +150,6 @@ describe('Interaction BUTTONS Component', () => {
     it('renders an image to the LEFT when imageSource is provided', () => {
       // Use a fixture known to have an image and LEFT position (default file does)
       cy.setupTestData(defaultTestFile, interactionType);
-      cy.removeClickLayer();
       cy.get('[data-cy="stimulus-image"]').should('exist').and('be.visible');
       cy.get('[data-cy="buttons-container"]').should('have.css', 'flex-direction', 'row');
     });
@@ -250,7 +244,6 @@ describe('Interaction BUTTONS Component', () => {
         interactionType
       );
       assertButtonExists();
-      cy.removeClickLayer();
 
       // Click any button should trigger navigation after a small delay in the component
       cy.get('[data-cy="button-0"]').click();
@@ -265,12 +258,6 @@ describe('Interaction BUTTONS Component', () => {
     });
   });
 
-  // Shared tests for the BUTTONS interaction type
-  describe('Shared behaviors', () => {
-    testContinueButtonFeatures(interactionType);
-    testMainAudioFeatures(interactionType, defaultTestFile);
-    testRibbonBars(interactionType, `${interactionType}_ribbonBars_true_test`);
-    testAudioFeedback(interactionType, `${interactionType}_feedback_test`);
-    testOpeningImageFeatures(interactionType, `${interactionType}_with_openingImage_test`);
-  });
+  // Test base features for the BUTTONS interaction type
+  testBaseFeatures(interactionType, defaultTestFile);
 });

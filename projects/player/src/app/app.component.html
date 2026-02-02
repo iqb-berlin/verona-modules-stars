@@ -5,6 +5,10 @@
     <stars-standalone-menu></stars-standalone-menu>
   }
 
+  @if (unitService.firstAudioOptions()?.firstClickLayer && unitService.mainAudio()?.audioSource && !unitService.firstClick()) {
+    <stars-click-layer (click)="unitService.firstClick.set(true)"></stars-click-layer>
+  }
+
   <!-- audio component (show if player is not hidden) -->
   @if ((unitService.mainAudio().audioSource || unitService.openingImageParams().audioSource) && !unitService.showingOpeningImage()) {
     <stars-audio [audio]="unitService.currentAudioSrc()" [firstAudioOptions]="unitService.firstAudioOptions()"></stars-audio>

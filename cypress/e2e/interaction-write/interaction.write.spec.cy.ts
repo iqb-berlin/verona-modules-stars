@@ -1,9 +1,5 @@
 import { InteractionWriteParams, UnitDefinition } from '../../../projects/player/src/app/models/unit-definition';
-import { testMainAudioFeatures } from '../shared/main-audio.spec.cy';
-import { testContinueButtonFeatures } from '../shared/continue-button.spec.cy';
-import { testRibbonBars } from '../shared/ribbon-bar.spec.cy';
-import { testAudioFeedback } from '../shared/audio-feedback.spec.cy';
-import { testOpeningImageFeatures } from "../shared/opening-image.spec.cy";
+import { testBaseFeatures } from '../shared/base-features.spec.cy';
 
 describe('Interaction WRITE Component', () => {
   const interactionType = 'write';
@@ -30,8 +26,6 @@ describe('Interaction WRITE Component', () => {
 
   it('displays the text written by keyboard', () => {
     cy.setupTestData(defaultTestFile, interactionType);
-    // Remove click layer
-    cy.removeClickLayer();
 
     const text = 'kopf';
     cy.writeTextOnKeyboard(text);
@@ -52,9 +46,6 @@ describe('Interaction WRITE Component', () => {
         const code = 97 + Math.floor(Math.random() * 26); // a-z
         return String.fromCharCode(code);
       });
-
-      // Remove click layer
-      cy.removeClickLayer();
 
       letters.forEach(letter => {
         cy.get(`[data-cy=character-button-${letter}]`).click();
@@ -138,12 +129,6 @@ describe('Interaction WRITE Component', () => {
     cy.get('[data-cy=numbers-button-1]').should('exist');
   });
 
-  // Shared tests for the WRITE interaction type
-  describe('Shared Features', () => {
-    testContinueButtonFeatures(interactionType);
-    testMainAudioFeatures(interactionType, defaultTestFile);
-    testRibbonBars(interactionType, `${interactionType}_ribbonBars_true_test`);
-    testAudioFeedback(interactionType, `${interactionType}_feedback_test`);
-    testOpeningImageFeatures(interactionType, `${interactionType}_with_openingImage_test`);
-  });
+  // Test base features for the WRITE interaction type
+  testBaseFeatures(interactionType, defaultTestFile);
 });

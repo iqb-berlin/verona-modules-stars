@@ -36,6 +36,9 @@ export class UnitService {
   // TODO better hideAudioButton()
   showingOpeningImage = signal<boolean>(false);
 
+  /** To show the first click layer */
+  firstClick = signal<boolean>(false);
+
   /** Opening flow is active: interactions and main audio hidden */
   private _openingFlowActive = signal<boolean>(false);
   openingFlowActive = this._openingFlowActive.asReadonly();
@@ -62,6 +65,7 @@ export class UnitService {
     this.openingImageParams.set({} as OpeningImageParams);
     this.showingOpeningImage.set(false);
     this._openingFlowActive.set(false);
+    this.firstClick.set(false);
   }
 
   setNewData(unitDefinition: unknown) {

@@ -2,16 +2,12 @@ import {
   InteractionDropParams,
   UnitDefinition
 } from '../../../projects/player/src/app/models/unit-definition';
-import { testMainAudioFeatures } from '../shared/main-audio.spec.cy';
-import { testContinueButtonFeatures } from '../shared/continue-button.spec.cy';
-import { testRibbonBars } from '../shared/ribbon-bar.spec.cy';
-import { testAudioFeedback } from '../shared/audio-feedback.spec.cy';
+import { testBaseFeatures } from '../shared/base-features.spec.cy';
 import {
   formatPxValue,
   getDropLandingArgs,
   getDropLandingTranslate
 } from '../../../projects/player/src/app/shared/utils/interaction-drop.util';
-import { testOpeningImageFeatures } from "../shared/opening-image.spec.cy";
 
 describe('Interaction DROP Component', () => {
   const interactionType = 'drop';
@@ -31,59 +27,34 @@ describe('Interaction DROP Component', () => {
   * */
   type TranslateValues = { xValue: string; yValue: string };
   const getTransformTranslateValues = (styleValue: string | null | undefined): TranslateValues => {
-    // Return empty when nothing to parse
-    if (styleValue == null) return { xValue: '', yValue: '' };
+    if (!styleValue) return { xValue: '', yValue: '' };
 
     const raw = String(styleValue).replace(/\s+/g, ' ').trim();
+    // Extract the last 'transform' declaration's value from a style string or use the whole string
+    const transformMatch = /(?:^|;\s*)transform\s*:\s*([^;]+)(?!.*;\s*transform\s*:)/i.exec(raw);
+    const transformOnly = transformMatch?.[1]?.trim() ?? (raw.includes('transform:') ? '' : raw);
 
-    // If a full style attribute was provided, extract the transform declaration value (right side of the colon)
-    // Example: 'transform: translate(10px, 20px); opacity: 1' -> 'translate(10px, 20px)'
-    const transformMatch = /(?:^|;\s*)transform\s*:\s*([^;]+)/i.exec(raw);
-    const transformOnly: string = transformMatch?.[1]?.trim() ?? raw;
+    // Regex to match translate and translate3d transform functions
+    const transformRegex = /translate(3d)?\(\s*([^)]+)\s*\)/gi;
+    let lastMatch;
+    let m;
+    // eslint-disable-next-line no-cond-assign
+    while ((m = transformRegex.exec(transformOnly)) !== null) {
+      lastMatch = m;
+    }
 
-    // Prefer the last translate/translate3d occurrence if multiple are present.
-    const findLast = (re: RegExp): RegExpExecArray | null => {
-      let match: RegExpExecArray | null = null;
-      const global = new RegExp(re.source, re.flags.includes('g') ? re.flags : `${re.flags}g`);
-      let m: RegExpExecArray | null;
-      // eslint-disable-next-line no-cond-assign
-      while ((m = global.exec(transformOnly)) != null) {
-        match = m;
-      }
-      return match;
+    if (!lastMatch) return { xValue: '', yValue: '' };
+
+    const [, is3d, params] = lastMatch;
+    const parts = params.split(',').map((p: string) => p.trim());
+
+    const tx = parts[0] || '0';
+    const ty = parts[1] || '0';
+
+    return {
+      xValue: formatPxValue(tx.endsWith('px') ? tx : `${parseFloat(tx)}px`),
+      yValue: formatPxValue(ty.endsWith('px') ? ty : `${parseFloat(ty)}px`)
     };
-
-    // translate3d(xpx, ypx, zpx)
-    const t3 = findLast(/translate3d\(\s*([-\d.]+)px?\s*,\s*([-\d.]+)px?\s*,\s*([-\d.]+)px?\s*\)/i);
-    if (t3) {
-      return { xValue: formatPxValue(`${t3[1]}px`), yValue: formatPxValue(`${t3[2]}px`) };
-    }
-
-    // translate(xpx, ypx)
-    const t2 = findLast(/translate\(\s*([-\d.]+)px?\s*,\s*([-\d.]+)px?\s*\)/i);
-    if (t2) {
-      return { xValue: formatPxValue(`${t2[1]}px`), yValue: formatPxValue(`${t2[2]}px`) };
-    }
-
-    // matrix(a, b, c, d, tx, ty) -> tx is group 5, ty is group 6
-    const m2 =
-      findLast(/matrix\(\s*([-\d.e]+)\s*,\s*([-\d.e]+)\s*,\s*([-\d.e]+)\s*,\s*([-\d.e]+)\s*,\s*([-\d.e]+)\s*,\s*([-\d.e]+)\s*\)/i);
-    if (m2) {
-      const tx = `${parseFloat(m2[5] ?? '0')}px`;
-      const ty = `${parseFloat(m2[6] ?? '0')}px`;
-      return { xValue: formatPxValue(tx), yValue: formatPxValue(ty) };
-    }
-
-    // matrix3d(...) -> tx is element 13 (index 12), ty is element 14 (index 13)
-    const m3 = findLast(/matrix3d\(\s*([-\d.e,\s]+)\)/i);
-    if (m3) {
-      const parts = (m3[1] ?? '').split(',').map((s: string) => parseFloat((s || '').trim() || '0'));
-      const tx = Number.isFinite(parts[12]) ? `${parts[12]}px` : '';
-      const ty = Number.isFinite(parts[13]) ? `${parts[13]}px` : '';
-      return { xValue: formatPxValue(tx), yValue: formatPxValue(ty) };
-    }
-
-    return { xValue: '', yValue: '' };
   };
 
   /**
@@ -95,7 +66,6 @@ describe('Interaction DROP Component', () => {
   const getTestSetupWithImageLandingXY = (
   ): Cypress.Chainable<any> => {
     cy.setupTestData(testFileWithImageLandingXY, interactionType);
-    cy.removeClickLayer();
 
     return cy.get('@testData').then(data => {
       const testData = data as unknown as UnitDefinition;
@@ -164,6 +134,7 @@ describe('Interaction DROP Component', () => {
     cy.get(`[data-cy="drop-animate-wrapper-${buttonIndex}"]`)
       .should($el => {
         const style = $el.attr('style') || '';
+        expect(style).to.contain('transform');
         const { xValue, yValue } = getTransformTranslateValues(style);
         expect(xValue).to.equal(xPx);
         expect(yValue).to.equal(yPx);
@@ -179,7 +150,6 @@ describe('Interaction DROP Component', () => {
   describe('Rendering', () => {
     beforeEach(() => {
       cy.setupTestData(defaultTestFile, interactionType);
-      cy.removeClickLayer();
     });
 
     it('renders the correct number of options', () => {
@@ -201,7 +171,6 @@ describe('Interaction DROP Component', () => {
     describe('BOTTOM', () => {
       beforeEach(() => {
         cy.setupTestData(defaultTestFile, interactionType);
-        cy.removeClickLayer();
       });
 
       it('applies correct styles and downward movement', () => {
@@ -217,6 +186,7 @@ describe('Interaction DROP Component', () => {
             cy.get(`[data-cy="drop-animate-wrapper-${buttonIndex}"]`)
               .should($el => {
                 const style = $el.attr('style') || '';
+                expect(style).to.contain('transform');
                 const { yValue } = getTransformTranslateValues(style);
                 expect(yValue.trim()).to.equal(`${yValueToBottom}px`);
               });
@@ -228,7 +198,6 @@ describe('Interaction DROP Component', () => {
     describe('TOP', () => {
       beforeEach(() => {
         cy.setupTestData(`${interactionType}_imagePosition_top_test`, interactionType);
-        cy.removeClickLayer();
       });
 
       it('applies correct styles and upward movement', () => {
@@ -244,6 +213,7 @@ describe('Interaction DROP Component', () => {
             cy.get(`[data-cy="drop-animate-wrapper-${buttonIndex}"]`)
               .should($el => {
                 const style = $el.attr('style') || '';
+                expect(style).to.contain('transform');
                 const { yValue } = getTransformTranslateValues(style);
                 expect(yValue.trim()).to.equal(`${yValueToTop}px`);
               });
@@ -274,7 +244,6 @@ describe('Interaction DROP Component', () => {
   describe('Click behavior', () => {
     beforeEach(() => {
       cy.setupTestData(defaultTestFile, interactionType);
-      cy.removeClickLayer();
     });
 
     it('toggles option back to initial position when clicked again', () => {
@@ -306,27 +275,23 @@ describe('Interaction DROP Component', () => {
         };
         if (imageLandingXY !== '') {
           // Triggers the drag event
-          cy.get(`[data-cy="drop-animate-wrapper-${buttonIndex}"]`)
+          cy.get(`[data-cy="button-${buttonIndex}"]`)
             .trigger('mousedown', { button: 0, bubbles: true, force: true })
-            .trigger('mousemove', { pageX: 10, pageY: 0, force: true });
+            .trigger('mousemove', { pageX: 10, pageY: 10, force: true });
 
           cy.get(dropImage) // droppable
-            .trigger('mousemove', { position: 'center', force: true })
-            .trigger('mouseup', { button: 0, bubbles: true, force: true });
+            .trigger('mousemove', { force: true })
+            .trigger('mouseup', { force: true });
+
           // Wait for animation to complete
-          cy.wait(1000);
+          cy.wait(2000);
+
           assertTransformTranslate(xPx, yPx);
         }
       });
     });
   });
 
-  // Shared tests for the DROP interaction type
-  describe('Shared behaviors', () => {
-    testContinueButtonFeatures(interactionType);
-    testMainAudioFeatures(interactionType, defaultTestFile);
-    testRibbonBars(interactionType, `${interactionType}_ribbonBars_true_test`);
-    testAudioFeedback(interactionType, `${interactionType}_feedback_test`);
-    testOpeningImageFeatures(interactionType, `${interactionType}_with_openingImage_test`);
-  });
+  // Test base features for the DROP interaction type
+  testBaseFeatures(interactionType, defaultTestFile);
 });

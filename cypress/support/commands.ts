@@ -153,7 +153,7 @@ Cypress.Commands.add('clickButtonAtIndexOne', () => {
 });
 
 Cypress.Commands.add('waitUntilAudioIsFinishedPlaying', () => {
-  cy.get('[data-cy="audio-button-animation"]', { timeout: 60000 }) // wait up to 60s
+  cy.get('[data-cy="custom-audio-button"]', { timeout: 60000 }) // wait up to 60s
     .should($el => {
       // check that the class 'playing' is not present
       expect($el).not.to.have.class('playing');
@@ -341,7 +341,9 @@ Cypress.Commands.add('movePlaceValueIcons', (targetTens: number, targetOnes: num
 
 Cypress.Commands.add('applyStandardScenarios', (interactionType: string) => {
   cy.log('first apply standard scenarios that are wrong:');
-  if (interactionType === 'write') {
+  if (interactionType === 'image_only') {
+    cy.get('[data-cy="stimulus-image"]').should('exist').and('be.visible');
+  } else if (interactionType === 'write') {
     // Click any letter
     cy.get('[data-cy=character-button-a]').click();
   } else if (interactionType === 'find_on_image') {

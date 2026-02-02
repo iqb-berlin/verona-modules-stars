@@ -97,7 +97,7 @@ describe('Interaction FIND_ON_IMAGE Component', () => {
       .should('exist');
   });
 
-  // Shared tests for FIND_ON_IMAGE interaction type
+  // Test base features for the FIND_ON_IMAGE interaction type
   describe('Shared behaviors', () => {
     testContinueButtonFeatures(interactionType);
     testRibbonBars(interactionType, `${interactionType}_ribbonBars_true_test`);

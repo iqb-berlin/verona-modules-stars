@@ -1,7 +1,6 @@
 import { testMainAudioFeatures } from '../shared/main-audio.spec.cy';
 import { testRibbonBars } from '../shared/ribbon-bar.spec.cy';
-import { testAudioFeedback } from "../shared/audio-feedback.spec.cy";
-import { testOpeningImageFeatures } from "../shared/opening-image.spec.cy";
+import { firstAudioOptionsFeatures } from '../shared/first-audio-options.spec.cy';
 
 describe('Interaction IMAGE_ONLY Component', () => {
   const interactionType = 'image_only';
@@ -23,9 +22,6 @@ describe('Interaction IMAGE_ONLY Component', () => {
     // Continue button should NOT exist initially
     cy.assertContinueButtonNotExists();
 
-    // Remove click layer
-    cy.removeClickLayer();
-
     // Start the audio
     cy.get('[data-cy="speaker-icon"]').click();
 
@@ -39,8 +35,9 @@ describe('Interaction IMAGE_ONLY Component', () => {
     cy.assertContinueButtonExistsAndVisible();
   });
 
-  // Shared tests for the IMAGE_ONLY interaction type
+  // Test base features for the IMAGE_ONLY interaction type
   describe('Shared behaviors', () => {
+    firstAudioOptionsFeatures(interactionType, `${interactionType}_firstClickLayer_true_test`);
     testMainAudioFeatures(interactionType, defaultTestFile);
     testRibbonBars(interactionType, `${interactionType}_ribbonBars_true_test`);
   });
