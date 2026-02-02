@@ -327,12 +327,14 @@ Cypress.Commands.add('movePlaceValueIcons', (targetTens: number, targetOnes: num
     for (let i = initialTensMoved; i < targetTens; i++) {
       cy.get('[data-cy="icon-item-tens"]').first().click({ force: true });
       cy.get('[data-cy="icon-item-tens-moved"]').should('have.length', i + 1);
+      cy.wait(500); // Wait for debounce
     }
 
     // Move ones
     for (let i = initialOnesMoved; i < targetOnes; i++) {
       cy.get('[data-cy="icon-item-ones"]').first().click({ force: true });
       cy.get('[data-cy="icon-item-ones-moved"]').should('have.length', i + 1);
+      cy.wait(500); // Wait for debounce
     }
   });
 });
@@ -350,6 +352,7 @@ Cypress.Commands.add('applyStandardScenarios', (interactionType: string) => {
     cy.get('[data-cy="polygon-1"]').click();
   } else if (interactionType === 'place_value') {
     cy.get('[data-cy="icon-item-ones"]').first().click({ force: true });
+    cy.wait(500); // Wait for debounce
   } else {
     // InteractionType: BUTTONS, DROP
     // Click the button index 1

@@ -115,6 +115,7 @@ export class ResponsesService {
         const n = this.asNumberOrZero(mainAudioResp.value);
         if (n >= 1) {
           this.mainAudioComplete.set(true);
+          this.firstInteractionDone.set(true);
         }
       }
       // Restore allResponses from former state
@@ -406,6 +407,9 @@ export class ResponsesService {
           if (mainAudioResp) {
             const n = this.asNumberOrZero(mainAudioResp.value);
             this.mainAudioComplete.set(n >= 1);
+            if (n >= 1) {
+              this.firstInteractionDone.set(true);
+            }
           } else {
             this.mainAudioComplete.set(false);
           }
@@ -416,6 +420,7 @@ export class ResponsesService {
               r.id !== 'mainAudio' && r.id !== 'videoPlayer');
           if (hasInteractionValueChanged) {
             this.responseProgress.set('complete');
+            this.firstInteractionDone.set(true);
           } else if (unitState.responseProgress) {
             // fall back to provided responseProgress from unitState when available
             this.responseProgress.set(unitState.responseProgress);
