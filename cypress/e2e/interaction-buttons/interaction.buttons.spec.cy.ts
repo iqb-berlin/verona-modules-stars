@@ -2,12 +2,7 @@ import {
   InteractionButtonParams,
   UnitDefinition
 } from '../../../projects/player/src/app/models/unit-definition';
-import { testMainAudioFeatures } from '../shared/main-audio.spec.cy';
-import { testContinueButtonFeatures } from '../shared/continue-button.spec.cy';
-import { testRibbonBars } from '../shared/ribbon-bar.spec.cy';
-import { testAudioFeedback } from '../shared/audio-feedback.spec.cy';
-import { testOpeningImageFeatures } from '../shared/opening-image.spec.cy';
-import { firstAudioOptionsFeatures } from '../shared/first-audio-options.spec.cy';
+import { testBaseFeatures } from '../shared/base-features.spec.cy';
 
 describe('Interaction BUTTONS Component', () => {
   const interactionType = 'buttons';
@@ -263,13 +258,6 @@ describe('Interaction BUTTONS Component', () => {
     });
   });
 
-  // Shared tests for the BUTTONS interaction type
-  describe('Shared behaviors', () => {
-    firstAudioOptionsFeatures(interactionType, `${interactionType}_firstClickLayer_true_test`);
-    testContinueButtonFeatures(interactionType);
-    testMainAudioFeatures(interactionType, defaultTestFile);
-    testRibbonBars(interactionType, `${interactionType}_ribbonBars_true_test`);
-    testAudioFeedback(interactionType, `${interactionType}_feedback_test`);
-    testOpeningImageFeatures(interactionType, `${interactionType}_with_openingImage_test`);
-  });
+  // Test base features for the BUTTONS interaction type
+  testBaseFeatures(interactionType, defaultTestFile);
 });

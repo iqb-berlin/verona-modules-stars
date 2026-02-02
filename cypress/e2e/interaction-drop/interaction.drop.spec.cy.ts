@@ -2,16 +2,12 @@ import {
   InteractionDropParams,
   UnitDefinition
 } from '../../../projects/player/src/app/models/unit-definition';
-import { testMainAudioFeatures } from '../shared/main-audio.spec.cy';
-import { testContinueButtonFeatures } from '../shared/continue-button.spec.cy';
-import { testRibbonBars } from '../shared/ribbon-bar.spec.cy';
-import { testAudioFeedback } from '../shared/audio-feedback.spec.cy';
+import { testBaseFeatures } from '../shared/base-features.spec.cy';
 import {
   formatPxValue,
   getDropLandingArgs,
   getDropLandingTranslate
 } from '../../../projects/player/src/app/shared/utils/interaction-drop.util';
-import { testOpeningImageFeatures } from "../shared/opening-image.spec.cy";
 
 describe('Interaction DROP Component', () => {
   const interactionType = 'drop';
@@ -316,12 +312,6 @@ describe('Interaction DROP Component', () => {
     });
   });
 
-  // Shared tests for the DROP interaction type
-  describe('Shared behaviors', () => {
-    testContinueButtonFeatures(interactionType);
-    testMainAudioFeatures(interactionType, defaultTestFile);
-    testRibbonBars(interactionType, `${interactionType}_ribbonBars_true_test`);
-    testAudioFeedback(interactionType, `${interactionType}_feedback_test`);
-    testOpeningImageFeatures(interactionType, `${interactionType}_with_openingImage_test`);
-  });
+  // Test base features for the DROP interaction type
+  testBaseFeatures(interactionType, defaultTestFile);
 });

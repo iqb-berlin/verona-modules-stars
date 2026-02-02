@@ -5,7 +5,7 @@
   "ribbonBars": false,
   "continueButtonShow": "ALWAYS",
   "firstAudioOptions": {
-    "firstClickLayer": false,
+    "firstClickLayer": true,
     "animateButton": false
   },
   "mainAudio": {
@@ -16,9 +16,9 @@
   "interactionType": "PLACE_VALUE",
   "interactionParameters": {
     "variableId": "PLACE_VALUE",
-    "value": 22,
+    "value": 24,
     "numberOfRows": 5,
     "maxNumberOfTens": 3,
-    "maxNumberOfOnes": 5
+    "maxNumberOfOnes": 20
   }
 }

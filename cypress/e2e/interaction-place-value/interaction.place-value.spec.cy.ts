@@ -1,12 +1,8 @@
-import { testMainAudioFeatures } from '../shared/main-audio.spec.cy';
-import { testContinueButtonFeatures } from '../shared/continue-button.spec.cy';
-import { testRibbonBars } from '../shared/ribbon-bar.spec.cy';
-import { testOpeningImageFeatures } from '../shared/opening-image.spec.cy';
+import { testBaseFeatures } from '../shared/base-features.spec.cy';
 import {
   InteractionPlaceValueParams,
   UnitDefinition
 } from '../../../projects/player/src/app/models/unit-definition';
-import { testAudioFeedback } from '../shared/audio-feedback.spec.cy';
 
 describe('PLACE_VALUE Interaction E2E Tests', () => {
   const interactionType = 'place_value';
@@ -52,7 +48,6 @@ describe('PLACE_VALUE Interaction E2E Tests', () => {
 
   it('moves icons to upper panel when clicked', () => {
     setupAndAssert(`${defaultTestFile}.json`);
-    cy.removeClickLayer();
 
     // Click a "one" icon
     cy.get('[data-cy="icon-item-ones"]').last().click({ force: true });
@@ -71,7 +66,6 @@ describe('PLACE_VALUE Interaction E2E Tests', () => {
 
   it('moves icons back to lower panel when clicked', () => {
     setupAndAssert(`${defaultTestFile}.json`);
-    cy.removeClickLayer();
 
     // Move some icons first
     cy.get('[data-cy="icon-item-ones"]').last().click({ force: true });
@@ -92,7 +86,6 @@ describe('PLACE_VALUE Interaction E2E Tests', () => {
 
   it('prevents multiple moves on rapid double-click (debounce)', () => {
     setupAndAssert(`${defaultTestFile}.json`);
-    cy.removeClickLayer();
 
     // Rapidly click a "one" icon twice
     cy.get('[data-cy="icon-item-ones"]').last().click({ force: true });
@@ -111,7 +104,6 @@ describe('PLACE_VALUE Interaction E2E Tests', () => {
 
   it('disables wrappers when max icons are moved to upper panel', () => {
     setupAndAssert(`${defaultTestFile}.json`);
-    cy.removeClickLayer();
 
     cy.get('@testData').then(data => {
       const testData = data as unknown as UnitDefinition;
@@ -139,7 +131,6 @@ describe('PLACE_VALUE Interaction E2E Tests', () => {
 
   it('handles drag and drop to upper panel', () => {
     setupAndAssert(`${defaultTestFile}.json`);
-    cy.removeClickLayer();
 
     // Drag a "ten" icon to the upper panel
     cy.get('[data-cy="icon-item-tens"]').last()
@@ -166,7 +157,6 @@ describe('PLACE_VALUE Interaction E2E Tests', () => {
 
   it('handles drag and drop back to wrapper', () => {
     setupAndAssert(`${defaultTestFile}.json`);
-    cy.removeClickLayer();
 
     // Move a "ten" icon to the upper panel first
     cy.get('[data-cy="icon-item-tens"]').last().click({ force: true });
@@ -202,12 +192,6 @@ describe('PLACE_VALUE Interaction E2E Tests', () => {
     cy.get('[data-cy="icon-item-ones-moved"]').should('not.exist');
   });
 
-  // Shared tests for the PLACE_VALUE interaction type
-  describe('Shared Features', () => {
-    testMainAudioFeatures(interactionType, defaultTestFile);
-    testContinueButtonFeatures(interactionType);
-    testRibbonBars(interactionType, `${interactionType}_ribbonBars_true_test`);
-    testAudioFeedback(interactionType, `${interactionType}_feedback_test`);
-    testOpeningImageFeatures(interactionType, `${interactionType}_with_openingImage_test`);
-  });
+  // Test base features for the PLACE_VALUE interaction type
+  testBaseFeatures(interactionType, defaultTestFile);
 });

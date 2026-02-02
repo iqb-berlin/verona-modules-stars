@@ -17,37 +17,23 @@ export function testMainAudioFeatures(interactionType: string, configFile: strin
     });
 
     it('waits for audio completion when disableInteractionUntilComplete is true', () => {
-      if (testData.mainAudio?.disableInteractionUntilComplete) {
-        // Initially, the interaction should be disabled with overlay visible
-        cy.get('[data-cy="interaction-disabled-overlay"]').should('exist');
+      // Set up test data
+      cy.setupTestData(`${interactionType}_disableInteractionUntilComplete_true_test.json`, `${interactionType}`);
 
-        // Click the audio button to start playing
-        cy.get('[data-cy="speaker-icon"]').click();
+      // Initially, the interaction should be disabled with overlay visible
+      cy.get('[data-cy="interaction-disabled-overlay"]').should('exist');
 
-        // Wait for audio to finish playing
-        cy.waitUntilAudioIsFinishedPlaying();
+      // Click the audio button to start playing
+      cy.get('[data-cy="speaker-icon"]').click();
 
-        // After audio completion, the overlay should disappear
-        cy.get('[data-cy="interaction-disabled-overlay"]').should('not.exist');
+      // Wait for audio to finish playing
+      cy.waitUntilAudioIsFinishedPlaying();
 
-        if (interactionType === 'image_only') {
-          cy.get('[data-cy="stimulus-image"]').should('exist').and('be.visible');
-        } else if (interactionType === 'write') {
-          // Keyboard should be clickable
-          cy.get('[data-cy=character-button-a]').should('not.be.disabled');
-        } else {
-          // Buttons should be clickable
-          const buttonSelector = interactionType === 'polygon_buttons' ?
-            '[data-cy="polygon-0"]' :
-            '[data-cy="button-0"]';
-          cy.get(buttonSelector).click();
-          if (interactionType === 'polygon_buttons') {
-            cy.get(buttonSelector).should('have.class', 'clicked');
-          } else {
-            cy.get(`${buttonSelector} input`).should('have.attr', 'data-selected');
-          }
-        }
-      }
+      // After audio completion, the overlay should disappear
+      cy.get('[data-cy="interaction-disabled-overlay"]').should('not.exist');
+
+      // Interactions should be possible now
+      cy.applyStandardScenarios(interactionType);
     });
 
     it('is consistent with maxPlay time', () => {
