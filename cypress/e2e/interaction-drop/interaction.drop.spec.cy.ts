@@ -95,7 +95,6 @@ describe('Interaction DROP Component', () => {
   const getTestSetupWithImageLandingXY = (
   ): Cypress.Chainable<any> => {
     cy.setupTestData(testFileWithImageLandingXY, interactionType);
-    cy.removeClickLayer();
 
     return cy.get('@testData').then(data => {
       const testData = data as unknown as UnitDefinition;
@@ -179,7 +178,6 @@ describe('Interaction DROP Component', () => {
   describe('Rendering', () => {
     beforeEach(() => {
       cy.setupTestData(defaultTestFile, interactionType);
-      cy.removeClickLayer();
     });
 
     it('renders the correct number of options', () => {
@@ -201,7 +199,6 @@ describe('Interaction DROP Component', () => {
     describe('BOTTOM', () => {
       beforeEach(() => {
         cy.setupTestData(defaultTestFile, interactionType);
-        cy.removeClickLayer();
       });
 
       it('applies correct styles and downward movement', () => {
@@ -228,7 +225,6 @@ describe('Interaction DROP Component', () => {
     describe('TOP', () => {
       beforeEach(() => {
         cy.setupTestData(`${interactionType}_imagePosition_top_test`, interactionType);
-        cy.removeClickLayer();
       });
 
       it('applies correct styles and upward movement', () => {
@@ -274,7 +270,6 @@ describe('Interaction DROP Component', () => {
   describe('Click behavior', () => {
     beforeEach(() => {
       cy.setupTestData(defaultTestFile, interactionType);
-      cy.removeClickLayer();
     });
 
     it('toggles option back to initial position when clicked again', () => {

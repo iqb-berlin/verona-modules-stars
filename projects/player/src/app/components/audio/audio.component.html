@@ -4,7 +4,7 @@
          [class.disabled]="disabled() && !isPlaying()"
          [attr.data-cy]="disabled() ? 'audio-button-container-disabled' : 'audio-button-container'"
     >
-      <div class="custom-audio-button" (click)="play()" [class.moving-button]="movingButton()" [class.playing]="isPlaying()">
+      <div class="custom-audio-button" (click)="play()" [class.moving-button]="movingButton()" [class.playing]="isPlaying()" data-cy="custom-audio-button">
         <div class="speaker-icon" data-cy="speaker-icon">
           <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
             <rect class="white-circle" x="0" y="0" width="70" height="70" rx="70" fill="white"/>
