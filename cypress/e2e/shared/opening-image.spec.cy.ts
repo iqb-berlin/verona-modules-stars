@@ -36,7 +36,7 @@ export function testOpeningImageFeatures(interactionType: string, configFile: st
       cy.get('[data-cy="opening-image"]').should('not.exist');
 
       // after the opening-image is gone, it automatically plays the audioSource inside the mainAudio
-      cy.get('[data-cy="audio-button-animation"]').should('have.class', 'playing');
+      cy.get('[data-cy="custom-audio-button"]').should('have.class', 'playing');
     });
   });
 }

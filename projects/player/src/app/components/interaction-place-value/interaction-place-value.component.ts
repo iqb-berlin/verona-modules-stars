@@ -1,14 +1,19 @@
 import {
-  Component, computed, effect, ElementRef, HostListener, signal, ViewChild
+  Component, computed, effect, ElementRef, signal, ViewChild
 } from '@angular/core';
+import {
+  CdkDrag, CdkDragEnd
+} from '@angular/cdk/drag-drop';
 import { Response } from '@iqbspecs/response/response.interface';
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
 import { IconButtonTypeEnum, InteractionPlaceValueParams } from '../../models/unit-definition';
+import { parseTranslate, updateTransitionDisabledSet } from '../../shared/utils/drag-drop.util';
 
 @Component({
   selector: 'stars-interaction-place-value',
   templateUrl: './interaction-place-value.component.html',
-  styleUrls: ['./interaction-place-value.component.scss']
+  styleUrls: ['./interaction-place-value.component.scss'],
+  imports: [CdkDrag]
 })
 export class InteractionPlaceValueComponent extends InteractionComponentDirective {
   localParameters!: InteractionPlaceValueParams;
@@ -45,19 +50,58 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
   /** Per-item transform map */
   readonly itemTransforms: Record<number, string> = {};
 
+  /** Set of item IDs for which CSS transitions should be disabled (used during drag) */
+  readonly transitionDisabledIds = signal<Set<number>>(new Set());
+
+  /** ID of the item currently being dragged */
+  readonly draggingIndex = signal<number | null>(null);
+
+  /** Whether the currently dragged item is a 'tens' icon */
+  readonly isDraggingTens = computed(() => {
+    const draggingId = this.draggingIndex();
+    if (draggingId !== null && this.tensArray().some(t => t.id === draggingId)) {
+      return true;
+    }
+    return this.tensArray().some(t => this.isAnimating(t.id));
+  });
+
+  /** Whether the currently dragged item is a 'ones' icon */
+  readonly isDraggingOnes = computed(() => {
+    const draggingId = this.draggingIndex();
+    if (draggingId !== null && this.onesArray().some(o => o.id === draggingId)) {
+      return true;
+    }
+    return this.onesArray().some(o => this.isAnimating(o.id));
+  });
+
+  /** Flag to prevent click handler when drag ends */
+  private suppressClick = false;
+
+  /** Timestamp of the last successful click to prevent double-click issues */
+  private lastClickTime = 0;
+
+  /** Debounce time for clicks in milliseconds */
+  private static readonly CLICK_DEBOUNCE_MS = 500;
+
   /** Transient selection: ids currently in the middle of a user-triggered move/animation */
   private readonly selectionAnimatingIds: Set<number> = new Set<number>();
 
-  /** Check if an item should display the selected (active) SVG */
-  isSelected(id: number): boolean {
-    return this.selectionAnimatingIds.has(id);
-  }
+  /** Animation control for click/drag animations: reactive map of animating item ids */
+  private readonly animatingFlags = signal<Record<number, true>>({});
+  /** keep in sync with CSS transition */
+  private static readonly CLICK_ANIMATION_MS = 1000;
+  /** Extra vertical gap between tens icons while stacked in the upper panel (in px) */
+  private static readonly VERTICAL_GAP_PX = 12;
 
-  /** Whether an item (by id) currently belongs to the upper panel (either tens or ones list). */
-  inUpperPanel(id: number): boolean {
-    return this.tensCountAtTheTopPanel().some(i => i.id === id) ||
-      this.onesCountAtTheTopPanel().some(i => i.id === id);
-  }
+  /** Request a layout update. Marked as true if a layout update was requested but not yet executed. */
+  private layoutUpdateRequested = false;
+  /** Mark as true if a layout update was rescheduled due to a pending one. */
+  private layoutUpdateReschedule = false;
+
+  numberOfRows: number = 5;
+  /** Maximum number of tens and ones  */
+  maxNumberOfTens: number = 3;
+  maxNumberOfOnes: number = 20;
 
   /** Tens wrapper shows exactly maxNumberOfTens + 1 items stacked on top of each other. */
   readonly tensArray = computed(() => {
@@ -80,31 +124,6 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
     }));
   });
 
-  /** Animation control for click/drag animations: reactive map of animating item ids */
-  private readonly animatingFlags = signal<Record<number, true>>({});
-  /** keep in sync with CSS transition */
-  private static readonly CLICK_ANIMATION_MS = 500;
-  /** Extra vertical gap between tens icons while stacked in the upper panel (in px) */
-  private static readonly VERTICAL_GAP_PX = 12;
-
-  /** Request a layout update. Marked as true if a layout update was requested but not yet executed. */
-  private layoutUpdateRequested = false;
-  /** Mark as true if a layout update was rescheduled due to a pending one. */
-  private layoutUpdateReschedule = false;
-
-  /** Check whether a specific item (by id) is currently marked as animating. */
-  isAnimating(id: number): boolean {
-    // Ensure a strict boolean is returned even if the index is undefined
-    return this.animatingFlags()[id] ?? false;
-  }
-
-  // Recompute transforms on window resize so items adapt to new geometry
-  @HostListener('window:resize')
-  onWindowResize(): void {
-    // Recalculate on resize in the next animation frame and animate smoothly
-    this.scheduleLayoutUpdate();
-  }
-
   /** Total number of rows in the upper panel */
   getUpperPanelHeight = computed(() => (
     (this.tensItemHeight * this.numberOfRows) +
@@ -112,10 +131,36 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
     (2 * this.padding)
   ));
 
-  numberOfRows: number = 5;
-  /** Maximum number of tens and ones  */
-  maxNumberOfTens: number = 3;
-  maxNumberOfOnes: number = 20;
+  /** Check if tens wrapper should be disabled */
+  readonly tensWrapperDisabled = computed(() => {
+    const currentTens = this.tensCountAtTheTopPanel().length;
+    const maxTensInPanel = this.maxNumberOfTens;
+    return currentTens >= maxTensInPanel;
+  });
+
+  /** Check if ones wrapper should be disabled */
+  readonly onesWrapperDisabled = computed(() => {
+    const currentOnes = this.onesCountAtTheTopPanel().length;
+    const maxOnesInPanel = this.maxNumberOfOnes;
+    return currentOnes >= maxOnesInPanel;
+  });
+
+  /** Check if an item should display the selected (active) SVG */
+  isSelected(id: number): boolean {
+    return this.selectionAnimatingIds.has(id);
+  }
+
+  /** Whether an item (by id) currently belongs to the upper panel (either tens or ones list). */
+  inUpperPanel(id: number): boolean {
+    return this.tensCountAtTheTopPanel().some(i => i.id === id) ||
+      this.onesCountAtTheTopPanel().some(i => i.id === id);
+  }
+
+  /** Check whether a specific item (by id) is currently marked as animating. */
+  isAnimating(id: number): boolean {
+    // Ensure a strict boolean is returned even if the index is undefined
+    return this.animatingFlags()[id] ?? false;
+  }
 
   constructor() {
     super();
@@ -170,6 +215,167 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
     });
   }
 
+  /** Returns the free-drag position for the given item ID, derived from itemTransforms */
+  freeDragPositionFor(id: number): { x: number; y: number } {
+    const transform = this.itemTransforms[id] ?? '';
+    return parseTranslate(transform);
+  }
+
+  onDragStarted(id: number): void {
+    this.draggingIndex.set(id);
+    this.suppressClick = true;
+    this.addTransitionDisabled(id);
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  onDragReleased(id: number): void {
+    this.removeTransitionDisabled(id);
+  }
+
+  /** Returns whether transitions should be disabled for the given item ID */
+  shouldDisableTransition(id: number): boolean {
+    return this.transitionDisabledIds().has(id);
+  }
+
+  private addTransitionDisabled(id: number): void {
+    this.transitionDisabledIds.update(set => updateTransitionDisabledSet(set, id, 'add'));
+  }
+
+  private removeTransitionDisabled(id: number): void {
+    this.transitionDisabledIds.update(set => updateTransitionDisabledSet(set, id, 'remove'));
+  }
+
+  /** Reset values after drag finishes */
+  onDragEnded(event: CdkDragEnd, source: 'ones' | 'tens', item: CountItem): void {
+    setTimeout(() => { this.suppressClick = false; }, 0);
+    this.draggingIndex.set(null);
+
+    const freePos = (event?.source as CdkDrag)?.getFreeDragPosition?.() ?? { x: 0, y: 0 };
+    const droppedTransform = `translate3d(${(freePos?.x ?? 0)}px, ${(freePos?.y ?? 0)}px, 0px)`;
+
+    // Update the transform to the dropped position.
+    // Transition is still disabled at this point.
+    this.itemTransforms[item.id] = droppedTransform;
+
+    const inPanel = this.inUpperPanel(item.id);
+
+    // Force a reflow while transitions are disabled and the 'dropped' transform is set.
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+    event.source.element.nativeElement.offsetHeight;
+
+    if (inPanel) {
+      // Dragged FROM panel -> ALWAYS return to wrapper
+      this.onItemClick(source, item, undefined, true);
+    } else {
+      // Dragged FROM wrapper
+      const isDisabled = source === 'tens' ? this.tensWrapperDisabled() : this.onesWrapperDisabled();
+      if (isDisabled) {
+        // Return to wrapper
+        this.itemTransforms[item.id] = 'translate3d(0px, 0px, 0px)';
+        this.scheduleLayoutUpdate([item.id], true);
+      } else {
+        // Add to panel
+        this.onItemClick(source, item, undefined, true);
+      }
+    }
+  }
+
+  /** Resets the component's state to its initial values */
+  private resetSelection(): void {
+    this.addedSeqCounter = 0;
+    this.addedSequence.clear();
+    this.tensSlotIndex.clear();
+    this.onesSlotIndex.clear();
+    this.nextTensSlot = 0;
+    this.nextOnesSlot = 0;
+    this.tensCountAtTheTopPanel.set([]);
+    this.onesCountAtTheTopPanel.set([]);
+    Object.keys(this.itemTransforms).forEach(k => { delete this.itemTransforms[Number(k)]; });
+    this.animatingFlags.set({});
+    this.selectionAnimatingIds.clear();
+    this.hasRestoredFromFormerState = false;
+  }
+
+  /**
+   * Handles the click or drag-drop interaction for an item (ones or tens).
+   * Moves items between the source wrapper stacks and the upper panel.
+   *
+   * @param source The type of item being interacted with ('ones' or 'tens').
+   * @param item The specific item being moved. If undefined, the next available item
+   *             is picked from the source stack (LIFO order).
+   * @param event The original click event, used to stop propagation.
+   * @param isFromDrag Indicates if this call originated from a drag-end event
+   *                   rather than a direct click.
+   */
+  onItemClick(source: 'ones' | 'tens', item?: CountItem, event?: Event, isFromDrag = false): void {
+    if (!isFromDrag) {
+      if (this.suppressClick) return;
+      const now = Date.now();
+      if (now - this.lastClickTime < InteractionPlaceValueComponent.CLICK_DEBOUNCE_MS) {
+        return;
+      }
+      this.lastClickTime = now;
+    }
+
+    if (event) {
+      event.stopPropagation();
+    }
+
+    // If no specific item provided, select the next available candidate from the wrapper stack.
+    // NOTE: This picks items in LIFO order (from the top of the visual stack).
+    const chosen: CountItem | undefined = item ?? this.pickNextCandidate(source);
+    if (!chosen) return;
+    const movedId = chosen.id;
+    if (source === 'tens') {
+      const alreadyInPanel = this.tensCountAtTheTopPanel().some(i => i.id === chosen.id);
+      // Guard adds when disabled; allow removals regardless of disabled state
+      if (!alreadyInPanel && this.tensWrapperDisabled()) return;
+      if (!alreadyInPanel) {
+        // Remember insertion order for stable FIFO rendering in the upper panel.
+        // This ensures that the first item added to the panel stays in the first visual slot.
+        if (!this.addedSequence.has(chosen.id)) {
+          this.addedSeqCounter += 1;
+          this.addedSequence.set(chosen.id, this.addedSeqCounter);
+        }
+        // Assign a stable vertical slot for tens
+        if (!this.tensSlotIndex.has(chosen.id)) {
+          this.tensSlotIndex.set(chosen.id, this.nextTensSlot);
+          this.nextTensSlot += 1;
+        }
+        this.tensCountAtTheTopPanel.set([...this.tensCountAtTheTopPanel(), chosen]);
+      } else {
+        // Already in panel → remove (return to wrapper)
+        const remaining = this.tensCountAtTheTopPanel().filter(i => i.id !== chosen.id);
+        this.tensCountAtTheTopPanel.set(remaining);
+        // Do not delete transform here if we are animating back; scheduleLayoutUpdate handles it
+        this.itemTransforms[chosen.id] = 'translate3d(0px, 0px, 0px)';
+      }
+    } else {
+      const alreadyInPanel = this.onesCountAtTheTopPanel().some(i => i.id === chosen.id);
+      if (!alreadyInPanel && this.onesWrapperDisabled()) return;
+      if (!alreadyInPanel) {
+        // Remember insertion order for stable FIFO rendering in the upper panel.
+        if (!this.addedSequence.has(chosen.id)) {
+          this.addedSeqCounter += 1;
+          this.addedSequence.set(chosen.id, this.addedSeqCounter);
+        }
+        if (!this.onesSlotIndex.has(chosen.id)) {
+          this.onesSlotIndex.set(chosen.id, this.nextOnesSlot);
+          this.nextOnesSlot += 1;
+        }
+        this.onesCountAtTheTopPanel.set([...this.onesCountAtTheTopPanel(), chosen]);
+      } else {
+        const remaining = this.onesCountAtTheTopPanel().filter(i => i.id !== chosen.id);
+        this.onesCountAtTheTopPanel.set(remaining);
+        this.itemTransforms[chosen.id] = 'translate3d(0px, 0px, 0px)';
+      }
+    }
+
+    // Recompute layout transforms and emit responses
+    this.scheduleLayoutUpdate([movedId], isFromDrag);
+    this.emitResponses();
+  }
+
   /** Emits responses for the current state of the component */
   private emitResponses(): void {
     const tensCount = this.tensCountAtTheTopPanel().length;
@@ -191,116 +397,36 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
     ]);
   }
 
-  /** Resets the component's state to its initial values */
-  private resetSelection(): void {
-    this.addedSeqCounter = 0;
-    this.addedSequence.clear();
-    this.tensSlotIndex.clear();
-    this.onesSlotIndex.clear();
-    this.nextTensSlot = 0;
-    this.nextOnesSlot = 0;
-    this.tensCountAtTheTopPanel.set([]);
-    this.onesCountAtTheTopPanel.set([]);
-    Object.keys(this.itemTransforms).forEach(k => { delete this.itemTransforms[Number(k)]; });
-    this.animatingFlags.set({});
-    this.selectionAnimatingIds.clear();
-    this.hasRestoredFromFormerState = false;
-  }
-
-  /** Check if tens wrapper should be disabled */
-  readonly tensWrapperDisabled = computed(() => {
-    const currentTens = this.tensCountAtTheTopPanel().length;
-    const maxTensInPanel = this.maxNumberOfTens;
-    return currentTens >= maxTensInPanel;
-  });
-
-  /** Check if ones wrapper should be disabled */
-  readonly onesWrapperDisabled = computed(() => {
-    const currentOnes = this.onesCountAtTheTopPanel().length;
-    const maxOnesInPanel = this.maxNumberOfOnes;
-    return currentOnes >= maxOnesInPanel;
-  });
-
-  /** Onclick handler */
-  onItemClick(source: 'ones' | 'tens', item?: CountItem, event?: Event): void {
-    if (event) {
-      event.stopPropagation();
-    }
-
-    // If no specific item provided, select the next available candidate from the wrapper stack
-    const chosen: CountItem | undefined = item ?? this.pickNextCandidate(source);
-    if (!chosen) return;
-
-    const movedId = chosen.id;
-    if (source === 'tens') {
-      const alreadyInPanel = this.tensCountAtTheTopPanel().some(i => i.id === chosen.id);
-      // Guard adds when disabled; allow removals regardless of disabled state
-      if (!alreadyInPanel && this.tensWrapperDisabled()) return;
-      if (!alreadyInPanel) {
-        // remember insertion order for stable FIFO rendering
-        if (!this.addedSequence.has(chosen.id)) {
-          this.addedSeqCounter += 1;
-          this.addedSequence.set(chosen.id, this.addedSeqCounter);
-        }
-        // Assign a stable vertical slot for tens
-        if (!this.tensSlotIndex.has(chosen.id)) {
-          this.tensSlotIndex.set(chosen.id, this.nextTensSlot);
-          this.nextTensSlot += 1;
-        }
-        this.tensCountAtTheTopPanel.set([...this.tensCountAtTheTopPanel(), chosen]);
-      } else {
-        // Already in panel → remove (return to wrapper)
-        const remaining = this.tensCountAtTheTopPanel().filter(i => i.id !== chosen.id);
-        this.tensCountAtTheTopPanel.set(remaining);
-        delete this.itemTransforms[chosen.id];
-      }
-    } else {
-      const alreadyInPanel = this.onesCountAtTheTopPanel().some(i => i.id === chosen.id);
-      if (!alreadyInPanel && this.onesWrapperDisabled()) return;
-      if (!alreadyInPanel) {
-        if (!this.addedSequence.has(chosen.id)) {
-          this.addedSeqCounter += 1;
-          this.addedSequence.set(chosen.id, this.addedSeqCounter);
-        }
-        if (!this.onesSlotIndex.has(chosen.id)) {
-          this.onesSlotIndex.set(chosen.id, this.nextOnesSlot);
-          this.nextOnesSlot += 1;
-        }
-        this.onesCountAtTheTopPanel.set([...this.onesCountAtTheTopPanel(), chosen]);
-      } else {
-        const remaining = this.onesCountAtTheTopPanel().filter(i => i.id !== chosen.id);
-        this.onesCountAtTheTopPanel.set(remaining);
-        delete this.itemTransforms[chosen.id];
-      }
-    }
-
-    // Recompute layout transforms and emit responses
-    this.scheduleLayoutUpdate([movedId]);
-    this.emitResponses();
-  }
-
   /**
    * Pick the next available stacked icon from a wrapper when the wrapper itself is clicked.
    * Respects disabled state and capacity and never returns an id that is already present in the upper panel.
+   *
+   * This implementation iterates from the end of the array (LIFO order), which corresponds
+   * to picking the "top" icon from the visual stack in the wrapper.
    */
   private pickNextCandidate(source: 'ones' | 'tens'): CountItem | undefined {
     if (source === 'tens') {
       if (this.tensWrapperDisabled()) return undefined;
       const all = this.tensArray();
       const used = new Set(this.tensCountAtTheTopPanel().map(i => i.id));
+      // Start from the end of the array to achieve LIFO (top-of-stack) picking
       for (let i = all.length - 1; i >= 0; i -= 1) {
         const candidate = all[i];
-        if (candidate && !used.has(candidate.id)) return candidate;
+        if (candidate && !used.has(candidate.id)) {
+          return candidate;
+        }
       }
       return undefined;
     }
-    // ones
     if (this.onesWrapperDisabled()) return undefined;
     const all = this.onesArray();
     const used = new Set(this.onesCountAtTheTopPanel().map(i => i.id));
+    // Start from the end of the array to achieve LIFO (top-of-stack) picking
     for (let i = all.length - 1; i >= 0; i -= 1) {
       const candidate = all[i];
-      if (candidate && !used.has(candidate.id)) return candidate;
+      if (candidate && !used.has(candidate.id)) {
+        return candidate;
+      }
     }
     return undefined;
   }
@@ -344,7 +470,7 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
       const x = baseXTens;
       const y = baseYTens + (slot * (rowH + tensGapY));
       // Always (re)calculate transforms to reflect current layout
-      this.itemTransforms[tensIcon.id] = `translate(${x}px, ${y}px)`;
+      this.itemTransforms[tensIcon.id] = `translate3d(${x}px, ${y}px, 0px)`;
     });
 
     // Ones: align horizontally next to each other — X increases by (icon width + 2*8px padding) per slot,
@@ -371,7 +497,7 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
       // and also use the same vertical gap between their own rows
       const y = baseYOnes + (tensRows * (rowH + tensGapY)) + (row * (rowH + tensGapY));
       // Always (re)calculate transforms; ones move down when tens grow or wrap when row fills
-      this.itemTransforms[oneIcon.id] = `translate(${x}px, ${y}px)`;
+      this.itemTransforms[oneIcon.id] = `translate3d(${x}px, ${y}px, 0px)`;
     });
   }
 
@@ -394,24 +520,26 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
 
     const newTens: CountItem[] = [];
     for (let i = tensAll.length - 1; i >= 0 && newTens.length < desiredTens; i -= 1) {
-      const it = tensAll[i];
-      if (!it) continue;
-      this.addedSeqCounter += 1;
-      this.addedSequence.set(it.id, this.addedSeqCounter);
-      this.tensSlotIndex.set(it.id, this.nextTensSlot);
-      this.nextTensSlot += 1;
-      newTens.push(it);
+      const tensItem = tensAll[i];
+      if (tensItem) {
+        this.addedSeqCounter += 1;
+        this.addedSequence.set(tensItem.id, this.addedSeqCounter);
+        this.tensSlotIndex.set(tensItem.id, this.nextTensSlot);
+        this.nextTensSlot += 1;
+        newTens.push(tensItem);
+      }
     }
 
     const newOnes: CountItem[] = [];
     for (let i = onesAll.length - 1; i >= 0 && newOnes.length < desiredOnes; i -= 1) {
-      const it = onesAll[i];
-      if (!it) continue;
-      this.addedSeqCounter += 1;
-      this.addedSequence.set(it.id, this.addedSeqCounter);
-      this.onesSlotIndex.set(it.id, this.nextOnesSlot);
-      this.nextOnesSlot += 1;
-      newOnes.push(it);
+      const onesItem = onesAll[i];
+      if (onesItem) {
+        this.addedSeqCounter += 1;
+        this.addedSequence.set(onesItem.id, this.addedSeqCounter);
+        this.onesSlotIndex.set(onesItem.id, this.nextOnesSlot);
+        this.nextOnesSlot += 1;
+        newOnes.push(onesItem);
+      }
     }
 
     // Apply restored arrays
@@ -422,14 +550,14 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
     this.scheduleLayoutUpdate();
   }
 
-  private scheduleLayoutUpdate(idsToAnimate?: number[]): void {
+  private scheduleLayoutUpdate(idsToAnimate?: number[], immediate = false): void {
     // Coalesce multiple calls: if an update is already requested, mark as reschedule and exit.
-    if (this.layoutUpdateRequested) {
+    if (!immediate && this.layoutUpdateRequested) {
       this.layoutUpdateReschedule = true;
       return;
     }
-    this.layoutUpdateRequested = true;
-    setTimeout(() => {
+
+    const performUpdate = () => {
       // Mark only the explicitly moved ids as animating and selected
       const ids = Array.isArray(idsToAnimate) ? idsToAnimate : [];
       if (ids.length > 0) {
@@ -438,39 +566,58 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
           this.setAnimating(id, true);
         });
       }
+
+      // If immediate, ensure we are not in a tick where transitions are disabled for these ids
+      if (immediate && ids.length > 0) {
+        ids.forEach(id => this.removeTransitionDisabled(id));
+      }
+
       this.recomputeUpperPanelTransforms();
-      this.layoutUpdateRequested = false;
+      if (!immediate) {
+        this.layoutUpdateRequested = false;
+      }
 
       if (ids.length > 0) {
         setTimeout(() => {
           ids.forEach(id => {
             this.setAnimating(id, false);
             this.selectionAnimatingIds.delete(id);
+            // If the item is no longer in the upper panel, clear its transform after animation
+            if (!this.inUpperPanel(id)) {
+              delete this.itemTransforms[id];
+            }
           });
         }, InteractionPlaceValueComponent.CLICK_ANIMATION_MS);
       }
 
       // If another update was requested while the layout was being updated, schedule again
-      if (this.layoutUpdateReschedule) {
+      if (!immediate && this.layoutUpdateReschedule) {
         this.layoutUpdateReschedule = false;
         // Re-run without extra animating marks to smoothly reposition others
         this.scheduleLayoutUpdate();
       }
-    }, 0);
+    };
+
+    if (immediate) {
+      performUpdate();
+    } else {
+      this.layoutUpdateRequested = true;
+      setTimeout(performUpdate, 0);
+    }
   }
 
   /** Reactive helper to set/clear animating state */
   private setAnimating(id: number, on: boolean): void {
-    const curr = this.animatingFlags();
-    if (on) {
-      if (curr[id]) return; // no change
-      this.animatingFlags.set({ ...curr, [id]: true });
-    } else {
-      if (!curr[id]) return; // no change
+    this.animatingFlags.update(curr => {
+      if (on) {
+        if (curr[id]) return curr; // no change
+        return { ...curr, [id]: true };
+      }
+      if (!curr[id]) return curr; // no change
       const next = { ...curr };
       delete next[id];
-      this.animatingFlags.set(next);
-    }
+      return next;
+    });
   }
 
   // eslint-disable-next-line class-methods-use-this

@@ -13,6 +13,9 @@ describe('Interaction IMAGE_ONLY Component', () => {
   });
 
   it('displays imageSource', () => {
+    // Remove click layer
+    cy.removeClickLayer();
+
     // Check if the imageSource is displayed
     cy.get('[data-cy="stimulus-image"]')
       .should('have.attr', 'src')

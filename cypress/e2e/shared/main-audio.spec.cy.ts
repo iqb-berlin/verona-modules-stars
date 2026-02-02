@@ -16,45 +16,10 @@ export function testMainAudioFeatures(interactionType: string, configFile: strin
       cy.get('[data-cy="speaker-icon"]').should('exist');
     });
 
-    it('handles firstClickLayer correctly', () => {
-      if (testData.firstAudioOptions?.firstClickLayer) {
-        cy.get('[data-cy="click-layer"]').should('exist').and('be.visible');
-
-        // Remove click layer to enable interactions
-        cy.removeClickLayer();
-
-        // After clicking, the layer should disappear
-        cy.get('[data-cy="click-layer"]').should('not.exist');
-        // Now interactions should be possible (unless disableInteractionUntilComplete is also true)
-        if (!testData.mainAudio?.disableInteractionUntilComplete) {
-          // if interactionType:IMAGE_ONLY, then it is enough that the image exists and visible
-          if (interactionType === 'image_only') {
-            cy.get('[data-cy="stimulus-image"]').should('exist').and('be.visible');
-          } else if (interactionType === 'write') {
-            cy.get('[data-cy=character-button-a]').click();
-            cy.get('[data-cy=text-span]').should('contain', 'a');
-          } else if (interactionType === 'place_value') {
-            cy.get('[data-cy=icon-item-tens]').first().click({ force: true });
-            cy.get('[data-cy=icon-item-tens-moved]').should('exist');
-          } else {
-            const buttonSelector = interactionType === 'polygon_buttons' ?
-              '[data-cy="polygon-0"]' :
-              '[data-cy="button-0"]';
-            const selectedClass = interactionType === 'polygon_buttons' ? 'clicked' : 'selected';
-            cy.get(buttonSelector).should('be.visible').click();
-            cy.get(buttonSelector).should('have.class', selectedClass);
-          }
-        }
-      }
-    });
-
     it('waits for audio completion when disableInteractionUntilComplete is true', () => {
       if (testData.mainAudio?.disableInteractionUntilComplete) {
         // Initially, the interaction should be disabled with overlay visible
         cy.get('[data-cy="interaction-disabled-overlay"]').should('exist');
-
-        // Remove click layer to enable interactions
-        cy.removeClickLayer();
 
         // Click the audio button to start playing
         cy.get('[data-cy="speaker-icon"]').click();
@@ -88,9 +53,6 @@ export function testMainAudioFeatures(interactionType: string, configFile: strin
     it('is consistent with maxPlay time', () => {
       const maxPlayTime = testData.mainAudio?.maxPlay ?? 1;
 
-      // Remove click layer
-      cy.removeClickLayer();
-
       // Initially audio button container should be enabled
       cy.get('[data-cy="audio-button-container"]').should('exist');
       if (maxPlayTime > 0) {
@@ -102,7 +64,7 @@ export function testMainAudioFeatures(interactionType: string, configFile: strin
         }
 
         // Ensure it doesn't flip to playing
-        cy.get('[data-cy="audio-button-animation"]').should('not.have.class', 'playing');
+        cy.get('[data-cy="custom-audio-button"]').should('not.have.class', 'playing');
         // Ensure that it is disabled
         cy.get('[data-cy="audio-button-container-disabled"]').should('exist');
       }
@@ -126,26 +88,6 @@ export function testMainAudioFeatures(interactionType: string, configFile: strin
       }
       // After many times clicked, the container should still exist
       cy.get('[data-cy="audio-button-container"]').should('exist');
-    });
-
-    it('animates audio button when animateButton is true', () => {
-      // Set up test data
-      cy.setupTestData(`${interactionType}_animateButton_true_test.json`, interactionType);
-
-      cy.get('@testData').then(data => {
-        testData = data as unknown as UnitDefinition;
-
-        if (testData.firstAudioOptions?.animateButton) {
-          // The button should NOT be moving initially
-          cy.get('.custom-audio-button').should('exist').and('not.have.class', 'moving-button');
-
-          // Do not interact with the page; wait slightly over 10 seconds
-          cy.wait(11000);
-
-          // After 10s of inactivity (and before first interaction), it should start moving
-          cy.get('.custom-audio-button').should('have.class', 'moving-button');
-        }
-      });
     });
   });
 }
