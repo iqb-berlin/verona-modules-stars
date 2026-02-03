@@ -5,7 +5,7 @@
   "continueButtonShow": "ON_ANY_RESPONSE",
   "firstAudioOptions" : {
     "firstClickLayer": true,
-    "animateButton": true
+    "animateButton": false
   },
   "ribbonBars": false,
   "mainAudio": {

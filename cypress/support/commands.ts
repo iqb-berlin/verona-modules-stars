@@ -153,7 +153,7 @@ Cypress.Commands.add('clickButtonAtIndexOne', () => {
 });
 
 Cypress.Commands.add('waitUntilAudioIsFinishedPlaying', () => {
-  cy.get('[data-cy="audio-button-animation"]', { timeout: 60000 }) // wait up to 60s
+  cy.get('[data-cy="custom-audio-button"]', { timeout: 60000 }) // wait up to 60s
     .should($el => {
       // check that the class 'playing' is not present
       expect($el).not.to.have.class('playing');
@@ -327,19 +327,23 @@ Cypress.Commands.add('movePlaceValueIcons', (targetTens: number, targetOnes: num
     for (let i = initialTensMoved; i < targetTens; i++) {
       cy.get('[data-cy="icon-item-tens"]').first().click({ force: true });
       cy.get('[data-cy="icon-item-tens-moved"]').should('have.length', i + 1);
+      cy.wait(500); // Wait for debounce
     }
 
     // Move ones
     for (let i = initialOnesMoved; i < targetOnes; i++) {
       cy.get('[data-cy="icon-item-ones"]').first().click({ force: true });
       cy.get('[data-cy="icon-item-ones-moved"]').should('have.length', i + 1);
+      cy.wait(500); // Wait for debounce
     }
   });
 });
 
 Cypress.Commands.add('applyStandardScenarios', (interactionType: string) => {
   cy.log('first apply standard scenarios that are wrong:');
-  if (interactionType === 'write') {
+  if (interactionType === 'image_only') {
+    cy.get('[data-cy="stimulus-image"]').should('exist').and('be.visible');
+  } else if (interactionType === 'write') {
     // Click any letter
     cy.get('[data-cy=character-button-a]').click();
   } else if (interactionType === 'find_on_image') {
@@ -350,6 +354,7 @@ Cypress.Commands.add('applyStandardScenarios', (interactionType: string) => {
     cy.get('[data-cy="polygon-1"]').click();
   } else if (interactionType === 'place_value') {
     cy.get('[data-cy="icon-item-ones"]').first().click({ force: true });
+    cy.wait(500); // Wait for debounce
   } else {
     // InteractionType: BUTTONS, DROP
     // Click the button index 1

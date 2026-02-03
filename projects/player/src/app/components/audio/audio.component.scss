@@ -7,19 +7,6 @@
   align-items: flex-start;
   flex-direction: row;
 
-  &.playing {
-    .custom-audio-button {
-      ::ng-deep .white-circle {
-        fill: #0050E5;
-      }
-      g path {
-        stroke: white;
-        stroke-width: 0;
-        fill: white;
-      }
-    }
-  }
-
   .custom-audio-button {
     width: 80px;
     height: 80px;
@@ -34,45 +21,19 @@
       animation: moving 7s infinite;
     }
 
-    @keyframes moving {
-      0% {
-        transform: scale(1);
-      }
-
-      5%, 15% {
-        transform: scale(1.15);
-      }
-
-      10%, 20%  {
-        transform: scale(0.95);
-      }
-
-      25% {
-        transform: scale(1);
-      }
-
-      100% {
-        transform: scale(1);
-      }
-
-    }
-
-    img {
-      width: auto;
-      height: auto;
-    }
-  }
-
-  .audio-button-animation {
-    height: variables.$audio-waves-animation-height;
-    opacity: 0;
-    margin-top: 5px;
-    transition: opacity ease-in-out 0.5s;
-    transition-delay: 0.5s;
-
     &.playing {
-      opacity: 1;
-      transition-delay: 0s;
+      animation: moving-play 2s infinite;
+      animation-direction: alternate-reverse;
+
+      ::ng-deep .white-circle {
+        fill: #0050E5;
+      }
+
+      g path {
+        stroke: white;
+        stroke-width: 0;
+        fill: white;
+      }
     }
   }
 }
@@ -96,43 +57,42 @@
   margin-bottom: 0.75rem;
 }
 
-.audio-text-wrapper {
-  display: block;
-  width: 100%;
-  clear: both;
-}
-
-.audio-instruction-text {
-  margin: 0;
-  padding: 0;
-  max-width: clamp(150px, 20vw, 250px);
-  font-size: clamp(0.7rem, 2vw, 1rem);
-  color: #000;
-  text-align: center;
-  line-height: 1.3;
-  width: auto;
-  word-wrap: break-word;
-  font-style: italic;
-  display: block;
-}
-
-@media (max-width: 768px) {
-  .audio-instruction-text {
-    font-size: 0.9rem;
-    max-width: 200px;
+@keyframes moving {
+  0% {
+    transform: scale(1);
   }
 
-  .audio-button-wrapper {
-    margin-bottom: 0.5rem;
+  5%, 15% {
+    transform: scale(1.15);
+  }
+
+  10%, 20%  {
+    transform: scale(0.95);
+  }
+
+  25% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(1);
   }
 }
 
-@media (max-height: 600px) {
-  .audio-instruction-text {
-    font-size: 0.85rem;
+@keyframes moving-play {
+  0% {
+    transform: scale(1);
   }
 
-  .audio-button-wrapper {
-    margin-bottom: 0.5rem;
+  5%, 15%, 35%, 45%, 55%, 65%, 85%, 95% {
+    transform: scale(1.03);
+  }
+
+  10%, 20%, 30%, 40%, 60%, 70%, 80%  {
+    transform: scale(0.97);
+  }
+
+  25%, 50%, 75%, 100% {
+    transform: scale(1);
   }
 }

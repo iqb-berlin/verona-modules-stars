@@ -113,9 +113,6 @@ describe('App component', () => {
 
     cy.get('[data-cy=buttons-container]').should('exist');
 
-    // Remove click layer
-    cy.removeClickLayer();
-
     // Click first button and test VALUE_CHANGED
     cy.clickButtonAtIndexOne();
 
@@ -152,9 +149,6 @@ describe('App component', () => {
 
       const parameter = unit.variableInfo?.[0]?.codes?.[0]?.parameter;
       cy.get('[data-cy=buttons-container]').should('exist');
-
-      // Remove click layer
-      cy.removeClickLayer();
 
       const paramStr = String(parameter ?? '').trim();
       const match = paramStr.match(/\d+$/);

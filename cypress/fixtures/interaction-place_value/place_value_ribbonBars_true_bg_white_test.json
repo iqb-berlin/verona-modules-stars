@@ -5,7 +5,7 @@
   "ribbonBars": true,
   "continueButtonShow": "ALWAYS",
   "firstAudioOptions": {
-    "firstClickLayer": true,
+    "firstClickLayer": false,
     "animateButton": false
   },
   "mainAudio": {

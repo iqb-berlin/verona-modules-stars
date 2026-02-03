@@ -17,7 +17,7 @@
 
 .icons-upper-panel {
   width: 680px;
-  margin-right: -10px;
+  margin-right: -13px;
   background-color: colors.$white;
   box-sizing: border-box;
   border: 3px solid lightgrey;
@@ -45,6 +45,10 @@
   flex-shrink: 0; // Do not allow flexbox to shrink these areas
   position: relative; // allow stacking
   z-index: 1;
+
+  &.active-drag {
+    z-index: 10000;
+  }
 }
 
 .tens-wrapper {
@@ -71,14 +75,16 @@
 }
 
 .icon-item.no-transition {
-  transition: none !important;
+  transition: none;
   border-radius: variables.$icons-border-radius;;
 }
 
-.icon-item.animating {
-  z-index: 9999 !important;
+.icon-item.animating,
+.icon-item.dragging {
+  /* Keep the icons on top while animating and dragging */
+  z-index: 10001 !important;
   /* Keep absolute positioning to avoid reflow/jump during animation */
-  position: absolute !important;
+  position: absolute;
   top: 0;
   left: 0;
 }
@@ -124,7 +130,7 @@
 
 .tens-wrapper .icon-item.moved,
 .ones-wrapper .icon-item.moved {
-  pointer-events: auto !important;
+  pointer-events: auto;
   z-index: 3;
 }
 .tens-wrapper.disabled .icon-item.moved,
@@ -132,10 +138,10 @@
   pointer-events: auto;
 }
 
-/* Remove heavy box-shadows on stacked wrapper items to avoid compounded dark shadow. */
+/* Apply box-shadows only to the bottom wrapper item to give a depth effect. */
 .tens-wrapper .icon-item:first-child:not(.moved),
 .ones-wrapper .icon-item:first-child:not(.moved) {
-  @include variables.tens-and-ones-box-shadow;
+  @include variables.default-box-shadow;
 }
 
 .tens-wrapper .icon-item:not(.moved),
@@ -144,6 +150,6 @@
 }
 
 .icon-item.moved {
-  @include variables.tens-and-ones-box-shadow;
+  @include variables.default-box-shadow;
 }
 

@@ -16,7 +16,7 @@
   "interactionType": "PLACE_VALUE",
   "interactionParameters": {
     "variableId": "PLACE_VALUE",
-    "value": 24,
+    "value": 22,
     "numberOfRows": 5,
     "maxNumberOfTens": 3,
     "maxNumberOfOnes": 20
@@ -29,7 +29,7 @@
       "codes": [
         {
           "method": "EQUALS",
-          "parameter": "24",
+          "parameter": "22",
           "code": 1,
           "score": 1
         }

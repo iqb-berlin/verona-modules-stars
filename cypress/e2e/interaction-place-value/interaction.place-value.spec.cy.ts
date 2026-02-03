@@ -1,12 +1,8 @@
-import { testMainAudioFeatures } from '../shared/main-audio.spec.cy';
-import { testContinueButtonFeatures } from '../shared/continue-button.spec.cy';
-import { testRibbonBars } from '../shared/ribbon-bar.spec.cy';
-import { testOpeningImageFeatures } from '../shared/opening-image.spec.cy';
+import { testBaseFeatures } from '../shared/base-features.spec.cy';
 import {
   InteractionPlaceValueParams,
   UnitDefinition
 } from '../../../projects/player/src/app/models/unit-definition';
-import { testAudioFeedback } from "../shared/audio-feedback.spec.cy";
 
 describe('PLACE_VALUE Interaction E2E Tests', () => {
   const interactionType = 'place_value';
@@ -52,15 +48,16 @@ describe('PLACE_VALUE Interaction E2E Tests', () => {
 
   it('moves icons to upper panel when clicked', () => {
     setupAndAssert(`${defaultTestFile}.json`);
-    cy.removeClickLayer();
 
     // Click a "one" icon
     cy.get('[data-cy="icon-item-ones"]').last().click({ force: true });
     cy.get('[data-cy="icon-item-ones-moved"]').should('have.length', 1);
+    cy.wait(500); // Wait for debounce
 
     // Click another "one" icon
     cy.get('[data-cy="icon-item-ones"]').last().click({ force: true });
     cy.get('[data-cy="icon-item-ones-moved"]').should('have.length', 2);
+    cy.wait(500); // Wait for debounce
 
     // Click a "ten" icon
     cy.get('[data-cy="icon-item-tens"]').last().click({ force: true });
@@ -69,25 +66,44 @@ describe('PLACE_VALUE Interaction E2E Tests', () => {
 
   it('moves icons back to lower panel when clicked', () => {
     setupAndAssert(`${defaultTestFile}.json`);
-    cy.removeClickLayer();
 
     // Move some icons first
     cy.get('[data-cy="icon-item-ones"]').last().click({ force: true });
+    cy.wait(500); // Wait for debounce
     cy.get('[data-cy="icon-item-tens"]').last().click({ force: true });
+    cy.wait(500); // Wait for debounce
     cy.get('[data-cy="icon-item-ones-moved"]').should('have.length', 1);
     cy.get('[data-cy="icon-item-tens-moved"]').should('have.length', 1);
 
     // Click the moved icons again to move them back
     cy.get('[data-cy="icon-item-ones-moved"]').first().click({ force: true });
     cy.get('[data-cy="icon-item-ones-moved"]').should('not.exist');
+    cy.wait(500); // Wait for debounce
 
     cy.get('[data-cy="icon-item-tens-moved"]').first().click({ force: true });
     cy.get('[data-cy="icon-item-tens-moved"]').should('not.exist');
   });
 
+  it('prevents multiple moves on rapid double-click (debounce)', () => {
+    setupAndAssert(`${defaultTestFile}.json`);
+
+    // Rapidly click a "one" icon twice
+    cy.get('[data-cy="icon-item-ones"]').last().click({ force: true });
+    cy.get('[data-cy="icon-item-ones"]').last().click({ force: true });
+
+    // Only one should have moved due to the 500ms debounce
+    cy.get('[data-cy="icon-item-ones-moved"]').should('have.length', 1);
+
+    // Wait for debounce to expire
+    cy.wait(500);
+
+    // Click again, now it should work
+    cy.get('[data-cy="icon-item-ones"]').last().click({ force: true });
+    cy.get('[data-cy="icon-item-ones-moved"]').should('have.length', 2);
+  });
+
   it('disables wrappers when max icons are moved to upper panel', () => {
     setupAndAssert(`${defaultTestFile}.json`);
-    cy.removeClickLayer();
 
     cy.get('@testData').then(data => {
       const testData = data as unknown as UnitDefinition;
@@ -103,20 +119,79 @@ describe('PLACE_VALUE Interaction E2E Tests', () => {
 
       // Move one ten back and check if it is enabled again
       cy.get('[data-cy="icon-item-tens-moved"]').first().click({ force: true });
+      cy.wait(500); // Wait for debounce
       cy.get('[data-cy="tens-wrapper"]').should('not.have.class', 'disabled');
 
       // Move one one back and check if it is enabled again
       cy.get('[data-cy="icon-item-ones-moved"]').first().click({ force: true });
+      cy.wait(500); // Wait for debounce
       cy.get('[data-cy="ones-wrapper"]').should('not.have.class', 'disabled');
     });
   });
 
-  // Shared tests for the PLACE_VALUE interaction type
-  describe('Shared Features', () => {
-    testMainAudioFeatures(interactionType, defaultTestFile);
-    testContinueButtonFeatures(interactionType);
-    testRibbonBars(interactionType, `${interactionType}_ribbonBars_true_test`);
-    testAudioFeedback(interactionType, `${interactionType}_feedback_test`);
-    testOpeningImageFeatures(interactionType, `${interactionType}_with_openingImage_test`);
+  it('handles drag and drop to upper panel', () => {
+    setupAndAssert(`${defaultTestFile}.json`);
+
+    // Drag a "ten" icon to the upper panel
+    cy.get('[data-cy="icon-item-tens"]').last()
+      .trigger('mousedown', { button: 0, bubbles: true, force: true })
+      .trigger('mousemove', { pageX: 10, pageY: 0, force: true });
+
+    cy.get('[data-cy="icons-upper-panel"]')
+      .trigger('mousemove', { position: 'center', force: true })
+      .trigger('mouseup', { button: 0, bubbles: true, force: true });
+
+    cy.get('[data-cy="icon-item-tens-moved"]').should('have.length', 1);
+
+    // Drag a "one" icon to the upper panel
+    cy.get('[data-cy="icon-item-ones"]').last()
+      .trigger('mousedown', { button: 0, bubbles: true, force: true })
+      .trigger('mousemove', { pageX: 10, pageY: 0, force: true });
+
+    cy.get('[data-cy="icons-upper-panel"]')
+      .trigger('mousemove', { position: 'center', force: true })
+      .trigger('mouseup', { button: 0, bubbles: true, force: true });
+
+    cy.get('[data-cy="icon-item-ones-moved"]').should('have.length', 1);
   });
+
+  it('handles drag and drop back to wrapper', () => {
+    setupAndAssert(`${defaultTestFile}.json`);
+
+    // Move a "ten" icon to the upper panel first
+    cy.get('[data-cy="icon-item-tens"]').last().click({ force: true });
+    cy.wait(500); // Wait for debounce
+    cy.get('[data-cy="icon-item-tens-moved"]').should('have.length', 1);
+
+    // Drag the moved "ten" icon back to its wrapper
+    cy.get('[data-cy="icon-item-tens-moved"]').first()
+      .trigger('mousedown', { button: 0, bubbles: true, force: true })
+      .trigger('mousemove', { pageX: 10, pageY: 0, force: true });
+
+    cy.get('[data-cy="tens-wrapper"]')
+      .trigger('mousemove', { position: 'center', force: true })
+      .trigger('mouseup', { button: 0, bubbles: true, force: true });
+
+    cy.get('[data-cy="icon-item-tens-moved"]').should('not.exist');
+    cy.wait(500); // Wait for debounce
+
+    // Move a "one" icon to the upper panel first
+    cy.get('[data-cy="icon-item-ones"]').last().click({ force: true });
+    cy.wait(500); // Wait for debounce
+    cy.get('[data-cy="icon-item-ones-moved"]').should('have.length', 1);
+
+    // Drag the moved "one" icon back to its wrapper
+    cy.get('[data-cy="icon-item-ones-moved"]').first()
+      .trigger('mousedown', { button: 0, bubbles: true, force: true })
+      .trigger('mousemove', { pageX: 10, pageY: 0, force: true });
+
+    cy.get('[data-cy="ones-wrapper"]')
+      .trigger('mousemove', { position: 'center', force: true })
+      .trigger('mouseup', { button: 0, bubbles: true, force: true });
+
+    cy.get('[data-cy="icon-item-ones-moved"]').should('not.exist');
+  });
+
+  // Test base features for the PLACE_VALUE interaction type
+  testBaseFeatures(interactionType, defaultTestFile);
 });
