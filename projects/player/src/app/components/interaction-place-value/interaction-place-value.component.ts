@@ -32,11 +32,13 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
 
   // Ones icon and Tens icon dimensions
   private readonly tensItemHeight = 50;
-  private readonly onesItemHeight = 50;
-  private readonly onesItemWidth = 50;
+  // private readonly onesItemHeight = 50;
+  // private readonly onesItemWidth = 50;
+  private readonly onesItemHeight = 30;
+  private readonly onesItemWidth = 30;
   private readonly padding = 8;
   private readonly panelPadding = 2 * this.padding;
-  private readonly panelWidth = 680 + this.panelPadding;
+  // private readonly panelWidth = 680 + this.panelPadding;
 
   /** Upper-panel items */
   readonly tensCountAtTheTopPanel = signal<CountItem[]>([]);
@@ -88,10 +90,12 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
 
   /** Animation control for click/drag animations: reactive map of animating item ids */
   private readonly animatingFlags = signal<Record<number, true>>({});
+  private static readonly ONES_PER_ROW = 10;
   /** keep in sync with CSS transition */
   private static readonly CLICK_ANIMATION_MS = 1000;
   /** Extra vertical gap between tens icons while stacked in the upper panel (in px) */
-  private static readonly VERTICAL_GAP_PX = 12;
+  // private static readonly VERTICAL_GAP_PX = 12;
+  private static readonly VERTICAL_GAP_BETWEEN_ROWS = 12;
 
   /** Request a layout update. Marked as true if a layout update was requested but not yet executed. */
   private layoutUpdateRequested = false;
@@ -124,12 +128,27 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
     }));
   });
 
-  /** Total number of rows in the upper panel */
-  getUpperPanelHeight = computed(() => (
-    (this.tensItemHeight * this.numberOfRows) +
-    (InteractionPlaceValueComponent.VERTICAL_GAP_PX * Math.max(0, this.numberOfRows - 1)) +
-    (2 * this.padding)
-  ));
+  /** The height of the upper panel when tens and ones are stacked on top of each other (in px) */
+  getUpperPanelHeight = computed(() => {
+    const tensRows = this.maxNumberOfTens;
+    const gapBetweenRows = InteractionPlaceValueComponent.VERTICAL_GAP_BETWEEN_ROWS;
+
+    const tensHeight = tensRows > 0 ?
+      (tensRows * this.tensItemHeight) +
+      (Math.max(0, tensRows - 1) * gapBetweenRows) :
+      0;
+
+    const onesRows = Math.ceil(this.maxNumberOfOnes / InteractionPlaceValueComponent.ONES_PER_ROW);
+    const onesHeight = onesRows > 0 ?
+      (onesRows * this.onesItemHeight) +
+      (Math.max(0, onesRows - 1) * gapBetweenRows) :
+      0;
+
+    const gapBetweenTensAndOnes = (tensRows > 0 && onesRows > 0) ?
+      gapBetweenRows : 0;
+
+    return tensHeight + gapBetweenTensAndOnes + onesHeight + (2 * this.padding);
+  });
 
   /** Check if tens wrapper should be disabled */
   readonly tensWrapperDisabled = computed(() => {
@@ -431,6 +450,78 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
     return undefined;
   }
 
+  // Function used before the changes done in task 264 and 263 !!!!!
+  // Delete below if a decision is made against the previous icons
+  /** Calculate and cache current transforms for all items in the upper panel */
+  // private recomputeUpperPanelTransforms(): void {
+  //   const panelEl = this.iconsUpperPanel?.nativeElement;
+  //   const tensWrapEl = this.tensWrapper?.nativeElement;
+  //   const onesWrapEl = this.onesWrapper?.nativeElement;
+  //   if (!panelEl || !tensWrapEl || !onesWrapEl) return;
+  //
+  //   const padding = this.padding;
+  //   const rowH = this.onesItemHeight;
+  //   const colW = this.onesItemWidth;
+  //   const panelPadding = this.panelPadding;
+  //
+  //   // Measure viewport positions to compute deltas from wrappers to the upper panel
+  //   const panelRect = panelEl.getBoundingClientRect();
+  //   const tensRect = tensWrapEl.getBoundingClientRect();
+  //   const onesRect = onesWrapEl.getBoundingClientRect();
+  //
+  //   const deltaXTensToPanel = panelRect.left - tensRect.left;
+  //   const deltaYTensToPanel = panelRect.top - tensRect.top;
+  //   const deltaXOnesToPanel = panelRect.left - onesRect.left;
+  //   const deltaYOnesToPanel = panelRect.top - onesRect.top;
+  //
+  //   // Current items in the upper panel
+  //   // eslint-disable-next-line max-len
+  //   const tens = [...this.tensCountAtTheTopPanel()].sort((a, b) => (this.addedSequence.get(a.id) ?? 0) - (this.addedSequence.get(b.id) ?? 0)
+  //   );
+  //
+  //   // eslint-disable-next-line max-len
+  //   const ones = [...this.onesCountAtTheTopPanel()].sort((a, b) => (this.addedSequence.get(a.id) ?? 0) - (this.addedSequence.get(b.id) ?? 0)
+  //   );
+  //
+  //   // Base translate for the first tens item so it lands at the upper panel's top-left (with padding)
+  //   const baseXTens = deltaXTensToPanel + padding + (padding + padding / 2); // extra 12px padding for tens X
+  //   const baseYTens = deltaYTensToPanel + padding;
+  //   const tensGapY = InteractionPlaceValueComponent.VERTICAL_GAP_PX;
+  //   tens.forEach((tensIcon, slot) => {
+  //     const x = baseXTens;
+  //     const y = baseYTens + (slot * (rowH + tensGapY));
+  //     // Always (re)calculate transforms to reflect current layout
+  //     this.itemTransforms[tensIcon.id] = `translate3d(${x}px, ${y}px, 0px)`;
+  //   });
+  //
+  //   // Ones: align horizontally next to each other — X increases by (icon width + 2*8px padding) per slot,
+  //   const baseXOnes = deltaXOnesToPanel + padding + (padding + padding / 2); // extra 12px padding for tens X
+  //   const baseYOnes = deltaYOnesToPanel + padding;
+  //   const tensRows = tens.length; // ones should be visually under all tens items
+  //
+  //   // Each next ones item should advance by icon width + 2*8px padding (16px total) horizontally
+  //   const onesWidthWithPadding = colW + panelPadding; // 50 + 16 = 66px per column
+  //
+  //   // Calculate how many ones can fit per row using the component's panelWidth
+  //   // Usable width is the inner panel width minus our custom left base offset and right padding
+  //   const panelInnerWidth = this.panelWidth - panelPadding;
+  //   const baseLeftInset = padding + (padding + padding / 2);
+  //   const usableWidth = Math.max(0, panelInnerWidth - baseLeftInset - padding);
+  //   // Calculate how many ones icon can fit in a row
+  //   const onesPerRow = Math.max(1, Math.floor((usableWidth - colW) / onesWidthWithPadding) + 1);
+  //
+  //   ones.forEach((oneIcon, slot) => {
+  //     const row = Math.floor(slot / onesPerRow);
+  //     const col = slot % onesPerRow;
+  //     const x = baseXOnes + (col * onesWidthWithPadding);
+  //     // Ones start below all tens rows, including the extra vertical gap between tens rows,
+  //     // and also use the same vertical gap between their own rows
+  //     const y = baseYOnes + (tensRows * (rowH + tensGapY)) + (row * (rowH + tensGapY));
+  //     // Always (re)calculate transforms; ones move down when tens grow or wrap when row fills
+  //     this.itemTransforms[oneIcon.id] = `translate3d(${x}px, ${y}px, 0px)`;
+  //   });
+  // }
+
   /** Calculate and cache current transforms for all items in the upper panel */
   private recomputeUpperPanelTransforms(): void {
     const panelEl = this.iconsUpperPanel?.nativeElement;
@@ -439,9 +530,9 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
     if (!panelEl || !tensWrapEl || !onesWrapEl) return;
 
     const padding = this.padding;
-    const rowH = this.onesItemHeight;
+    const onesRowH = this.onesItemHeight;
+    const tensRowH = this.tensItemHeight;
     const colW = this.onesItemWidth;
-    const panelPadding = this.panelPadding;
 
     // Measure viewport positions to compute deltas from wrappers to the upper panel
     const panelRect = panelEl.getBoundingClientRect();
@@ -463,39 +554,36 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
     );
 
     // Base translate for the first tens item so it lands at the upper panel's top-left (with padding)
-    const baseXTens = deltaXTensToPanel + padding + (padding + padding / 2); // extra 12px padding for tens X
+    const baseXTens = deltaXTensToPanel + (padding * 3); // 24px padding on the left
     const baseYTens = deltaYTensToPanel + padding;
-    const tensGapY = InteractionPlaceValueComponent.VERTICAL_GAP_PX;
+    const gapBetweenRows = InteractionPlaceValueComponent.VERTICAL_GAP_BETWEEN_ROWS;
     tens.forEach((tensIcon, slot) => {
       const x = baseXTens;
-      const y = baseYTens + (slot * (rowH + tensGapY));
+      const y = baseYTens + (slot * (tensRowH + gapBetweenRows));
       // Always (re)calculate transforms to reflect current layout
       this.itemTransforms[tensIcon.id] = `translate3d(${x}px, ${y}px, 0px)`;
     });
 
-    // Ones: align horizontally next to each other — X increases by (icon width + 2*8px padding) per slot,
-    const baseXOnes = deltaXOnesToPanel + padding + (padding + padding / 2); // extra 12px padding for tens X
+    // Ones: align horizontally next to each other
+    // 24px padding on the left + 10px to match the tens icons first blue point when stacked above
+    const baseXOnes = deltaXOnesToPanel + (padding * 3) + 10;
     const baseYOnes = deltaYOnesToPanel + padding;
-    const tensRows = tens.length; // ones should be visually under all tens items
+    const tensCount = tens.length; // ones should be visually under all tens items
 
-    // Each next ones item should advance by icon width + 2*8px padding (16px total) horizontally
-    const onesWidthWithPadding = colW + panelPadding; // 50 + 16 = 66px per column
+    // Each next ones item should advance by icon width + 6px padding horizontally
+    const onesHorizontalGap = 6;
+    const onesWidthWithPadding = colW + onesHorizontalGap; // 30 + 6 = 36px per column
 
-    // Calculate how many ones can fit per row using the component's panelWidth
-    // Usable width is the inner panel width minus our custom left base offset and right padding
-    const panelInnerWidth = this.panelWidth - panelPadding;
-    const baseLeftInset = padding + (padding + padding / 2);
-    const usableWidth = Math.max(0, panelInnerWidth - baseLeftInset - padding);
-    // Calculate how many ones icon can fit in a row
-    const onesPerRow = Math.max(1, Math.floor((usableWidth - colW) / onesWidthWithPadding) + 1);
+    // Max 10 ones icons can be moved next to each other in one line
+    const onesPerRow = InteractionPlaceValueComponent.ONES_PER_ROW;
 
     ones.forEach((oneIcon, slot) => {
       const row = Math.floor(slot / onesPerRow);
       const col = slot % onesPerRow;
       const x = baseXOnes + (col * onesWidthWithPadding);
       // Ones start below all tens rows, including the extra vertical gap between tens rows,
-      // and also use the same vertical gap between their own rows
-      const y = baseYOnes + (tensRows * (rowH + tensGapY)) + (row * (rowH + tensGapY));
+      // and also use the vertical gap for ones
+      const y = baseYOnes + (tensCount * (tensRowH + gapBetweenRows)) + (row * (onesRowH + gapBetweenRows));
       // Always (re)calculate transforms; ones move down when tens grow or wrap when row fills
       this.itemTransforms[oneIcon.id] = `translate3d(${x}px, ${y}px, 0px)`;
     });
