@@ -228,6 +228,24 @@ describe('Interaction BUTTONS Component', () => {
       cy.setupTestData('buttons_option_text_test.json', interactionType);
       cy.get('[data-cy=button-with-text]').should('exist');
     });
+
+    it('renders buttons with audioSource and verifies speaker-icons functionality', () => {
+      cy.setupTestData('buttons_option_with_audioSource_test.json', interactionType);
+      cy.get('@testData').then(data => {
+        const testData = data as unknown as UnitDefinition;
+        const buttonParams = testData.interactionParameters as InteractionButtonParams;
+        const buttons = buttonParams.options.buttons!;
+
+        buttons.forEach((button, index) => {
+          if (button.audioSource) {
+            cy.get(`[data-cy=button-with-audioSource-${index}]`).should('exist');
+            cy.get(`[data-cy=button-wrapper-${index}]`).find('[data-cy=speaker-icon]')
+              .should('exist')
+              .click({ force: true });
+          }
+        });
+      });
+    });
   });
 
   describe('Navigation on triggerNavigationOnSelect', () => {

@@ -37,7 +37,7 @@
              [class.tall-rectangle-buttons]="localParameters.buttonType === 'TALL_RECTANGLE'"
              [attr.data-cy]="'button-row-' + $index">
           @for (button of row; track $index) {
-            <div class="inner-button-wrapper">
+            <div class="inner-button-wrapper" [attr.data-cy]="'button-wrapper-' + button.index">
               <stars-standard-button
                 [id]="button.id"
                 [value]="button.index"
@@ -47,7 +47,7 @@
                 [icon]="button.option.icon"
                 [selected]="selectedValues()[button.index]"
                 [type]="localParameters.buttonType"
-                [attr.data-cy]="'button-' + button.index"
+                [attr.data-cy]="button.option.audioSource ? 'button-with-audioSource-' + button.index : 'button-' + button.index"
                 (buttonClick)="onButtonClick(button.index)">
               </stars-standard-button>
               @if (button.option.audioSource) {
