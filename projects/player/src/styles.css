@@ -11,53 +11,13 @@
   font-display: swap;
 }
 
-@font-face {
-  font-family: 'Quicksand';
-  src: url('./assets/fonts/Quicksand-Light.ttf') format('truetype');
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Quicksand';
-  src: url('./assets/fonts/Quicksand-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Quicksand';
-  src: url('./assets/fonts/Quicksand-Medium.ttf') format('truetype');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Quicksand';
-  src: url('./assets/fonts/Quicksand-SemiBold.ttf') format('truetype');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Quicksand';
-  src: url('./assets/fonts/Quicksand-Bold.ttf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
 html {
   height: 100%;
 }
 
 body {
   margin: 0;
-  font-family: 'IQBprimar', 'Quicksand', sans-serif;
+  font-family: 'IQBprimar', sans-serif;
   font-weight: normal;
   color: black;
   font-size: 28px;
@@ -70,7 +30,7 @@ button {
 
 /* Apply font family to all elements */
 *, *::before, *::after {
-  font-family: 'IQBprimar', 'Quicksand', sans-serif;
+  font-family: 'IQBprimar', sans-serif;
 }
 
 player-sub-form {
