@@ -16,8 +16,9 @@
 }
 
 .icons-upper-panel {
-  width: 680px;
-  margin-right: -13px;
+  //width: 680px;
+  width: 420px;
+  //margin-right: -13px;
   background-color: colors.$white;
   box-sizing: border-box;
   border: 3px solid lightgrey;
@@ -39,7 +40,6 @@
   display: flex;
   flex-direction: column;
   border-radius: variables.$icons-border-radius;
-  height: 50px;
   box-sizing: border-box;
   background-color: rgba(0, 0, 0, 0.02);
   flex-shrink: 0; // Do not allow flexbox to shrink these areas
@@ -51,27 +51,33 @@
   }
 }
 
+.ones-wrapper {
+  height: 30px;
+}
+
 .tens-wrapper {
-  width: 645px;
+  width: 390px;
+  height: 50px;
   border-radius: variables.$icons-border-radius;
 }
 .ones-wrapper {
-  width: 50px;
-  margin-right: 12px;
+  width: 30px;
+  margin-right: 24px;
 }
 
 .icon-item.tens, .icon-item.ones {
-  height: 50px;
   border-radius: variables.$icons-border-radius;
   transform-origin: center center;
   transition: transform 1s ease-in-out;
 }
 .icon-item.tens {
-  width: 645px;
+  width: 390px;
+  height: 50px;
 }
 
 .icon-item.ones {
-  width: 50px;
+  width: 30px;
+  height: 30px;
 }
 
 .icon-item.no-transition {
@@ -139,9 +145,12 @@
 }
 
 /* Apply box-shadows only to the bottom wrapper item to give a depth effect. */
-.tens-wrapper .icon-item:first-child:not(.moved),
-.ones-wrapper .icon-item:first-child:not(.moved) {
+.tens-wrapper .icon-item:first-child:not(.moved) {
   @include variables.default-box-shadow;
+}
+
+.ones-wrapper .icon-item:first-child:not(.moved) {
+  box-shadow: 3.91px 3.91px 0 0.2px rgba(0, 0, 0, 0.2);
 }
 
 .tens-wrapper .icon-item:not(.moved),
@@ -149,7 +158,11 @@
   box-shadow: none;
 }
 
-.icon-item.moved {
+.icon-item.tens.moved {
   @include variables.default-box-shadow;
+}
+
+.icon-item.ones.moved {
+  box-shadow: 3.91px 3.91px 0 0.2px rgba(0, 0, 0, 0.2);
 }
 

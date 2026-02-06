@@ -40,12 +40,15 @@
              (click)="onItemClick('ones', ones, $event)"
              [attr.data-cy]="inUpperPanel(ones.id) ? 'icon-item-ones-moved' : 'icon-item-ones'"
          >
-          <svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect class="bg-rect" width="50" height="50" rx="16" [attr.fill]="(isSelected(ones.id) || draggingIndex() === ones.id) ? '#DCDCDC' : 'white'"/>
-            @if (!(isSelected(ones.id) || draggingIndex() === ones.id)) {
-              <rect x="0.5" y="0.5" width="50" height="50" rx="16" stroke="#DBDDE7"/>
-            }
-            <circle cx="25" cy="25" r="15" fill="#0050E5"/>
+<!--          <svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">-->
+<!--            <rect class="bg-rect" width="50" height="50" rx="16" [attr.fill]="(isSelected(ones.id) || draggingIndex() === ones.id) ? '#DCDCDC' : 'white'"/>-->
+<!--            @if (!(isSelected(ones.id) || draggingIndex() === ones.id)) {-->
+<!--              <rect x="0.5" y="0.5" width="50" height="50" rx="16" stroke="#DBDDE7"/>-->
+<!--            }-->
+<!--            <circle cx="25" cy="25" r="15" fill="#0050E5"/>-->
+<!--          </svg>-->
+          <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="15" cy="15" r="15" fill="#0050E5"/>
           </svg>
         </div>
       }
@@ -73,29 +76,43 @@
              (click)="onItemClick('tens', tens, $event)"
              [attr.data-cy]="inUpperPanel(tens.id) ? 'icon-item-tens-moved' : 'icon-item-tens'"
         >
-          <svg width="645" height="50" viewBox="0 0 645 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g clip-path="url(#clip0_1_15)">
-              <rect class="bg-rect" width="645" height="50" rx="16" [attr.fill]="(isSelected(tens.id) || draggingIndex() === tens.id) ? '#DCDCDC' : 'white'"/>
-              @if (!(isSelected(tens.id) || draggingIndex() === tens.id)) {
-                <rect x="0.5" y="0.5" width="645" height="50" rx="16" stroke="#DBDDE7"/>
-              }
-              <line x1="322.5" y1="5" x2="322.5" y2="45" stroke="gray" stroke-width="3"/>
-              <path d="M24.5156 40C32.7999 40 39.5156 33.2843 39.5156 25C39.5156 16.7157 32.7999 10 24.5156 10C16.2313 10 9.51559 16.7157 9.51559 25C9.51559 33.2843 16.2313 40 24.5156 40Z" fill="#0050E5"/>
-              <path d="M355 40C363.284 40 370 33.2843 370 25C370 16.7157 363.284 10 355 10C346.716 10 340 16.7157 340 25C340 33.2843 346.716 40 355 40Z" fill="#0050E5"/>
-              <path d="M91 40C99.2843 40 106 33.2843 106 25C106 16.7157 99.2843 10 91 10C82.7157 10 76 16.7157 76 25C76 33.2843 82.7157 40 91 40Z" fill="#0050E5"/>
-              <path d="M421 40C429.284 40 436 33.2843 436 25C436 16.7157 429.284 10 421 10C412.716 10 406 16.7157 406 25C406 33.2843 412.716 40 421 40Z" fill="#0050E5"/>
-              <path d="M157 40C165.284 40 172 33.2843 172 25C172 16.7157 165.284 10 157 10C148.716 10 142 16.7157 142 25C142 33.2843 148.716 40 157 40Z" fill="#0050E5"/>
-              <path d="M487 40C495.284 40 502 33.2843 502 25C502 16.7157 495.284 10 487 10C478.716 10 472 16.7157 472 25C472 33.2843 478.716 40 487 40Z" fill="#0050E5"/>
-              <path d="M223 40C231.284 40 238 33.2843 238 25C238 16.7157 231.284 10 223 10C214.716 10 208 16.7157 208 25C208 33.2843 214.716 40 223 40Z" fill="#0050E5"/>
-              <path d="M553 40C561.284 40 568 33.2843 568 25C568 16.7157 561.284 10 553 10C544.716 10 538 16.7157 538 25C538 33.2843 544.716 40 553 40Z" fill="#0050E5"/>
-              <path d="M289 40C297.284 40 304 33.2843 304 25C304 16.7157 297.284 10 289 10C280.716 10 274 16.7157 274 25C274 33.2843 280.716 40 289 40Z" fill="#0050E5"/>
-              <path d="M619 40C627.284 40 634 33.2843 634 25C634 16.7157 627.284 10 619 10C610.716 10 604 16.7157 604 25C604 33.2843 610.716 40 619 40Z" fill="#0050E5"/>
-            </g>
-            <defs>
-              <clipPath id="clip0_1_15">
-                <rect width="652" height="50" fill="white"/>
-              </clipPath>
-            </defs>
+<!--          <svg width="645" height="50" viewBox="0 0 645 50" fill="none" xmlns="http://www.w3.org/2000/svg">-->
+<!--            <g clip-path="url(#clip0_1_15)">-->
+<!--              <rect class="bg-rect" width="645" height="50" rx="16" [attr.fill]="(isSelected(tens.id) || draggingIndex() === tens.id) ? '#DCDCDC' : 'white'"/>-->
+<!--              @if (!(isSelected(tens.id) || draggingIndex() === tens.id)) {-->
+<!--                <rect x="0.5" y="0.5" width="645" height="50" rx="16" stroke="#DBDDE7"/>-->
+<!--              }-->
+<!--              <line x1="322.5" y1="5" x2="322.5" y2="45" stroke="gray" stroke-width="3"/>-->
+<!--              <path d="M24.5156 40C32.7999 40 39.5156 33.2843 39.5156 25C39.5156 16.7157 32.7999 10 24.5156 10C16.2313 10 9.51559 16.7157 9.51559 25C9.51559 33.2843 16.2313 40 24.5156 40Z" fill="#0050E5"/>-->
+<!--              <path d="M355 40C363.284 40 370 33.2843 370 25C370 16.7157 363.284 10 355 10C346.716 10 340 16.7157 340 25C340 33.2843 346.716 40 355 40Z" fill="#0050E5"/>-->
+<!--              <path d="M91 40C99.2843 40 106 33.2843 106 25C106 16.7157 99.2843 10 91 10C82.7157 10 76 16.7157 76 25C76 33.2843 82.7157 40 91 40Z" fill="#0050E5"/>-->
+<!--              <path d="M421 40C429.284 40 436 33.2843 436 25C436 16.7157 429.284 10 421 10C412.716 10 406 16.7157 406 25C406 33.2843 412.716 40 421 40Z" fill="#0050E5"/>-->
+<!--              <path d="M157 40C165.284 40 172 33.2843 172 25C172 16.7157 165.284 10 157 10C148.716 10 142 16.7157 142 25C142 33.2843 148.716 40 157 40Z" fill="#0050E5"/>-->
+<!--              <path d="M487 40C495.284 40 502 33.2843 502 25C502 16.7157 495.284 10 487 10C478.716 10 472 16.7157 472 25C472 33.2843 478.716 40 487 40Z" fill="#0050E5"/>-->
+<!--              <path d="M223 40C231.284 40 238 33.2843 238 25C238 16.7157 231.284 10 223 10C214.716 10 208 16.7157 208 25C208 33.2843 214.716 40 223 40Z" fill="#0050E5"/>-->
+<!--              <path d="M553 40C561.284 40 568 33.2843 568 25C568 16.7157 561.284 10 553 10C544.716 10 538 16.7157 538 25C538 33.2843 544.716 40 553 40Z" fill="#0050E5"/>-->
+<!--              <path d="M289 40C297.284 40 304 33.2843 304 25C304 16.7157 297.284 10 289 10C280.716 10 274 16.7157 274 25C274 33.2843 280.716 40 289 40Z" fill="#0050E5"/>-->
+<!--              <path d="M619 40C627.284 40 634 33.2843 634 25C634 16.7157 627.284 10 619 10C610.716 10 604 16.7157 604 25C604 33.2843 610.716 40 619 40Z" fill="#0050E5"/>-->
+<!--            </g>-->
+<!--            <defs>-->
+<!--              <clipPath id="clip0_1_15">-->
+<!--                <rect width="652" height="50" fill="white"/>-->
+<!--              </clipPath>-->
+<!--            </defs>-->
+<!--          </svg>-->
+          <svg width="390" height="50" viewBox="0 0 390 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="390" height="50" rx="16" [attr.fill]="(isSelected(tens.id) || draggingIndex() === tens.id) ? '#DCDCDC' : 'white'" stroke="#DBDDE7"/>
+            <circle cx="28" cy="26" r="15" fill="#0050E5"/>
+            <circle cx="222" cy="26" r="15" fill="#0050E5"/>
+            <circle cx="64" cy="26" r="15" fill="#0050E5"/>
+            <circle cx="257" cy="26" r="15" fill="#0050E5"/>
+            <circle cx="100" cy="26" r="15" fill="#0050E5"/>
+            <circle cx="292" cy="26" r="15" fill="#0050E5"/>
+            <circle cx="136" cy="26" r="15" fill="#0050E5"/>
+            <circle cx="327" cy="26" r="15" fill="#0050E5"/>
+            <circle cx="172" cy="26" r="15" fill="#0050E5"/>
+            <circle cx="363" cy="26" r="15" fill="#0050E5"/>
+            <path d="M197.108 3.00274L197.156 26.002L197 49.0026" stroke="#808080" stroke-width="3"/>
           </svg>
         </div>
       }
