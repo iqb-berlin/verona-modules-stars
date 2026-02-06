@@ -1,10 +1,6 @@
-# Release Note 0.6.26 #
+# Release Note 0.6.27 #
 
 ## Neu
 
-* Drag&Drop für PlaceValue Items
-* Update SVGs für PlaceValue
-* Audio Animationen jetzt als Bewegung der Ohren
-* Wegfall der AudioWave Animation
-* Test Updates
-* FirstClickLayer als eigenständige Komponente
+* andere Item Ansicht für Place_Value (Legeaufgabe)
+* 
