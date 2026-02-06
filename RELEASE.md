@@ -2,5 +2,4 @@
 
 ## Neu
 
-* andere Item Ansicht für Place_Value (Legeaufgabe)
-* 
+* andere Item Ansicht für Place_Value (Legeaufgabe) (#263 und #264)
