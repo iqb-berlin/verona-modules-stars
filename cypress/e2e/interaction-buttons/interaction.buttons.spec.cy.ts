@@ -157,11 +157,8 @@ describe('Interaction BUTTONS Component', () => {
     it('handles margins when imageUseFullArea parameter is set', () => {
       // eslint-disable-next-line max-len
       // Keep below variable in sync with projects/player/src/app/components/interaction-buttons/interaction-buttons.component.html
-      const marginWithUseFullArea = 0;
-      const marginWithoutUseFullArea = 125;
-
-      // when imageUseFullArea is true stimulus-wrapper max-height = imgWrapperMaxHeight
-      // when it is false, stimulus-wrapper height = imgWrapperHeight
+      const paddingZero = 0;
+      const defaultOffset = 90;
 
       const imageConfigs = [
         {
@@ -180,11 +177,16 @@ describe('Interaction BUTTONS Component', () => {
         cy.get('[data-cy="stimulus-image"]').should('exist').and('be.visible');
 
         if (imageUseFullArea) {
-          cy.get('[data-cy="buttons-container"]').should('have.css', 'margin-bottom', `${marginWithUseFullArea}px`);
-          cy.get('[data-cy="buttons-container"]').should('have.css', 'margin-top', `${marginWithUseFullArea}px`);
+          cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-bottom', '60px');
+          cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-top', `${paddingZero}px`);
+          cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-left', `${paddingZero}px`);
+          cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-right', `${paddingZero}px`);
         } else {
-          cy.get('[data-cy="buttons-container"]').should('have.css', 'margin-bottom', `${marginWithoutUseFullArea}px`);
-          cy.get('[data-cy="buttons-container"]').should('have.css', 'margin-top', `${marginWithoutUseFullArea}px`);
+          cy.get('[data-cy="buttons-container"]')
+            .should('have.css', 'padding-bottom', `${defaultOffset}px`);
+          cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-top', `${paddingZero}px`);
+          cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-left', `${defaultOffset}px`);
+          cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-right', `${defaultOffset}px`);
         }
       });
     });
