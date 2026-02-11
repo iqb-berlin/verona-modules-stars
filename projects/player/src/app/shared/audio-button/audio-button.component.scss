@@ -6,6 +6,9 @@
   background-color: transparent;
   border: none;
   cursor: pointer;
+  position: absolute;
+  bottom: -65px;
+  left: 35%;
 
   &.clicked {
     filter: drop-shadow(0 0 0 rgba(0, 0, 0, 0.2));

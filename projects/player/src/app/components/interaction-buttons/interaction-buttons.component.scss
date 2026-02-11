@@ -8,6 +8,15 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: variables.$layoutPadding;
+
+  &.full-area {
+    padding: 0 0 60px 0;
+  }
+
+  &.layout--top-center.has-image:not(.full-area) {
+    padding-top: 0;
+  }
 
   &.layout--top-center {
     flex-direction: column;
@@ -23,17 +32,13 @@
     column-gap: 24px;
   }
 
-  &.has-image:not(.layout--left-center-50) {
-    overflow: hidden;
-  }
-
   &.layout--left-bottom {
-    padding: 0 24px;
     align-items: baseline;
   }
 }
 
 .inner-button-wrapper {
+  position: relative;
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
@@ -51,6 +56,14 @@
   flex-direction: column;
   overflow: hidden;
   box-sizing: border-box;
+
+  .buttons-container.layout--top-center:not(.full-area) & {
+    padding: 12px 24px;
+  }
+
+  .buttons-container.full-area & {
+    padding: 0 0 12px 0;
+  }
 }
 
 .buttons-container.layout--left-center-50 .stimulus-wrapper,
@@ -84,7 +97,7 @@
 
 .buttons-wrapper {
   box-sizing: border-box;
-  padding: 5px 0 24px 5px;
+  padding-bottom: 12px;
   flex-grow: 0;
   flex-shrink: 0;
 
@@ -92,21 +105,12 @@
   flex-direction: column;
   gap: variables.$small-gap-margin;
 
-  padding: 5px 0 24px 5px;
-
-  &:has(.row.tall-rectangle-buttons) {
-    padding-right: 72px;
-  }
-
   .buttons-container.layout--left-center-50 & {
     flex: 0 0 50%;
     align-items: flex-start;
     padding-right: 0;
   }
 
-  .buttons-container.layout--left-center.has-image & {
-    padding-right: 72px;
-  }
   .buttons-container.layout--left-center:not(.has-image) & {
     padding-right: 5px;
   }
