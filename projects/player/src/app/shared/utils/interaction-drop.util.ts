@@ -130,9 +130,6 @@ export const getDropLandingArgs = (
 export const formatPxValue = (value: string): string => {
   const num = Number(String(value).replace(/[^-0-9.]/g, ''));
   if (Number.isNaN(num)) return value; // fallback if not a number
-  const rounded = Math.round(num * 1000) / 1000; // stable rounding to 3 decimals
-  let s = rounded.toFixed(3);
-  // Remove trailing zeros and an optional decimal point (e.g., "-93.000" -> "-93", "12.340" -> "12.34")
-  s = s.replace(/\.?0+$/, '');
-  return `${s}px`;
+  const rounded = Math.round(num); // Round to the nearest integer
+  return `${rounded}px`;
 };
