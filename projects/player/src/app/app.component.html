@@ -32,8 +32,6 @@
     <div class="interaction-disabled-overlay" (click)="disabledOverlay($event)" data-cy="interaction-disabled-overlay"></div>
   }
 
-  @let interactionAreaOffsetTopPx = hasRibbonBars() ? 95 : 125;
-  @let interactionAreaOffsetBottomPx = hasRibbonBars() ? 95 : 125;
   <!-- show ribbons when in practice mode -->
   @if (hasRibbonBars()) {
     <stars-ribbon-bar></stars-ribbon-bar>
@@ -42,8 +40,6 @@
   @if (unitService.openingFlowActive()) {
     <stars-opening-image
       [parameters]="unitService.openingImageParams()"
-      [offsetTopPx]="interactionAreaOffsetTopPx"
-      [offsetBottomPx]="interactionAreaOffsetBottomPx"
     ></stars-opening-image>
   }
 
@@ -51,45 +47,31 @@
   @if (!unitService.openingFlowActive() && unitService.interaction() === 'BUTTONS' || unitService.interaction() === 'IMAGE_ONLY') {
     <stars-interaction-buttons class="interaction"
       [parameters]="getParametersWithFormerState()"
-      [offsetTopPx]="interactionAreaOffsetTopPx"
-      [offsetBottomPx]="interactionAreaOffsetBottomPx"
       (responses)="responsesService.newResponses($event)">
     </stars-interaction-buttons>
   } @else if (!unitService.openingFlowActive() && unitService.interaction() === 'DROP') {
     <stars-interaction-drop class="interaction"
       [parameters]="getParametersWithFormerState()"
-      [offsetTopPx]="interactionAreaOffsetTopPx"
-      [offsetBottomPx]="interactionAreaOffsetBottomPx"
       (responses)="responsesService.newResponses($event)"></stars-interaction-drop>
   } @else if (!unitService.openingFlowActive() && unitService.interaction() === 'WRITE') {
     <stars-interaction-write class="interaction"
       [parameters]="getParametersWithFormerState()"
-      [offsetTopPx]="interactionAreaOffsetTopPx"
-      [offsetBottomPx]="interactionAreaOffsetBottomPx"
       (responses)="responsesService.newResponses($event)"></stars-interaction-write>
   } @else if (unitService.interaction() === 'VIDEO') {
     <stars-interaction-video class="interaction"
       [parameters]="unitService.parameters()"
-      [offsetTopPx]="interactionAreaOffsetTopPx"
-      [offsetBottomPx]="interactionAreaOffsetBottomPx"
       (responses)="responsesService.newResponses($event)"></stars-interaction-video>
   } @else if (unitService.interaction() === 'FIND_ON_IMAGE') {
     <stars-interaction-find-on-image class="interaction"
       [parameters]="getParametersWithFormerState()"
-      [offsetTopPx]="interactionAreaOffsetTopPx"
-      [offsetBottomPx]="interactionAreaOffsetBottomPx"
       (responses)="responsesService.newResponses($event)"></stars-interaction-find-on-image>
   } @else if (!unitService.openingFlowActive() && unitService.interaction() === 'POLYGON_BUTTONS') {
     <stars-interaction-polygon-buttons class="interaction"
       [parameters]="getParametersWithFormerState()"
-      [offsetTopPx]="interactionAreaOffsetTopPx"
-      [offsetBottomPx]="interactionAreaOffsetBottomPx"
       (responses)="responsesService.newResponses($event)"></stars-interaction-polygon-buttons>
   } @else if (!unitService.openingFlowActive() && unitService.interaction() === 'PLACE_VALUE') {
     <stars-interaction-place-value class="interaction"
       [parameters]="getParametersWithFormerState()"
-      [offsetTopPx]="interactionAreaOffsetTopPx"
-      [offsetBottomPx]="interactionAreaOffsetBottomPx"
       (responses)="responsesService.newResponses($event)"></stars-interaction-place-value>
   }
 

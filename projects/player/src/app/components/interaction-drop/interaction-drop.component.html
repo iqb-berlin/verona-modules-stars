@@ -1,18 +1,20 @@
 <div #dropContainer
-     class="drop-select-container"
+     class="drop-container"
      [class]="'image-position-' + localParameters.imagePosition?.toLowerCase()"
      data-cy="drop-container">
 
   <!-- Image section -->
   <div class="stimulus-wrapper">
     @if (localParameters.imageSource) {
-      <img #imageElement
+      <div class="image-wrapper">
+        <img #imageElement
            [src]="localParameters.imageSource" [alt]="" data-cy="drop-image">
+      </div>
     }
   </div>
 
   <!-- Buttons section -->
-  <div class="buttons-container" role="group">
+  <div class="buttons-wrapper" role="group">
     @for (option of localParameters.options; track $index) {
       <div
         class="animate-wrapper"

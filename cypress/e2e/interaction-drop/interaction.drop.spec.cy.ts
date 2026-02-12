@@ -3,6 +3,7 @@ import {
   UnitDefinition
 } from '../../../projects/player/src/app/models/unit-definition';
 import { testBaseFeatures } from '../shared/base-features.spec.cy';
+import { testResponsiveImageFeatures } from '../shared/responsive-image.spec.cy';
 import {
   formatPxValue,
   getDropLandingArgs,
@@ -12,7 +13,8 @@ import {
 describe('Interaction DROP Component', () => {
   const interactionType = 'drop';
   const defaultTestFile = 'drop_4_option_test';
-  const testFileWithImageLandingXY = `${interactionType}_imagePosition_top_rectangle_with_imageLandingXY_100-100_test`;
+
+  const testFileWithImageLandingXY = `${interactionType}_imagePosition_top_imageLandingXY_100-100_test`;
   /** Ref from the value on interaction-drop.component.ts calculateButtonTransformValues function. */
   const yValueToBottom = 280;
   /** Ref from the value on interaction-drop.component.ts calculateButtonTransformValues function. */
@@ -45,8 +47,8 @@ describe('Interaction DROP Component', () => {
 
     if (!lastMatch) return { xValue: '', yValue: '' };
 
-    const [, is3d, params] = lastMatch;
-    const parts = params.split(',').map((p: string) => p.trim());
+    const [, , params] = lastMatch as RegExpExecArray;
+    const parts = (params ?? '').split(',').map((p: string) => p.trim());
 
     const tx = parts[0] || '0';
     const ty = parts[1] || '0';
@@ -294,4 +296,5 @@ describe('Interaction DROP Component', () => {
 
   // Test base features for the DROP interaction type
   testBaseFeatures(interactionType, defaultTestFile);
+  testResponsiveImageFeatures(interactionType, `${interactionType}_imagePosition_top_test`, '[data-cy="drop-image"]');
 });

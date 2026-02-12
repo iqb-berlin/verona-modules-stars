@@ -1,12 +1,9 @@
 @use 'colors';
 @use 'variables';
 
-.drop-select-container {
-  @include variables.flex-center;
+.drop-container {
+  @include variables.interaction-wrapper;
   flex-direction: column;
-  padding-top: 8%;
-  width: 100%;
-  height: 100%;
 
   // Image at the bottom, buttons at the top
   &.image-position-bottom {
@@ -19,15 +16,16 @@
   }
 
   .stimulus-wrapper {
-    padding: 0 variables.$small-gap-margin 0 variables.$small-gap-margin;
-    img {
-      @include variables.responsive-image;
-      padding: unset;
-    }
+    @include variables.stimulus-wrapper;
+    padding: 12px variables.$small-gap-margin;
+  }
+
+  .image-wrapper {
+    @include variables.image-wrapper;
   }
 }
 
-.buttons-container {
+.buttons-wrapper {
   @include variables.flex-center;
   flex-direction: row;
   width: 100%;
