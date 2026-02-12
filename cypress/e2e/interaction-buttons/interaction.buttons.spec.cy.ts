@@ -3,6 +3,7 @@ import {
   UnitDefinition
 } from '../../../projects/player/src/app/models/unit-definition';
 import { testBaseFeatures } from '../shared/base-features.spec.cy';
+import { testResponsiveImageFeatures } from '../shared/responsive-image.spec.cy';
 
 describe('Interaction BUTTONS Component', () => {
   const interactionType = 'buttons';
@@ -280,4 +281,5 @@ describe('Interaction BUTTONS Component', () => {
 
   // Test base features for the BUTTONS interaction type
   testBaseFeatures(interactionType, defaultTestFile);
+  testResponsiveImageFeatures(interactionType, `${interactionType}_imagePosition_top_test`, '[data-cy="stimulus-image"]');
 });
