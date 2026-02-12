@@ -7,6 +7,7 @@
   + wenn imageUseFullArea: true, nur 60px padding unten
 
 + Layoutänderungen für DROP:
+  + 90px padding wird links, rechts, oben und unten hinzugefügt
   + Bilder werden nicht größer, können aber kleiner werden, wenn der Viewport kleiner wird
 
 + E2E-Tests für Buttons und Drop hinzugefügt, um zu überprüfen, dass das Bild nicht größer wird, wenn sich der Viewport ändert
