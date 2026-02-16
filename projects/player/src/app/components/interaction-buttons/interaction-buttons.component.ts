@@ -32,6 +32,7 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
   /** Options sorted by rows. */
   optionRows: Array<Array<RowOption>> = [];
   /** Boolean to track if the former the state has been restored from response. */
+  // TODO no need for this, if parameters change state has to be set
   private hasRestoredFromFormerState = false;
   /** Flag to mark images useFullArea: true. */
   useFullArea = false;
@@ -221,6 +222,7 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
     return rows;
   }
 
+  // TODO simplify, actually no need for it
   // eslint-disable-next-line class-methods-use-this
   private getCustomDistribution(totalOptions: number, numberOfRows: number): number[] {
     if (numberOfRows === 1) {
@@ -289,7 +291,7 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
     // Update UI state
     this.updateSelection(index);
 
-    // Emit the restored state
+    // Emit the stored state
     this.emitResponse('VALUE_CHANGED', true);
 
     // Check if triggerNavigationOnSelect is enabled

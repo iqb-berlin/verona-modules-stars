@@ -2,7 +2,6 @@ import { Response } from '@iqbspecs/response/response.interface';
 import { VariableInfo } from './responses';
 import { AudioFeedback } from './feedback';
 
-// eslint-disable-next-line max-len
 export type ContinueButtonEnum = 'ALWAYS' | 'NO' | 'ON_ANY_RESPONSE' | 'ON_RESPONSES_COMPLETE' |
 'ON_MAIN_AUDIO_COMPLETE' | 'ON_VIDEO_COMPLETE' | 'ON_AUDIO_AND_RESPONSE';
 export type InteractionEnum = 'BUTTONS' |

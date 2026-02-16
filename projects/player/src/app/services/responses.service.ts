@@ -12,12 +12,13 @@ import { FeedbackDefinition } from '../models/feedback';
 })
 
 export class ResponsesService {
-  // TODO change to readonly and add support function interactionDone
-  firstInteractionDone = signal(false);
-  unitDefinitionProblem = signal('');
+  private _firstInteractionDone = signal(false);
+  firstInteractionDone = this._firstInteractionDone.asReadonly();
   responseProgress = signal<Progress>('none');
   mainAudioComplete = signal(false);
   videoComplete = signal(false);
+
+  private unitDefinitionProblem: string = '';
 
   allResponses: Response[] = [];
   variableInfo: VariableInfo[] = [];
@@ -30,10 +31,10 @@ export class ResponsesService {
   formerStateResponses = signal<Response[]>([]);
 
   /**
-  * Interpret mixed input as a number
+   * Interpret mixed input as a number
    * @param value mixed input
    * @returns number
-  * */
+   */
   // eslint-disable-next-line class-methods-use-this
   private asNumberOrZero(value: unknown): number {
     if (typeof value === 'number') return value;
@@ -46,9 +47,13 @@ export class ResponsesService {
     return 0;
   }
 
-  setNewData(unitDefinition: UnitDefinition = null) {
-    this.firstInteractionDone.set(false);
-    this.unitDefinitionProblem.set('');
+  /**
+   * Set New Data for ResponseService aka new unit has been loaded
+   * incl. reset all variables
+   * @param unitDefinition
+   */
+  setNewData(unitDefinition: UnitDefinition) {
+    this._firstInteractionDone.set(false);
     this.videoComplete.set(false);
     this.variableInfo = [];
     this.allResponses = [];
@@ -104,7 +109,7 @@ export class ResponsesService {
           }
         });
       }
-      if (problems.length > 0) this.unitDefinitionProblem.set(problems.join('; '));
+      if (problems.length > 0) this.unitDefinitionProblem = problems.join('; ');
     }
 
     // Restore from former state if available
@@ -115,7 +120,7 @@ export class ResponsesService {
         const n = this.asNumberOrZero(mainAudioResp.value);
         if (n >= 1) {
           this.mainAudioComplete.set(true);
-          this.firstInteractionDone.set(true);
+          this._firstInteractionDone.set(true);
         }
       }
       // Restore allResponses from former state
@@ -124,6 +129,11 @@ export class ResponsesService {
     }
   }
 
+  /**
+   * New Response has been fired
+   * ->
+   * @param responses
+   */
   newResponses(responses: StarsResponse[]) {
     responses.forEach(response => {
       const codedResponse = this.getCodedResponse(response);
@@ -222,6 +232,11 @@ export class ResponsesService {
     return false;
   }
 
+  /**
+   * Coding for a given response
+   * @param givenResponse
+   * @private
+   */
   private getCodedResponse(givenResponse: Response): Response {
     const newResponse = {
       id: givenResponse.id,
@@ -286,11 +301,19 @@ export class ResponsesService {
     return newResponse;
   }
 
-  /** returns a response for one specific variableId */
+  /**
+   * Returns returns a response for one specific variableId
+   * @param id variableId
+   * @returns Response
+   * */
   getResponseByVariableId(id: string): Response {
     return this.allResponses.find(r => r.id === id) || {} as Response;
   }
 
+  /**
+   * Check for Response Complete
+   * @private
+   */
   private getResponsesComplete(): Progress {
     if (this.allResponses.length === 0) return 'none';
     if (!this.variableInfo || this.variableInfo.length === 0) return 'complete';
@@ -316,11 +339,22 @@ export class ResponsesService {
     return isComplete ? 'complete' : 'some';
   }
 
+  /**
+   * Get PresentationStatus
+   * when loaded -> 'some'
+   * when audio finished -> 'complete'
+   * @private
+   */
   private getPresentationStatus(): Progress {
+    // TODO check for other possibilities
     if (this.mainAudioComplete()) return 'complete';
     return 'some';
   }
 
+  /**
+   * return pendingAudioSource and reset it
+   * @param setAsPlayed
+   */
   getAudioFeedback(setAsPlayed: boolean): string {
     const returnValue = this.pendingAudioFeedbackSource;
     if (setAsPlayed) {
@@ -380,6 +414,10 @@ export class ResponsesService {
     }
   }
 
+  /**
+   * set state of former state
+   * @param unitState
+   */
   setFormerState(unitState: UnitState | null) {
     const prevPresentation = this.getPresentationStatus();
     const prevResponse = this.responseProgress();
@@ -408,7 +446,7 @@ export class ResponsesService {
             const n = this.asNumberOrZero(mainAudioResp.value);
             this.mainAudioComplete.set(n >= 1);
             if (n >= 1) {
-              this.firstInteractionDone.set(true);
+              this._firstInteractionDone.set(true);
             }
           } else {
             this.mainAudioComplete.set(false);
@@ -420,7 +458,7 @@ export class ResponsesService {
               r.id !== 'mainAudio' && r.id !== 'videoPlayer');
           if (hasInteractionValueChanged) {
             this.responseProgress.set('complete');
-            this.firstInteractionDone.set(true);
+            this._firstInteractionDone.set(true);
           } else if (unitState.responseProgress) {
             // fall back to provided responseProgress from unitState when available
             this.responseProgress.set(unitState.responseProgress);
