@@ -103,22 +103,27 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
           this.scheduleRecalcAfterLayout();
         }
 
-        // Attempt to restore former state once
+        // Attempt to restore former state once when the unit is first loaded
         if (!this.hasRestoredFromFormerState) {
           const formerStateResponses: StarsResponse[] = (parameters as any).formerState || [];
+
+          // Always reset visual selection and button positions before attempting to restore.
+          // This ensures no visual leakage from previously loaded units.
+          this.resetSelection();
 
           if (Array.isArray(formerStateResponses) && formerStateResponses.length > 0) {
             const foundResponse = formerStateResponses.find(r => r.id === this.localParameters.variableId);
 
-            if (foundResponse && foundResponse.value != null) {
+            // Only restore if we have a valid non-zero value.
+            // A value of 0 or '0' means no button is currently dropped/selected.
+            if (foundResponse && foundResponse.value != null && foundResponse.value !== 0 && foundResponse.value !== '0') {
               this.restoreFromFormerState(foundResponse);
               this.hasRestoredFromFormerState = true;
               return;
             }
           }
 
-          // No valid former state - initialize as new
-          this.resetSelection();
+          // No valid former state - initialize as new with a 0 value (no selection)
           this.responses.emit([{
             id: this.localParameters.variableId,
             status: 'DISPLAYED',

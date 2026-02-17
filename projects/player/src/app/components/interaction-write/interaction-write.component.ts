@@ -50,9 +50,17 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
         this.localParameters.maxInputLength = parameters.maxInputLength || 10;
         this.localParameters.imageSource = parameters.imageSource || '';
         this.localParameters.text = parameters.text || '';
-        // Only restore from former state once, on initial load
+
+        // Only restore from former state once on initial unit load
         if (!this.hasRestoredFromFormerState) {
           const formerStateResponses: Response[] = (parameters as any).formerState || [];
+
+          // Explicitly reset the text and input status before attempting restoration
+          // This prevents state "leakage" if a previous unit used the same variableId
+          this.currentText = '';
+          this.isDisabled = this.localParameters?.maxInputLength !== null &&
+            this.localParameters?.maxInputLength !== undefined &&
+            this.currentText.length >= this.localParameters.maxInputLength;
 
           if (Array.isArray(formerStateResponses) && formerStateResponses.length > 0) {
             const found = formerStateResponses.find(r => r.id === this.localParameters.variableId);
@@ -64,11 +72,7 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
             }
           }
 
-          // No former state - initialize as new
-          this.currentText = '';
-          this.isDisabled = this.localParameters.maxInputLength !== null &&
-            this.currentText.length >= this.localParameters.maxInputLength;
-
+          // No valid former state - initialize with empty string
           this.responses.emit([{
             id: this.localParameters.variableId,
             status: 'DISPLAYED',
@@ -90,7 +94,8 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
   }
 
   addChar(button: string) {
-    if (this.localParameters.maxInputLength !== null &&
+    if (this.localParameters?.maxInputLength !== null &&
+      this.localParameters?.maxInputLength !== undefined &&
       this.currentText.length >= this.localParameters.maxInputLength) {
       return;
     }
@@ -98,7 +103,8 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
     const charToAdd = this.currentText.length === 0 ? this.capitalize(button) : button;
     this.currentText += charToAdd;
 
-    this.isDisabled = this.localParameters.maxInputLength !== null &&
+    this.isDisabled = this.localParameters?.maxInputLength !== null &&
+      this.localParameters?.maxInputLength !== undefined &&
       this.currentText.length >= this.localParameters.maxInputLength;
 
     this.valueChanged();
@@ -107,7 +113,8 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
   deleteChar() {
     if (this.currentText.length > 0) {
       this.currentText = this.currentText.slice(0, -1);
-      this.isDisabled = this.localParameters.maxInputLength !== null &&
+      this.isDisabled = this.localParameters?.maxInputLength !== null &&
+        this.localParameters?.maxInputLength !== undefined &&
         this.currentText.length >= this.localParameters.maxInputLength;
       this.valueChanged();
     }
@@ -115,7 +122,7 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
 
   private valueChanged() {
     const response: StarsResponse = {
-      id: this.localParameters.variableId,
+      id: this.localParameters?.variableId || 'WRITE',
       status: 'VALUE_CHANGED',
       value: this.currentText,
       relevantForResponsesProgress: true
@@ -132,7 +139,8 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
     if (!response.value || typeof response.value !== 'string') return;
 
     this.currentText = response.value;
-    this.isDisabled = this.localParameters.maxInputLength !== null &&
+    this.isDisabled = this.localParameters?.maxInputLength !== null &&
+      this.localParameters?.maxInputLength !== undefined &&
       this.currentText.length >= this.localParameters.maxInputLength;
   }
 

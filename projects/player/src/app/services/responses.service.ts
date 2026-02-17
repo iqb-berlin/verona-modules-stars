@@ -44,7 +44,11 @@ export class ResponsesService {
     return 0;
   }
 
-  setNewData(unitDefinition: UnitDefinition = null) {
+  /**
+   * Resets all state-related properties and signals to their initial values.
+   * This ensures a clean state whenever a new unit is loaded.
+   */
+  reset() {
     this.unitDefinitionProblem.set('');
     this.videoComplete.set(false);
     this.variableInfo = [];
@@ -53,7 +57,14 @@ export class ResponsesService {
     this.pendingAudioFeedback.set(false);
     this.pendingAudioFeedbackSource = '';
     this.feedbackDefinitions = [];
+  }
 
+  /**
+   * Initializes the service with a new unit definition.
+   * Calls reset() at the beginning to ensure any previous unit state is cleared.
+   */
+  setNewData(unitDefinition: UnitDefinition = null) {
+    this.reset();
     if (unitDefinition) {
       const problems: string[] = [];
       if (unitDefinition.variableInfo && unitDefinition.variableInfo.length > 0) {
@@ -117,6 +128,10 @@ export class ResponsesService {
       // Restore allResponses from former state
       this.allResponses = JSON.parse(JSON.stringify(former));
       this.lastResponsesString = JSON.stringify(former);
+    } else {
+      // No former state
+      this.mainAudioComplete.set(false);
+      this.responseProgress.set('none');
     }
   }
 

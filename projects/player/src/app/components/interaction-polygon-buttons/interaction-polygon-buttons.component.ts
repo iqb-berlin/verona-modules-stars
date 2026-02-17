@@ -66,52 +66,56 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
   }
 
   private resetSelection(): void {
-    if (!this.localParameters.options) return;
-
-    const numberOfOptions = this.localParameters.options?.length || 0;
-    this.selectedValues.set(Array.from(
-      { length: numberOfOptions },
-      () => false
-    ));
+    const numberOfOptions = this.localParameters?.options?.length || 0;
+    // Always set a NEW array reference
+    this.selectedValues.set(Array(numberOfOptions).fill(false));
   }
 
-  click(index) {
+  click(index: number) {
     this.updateSelection(index);
     this.emitResponse('VALUE_CHANGED', true);
   }
 
   private restoreFromFormerState(response: Response): void {
-    if (!response.value || typeof response.value !== 'string') {
-      return;
-    }
+    // Normalize the incoming value to a string for consistent parsing
+    const valueString = (typeof response.value === 'string') ? response.value : `${response.value}`;
+    if (!valueString) return;
+
     if (this.localParameters.multiSelect) {
-      // Restore multiselect: "010" => [false, true, false]
-      const selectedStates = response.value
-        .split('')
-        .map((char: string) => char === '1');
-      this.selectedValues.set(selectedStates);
+      // Restore multiselect: e.g., "010" string restored to [false, true, false]
+      const selectedStates = valueString.split('').map((char: string) => char === '1');
+      // Create a cloned array to ensure a new reference is stored in the signal
+      this.selectedValues.set([...selectedStates]);
     } else {
-      // Restore single select: "2" => [false, true, false]
-      const selectedIndex = parseInt(response.value, 10) - 1;
-      this.resetSelection();
-      const selectedValues = this.selectedValues();
-      selectedValues[selectedIndex] = true;
-      this.selectedValues.set(selectedValues);
+      // Restore single select: e.g., "2" string restored to [false, true, false]
+      const selectedIndex = Number.parseInt(valueString, 10) - 1;
+      const numberOfOptions = this.localParameters?.options?.length || 0;
+      const next = Array(numberOfOptions).fill(false);
+      if (selectedIndex >= 0 && selectedIndex < numberOfOptions) {
+        next[selectedIndex] = true;
+      }
+      // Pass the new array reference to trigger signal change detection
+      this.selectedValues.set(next);
     }
   }
 
   private updateSelection(index: number): void {
     if (this.localParameters.multiSelect) {
-      // Toggle the clicked item
-      const selectedValues = this.selectedValues();
-      selectedValues[index] = !selectedValues[index];
-      this.selectedValues.set(selectedValues);
+      // Toggle the clicked item using an immutable update to the signal
+      this.selectedValues.update(values => {
+        const next = [...values];
+        next[index] = !next[index];
+        return next;
+      });
     } else {
-      // Single select: reset all and select clicked item
-      this.resetSelection();
-      const selectedValues = this.selectedValues();
-      selectedValues[index] = true;
-      this.selectedValues.set(selectedValues);
+      // Single select: create a NEW array with only the clicked item selected
+      // This immutable approach ensures the UI updates immediately when selecting another option
+      const numberOfOptions = this.localParameters?.options?.length || 0;
+      const next = Array(numberOfOptions).fill(false);
+      if (index >= 0 && index < numberOfOptions) {
+        next[index] = true;
+      }
+      this.selectedValues.set(next);
     }
   }
 
