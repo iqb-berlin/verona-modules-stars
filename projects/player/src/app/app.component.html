@@ -5,8 +5,8 @@
     <stars-standalone-menu></stars-standalone-menu>
   }
 
-  @if (unitService.firstAudioOptions()?.firstClickLayer && unitService.mainAudio()?.audioSource && !unitService.firstClick()) {
-    <stars-click-layer (click)="unitService.firstClick.set(true)"></stars-click-layer>
+  @if (unitService.showFirstClickLayer()) {
+    <stars-click-layer></stars-click-layer>
   }
 
   <!-- audio component (show if player is not hidden) -->

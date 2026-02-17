@@ -22,7 +22,6 @@ export class AudioComponent {
   unitService = inject(UnitService);
 
   movingButton = signal(false);
-  showLayer = signal(false);
   isPlaying = signal(false);
   isDisabled = signal(false);
 
@@ -39,10 +38,8 @@ export class AudioComponent {
 
     effect(() => {
       // play audio when triggered from the firstClickLayer
-      if (this.unitService.firstAudioOptions()?.firstClickLayer) {
-        if (this.unitService.firstClick()) {
-          this.play();
-        }
+      if (this.unitService.firstClickLayerClicked()) {
+        this.play();
       }
     });
 
@@ -56,24 +53,16 @@ export class AudioComponent {
       }
     });
 
-    // TODO separate firstClickLayer into a component
     // Effect to reactively handle animateButton with a delayed start
     effect(() => {
-      // show the firstClickLayer if configured, and no interaction has been done yet
-      if (this.firstAudioOptions()?.firstClickLayer && !this.responsesService.firstInteractionDone()) {
-        this.showLayer.set(true);
-      } else {
-        this.showLayer.set(false);
-      }
-
       // Clear any existing timer
       if (this.animateTimer) {
         clearTimeout(this.animateTimer);
       }
 
-      if (this.firstAudioOptions()?.animateButton && !this.responsesService.firstInteractionDone()) {
+      if (this.firstAudioOptions()?.animateButton && !this.unitService.interactionDone()) {
         this.animateTimer = setTimeout(() => {
-          if (!this.responsesService.firstInteractionDone()) {
+          if (!this.unitService.interactionDone()) {
             this.movingButton.set(true);
           }
         }, 10000);
@@ -104,7 +93,6 @@ export class AudioComponent {
       });
     }
 
-    this.responsesService.firstInteractionDone.set(true);
     this.movingButton.set(false);
   }
 
