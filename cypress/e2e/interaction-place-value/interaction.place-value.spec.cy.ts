@@ -1,4 +1,5 @@
 import { testBaseFeatures } from '../shared/base-features.spec.cy';
+import { testFormerStateFeatures } from '../shared/former-state.spec.cy';
 import {
   InteractionPlaceValueParams,
   UnitDefinition
@@ -194,4 +195,6 @@ describe('PLACE_VALUE Interaction E2E Tests', () => {
 
   // Test base features for the PLACE_VALUE interaction type
   testBaseFeatures(interactionType, defaultTestFile);
+  // Test former state features for the PLACE_VALUE interaction type
+  testFormerStateFeatures(interactionType, defaultTestFile);
 });

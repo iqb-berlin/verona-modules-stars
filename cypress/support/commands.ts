@@ -395,3 +395,47 @@ Cypress.Commands.add('applyCorrectAnswerScenarios', (interactionType: string, da
     }
   }
 });
+
+Cypress.Commands.add('assertInteractionComponentVisible', (interactionType: string) => {
+  cy.log(`Waiting for interaction visibility: ${interactionType}`);
+  if (interactionType === 'polygon_buttons') {
+    cy.get('[data-cy="polygon-buttons-container"]', { timeout: 15000 }).should('be.visible');
+  } else if (interactionType === 'write') {
+    cy.get('[data-cy=write-container]', { timeout: 15000 }).should('be.visible');
+  } else if (interactionType === 'place_value') {
+    cy.get('[data-cy="interaction-place-value"]', { timeout: 15000 }).should('be.visible');
+  } else if (interactionType === 'drop') {
+    cy.get('[data-cy="drop-container"]', { timeout: 15000 }).should('be.visible');
+  } else if (interactionType === 'find_on_image') {
+    cy.get('[data-cy="image-element"]')
+      .should('exist')
+      .and('be.visible')
+      .and('have.attr', 'src');
+  } else {
+    // Button interaction type
+    cy.get('[data-cy="button-0"]', { timeout: 15000 }).should('be.visible');
+  }
+});
+
+Cypress.Commands.add('assertRestoredState', (interactionType: string) => {
+  cy.log(`Verifying restored state for interaction type: ${interactionType}`);
+  if (interactionType === 'polygon_buttons') {
+    cy.get('[data-cy="polygon-1"]', { timeout: 15000 }).should('have.class', 'clicked');
+  } else if (interactionType === 'write') {
+    // The default interaction types 'a', which is capitalized to 'A' in the component.
+    cy.get('[data-cy=text-span]', { timeout: 15000 }).should('contain', 'A');
+  } else if (interactionType === 'place_value') {
+    // Default interaction for place_value moves one ones icon.
+    cy.get('[data-cy="icon-item-ones-moved"]', { timeout: 15000 }).should('have.length', 1);
+  } else if (interactionType === 'drop') {
+    // Verifies the button at index 0 has been moved (its transform matrix is no longer identity).
+    cy.get('[data-cy="drop-animate-wrapper-0"]', { timeout: 15000 })
+      .should('have.css', 'transform');
+  } else if (interactionType === 'find_on_image') {
+    cy.get('[data-cy="click-target"]')
+      .should('exist');
+  } else {
+    // Button interaction type
+    cy.get('[data-cy="button-1"] input', { timeout: 15000 }).should('have.attr', 'data-selected', 'true');
+  }
+});

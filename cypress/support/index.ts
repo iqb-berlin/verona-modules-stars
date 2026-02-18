@@ -110,6 +110,19 @@ declare global {
        */
       applyCorrectAnswerScenarios(interactionType: string, dataToCheck: UnitDefinition): Chainable<void>;
 
+      /**
+       * Asserts that the interaction container or a primary element is visible
+       * Useful for waiting for a unit to load.
+       * @param interactionType - the type of interaction.
+       */
+      assertInteractionComponentVisible(interactionType:string): Chainable<void>;
+
+      /**
+       * Asserts that the interaction's visual state has been restored correctly from a former unit state
+       * This should be used after a former state has been applied (e.g. via vopStartCommand)
+       * @param interactionType - the type of interaction
+       */
+      assertRestoredState(interactionType:string): Chainable<void>;
     }
   }
 }

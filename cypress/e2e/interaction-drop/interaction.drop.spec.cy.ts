@@ -3,6 +3,7 @@ import {
   UnitDefinition
 } from '../../../projects/player/src/app/models/unit-definition';
 import { testBaseFeatures } from '../shared/base-features.spec.cy';
+import { testFormerStateFeatures } from '../shared/former-state.spec.cy';
 import { testResponsiveImageFeatures } from '../shared/responsive-image.spec.cy';
 import {
   formatPxValue,
@@ -296,5 +297,8 @@ describe('Interaction DROP Component', () => {
 
   // Test base features for the DROP interaction type
   testBaseFeatures(interactionType, defaultTestFile);
+  // Test former state features for the DROP interaction type
+  testFormerStateFeatures(interactionType, defaultTestFile);
+  // Test responsive image features for the DROP interaction type
   testResponsiveImageFeatures(interactionType, `${interactionType}_imagePosition_top_test`, '[data-cy="drop-image"]');
 });

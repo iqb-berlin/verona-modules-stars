@@ -2,6 +2,7 @@ import {
   UnitDefinition, InteractionPolygonButtonsParams
 } from '../../../projects/player/src/app/models/unit-definition';
 import { testBaseFeatures } from '../shared/base-features.spec.cy';
+import { testFormerStateFeatures } from '../shared/former-state.spec.cy';
 
 describe('Interaction POLYGON BUTTONS Component', () => {
   const interactionType = 'polygon_buttons';
@@ -68,4 +69,6 @@ describe('Interaction POLYGON BUTTONS Component', () => {
 
   // Test base features for the POLYGON_BUTTONS interaction type
   testBaseFeatures(interactionType, defaultTestFile);
+  // Test former state features for the POLYGON_BUTTONS interaction type
+  testFormerStateFeatures(interactionType, defaultTestFile);
 });
