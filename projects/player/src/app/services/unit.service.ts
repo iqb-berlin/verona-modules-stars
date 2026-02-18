@@ -4,30 +4,22 @@ import {
   AudioOptions,
   ContinueButtonEnum,
   FirstAudioOptionsParams,
-  InteractionEnum, OpeningImageParams,
+  InteractionEnum,
+  OpeningImageParams,
   UnitDefinition
 } from '../models/unit-definition';
-
-export enum MainPlayerStatus {
-  PAUSED = 'PAUSED',
-  PLAYING = 'PLAYING', // audio waves can be shown
-  ENDED = 'ENDED',
-  READY = 'READY',
-  HIDE = 'HIDE'
-}
 
 @Injectable({
   providedIn: 'root'
 })
 
 export class UnitService {
-  firstAudioOptions = signal<FirstAudioOptionsParams | undefined>(undefined);
+  firstAudioOptions = signal<FirstAudioOptionsParams>({} as FirstAudioOptionsParams);
   mainAudio = signal<AudioOptions>({} as AudioOptions);
   backgroundColor = signal('#EEE');
   continueButton = signal<ContinueButtonEnum>('NO');
   interaction = signal<InteractionEnum | undefined>(undefined);
   parameters = signal<unknown>({});
-  hasInteraction = signal(false);
   ribbonBars = signal<boolean>(false);
   disableInteractionUntilComplete = signal(false);
   openingImageParams = signal<OpeningImageParams>({} as OpeningImageParams);
@@ -54,12 +46,11 @@ export class UnitService {
 
   reset() {
     this.mainAudio.set({} as AudioOptions);
-    this.firstAudioOptions.set(undefined);
+    this.firstAudioOptions.set({} as FirstAudioOptionsParams);
     this.backgroundColor.set('#EEE');
     this.continueButton.set('NO');
     this.interaction.set(undefined);
     this.parameters.set({});
-    this.hasInteraction.set(false);
     this.ribbonBars.set(false);
     this.disableInteractionUntilComplete.set(false);
     this.openingImageParams.set({} as OpeningImageParams);
@@ -71,9 +62,7 @@ export class UnitService {
   setNewData(unitDefinition: unknown) {
     this.reset();
     const def = unitDefinition as UnitDefinition;
-    const firstAudioOptions: FirstAudioOptionsParams = {};
-    this.firstAudioOptions.set(def.firstAudioOptions || firstAudioOptions);
-    this.hasInteraction.set(def.interactionType !== undefined || def.interactionParameters !== undefined);
+    this.firstAudioOptions.set(def.firstAudioOptions || {});
     // add audioId to the mainAudio object to be able to use it in audioService.setAudioSrc()
     const mainAudio: AudioOptions | undefined = def.mainAudio ?
       ({ ...def.mainAudio, audioId: 'mainAudio' } as AudioOptions) :

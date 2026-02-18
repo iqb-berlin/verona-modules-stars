@@ -3,9 +3,13 @@ import {
 } from '@angular/core';
 import { StarsResponse } from '../services/responses.service';
 
-@Directive()
+export interface OnShowHint {
+  showHint(value: string): void;
+}
 
+@Directive()
 export abstract class InteractionComponentDirective {
   parameters = input.required<unknown>();
+  showHint = input<string>('');
   responses = output<StarsResponse[]>();
 }

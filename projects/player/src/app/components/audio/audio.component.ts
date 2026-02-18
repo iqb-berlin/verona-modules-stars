@@ -6,6 +6,7 @@ import { ResponsesService } from '../../services/responses.service';
 import { AudioService } from '../../services/audio.service';
 import { AudioOptions, FirstAudioOptionsParams } from '../../models/unit-definition';
 import { UnitService } from '../../services/unit.service';
+import { StateService } from '../../services/state.service';
 
 @Component({
   selector: 'stars-audio',
@@ -19,6 +20,7 @@ export class AudioComponent {
 
   audioService = inject(AudioService);
   responsesService = inject(ResponsesService);
+  stateService = inject(StateService);
   unitService = inject(UnitService);
 
   movingButton = signal(false);
@@ -104,7 +106,7 @@ export class AudioComponent {
       });
     }
 
-    this.responsesService.firstInteractionDone.set(true);
+    this.stateService.interactionDone();
     this.movingButton.set(false);
   }
 

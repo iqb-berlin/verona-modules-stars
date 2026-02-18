@@ -47,6 +47,14 @@
     box-shadow: none;
   }
 
+  input.hint {
+    border-radius: variables.$border-radius;
+    border-width: 2px;
+    border-color: red;
+    transition: all 0.2s ease;
+    box-shadow: none;
+  }
+
   &.circle-type {
     width: 100px;
     height: 100px;
