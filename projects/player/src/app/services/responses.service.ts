@@ -18,8 +18,6 @@ export class ResponsesService {
   mainAudioComplete = signal(false);
   videoComplete = signal(false);
 
-  private unitDefinitionProblem: string = '';
-
   allResponses: Response[] = [];
   variableInfo: VariableInfo[] = [];
   veronaPostService = inject(VeronaPostService);
