@@ -21,7 +21,7 @@
     }
 
     &.playing {
-      animation: moving-play 2s infinite;
+      animation: moving-play 1s infinite;
       animation-direction: alternate-reverse;
 
       ::ng-deep .white-circle {
@@ -79,19 +79,15 @@
 }
 
 @keyframes moving-play {
-  0% {
+  0%, 50%, 100% {
     transform: scale(1);
   }
 
-  5%, 15%, 35%, 45%, 55%, 65%, 85%, 95% {
-    transform: scale(1.03);
+  25% {
+    transform: scale(1.05);
   }
 
-  10%, 20%, 30%, 40%, 60%, 70%, 80%  {
-    transform: scale(0.97);
-  }
-
-  25%, 50%, 75%, 100% {
-    transform: scale(1);
+  75%  {
+    transform: scale(0.95);
   }
 }
