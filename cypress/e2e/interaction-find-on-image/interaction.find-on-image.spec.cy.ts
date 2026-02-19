@@ -103,6 +103,6 @@ describe('Interaction FIND_ON_IMAGE Component', () => {
     testContinueButtonFeatures(interactionType);
     testRibbonBars(interactionType, `${interactionType}_ribbonBars_true_test`);
     testAudioFeedback(interactionType, `${interactionType}_feedback_test`);
-    // testFormerStateFeatures(interactionType, defaultTestFile);
+    testFormerStateFeatures(interactionType, defaultTestFile);
   });
 });

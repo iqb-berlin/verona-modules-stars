@@ -339,27 +339,130 @@ Cypress.Commands.add('movePlaceValueIcons', (targetTens: number, targetOnes: num
   });
 });
 
-Cypress.Commands.add('applyStandardScenarios', (interactionType: string) => {
-  cy.log('first apply standard scenarios that are wrong:');
+Cypress.Commands.add('applyStandardScenarios', (interactionType: string, navigator?: unknown) => {
+  const isCoordString = (val: string) => /^\s*\d+\s*,\s*\d+\s*$/.test(val);
+  const parseCoords = (val: string): [number, number] => {
+    const coords = val.split(',').map(v => Number.parseInt(v.trim(), 10));
+    return [coords[0] || 0, coords[1] || 0];
+  };
+
   if (interactionType === 'image_only') {
     cy.get('[data-cy="stimulus-image"]').should('exist').and('be.visible');
-  } else if (interactionType === 'write') {
-    // Click any letter
+    return;
+  }
+
+  if (interactionType === 'write') {
+    if (navigator !== undefined) {
+      if (typeof navigator === 'string') {
+        // allow 'a' | 'A' or 'character-button-a'
+        const letterMatch = navigator.match(/^[a-z]$/i);
+        if (letterMatch && letterMatch[0]) {
+          const letter = letterMatch[0].toLowerCase();
+          cy.get(`[data-cy=character-button-${letter}]`).click();
+          return;
+        }
+        const btnMatch = navigator.match(/^character-button-([a-z])$/i);
+        if (btnMatch && btnMatch[1]) {
+          const letter = btnMatch[1].toLowerCase();
+          cy.get(`[data-cy=character-button-${letter}]`).click();
+          return;
+        }
+        // if a raw selector is passed
+        if (navigator.startsWith('[data-cy=')) {
+          cy.get(navigator).click();
+          return;
+        }
+      }
+    }
+    // Default behavior
     cy.get('[data-cy=character-button-a]').click();
-  } else if (interactionType === 'find_on_image') {
-    // Click a specific place on image
-    cy.get('[data-cy="image-element"]')
-      .click(100, 150);
-  } else if (interactionType === 'polygon_buttons') {
-    cy.get('[data-cy="polygon-1"]').click();
-  } else if (interactionType === 'place_value') {
+    return;
+  }
+
+  if (interactionType === 'find_on_image') {
+    if (navigator !== undefined) {
+      if (Array.isArray(navigator) && navigator.length === 2 &&
+        typeof navigator[0] === 'number' && typeof navigator[1] === 'number') {
+        cy.get('[data-cy="image-element"]').click(navigator[0] as number, navigator[1] as number);
+        return;
+      }
+      if (typeof navigator === 'string' && isCoordString(navigator)) {
+        const [x, y] = parseCoords(navigator);
+        cy.get('[data-cy="image-element"]').click(x, y);
+        return;
+      }
+    }
+    // Default behavior
+    cy.get('[data-cy="image-element"]').click(100, 150);
+    return;
+  }
+
+  if (interactionType === 'polygon_buttons') {
+    if (navigator !== undefined) {
+      if (typeof navigator === 'number') {
+        cy.get(`[data-cy="polygon-${navigator}"]`).click();
+        return;
+      }
+      if (typeof navigator === 'string') {
+        const polyMatch = navigator.match(/^polygon-(\d+)$/);
+        if (polyMatch && polyMatch[1]) {
+          cy.get(`[data-cy="polygon-${polyMatch[1]}"]`).click();
+          return;
+        }
+      }
+    }
+    // Default behavior
+    cy.get('[data-cy="polygon-0"]').click();
+    return;
+  }
+
+  if (interactionType === 'place_value') {
+    if (navigator !== undefined) {
+      let targetTens = 0;
+      let targetOnes = 0;
+      if (typeof navigator === 'string') {
+        const parts = navigator.split(',');
+        if (parts.length === 2) {
+          targetTens = Number.parseInt(parts[0]!.trim(), 10);
+          targetOnes = Number.parseInt(parts[1]!.trim(), 10);
+        } else if (parts.length === 1) {
+          targetOnes = Number.parseInt(parts[0]!.trim(), 10);
+        }
+      } else if (typeof navigator === 'number') {
+        targetTens = Math.floor(navigator / 10);
+        targetOnes = navigator % 10;
+      }
+      cy.movePlaceValueIcons(targetTens, targetOnes);
+      return;
+    }
+    // Default behavior
     cy.get('[data-cy="icon-item-ones"]').first().click({ force: true });
     cy.wait(500); // Wait for debounce
-  } else {
-    // InteractionType: BUTTONS, DROP
-    // Click the button index 1
-    cy.clickButtonAtIndexOne();
+    return;
   }
+
+  // Default for BUTTONS, DROP and others
+  if (navigator !== undefined) {
+    if (typeof navigator === 'number') {
+      const idx = navigator;
+      const selector = `[data-cy="button-${idx}"]`;
+      cy.get(selector).click();
+      return;
+    }
+    if (typeof navigator === 'string') {
+      const btnIdx = navigator.match(/^button-(\d+)$/);
+      if (btnIdx && btnIdx[1]) {
+        cy.get(`[data-cy="button-${btnIdx[1]}"]`).click();
+        return;
+      }
+      if (navigator.startsWith('[data-cy=')) {
+        cy.get(navigator).click();
+        return;
+      }
+    }
+  }
+  // Fallback default: click the button index 1
+  cy.clickButtonAtIndexOne();
 });
 
 Cypress.Commands.add('applyCorrectAnswerScenarios', (interactionType: string, dataToCheck: UnitDefinition) => {
@@ -417,25 +520,95 @@ Cypress.Commands.add('assertInteractionComponentVisible', (interactionType: stri
   }
 });
 
-Cypress.Commands.add('assertRestoredState', (interactionType: string) => {
+Cypress.Commands.add('assertRestoredState', (interactionType: string, expected?: unknown) => {
   cy.log(`Verifying restored state for interaction type: ${interactionType}`);
   if (interactionType === 'polygon_buttons') {
-    cy.get('[data-cy="polygon-1"]', { timeout: 15000 }).should('have.class', 'clicked');
+    let targetIndex = 0;
+    if (expected !== undefined) {
+      if (typeof expected === 'number') {
+        targetIndex = expected;
+      } else if (typeof expected === 'string') {
+        const polyMatch = expected.match(/^polygon-(\d+)$/);
+        if (polyMatch && polyMatch[1]) {
+          targetIndex = Number.parseInt(polyMatch[1], 10);
+        } else {
+          targetIndex = Number.parseInt(expected, 10);
+        }
+      }
+    }
+    cy.get(`[data-cy="polygon-${targetIndex}"]`, { timeout: 15000 }).should('have.class', 'clicked');
   } else if (interactionType === 'write') {
-    // The default interaction types 'a', which is capitalized to 'A' in the component.
-    cy.get('[data-cy=text-span]', { timeout: 15000 }).should('contain', 'A');
+    let expectedText = 'A';
+    if (expected !== undefined) {
+      if (typeof expected === 'string') {
+        // navigator could be 'a' or 'character-button-a'
+        const letterMatch = expected.match(/^[a-z]$/i);
+        if (letterMatch) {
+          expectedText = expected.toUpperCase();
+        } else {
+          const btnMatch = expected.match(/^character-button-([a-z])$/i);
+          if (btnMatch && btnMatch[1]) {
+            expectedText = btnMatch[1].toUpperCase();
+          }
+        }
+      }
+    }
+    cy.get('[data-cy=text-span]', { timeout: 15000 }).should('contain', expectedText);
   } else if (interactionType === 'place_value') {
-    // Default interaction for place_value moves one ones icon.
-    cy.get('[data-cy="icon-item-ones-moved"]', { timeout: 15000 }).should('have.length', 1);
+    // If expected is provided, parse it to determine how many tens/ones should be moved
+    let expectedTens = undefined as number | undefined;
+    let expectedOnes = undefined as number | undefined;
+
+    if (expected !== undefined) {
+      if (typeof expected === 'string') {
+        const parts = expected.split(',').map(p => p.trim());
+        if (parts.length === 2) {
+          expectedTens = Number.parseInt(parts[0]!, 10);
+          expectedOnes = Number.parseInt(parts[1]!, 10);
+        } else if (parts.length === 1) {
+          expectedOnes = Number.parseInt(parts[0]!, 10);
+        }
+      } else if (typeof expected === 'number') {
+        expectedTens = Math.floor(expected / 10);
+        expectedOnes = expected % 10;
+      }
+    }
+
+    // Default expectation: one ones icon moved if nothing provided
+    if (expectedTens === undefined && expectedOnes === undefined) {
+      expectedOnes = 1;
+    }
+
+    if (expectedTens !== undefined) {
+      cy.get('[data-cy="icon-item-tens-moved"]', { timeout: 15000 }).should('have.length', expectedTens);
+    }
+    if (expectedOnes !== undefined) {
+      cy.get('[data-cy="icon-item-ones-moved"]', { timeout: 15000 }).should('have.length', expectedOnes);
+    }
   } else if (interactionType === 'drop') {
-    // Verifies the button at index 0 has been moved (its transform matrix is no longer identity).
+    // Verifies the button at index 0 has been moved
     cy.get('[data-cy="drop-animate-wrapper-0"]', { timeout: 15000 })
       .should('have.css', 'transform');
   } else if (interactionType === 'find_on_image') {
     cy.get('[data-cy="click-target"]')
       .should('exist');
+  } else if (interactionType === 'buttons') {
+    let targetIndex = 1;
+    if (expected !== undefined) {
+      if (typeof expected === 'number') {
+        targetIndex = expected;
+      } else if (typeof expected === 'string') {
+        const btnIdx = expected.match(/^button-(\d+)$/);
+        if (btnIdx && btnIdx[1]) {
+          targetIndex = Number.parseInt(btnIdx[1], 10);
+        } else {
+          targetIndex = Number.parseInt(expected, 10);
+        }
+      }
+    }
+    cy.get(`[data-cy="button-${targetIndex}"] input`, { timeout: 15000 }).should('have.attr', 'data-selected', 'true');
   } else {
-    // Button interaction type
+    // Other interaction types, fallback or generic button verification
     cy.get('[data-cy="button-1"] input', { timeout: 15000 }).should('have.attr', 'data-selected', 'true');
   }
 });
