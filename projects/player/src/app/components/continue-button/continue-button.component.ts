@@ -4,6 +4,7 @@ import {
 
 import { ResponsesService } from '../../services/responses.service';
 import { AudioService } from '../../services/audio.service';
+import { UnitService } from '../../services/unit.service';
 
 @Component({
   selector: 'stars-continue-button',
@@ -16,6 +17,7 @@ export class ContinueButtonComponent {
   @Output() navigate = new EventEmitter();
   responseService = inject(ResponsesService);
   audioService = inject(AudioService);
+  unitService = inject(UnitService);
 
   clicked = signal(false);
 
