@@ -159,7 +159,7 @@ describe('Interaction BUTTONS Component', () => {
       // eslint-disable-next-line max-len
       // Keep below variable in sync with projects/player/src/app/components/interaction-buttons/interaction-buttons.component.html
       const paddingZero = 0;
-      const defaultOffset = 90;
+      const defaultPadding = 90;
 
       const imageConfigs = [
         {
@@ -178,16 +178,16 @@ describe('Interaction BUTTONS Component', () => {
         cy.get('[data-cy="stimulus-image"]').should('exist').and('be.visible');
 
         if (imageUseFullArea) {
-          cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-bottom', '60px');
+          cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-bottom', `${defaultPadding}px`);
           cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-top', `${paddingZero}px`);
           cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-left', `${paddingZero}px`);
           cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-right', `${paddingZero}px`);
         } else {
           cy.get('[data-cy="buttons-container"]')
-            .should('have.css', 'padding-bottom', `${defaultOffset}px`);
+            .should('have.css', 'padding-bottom', `${defaultPadding}px`);
           cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-top', `${paddingZero}px`);
-          cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-left', `${defaultOffset}px`);
-          cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-right', `${defaultOffset}px`);
+          cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-left', `${defaultPadding}px`);
+          cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-right', `${defaultPadding}px`);
         }
       });
     });

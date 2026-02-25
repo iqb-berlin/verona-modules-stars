@@ -44,7 +44,7 @@
   @include variables.stimulus-wrapper;
 
   .buttons-container.layout--top-center:not(.full-area) & {
-    padding: 12px variables.$small-gap-margin;
+    padding: 12px;
   }
 
   .buttons-container.full-area & {

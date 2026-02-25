@@ -15,9 +15,11 @@ describe('Interaction DROP Component', () => {
   const defaultTestFile = 'drop_4_option_test';
 
   const testFileWithImageLandingXY = `${interactionType}_imagePosition_top_imageLandingXY_100-100_test`;
-  /** Ref from the value on interaction-drop.component.ts calculateButtonTransformValues function. */
+  /** Ref from the value on interaction-drop.component.ts calculateButtonTransformValues function.
+   The value to bottom when there is no imageLandingXY provided in the unit definition. */
   const yValueToBottom = 280;
-  /** Ref from the value on interaction-drop.component.ts calculateButtonTransformValues function. */
+  /** Ref from the value on interaction-drop.component.ts calculateButtonTransformValues function.
+   The value to top when there is no imageLandingXY provided in the unit definition. */
   const yValueToTop = -280;
   const dropImage = '[data-cy="drop-image"]';
   const buttonIndex = 1;
@@ -175,7 +177,7 @@ describe('Interaction DROP Component', () => {
         cy.setupTestData(defaultTestFile, interactionType);
       });
 
-      it('applies correct styles and downward movement', () => {
+      it('applies correct styles and downward movement when imageLandingXY is NOT provided', () => {
         let testData: UnitDefinition;
         cy.get('@testData').then(data => {
           testData = data as unknown as UnitDefinition;
@@ -202,7 +204,7 @@ describe('Interaction DROP Component', () => {
         cy.setupTestData(`${interactionType}_imagePosition_top_test`, interactionType);
       });
 
-      it('applies correct styles and upward movement', () => {
+      it('applies correct styles and upward movement when imageLandingXY is NOT provided', () => {
         let testData: UnitDefinition;
         cy.get('@testData').then(data => {
           testData = data as unknown as UnitDefinition;

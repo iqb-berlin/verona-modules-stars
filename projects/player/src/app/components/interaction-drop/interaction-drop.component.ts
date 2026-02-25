@@ -374,6 +374,8 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
           transforms[index] = `translate(${xPx}, ${yPx})`;
         }
       } else {
+        // When no imageLandingXY is specified, the button is centered on the image,
+        // and the container is centered on the screen
         const baseOffsetX = containerCenter - currentButtonCenter;
         const transformY = this.localParameters.imagePosition === 'TOP' ? '-280px' : '280px';
         transforms[index] = `translate(${baseOffsetX}px, ${transformY})`;
