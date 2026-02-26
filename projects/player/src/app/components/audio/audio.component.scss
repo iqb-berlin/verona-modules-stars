@@ -11,9 +11,15 @@
     width: 80px;
     height: 80px;
     margin-top: 20px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent; /* removes focus ring on tap */
+    outline: none;
+    -webkit-touch-callout: none; /* prevents callout on long press (iOS) */
+    filter: drop-shadow(5px 5px 0 rgba(0, 0, 0, 0.2));
 
-    ::ng-deep .white-circle {
-      filter: drop-shadow(5px 5px 0 rgba(0, 0, 0, 0.2));
+    &:focus, &:active {
+      outline: none;
+      background-color: transparent;
     }
 
     &.moving-button {
@@ -24,8 +30,8 @@
       animation: moving-play 1s infinite;
       animation-direction: alternate-reverse;
 
-      ::ng-deep .white-circle {
-        fill: #0050E5;
+      .white-circle {
+        fill: colors.$highlight;
       }
 
       g path {
@@ -38,8 +44,7 @@
 }
 
 .disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  @include variables.disabled-button;
 }
 
 .audio-instruction-container {
