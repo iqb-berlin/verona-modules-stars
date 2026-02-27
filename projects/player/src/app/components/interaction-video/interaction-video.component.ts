@@ -1,5 +1,5 @@
 import {
-  AfterViewInit, Component, effect, ElementRef, signal, ViewChild
+  AfterViewInit, Component, effect, ElementRef, signal, ViewChild, inject
 } from '@angular/core';
 import {
   fromEvent, Subject, tap, throttleTime
@@ -9,6 +9,7 @@ import { takeUntil } from 'rxjs/operators';
 import { StarsResponse } from '../../services/responses.service';
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
 import { InteractionVideoParams } from '../../models/unit-definition';
+import { VeronaPostService } from '../../services/verona-post.service';
 
 @Component({
   selector: 'stars-interaction-video',
@@ -28,17 +29,26 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
   @ViewChild('videoPlayer', { static: false }) videoPlayerRef!: ElementRef<HTMLVideoElement>;
   private ngUnsubscribe = new Subject();
 
+  veronaPostService = inject(VeronaPostService);
+
   constructor() {
     super();
 
     effect(() => {
       const parameters = this.parameters() as InteractionVideoParams;
+      console.log('InteractionVideoComponent loaded with parameters:', parameters);
       this.localParameters = this.createDefaultParameters();
 
       if (parameters) {
+        // Reset internal playback state for new unit
+        this.playCount = 0;
+        this.currentTime = 0;
+        this.percentElapsed = 0;
+
         this.localParameters.imageSource = parameters.imageSource || '';
         this.localParameters.videoSource = parameters.videoSource || '';
         this.localParameters.text = parameters.text || '';
+        this.localParameters.triggerNavigationOnSelect = parameters.triggerNavigationOnSelect || false;
         this.localParameters.variableId = parameters.variableId || 'VIDEO';
         this.responses.emit([{
           id: this.localParameters.variableId,
@@ -88,6 +98,7 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
   }
 
   ended() {
+    console.log('video is ended...');
     this._isPlaying.set(false);
     this.percentElapsed = 0;
     this.playCount += 1;
@@ -98,14 +109,24 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
     this.currentTime = 0;
     this.videoPlayerRef.nativeElement.currentTime = 0;
     this.videoPlayerRef.nativeElement.load();
+
+    // Check if triggerNavigationOnSelect is enabled
+    if (this.localParameters.triggerNavigationOnSelect === true) {
+      this.localParameters.triggerNavigationOnSelect = false;
+      setTimeout(() => {
+        this.veronaPostService.sendVopUnitNavigationRequestedNotification('next');
+      }, 500);
+    }
   }
 
   sendPlaybackTimeChanged(): void {
     let videoValue = this.percentElapsed || 0;
     videoValue += this.playCount;
 
+    console.log(`Sending playback update: percentElapsed=${this.percentElapsed}, playCount=${this.playCount}, videoValue=${videoValue}`);
+
     const response: StarsResponse = {
-      id: 'videoPlayer',
+      id: 'VIDEO',
       value: videoValue,
       status: 'VALUE_CHANGED',
       relevantForResponsesProgress: false
@@ -117,10 +138,11 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
   // eslint-disable-next-line class-methods-use-this
   private createDefaultParameters(): InteractionVideoParams {
     return {
-      variableId: 'videoPlayer',
+      variableId: 'VIDEO',
       imageSource: '',
       videoSource: '',
-      text: ''
+      text: '',
+      triggerNavigationOnSelect: false
     };
   }
 }

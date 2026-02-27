@@ -151,7 +151,7 @@ export class ResponsesService {
         } else {
           this.allResponses.push(codedResponse);
         }
-        if (response.id === 'videoPlayer') {
+        if (response.id === 'VIDEO') {
           this.videoComplete.set((response.value as number) >= 1);
         }
       }
