@@ -12,6 +12,7 @@
     background-color: transparent;
     border: none;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
 
     &.is-playing {
       filter: contrast(0.6);
