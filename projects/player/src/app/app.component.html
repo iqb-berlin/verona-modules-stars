@@ -14,17 +14,18 @@
     <stars-audio [audio]="unitService.currentAudioSrc()" [firstAudioOptions]="unitService.firstAudioOptions()"></stars-audio>
   }
 
-  <!-- Continue Button (hidden during opening flow) -->
-  @if (!unitService.openingFlowActive() && (unitService.continueButton() === "ALWAYS" ||
-      (unitService.continueButton() === "ON_MAIN_AUDIO_COMPLETE" && responsesService.mainAudioComplete()) ||
-      (unitService.continueButton() === "ON_AUDIO_AND_RESPONSE" && responsesService.mainAudioComplete() &&
-      (responsesService.responseProgress() === "complete" || responsesService.responseProgress() === "some")) ||
-      (unitService.continueButton() === "ON_VIDEO_COMPLETE" && responsesService.videoComplete()) ||
-      (unitService.continueButton() === "ON_ANY_RESPONSE" &&
-        (responsesService.responseProgress() === "some" || responsesService.responseProgress() === "complete")) ||
-      (unitService.continueButton() === "ON_RESPONSES_COMPLETE" && responsesService.responseProgress() === "complete"))) {
-    <stars-continue-button
-      (navigate)="veronaPostService.sendVopUnitNavigationRequestedNotification('next')"></stars-continue-button>
+    <!-- Continue Button (hidden during opening flow) -->
+    @if (unitService.continueButton() === "ALWAYS" ||
+        (unitService.continueButton() === "ON_MAIN_AUDIO_COMPLETE" && responsesService.mainAudioComplete()) ||
+        (unitService.continueButton() === "ON_AUDIO_AND_RESPONSE" && responsesService.mainAudioComplete() &&
+        (responsesService.responseProgress() === "complete" || responsesService.responseProgress() === "some")) ||
+        (unitService.continueButton() === "ON_VIDEO_COMPLETE" && responsesService.videoComplete()) ||
+        (unitService.continueButton() === "ON_ANY_RESPONSE" &&
+          (responsesService.responseProgress() === "some" || responsesService.responseProgress() === "complete")) ||
+        (unitService.continueButton() === "ON_RESPONSES_COMPLETE" && responsesService.responseProgress() === "complete")) {
+      <stars-continue-button
+        (navigate)="veronaPostService.sendVopUnitNavigationRequestedNotification('next')"></stars-continue-button>
+    }
   }
 
   <!-- disable interaction until complete via overlay -->
@@ -32,6 +33,9 @@
     <div class="interaction-disabled-overlay" (click)="disabledOverlay($event)" data-cy="interaction-disabled-overlay"></div>
   }
 
+  <!-- TODO remove this, better use css classes -->
+  @let interactionAreaOffsetTopPx = hasRibbonBars() ? 95 : 125;
+  @let interactionAreaOffsetBottomPx = hasRibbonBars() ? 95 : 125;
   <!-- show ribbons when in practice mode -->
   @if (hasRibbonBars()) {
     <stars-ribbon-bar></stars-ribbon-bar>
@@ -40,39 +44,81 @@
   @if (unitService.openingFlowActive()) {
     <stars-opening-image
       [parameters]="unitService.openingImageParams()"
+      [offsetTopPx]="interactionAreaOffsetTopPx"
+      [offsetBottomPx]="interactionAreaOffsetBottomPx"
     ></stars-opening-image>
-  }
-
-  <!-- interaction elements -->
-  @if (!unitService.openingFlowActive() && unitService.interaction() === 'BUTTONS' || unitService.interaction() === 'IMAGE_ONLY') {
-    <stars-interaction-buttons class="interaction"
-      [parameters]="getParametersWithFormerState()"
-      (responses)="responsesService.newResponses($event)">
-    </stars-interaction-buttons>
-  } @else if (!unitService.openingFlowActive() && unitService.interaction() === 'DROP') {
-    <stars-interaction-drop class="interaction"
-      [parameters]="getParametersWithFormerState()"
-      (responses)="responsesService.newResponses($event)"></stars-interaction-drop>
-  } @else if (!unitService.openingFlowActive() && unitService.interaction() === 'WRITE') {
-    <stars-interaction-write class="interaction"
-      [parameters]="getParametersWithFormerState()"
-      (responses)="responsesService.newResponses($event)"></stars-interaction-write>
-  } @else if (unitService.interaction() === 'VIDEO') {
-    <stars-interaction-video class="interaction"
-      [parameters]="unitService.parameters()"
-      (responses)="responsesService.newResponses($event)"></stars-interaction-video>
-  } @else if (unitService.interaction() === 'FIND_ON_IMAGE') {
-    <stars-interaction-find-on-image class="interaction"
-      [parameters]="getParametersWithFormerState()"
-      (responses)="responsesService.newResponses($event)"></stars-interaction-find-on-image>
-  } @else if (!unitService.openingFlowActive() && unitService.interaction() === 'POLYGON_BUTTONS') {
-    <stars-interaction-polygon-buttons class="interaction"
-      [parameters]="getParametersWithFormerState()"
-      (responses)="responsesService.newResponses($event)"></stars-interaction-polygon-buttons>
-  } @else if (!unitService.openingFlowActive() && unitService.interaction() === 'PLACE_VALUE') {
-    <stars-interaction-place-value class="interaction"
-      [parameters]="getParametersWithFormerState()"
-      (responses)="responsesService.newResponses($event)"></stars-interaction-place-value>
+  } @else {
+    <!-- interaction elements -->
+    @switch (unitService.interaction()) {
+      @case ('VIDEO') {
+        <stars-interaction-video class="interaction"
+                                 [parameters]="unitService.parameters()"
+                                 [offsetTopPx]="interactionAreaOffsetTopPx"
+                                 [offsetBottomPx]="interactionAreaOffsetBottomPx"
+                                 (responses)="responsesService.newResponses($event)">
+        </stars-interaction-video>
+      }
+      @case ('FIND_ON_IMAGE') {
+        <stars-interaction-find-on-image class="interaction"
+                                         [parameters]="getParametersWithFormerState()"
+                                         [offsetTopPx]="interactionAreaOffsetTopPx"
+                                         [offsetBottomPx]="interactionAreaOffsetBottomPx"
+                                         (responses)="responsesService.newResponses($event)">
+        </stars-interaction-find-on-image>
+      }
+      @case ('POLYGON_BUTTONS') {
+        <stars-interaction-polygon-buttons class="interaction"
+                                           [parameters]="getParametersWithFormerState()"
+                                           [offsetTopPx]="interactionAreaOffsetTopPx"
+                                           [offsetBottomPx]="interactionAreaOffsetBottomPx"
+                                           (responses)="responsesService.newResponses($event)">
+        </stars-interaction-polygon-buttons>
+      }
+      @case ('PLACE_VALUE') {
+        <stars-interaction-place-value class="interaction"
+                                       [parameters]="getParametersWithFormerState()"
+                                       [offsetTopPx]="interactionAreaOffsetTopPx"
+                                       [offsetBottomPx]="interactionAreaOffsetBottomPx"
+                                       (responses)="responsesService.newResponses($event)">
+        </stars-interaction-place-value>
+      }
+      @case ('WRITE') {
+        <stars-interaction-write class="interaction"
+                                 [parameters]="getParametersWithFormerState()"
+                                 [offsetTopPx]="interactionAreaOffsetTopPx"
+                                 [offsetBottomPx]="interactionAreaOffsetBottomPx"
+                                 (responses)="responsesService.newResponses($event)">
+        </stars-interaction-write>
+      }
+      @case ('BUTTONS') {
+        <stars-interaction-buttons class="interaction"
+                                   [parameters]="getParametersWithFormerState()"
+                                   [offsetTopPx]="interactionAreaOffsetTopPx"
+                                   [offsetBottomPx]="interactionAreaOffsetBottomPx"
+                                   (responses)="responsesService.newResponses($event)">
+        </stars-interaction-buttons>
+      }
+      @case ('IMAGE_ONLY') {
+        <!-- TODO use own component -->
+        <stars-interaction-buttons class="interaction"
+                                   [parameters]="getParametersWithFormerState()"
+                                   [offsetTopPx]="interactionAreaOffsetTopPx"
+                                   [offsetBottomPx]="interactionAreaOffsetBottomPx"
+                                   (responses)="responsesService.newResponses($event)">
+        </stars-interaction-buttons>
+      }
+      @case ('DROP') {
+        <stars-interaction-drop class="interaction"
+                                [parameters]="getParametersWithFormerState()"
+                                [offsetTopPx]="interactionAreaOffsetTopPx"
+                                [offsetBottomPx]="interactionAreaOffsetBottomPx"
+                                (responses)="responsesService.newResponses($event)">
+        </stars-interaction-drop>
+      }
+      @default {
+        <!-- TODO error message ? -->
+      }
+    }
   }
 
   <!-- lower ribbons -->

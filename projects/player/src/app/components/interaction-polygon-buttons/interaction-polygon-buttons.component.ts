@@ -28,6 +28,7 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
     effect(() => {
       const parameters = this.parameters() as InteractionPolygonButtonsParams;
       this.localParameters = this.createDefaultParameters();
+      // TODO makes no sense setting it and check for it a bit later
       this.hasRestoredFromFormerState = false;
 
       if (parameters) {

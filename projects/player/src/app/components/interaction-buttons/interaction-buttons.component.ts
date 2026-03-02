@@ -86,6 +86,7 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
 
         // Only restore from former state once, on initial load
         if (!this.hasRestoredFromFormerState) {
+          this.resetSelection();
           const formerStateResponse: Response[] = parameters.formerState || [];
 
           if (Array.isArray(formerStateResponse) && formerStateResponse.length > 0) {

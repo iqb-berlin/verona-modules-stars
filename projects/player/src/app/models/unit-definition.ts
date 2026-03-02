@@ -20,6 +20,8 @@ export type ButtonTypeEnum = 'MEDIUM_SQUARE' | 'BIG_SQUARE' | 'SMALL_SQUARE' | '
 export type ImagePositionEnum = 'TOP' | 'LEFT' | 'BOTTOM';
 export type TargetSizeEnum = 'MEDIUM' | 'LARGE' | 'SMALL';
 export type LayoutEnum = 'LEFT_CENTER' | 'TOP_CENTER' | 'LEFT_BOTTOM' | 'LEFT_CENTER_50';
+export type InteractionParameters = InteractionButtonParams | InteractionDropParams | InteractionWriteParams |
+InteractionFindOnImageParams | InteractionPolygonButtonsParams | InteractionPlaceValueParams;
 
 export type InteractionParameters = InteractionButtonParams | InteractionWriteParams | InteractionDropParams |
 InteractionVideoParams | InteractionFindOnImageParams | InteractionPolygonButtonsParams | InteractionPlaceValueParams;

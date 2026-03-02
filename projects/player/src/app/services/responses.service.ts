@@ -111,6 +111,7 @@ export class ResponsesService {
     }
 
     // Restore from former state if available
+    // TODO duplicated code with setFormerState() ???
     const former = this.formerStateResponses();
     if (former && former.length > 0) {
       const mainAudioResp = former.find(r => r.id === 'mainAudio');
@@ -212,7 +213,7 @@ export class ResponsesService {
           const rangeY1 = Number.parseInt(rangeMatches[1], 10);
           const rangeX2 = Number.parseInt(rangeMatches[2], 10);
           const rangeY2 = Number.parseInt(rangeMatches[3], 10);
-          let compareXOk: boolean;
+          let compareXOk = false;
           if (rangeX1 < rangeX2) {
             compareXOk = responseX >= rangeX1 && responseX <= rangeX2;
           } else {
@@ -388,7 +389,7 @@ export class ResponsesService {
               valueToCompare : valueToCompare.toString();
             return valueToCompareAsString === f.parameter;
           }
-          let valueAsNumber: number;
+          let valueAsNumber = Number.MIN_VALUE;
           if (typeof valueToCompare === 'number') {
             valueAsNumber = valueToCompare;
           } else if (typeof valueToCompare === 'boolean') {
@@ -426,8 +427,23 @@ export class ResponsesService {
       this.allResponses = [];
       this.lastResponsesString = '';
       this.responseProgress.set('none');
+  resetState() {
+    this.formerStateResponses.set([]);
+    this.mainAudioComplete.set(false);
+    this.allResponses = [];
+    this.lastResponsesString = '';
+    this.responseProgress.set('none');
+  }
+
+  setFormerState(unitState: UnitState | null) {
+    const prevPresentation = this.getPresentationStatus();
+    const prevResponse = this.responseProgress();
+
+    if (!unitState) {
+      this.resetState();
     } else if (unitState.dataParts) {
       const dataParts = unitState.dataParts || {};
+      // TODO check if dataParts never can have more than one key (responses)
       const responsesJson = Object.values(dataParts)[0];
 
       if (responsesJson) {
@@ -439,9 +455,9 @@ export class ResponsesService {
           this.lastResponsesString = responsesJson as string;
 
           // Restore mainAudio completion from saved responses
-          const mainAudioResp = parsedResponses.find(r => r.id === 'mainAudio');
-          if (mainAudioResp) {
-            const n = this.asNumberOrZero(mainAudioResp.value);
+          const mainAudioResponse = parsedResponses.find(r => r.id === 'mainAudio');
+          if (mainAudioResponse) {
+            const n = this.asNumberOrZero(mainAudioResponse.value);
             this.mainAudioComplete.set(n >= 1);
             if (n >= 1) {
               this._firstInteractionDone.set(true);
@@ -465,19 +481,11 @@ export class ResponsesService {
           }
         } catch (error) {
           console.warn('RESPONSE SERVICE Failed to parse former state responses:', error);
-          this.formerStateResponses.set([]);
-          this.mainAudioComplete.set(false);
-          this.allResponses = [];
-          this.lastResponsesString = '';
-          this.responseProgress.set('none');
+          this.resetState();
         }
       } else {
         // No responses present in former state
-        this.formerStateResponses.set([]);
-        this.mainAudioComplete.set(false);
-        this.allResponses = [];
-        this.lastResponsesString = '';
-        this.responseProgress.set('none');
+        this.resetState();
       }
     }
 

@@ -9,9 +9,7 @@ import { OpeningImageParams } from '../../models/unit-definition';
 @Component({
   selector: 'stars-opening-image',
   templateUrl: './opening-image.component.html',
-  styleUrls: ['./opening-image.component.scss'],
-  standalone: true,
-  imports: []
+  styleUrls: ['./opening-image.component.scss']
 })
 export class OpeningImageComponent extends InteractionComponentDirective {
   /** Local copy of the component parameters with defaults applied. */
