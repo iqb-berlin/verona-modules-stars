@@ -8,7 +8,7 @@
     @if (localParameters.imageSource) {
       <div class="image-wrapper">
         <img #imageElement
-           [src]="localParameters.imageSource" [alt]="" data-cy="drop-image">
+           [src]="localParameters.imageSource" [alt]="localParameters.text || ''" data-cy="drop-image">
       </div>
     }
   </div>
