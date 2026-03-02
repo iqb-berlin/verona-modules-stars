@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject, computed } from '@angular/core';
 import { AudioService } from './audio.service';
 
 import {
@@ -10,30 +10,22 @@ import {
   OpeningImageParams,
   UnitDefinition
 } from '../models/unit-definition';
-
-export enum MainPlayerStatus {
-// TODO no need for this
-  PAUSED = 'PAUSED',
-  PLAYING = 'PLAYING', // audio waves can be shown
-  ENDED = 'ENDED',
-  READY = 'READY',
-  HIDE = 'HIDE'
-}
+import { ResponsesService } from "./responses.service";
 
 @Injectable({
   providedIn: 'root'
 })
 
 export class UnitService {
+  private audioService = inject(AudioService);
+  private responsesService = inject(ResponsesService);
+
   // TODO make more signals readonly
-  firstAudioOptions = signal<FirstAudioOptionsParams | undefined>(undefined);
-  mainAudio = signal<AudioOptions | undefined>(undefined);
   firstAudioOptions = signal<FirstAudioOptionsParams>({} as FirstAudioOptionsParams);
   mainAudio = signal<AudioOptions>({} as AudioOptions);
   backgroundColor = signal('#EEE');
   continueButton = signal<ContinueButtonEnum>('NO');
   interaction = signal<InteractionEnum | undefined>(undefined);
-  parameters = signal<unknown>({});
   parameters = signal<InteractionParameters>({});
   hasInteraction = signal(false);
   ribbonBars = signal<boolean>(false);
@@ -63,18 +55,12 @@ export class UnitService {
       !this.interactionDone();
   });
 
-  openingImageParams = signal<OpeningImageParams | null>(null);
-
-  private audioService = inject(AudioService);
-
   /** Opening flow is active: interactions and main audio hidden */
   // TODO rename functions to be more descriptive
   private _openingFlowActive = signal<boolean>(false);
   openingFlowActive = this._openingFlowActive.asReadonly();
 
   /** Player button status: ready, paused, playing, ended, hide */
-  // TODO no need for this
-  playerButtonStatus = signal<MainPlayerStatus>(MainPlayerStatus.HIDE);
   /** current audio source for the main audio */
   private _currentAudioSrc = signal<AudioOptions>({} as AudioOptions);
   currentAudioSrc = this._currentAudioSrc.asReadonly();
@@ -83,6 +69,8 @@ export class UnitService {
   startOpeningFlow(params: OpeningImageParams = {} as OpeningImageParams) {
     this.openingImageParams.set(params);
     this._openingFlowActive.set(true);
+  }
+
   /** Marks the first click as done to hide the layer and allow audio playback */
   setFirstClickLayerClicked() {
     this._firstClickLayerClicked.set(true);

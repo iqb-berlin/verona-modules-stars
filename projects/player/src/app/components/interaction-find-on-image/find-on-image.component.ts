@@ -4,6 +4,7 @@ import {
 } from '@angular/core';
 
 import { Response } from '@iqbspecs/response/response.interface';
+
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
 import { InteractionFindOnImageParams } from '../../models/unit-definition';
 
@@ -92,8 +93,7 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
           this.responses.emit([{
             id: this.localParameters.variableId,
             status: 'DISPLAYED',
-            value: '',
-            relevantForResponsesProgress: false
+            value: ''
           }]);
           this.hasRestoredFromFormerState = true;
         }
@@ -164,7 +164,7 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
 
   setShowArea() {
     this.updateImageMetrics();
-    const area = this.localParameters.showArea.match(/\d+/g);
+    const area = this.localParameters?.showArea?.match(/\d+/g);
     if (!area || area.length < 4 || this.imgWidth === 0) return;
 
     const imgWidthFactor = this.imgWidth / 100;
@@ -196,10 +196,9 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
     const y = Math.round(((event.layerY - this.imgTop) / this.imgHeight) * 100);
 
     this.responses.emit([{
-      id: this.localParameters.variableId,
+      id: this.localParameters.variableId || 'FIND_ON_IMAGE',
       status: 'VALUE_CHANGED',
-      value: `${x},${y}`,
-      relevantForResponsesProgress: true
+      value: `${x},${y}`
     }]);
   }
 

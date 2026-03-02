@@ -86,8 +86,6 @@ export class ResponsesService {
               newVInfo.codes.push(newCode);
             });
             this.variableInfo.push(vInfo);
-          } else {
-            problems.push('variableInfo: variableId or codes missing');
           }
         });
       }
@@ -102,12 +100,9 @@ export class ResponsesService {
               parameter: f.parameter,
               audioSource: f.audioSource
             });
-          } else {
-            problems.push('audioFeedback: variableId or parameter or audioSource missing');
           }
         });
       }
-      if (problems.length > 0) this.unitDefinitionProblem = problems.join('; ');
     }
 
     // Restore from former state if available
@@ -133,7 +128,7 @@ export class ResponsesService {
    * ->
    * @param responses
    */
-  newResponses(responses: StarsResponse[]) {
+  newResponses(responses: Response[]) {
     responses.forEach(response => {
       const codedResponse = this.getCodedResponse(response);
       const responseInStore = this.allResponses.find(r => r.id === response.id);
@@ -174,7 +169,7 @@ export class ResponsesService {
     if (responsesAsString !== this.lastResponsesString) {
       this.lastResponsesString = responsesAsString;
       // only set response progress if it is relevant for the progress and the status is VALUE_CHANGED
-      if (responses.some(r => r.relevantForResponsesProgress && r.status === 'VALUE_CHANGED')) {
+      if (responses.some(r => r.status === 'VALUE_CHANGED')) {
         const getResponsesCompleteOutput = this.getResponsesComplete();
         this.responseProgress.set(getResponsesCompleteOutput);
       }
@@ -342,9 +337,8 @@ export class ResponsesService {
    * Get PresentationStatus
    * when loaded -> 'some'
    * when audio finished -> 'complete'
-   * @private
    */
-  private getPresentationStatus(): Progress {
+  getPresentationStatus(): Progress {
     // TODO check for other possibilities
     if (this.mainAudioComplete()) return 'complete';
     return 'some';
@@ -413,20 +407,6 @@ export class ResponsesService {
     }
   }
 
-  /**
-   * set state of former state
-   * @param unitState
-   */
-  setFormerState(unitState: UnitState | null) {
-    const prevPresentation = this.getPresentationStatus();
-    const prevResponse = this.responseProgress();
-
-    if (!unitState) {
-      this.formerStateResponses.set([]);
-      this.mainAudioComplete.set(false);
-      this.allResponses = [];
-      this.lastResponsesString = '';
-      this.responseProgress.set('none');
   resetState() {
     this.formerStateResponses.set([]);
     this.mainAudioComplete.set(false);
@@ -435,6 +415,10 @@ export class ResponsesService {
     this.responseProgress.set('none');
   }
 
+  /**
+   * set state of former state
+   * @param unitState
+   */
   setFormerState(unitState: UnitState | null) {
     const prevPresentation = this.getPresentationStatus();
     const prevResponse = this.responseProgress();

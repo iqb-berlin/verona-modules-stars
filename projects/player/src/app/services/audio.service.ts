@@ -219,8 +219,7 @@ export class AudioService {
     this.responsesService.newResponses([{
       id: this.audioId(),
       value: audioValue,
-      status: 'VALUE_CHANGED',
-      relevantForResponsesProgress: false
+      status: 'VALUE_CHANGED'
     }]);
   }
 }

@@ -17,9 +17,6 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "allowedCommonJsDependencies": [
-              "lottie-web"
-            ],
             "outputPath": {
               "base": "dist/stars-player"
             },

@@ -1,7 +1,8 @@
 import {
   Directive, input, output
 } from '@angular/core';
-import { StarsResponse } from '../services/responses.service';
+
+import { Response } from '@iqbspecs/response/response.interface';
 
 export interface OnShowHint {
   showHint(value: string): void;
@@ -11,5 +12,5 @@ export interface OnShowHint {
 export abstract class InteractionComponentDirective {
   parameters = input.required<unknown>();
   showHint = input<string>('');
-  responses = output<StarsResponse[]>();
+  responses = output<Response[]>();
 }
