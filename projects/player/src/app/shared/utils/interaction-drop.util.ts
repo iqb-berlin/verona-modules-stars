@@ -52,32 +52,6 @@ export const getDropLandingTranslate = (
 };
 
 /**
- * Calculate the center position of a button within a row of buttons
- * @param totalButtons total number of buttons in the row
- * @param buttonIndex index of the selected button in the row
- * @returns {currentButtonCenter: number; containerCenter: number; } The center positions of
- * the button and the container
- */
-export const calculateButtonCenter = (totalButtons: number, buttonIndex: number):
-{ currentButtonCenter: number; containerCenter: number; } => {
-  const buttonContainerWidth = 170; // SMALL_SQUARE .animate-wrapper width
-  const gapWidth = 24;
-  const borderOffset = 8;
-  const buttonWidth = buttonContainerWidth - gapWidth;
-  const totalWidth = totalButtons * buttonContainerWidth; // Total width of the .buttons-container
-  const containerCenter = totalWidth / 2; // Center of buttons-container
-  const buttonCenter = buttonWidth / 2; // Distance from container edge to a button center
-
-  // X position of THIS button's center
-  const currentButtonCenter = (buttonIndex * buttonContainerWidth) + buttonCenter + borderOffset;
-
-  return {
-    currentButtonCenter,
-    containerCenter
-  };
-};
-
-/**
  * Calculates positional arguments for aligning a button with a target location on an image inside a container.
  * @param imgElement - The image element used for drop landing calculations
  * @param buttonElement - The button element to be positioned
