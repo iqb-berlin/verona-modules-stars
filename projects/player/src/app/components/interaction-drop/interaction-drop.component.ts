@@ -63,9 +63,6 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
   /** Suppress accidental clicks right after a drag */
   private suppressClick = false;
 
-  /** Boolean to track if the former state has been restored from response. */
-  private hasRestoredFromFormerState = false;
-
   /** Reference to the container element for attaching event listeners */
   @ViewChild('dropContainer', { static: true }) dropContainerRef!: ElementRef<HTMLElement>;
 
@@ -89,7 +86,6 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
     effect(() => {
       const parameters = this.parameters() as InteractionDropParams;
       this.localParameters = InteractionDropComponent.createDefaultParameters();
-      this.hasRestoredFromFormerState = false;
 
       if (parameters) {
         this.localParameters.options = parameters.options || [];
@@ -103,24 +99,21 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
           this.scheduleRecalcAfterLayout();
         }
 
-        // Attempt to restore former state once when the unit is first loaded
-        if (!this.hasRestoredFromFormerState) {
-          const formerStateResponses: StarsResponse[] = (parameters as any).formerState || [];
+        const formerStateResponses: StarsResponse[] = (parameters as any).formerState || [];
 
-          // Always reset visual selection and button positions before attempting to restore.
-          // This ensures no visual leakage from previously loaded units.
-          this.resetSelection();
+        // Always reset visual selection and button positions before attempting to restore.
+        // This ensures no visual leakage from previously loaded units.
+        this.resetSelection();
 
-          if (Array.isArray(formerStateResponses) && formerStateResponses.length > 0) {
-            const foundResponse = formerStateResponses.find(r => r.id === this.localParameters.variableId);
+        if (Array.isArray(formerStateResponses) && formerStateResponses.length > 0) {
+          const foundResponse = formerStateResponses.find(r => r.id === this.localParameters.variableId);
 
-            // Only restore if we have a valid non-zero value.
-            // A value of 0 or '0' means no button is currently dropped/selected.
-            if (foundResponse && foundResponse.value != null && foundResponse.value !== 0 && foundResponse.value !== '0') {
-              this.restoreFromFormerState(foundResponse);
-              this.hasRestoredFromFormerState = true;
-              return;
-            }
+          // Only restore if we have a valid non-zero value.
+          // A value of 0 or '0' means no button is currently dropped/selected.
+          if (foundResponse && foundResponse.value != null &&
+            foundResponse.value !== 0 && foundResponse.value !== '0') {
+            this.restoreFromFormerState(foundResponse);
+            return;
           }
 
           // No valid former state - initialize as new with a 0 value (no selection)
@@ -130,7 +123,6 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
             value: 0,
             relevantForResponsesProgress: false
           }]);
-          this.hasRestoredFromFormerState = true;
         }
       }
     });
@@ -274,10 +266,7 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
       this.settledTransform.set(null);
     }
 
-    this.lastDragWasFromSettled = false;
-    if (currentSettled !== null && currentSettled === index && this.settledTransform()) {
-      this.lastDragWasFromSettled = true;
-    }
+    this.lastDragWasFromSettled = !!(currentSettled !== null && currentSettled === index && this.settledTransform());
 
     // Disable transitions for the dragging button so it keeps up with the pointer
     this.addTransitionDisabled(index);

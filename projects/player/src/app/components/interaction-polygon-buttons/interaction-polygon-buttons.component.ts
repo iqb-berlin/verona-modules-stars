@@ -1,9 +1,8 @@
 import {
-  Component, effect, inject, signal
+  Component, effect, signal
 } from '@angular/core';
 import { Response } from '@iqbspecs/response/response.interface';
 
-import { VeronaPostService } from '../../services/verona-post.service';
 import { StarsResponse } from '../../services/responses.service';
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
 import { InteractionPolygonButtonsParams } from '../../models/unit-definition';
@@ -19,48 +18,38 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
   localParameters!: InteractionPolygonButtonsParams;
   /** Array of booleans for each option. */
   selectedValues = signal<boolean[]>([]);
-  /** Boolean to track if the former the state has been restored from response. */
-  private hasRestoredFromFormerState = false;
-
-  veronaPostService = inject(VeronaPostService);
 
   constructor() {
     effect(() => {
       const parameters = this.parameters() as InteractionPolygonButtonsParams;
       this.localParameters = this.createDefaultParameters();
-      this.hasRestoredFromFormerState = false;
-
       if (parameters) {
         this.localParameters.options = parameters.options || [];
         this.localParameters.variableId = parameters.variableId || 'POLYGON_BUTTONS';
         this.localParameters.multiSelect = parameters.multiSelect || false;
       }
 
-      if (!this.hasRestoredFromFormerState) {
-        const formerStateResponse: Response[] = parameters.formerState || [];
+      const formerStateResponse: Response[] = parameters.formerState || [];
 
-        if (Array.isArray(formerStateResponse) && formerStateResponse.length > 0) {
-          const foundResponse = formerStateResponse.find(
-            response => response.id === this.localParameters.variableId
-          );
+      if (Array.isArray(formerStateResponse) && formerStateResponse.length > 0) {
+        const foundResponse = formerStateResponse.find(
+          response => response.id === this.localParameters.variableId
+        );
 
-          if (foundResponse && foundResponse.value) {
-            this.restoreFromFormerState(foundResponse);
-            this.hasRestoredFromFormerState = true;
-            return;
-          }
+        if (foundResponse && foundResponse.value) {
+          this.restoreFromFormerState(foundResponse);
+          return;
         }
-
-        // No former state found - initialize as new
-        this.resetSelection();
-        this.responses.emit([{
-          id: this.localParameters.variableId || '',
-          status: 'DISPLAYED',
-          value: 0,
-          relevantForResponsesProgress: false
-        }]);
-        this.hasRestoredFromFormerState = true;
       }
+
+      // No former state found - initialize as new
+      this.resetSelection();
+      this.responses.emit([{
+        id: this.localParameters.variableId || '',
+        status: 'DISPLAYED',
+        value: 0,
+        relevantForResponsesProgress: false
+      }]);
     });
     super();
   }

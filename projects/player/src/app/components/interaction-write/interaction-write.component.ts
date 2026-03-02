@@ -21,17 +21,9 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
   /** An array of lowercase alphabet characters. */
   characterList = [...'abcdefghijklmnopqrstuvwxyz'];
   numbersList: string[] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-  numbersListBlock = [
-    ['1', '2', '3'],
-    ['4', '5', '6'],
-    ['7', '8', '9'],
-    ['0']
-  ];
 
   /** Small array of additional characters (German umlauts). */
   umlautListChars = [...'äöü'];
-  /** Boolean to track if the former state has been restored from response. */
-  private hasRestoredFromFormerState = false;
 
   constructor() {
     super();
@@ -39,8 +31,6 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
     effect(() => {
       const parameters = this.parameters() as InteractionWriteParams;
       this.localParameters = this.createDefaultParameters();
-      this.hasRestoredFromFormerState = false;
-
       if (parameters) {
         this.localParameters.addBackspaceKey = parameters.addBackspaceKey || true;
         this.localParameters.addUmlautKeys = parameters.addUmlautKeys || true;
@@ -51,36 +41,31 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
         this.localParameters.imageSource = parameters.imageSource || '';
         this.localParameters.text = parameters.text || '';
 
-        // Only restore from former state once on initial unit load
-        if (!this.hasRestoredFromFormerState) {
-          const formerStateResponses: Response[] = (parameters as any).formerState || [];
+        const formerStateResponses: Response[] = (parameters as any).formerState || [];
 
-          // Explicitly reset the text and input status before attempting restoration
-          // This prevents state "leakage" if a previous unit used the same variableId
-          this.currentText = '';
-          this.isDisabled = this.localParameters?.maxInputLength !== null &&
-            this.localParameters?.maxInputLength !== undefined &&
-            this.currentText.length >= this.localParameters.maxInputLength;
+        // Explicitly reset the text and input status before attempting restoration
+        // This prevents state "leakage" if a previous unit used the same variableId
+        this.currentText = '';
+        this.isDisabled = this.localParameters?.maxInputLength !== null &&
+          this.localParameters?.maxInputLength !== undefined &&
+          this.currentText.length >= this.localParameters.maxInputLength;
 
-          if (Array.isArray(formerStateResponses) && formerStateResponses.length > 0) {
-            const found = formerStateResponses.find(r => r.id === this.localParameters.variableId);
+        if (Array.isArray(formerStateResponses) && formerStateResponses.length > 0) {
+          const found = formerStateResponses.find(r => r.id === this.localParameters.variableId);
 
-            if (found && typeof found.value === 'string') {
-              this.restoreFromFormerState(found);
-              this.hasRestoredFromFormerState = true;
-              return;
-            }
+          if (found && typeof found.value === 'string') {
+            this.restoreFromFormerState(found);
+            return;
           }
-
-          // No valid former state - initialize with empty string
-          this.responses.emit([{
-            id: this.localParameters.variableId,
-            status: 'DISPLAYED',
-            value: '',
-            relevantForResponsesProgress: false
-          }]);
-          this.hasRestoredFromFormerState = true;
         }
+
+        // No valid former state - initialize with empty string
+        this.responses.emit([{
+          id: this.localParameters.variableId,
+          status: 'DISPLAYED',
+          value: '',
+          relevantForResponsesProgress: false
+        }]);
       }
 
       if (!this.currentText) this.currentText = '';

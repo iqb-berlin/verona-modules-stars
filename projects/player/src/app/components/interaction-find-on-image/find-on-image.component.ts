@@ -31,8 +31,6 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
   buttonDisabled = signal(true);
   /** Signal holding inline CSS for the optional show-area overlay (top/left/width/height). */
   showAreaStyle = signal('');
-  /** Boolean to track if the former state has been restored from response. */
-  private hasRestoredFromFormerState = false;
   /** The last restored value to avoid redundant restorations within the same unit. */
   private lastRestoredValue = '';
   /** The currently loaded unit identity (variableId + imageSource). */
@@ -53,7 +51,8 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
   private imageLoadHandler: ((ev?: Event) => void) | null = null;
   /** Reference to the pending restoration timer. */
   private restoreTimer: ReturnType<typeof setTimeout> | null = null;
-  /** Tracks the last seen parameters object reference to detect new vopStartCommand loads even if identity is the same. */
+  /** Tracks the last seen parameters object reference to detect new vopStartCommand
+   * loads even if identity is the same. */
   private lastParametersRef: unknown | null = null;
 
   constructor() {
@@ -69,7 +68,6 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
         this.lastParametersRef = parameters;
         // Always clear visuals and allow a fresh init/restore for this load
         this.resetVisualState();
-        this.hasRestoredFromFormerState = false;
         this.lastRestoredValue = '';
         // Reset identity so we recompute it below
         this.currentUnitIdentity = '';
@@ -89,7 +87,6 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
         // Only reset flags here; visuals already cleared above on new parameters object
         this.currentUnitIdentity = newIdentity;
         this.lastRestoredValue = '';
-        this.hasRestoredFromFormerState = false;
         // Also clear cached image ref so we don't use stale one
         this.cachedImgEl = null;
       }
@@ -110,40 +107,36 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
       }
 
       // 3. One-time initialization/restoration logic for the current load
-      if (!this.hasRestoredFromFormerState) {
-        const formerStateResponses: Response[] = parameters.formerState || [];
-        const foundResponse = Array.isArray(formerStateResponses) ?
-          formerStateResponses.find(r => r.id === this.localParameters.variableId) :
-          null;
+      const formerStateResponses: Response[] = parameters.formerState || [];
+      const foundResponse = Array.isArray(formerStateResponses) ?
+        formerStateResponses.find(r => r.id === this.localParameters.variableId) :
+        null;
 
-        if (foundResponse && foundResponse.value) {
-          // Only call restore if the value is different from what's currently shown/captured
-          if (foundResponse.value !== this.lastRestoredValue) {
-            if (this.imageRef && this.imageRef.nativeElement) {
-              this.restoreFromFormerState(foundResponse);
-            } else {
-              this.pendingRestoreResponse = foundResponse;
-            }
-            this.lastRestoredValue = foundResponse.value as string;
+      if (foundResponse && foundResponse.value) {
+        // Only call restore if the value is different from what's currently shown/captured
+        if (foundResponse.value !== this.lastRestoredValue) {
+          if (this.imageRef && this.imageRef.nativeElement) {
+            this.restoreFromFormerState(foundResponse);
+          } else {
+            this.pendingRestoreResponse = foundResponse;
           }
-          this.hasRestoredFromFormerState = true;
-        } else {
-          // Force UI to clear visuals when initializing as new
-          this.buttonDisabled.set(true);
-          this.clickTargetTop.set('0px');
-          this.clickTargetLeft.set('0px');
-          this.clickTargetSize.set('0px');
-
-          // No former state: emit DISPLAYED only once for this load
-          this.responses.emit([{
-            id: this.localParameters.variableId,
-            status: 'DISPLAYED',
-            value: '',
-            relevantForResponsesProgress: false
-          }]);
-          this.hasRestoredFromFormerState = true;
-          this.lastRestoredValue = '';
+          this.lastRestoredValue = foundResponse.value as string;
         }
+      } else {
+        // Force UI to clear visuals when initializing as new
+        this.buttonDisabled.set(true);
+        this.clickTargetTop.set('0px');
+        this.clickTargetLeft.set('0px');
+        this.clickTargetSize.set('0px');
+
+        // No former state: emit DISPLAYED only once for this load
+        this.responses.emit([{
+          id: this.localParameters.variableId,
+          status: 'DISPLAYED',
+          value: '',
+          relevantForResponsesProgress: false
+        }]);
+        this.lastRestoredValue = '';
       }
     });
   }

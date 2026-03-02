@@ -1,9 +1,7 @@
 import {
   Component, computed, effect, ElementRef, signal, ViewChild
 } from '@angular/core';
-import {
-  CdkDrag, CdkDragEnd
-} from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragEnd } from '@angular/cdk/drag-drop';
 import { Response } from '@iqbspecs/response/response.interface';
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
 import { IconButtonTypeEnum, InteractionPlaceValueParams } from '../../models/unit-definition';
@@ -49,8 +47,6 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
   /** ID of the item currently being dragged */
   readonly draggingIndex = signal<number | null>(null);
 
-  /** Boolean to track if the former state has been restored from response. */
-  private hasRestoredFromFormerState = false;
   /** Global sequence counter stamped on items when first added to the upper panel. */
   private addedSeqCounter = 0;
   /** Flag to prevent click handler when drag ends */
@@ -103,25 +99,21 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
         this.maxNumberOfOnes = this.localParameters.maxNumberOfOnes;
 
         // Restore from former state once, if available; otherwise emit DISPLAYED
-        if (!this.hasRestoredFromFormerState) {
-          const formerStateResponses: Response[] = (parameters as any).formerState || [];
-          if (Array.isArray(formerStateResponses) && formerStateResponses.length > 0) {
-            const found = formerStateResponses.find(r => r.id === this.localParameters.variableId);
-            if (found && (found.value !== undefined && found.value !== null && `${found.value}` !== '')) {
-              this.restoreFromFormerState(found);
-              this.hasRestoredFromFormerState = true;
-              return;
-            }
+        const formerStateResponses: Response[] = (parameters as any).formerState || [];
+        if (Array.isArray(formerStateResponses) && formerStateResponses.length > 0) {
+          const found = formerStateResponses.find(r => r.id === this.localParameters.variableId);
+          if (found && (found.value !== undefined && found.value !== null && `${found.value}` !== '')) {
+            this.restoreFromFormerState(found);
+            return;
           }
-          // No former state
-          this.responses.emit([{
-            id: this.localParameters.variableId,
-            status: 'DISPLAYED',
-            value: '',
-            relevantForResponsesProgress: false
-          }]);
-          this.hasRestoredFromFormerState = true;
         }
+        // No former state
+        this.responses.emit([{
+          id: this.localParameters.variableId,
+          status: 'DISPLAYED',
+          value: '',
+          relevantForResponsesProgress: false
+        }]);
       }
     });
 
@@ -157,7 +149,6 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
     this.suppressClick = false;
     this.layoutUpdateRequested = false;
     this.layoutUpdateReschedule = false;
-    this.hasRestoredFromFormerState = false;
   }
 
   /** Whether the currently dragged item is a 'tens' icon */
@@ -274,11 +265,9 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
     this.draggingIndex.set(null);
 
     const freePos = (event?.source as CdkDrag)?.getFreeDragPosition?.() ?? { x: 0, y: 0 };
-    const droppedTransform = `translate3d(${(freePos?.x ?? 0)}px, ${(freePos?.y ?? 0)}px, 0px)`;
-
     // Update the transform to the dropped position.
     // Transition is still disabled at this point.
-    this.itemTransforms[item.id] = droppedTransform;
+    this.itemTransforms[item.id] = `translate3d(${(freePos?.x ?? 0)}px, ${(freePos?.y ?? 0)}px, 0px)`;
 
     const inPanel = this.inUpperPanel(item.id);
 
