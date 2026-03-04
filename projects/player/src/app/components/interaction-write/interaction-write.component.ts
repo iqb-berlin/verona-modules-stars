@@ -1,14 +1,13 @@
 import { Component, effect } from '@angular/core';
 
-import type { Response } from '@iqbspecs/response/response.interface';
-
+import { Response } from '@iqbspecs/response/response.interface';
+import { StarsResponse } from '../../services/responses.service';
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
 import { InteractionWriteParams } from '../../models/unit-definition';
 
 @Component({
   selector: 'stars-interaction-write',
   templateUrl: 'interaction-write.component.html',
-  standalone: true,
   styleUrls: ['interaction-write.component.scss']
 })
 
@@ -22,6 +21,12 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
   /** An array of lowercase alphabet characters. */
   characterList = [...'abcdefghijklmnopqrstuvwxyz'];
   numbersList: string[] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+  numbersListBlock = [
+    ['1', '2', '3'],
+    ['4', '5', '6'],
+    ['7', '8', '9'],
+    ['0']
+  ];
 
   /** Small array of additional characters (German umlauts). */
   umlautListChars = [...'äöü'];
@@ -34,6 +39,7 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
     effect(() => {
       const parameters = this.parameters() as InteractionWriteParams;
       this.localParameters = this.createDefaultParameters();
+      this.hasRestoredFromFormerState = false;
 
       if (parameters) {
         this.localParameters.addBackspaceKey = parameters.addBackspaceKey || true;
@@ -44,29 +50,33 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
         this.localParameters.maxInputLength = parameters.maxInputLength || 10;
         this.localParameters.imageSource = parameters.imageSource || '';
         this.localParameters.text = parameters.text || '';
+        // Only restore from former state once, on initial load
+        if (!this.hasRestoredFromFormerState) {
+          const formerStateResponses: Response[] = (parameters as any).formerState || [];
 
-        const formerStateResponses: Response[] = (parameters as any).formerState || [];
+          if (Array.isArray(formerStateResponses) && formerStateResponses.length > 0) {
+            const found = formerStateResponses.find(r => r.id === this.localParameters.variableId);
 
-        if (Array.isArray(formerStateResponses) && formerStateResponses.length > 0) {
-          const found = formerStateResponses.find(r => r.id === this.localParameters.variableId);
-
-          if (found && typeof found.value === 'string') {
-            this.restoreFromFormerState(found);
-            return;
+            if (found && typeof found.value === 'string') {
+              this.restoreFromFormerState(found);
+              this.hasRestoredFromFormerState = true;
+              return;
+            }
           }
+
+          // No former state - initialize as new
+          this.currentText = '';
+          this.isDisabled = this.localParameters.maxInputLength !== null &&
+            this.currentText.length >= this.localParameters.maxInputLength;
+
+          this.responses.emit([{
+            id: this.localParameters.variableId,
+            status: 'DISPLAYED',
+            value: '',
+            relevantForResponsesProgress: false
+          }]);
+          this.hasRestoredFromFormerState = true;
         }
-
-        // No former state - initialize as new
-        this.currentText = '';
-        this.isDisabled = this.localParameters.maxInputLength !== null &&
-          this.currentText.length >= this.localParameters.maxInputLength;
-
-        this.responses.emit([{
-          id: this.localParameters.variableId,
-          status: 'DISPLAYED',
-          value: ''
-        }]);
-        this.hasRestoredFromFormerState = true;
       }
 
       if (!this.currentText) this.currentText = '';
@@ -80,7 +90,7 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
   }
 
   addChar(button: string) {
-    if (this.localParameters.maxInputLength &&
+    if (this.localParameters.maxInputLength !== null &&
       this.currentText.length >= this.localParameters.maxInputLength) {
       return;
     }
@@ -88,7 +98,8 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
     const charToAdd = this.currentText.length === 0 ? this.capitalize(button) : button;
     this.currentText += charToAdd;
 
-    if (this.localParameters.maxInputLength) this.isDisabled = this.currentText.length >= this.localParameters.maxInputLength;
+    this.isDisabled = this.localParameters.maxInputLength !== null &&
+      this.currentText.length >= this.localParameters.maxInputLength;
 
     this.valueChanged();
   }
@@ -96,16 +107,18 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
   deleteChar() {
     if (this.currentText.length > 0) {
       this.currentText = this.currentText.slice(0, -1);
-      if (this.localParameters.maxInputLength) this.isDisabled = this.currentText.length >= this.localParameters.maxInputLength;
+      this.isDisabled = this.localParameters.maxInputLength !== null &&
+        this.currentText.length >= this.localParameters.maxInputLength;
       this.valueChanged();
     }
   }
 
   private valueChanged() {
-    const response: Response = {
-      id: this.localParameters.variableId  || 'WRITE',
+    const response: StarsResponse = {
+      id: this.localParameters.variableId,
       status: 'VALUE_CHANGED',
-      value: this.currentText
+      value: this.currentText,
+      relevantForResponsesProgress: true
     };
 
     this.responses.emit([response]);
@@ -119,7 +132,8 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
     if (!response.value || typeof response.value !== 'string') return;
 
     this.currentText = response.value;
-    if(this.localParameters.maxInputLength) this.isDisabled = this.currentText.length >= this.localParameters.maxInputLength;
+    this.isDisabled = this.localParameters.maxInputLength !== null &&
+      this.currentText.length >= this.localParameters.maxInputLength;
   }
 
   // eslint-disable-next-line class-methods-use-this

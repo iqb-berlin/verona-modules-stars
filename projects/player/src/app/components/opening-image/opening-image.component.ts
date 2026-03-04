@@ -6,6 +6,7 @@ import { UnitService } from '../../services/unit.service';
 import { AudioService } from '../../services/audio.service';
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
 import { OpeningImageParams } from '../../models/unit-definition';
+import { StateService } from "../../services/state.service";
 
 @Component({
   selector: 'stars-opening-image',
@@ -20,6 +21,7 @@ export class OpeningImageComponent extends InteractionComponentDirective {
   showImage = signal<boolean>(false);
 
   unitService = inject(UnitService);
+  stateService = inject(StateService);
   audioService = inject(AudioService);
 
   constructor() {
@@ -27,7 +29,7 @@ export class OpeningImageComponent extends InteractionComponentDirective {
     // When opening flow starts
     effect(() => {
       // TODO avoid using two signals in effect
-      if (!this.unitService.openingFlowActive()) return;
+      if (!this.stateService.openingImageActive()) return;
       const params = this.parameters() as OpeningImageParams;
       this.localParameters = this.createDefaultParameters();
       if (params) {
@@ -47,7 +49,7 @@ export class OpeningImageComponent extends InteractionComponentDirective {
     });
 
     effect(() => {
-      if (!this.unitService.openingFlowActive()) return;
+      if (!this.stateService.openingImageActive()) return;
       const params = this.unitService.openingImageParams();
       if (!params?.audioSource) return;
 
@@ -80,7 +82,7 @@ export class OpeningImageComponent extends InteractionComponentDirective {
   private finishOpeningFlowAndStartMainAudio() {
     // Close opening flow
     this.unitService.showingOpeningImage.set(false);
-    this.unitService.finishOpeningFlow();
+    this.stateService.finishOpeningFlow();
     // After opening flow, disable the first click layer for the main audio
     const currentOpts = this.unitService.firstAudioOptions() || {};
     if (currentOpts.firstClickLayer) {

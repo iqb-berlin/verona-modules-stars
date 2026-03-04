@@ -8,6 +8,7 @@ import { UnitService } from './services/unit.service';
 import { MetadataService } from './services/metadata.service';
 import { ResponsesService } from './services/responses.service';
 import { VopStartCommand } from './models/verona';
+import { StateService } from './services/state.service';
 
 @Component({
   selector: 'stars-player',
@@ -18,6 +19,7 @@ import { VopStartCommand } from './models/verona';
 
 export class AppComponent implements OnInit {
   isStandalone: boolean | undefined;
+
   hasRibbonBars(): boolean {
     return this.unitService.ribbonBars();
   }
@@ -33,6 +35,7 @@ export class AppComponent implements OnInit {
 
   constructor(
     public unitService: UnitService,
+    public stateService: StateService,
     public responsesService: ResponsesService,
     public veronaPostService: VeronaPostService,
     private veronaSubscriptionService: VeronaSubscriptionService,

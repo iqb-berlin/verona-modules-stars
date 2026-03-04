@@ -1,6 +1,7 @@
 import { inject, Injectable, signal } from '@angular/core';
 
 import { Response } from '@iqbspecs/response/response.interface';
+
 import { Progress, UnitState, UnitStateDataType } from '../models/verona';
 import { VeronaPostService } from './verona-post.service';
 import { UnitDefinition } from '../models/unit-definition';
@@ -12,8 +13,9 @@ import { FeedbackDefinition } from '../models/feedback';
 })
 
 export class ResponsesService {
-  private _firstInteractionDone = signal(false);
-  firstInteractionDone = this._firstInteractionDone.asReadonly();
+  #firstInteractionDone = signal(false);
+  firstInteractionDone = this.#firstInteractionDone.asReadonly();
+
   responseProgress = signal<Progress>('none');
   mainAudioComplete = signal(false);
   videoComplete = signal(false);
@@ -51,17 +53,15 @@ export class ResponsesService {
    * @param unitDefinition
    */
   setNewData(unitDefinition: UnitDefinition) {
-    this._firstInteractionDone.set(false);
+    this.#firstInteractionDone.set(false);
     this.videoComplete.set(false);
     this.variableInfo = [];
     this.allResponses = [];
     this.lastResponsesString = '';
     this.pendingAudioFeedback.set(false);
     this.pendingAudioFeedbackSource = '';
-    this.feedbackDefinitions = [];
 
     if (unitDefinition) {
-      const problems: string[] = [];
       if (unitDefinition.variableInfo && unitDefinition.variableInfo.length > 0) {
         unitDefinition.variableInfo.forEach(vInfo => {
           if (vInfo.variableId && vInfo.variableId.length > 0 && vInfo.codes && vInfo.codes.length > 0) {
@@ -89,20 +89,6 @@ export class ResponsesService {
           }
         });
       }
-      if (unitDefinition.audioFeedback && unitDefinition.audioFeedback.feedback &&
-        unitDefinition.audioFeedback.feedback.length > 0) {
-        unitDefinition.audioFeedback.feedback.forEach(f => {
-          if (f.variableId && f.variableId.length > 0 && f.parameter && f.audioSource) {
-            this.feedbackDefinitions.push({
-              variableId: f.variableId,
-              source: f.source || 'CODE',
-              method: f.method || 'EQUALS',
-              parameter: f.parameter,
-              audioSource: f.audioSource
-            });
-          }
-        });
-      }
     }
 
     // Restore from former state if available
@@ -114,7 +100,7 @@ export class ResponsesService {
         const n = this.asNumberOrZero(mainAudioResp.value);
         if (n >= 1) {
           this.mainAudioComplete.set(true);
-          this._firstInteractionDone.set(true);
+          this.#firstInteractionDone.set(true);
         }
       }
       // Restore allResponses from former state
@@ -140,8 +126,8 @@ export class ResponsesService {
           // keep maximum to avoid regressions from brief seeks/back jumps
           responseInStore.value = Math.max(prevN, incomingN);
           responseInStore.status = codedResponse.status;
-          responseInStore.code = codedResponse.code;
-          responseInStore.score = codedResponse.score;
+          responseInStore.code = codedResponse.code || 0;
+          responseInStore.score = codedResponse.score || 0;
         } else {
           codedResponse.value = incomingN;
           this.allResponses.push(codedResponse);
@@ -154,8 +140,8 @@ export class ResponsesService {
         if (responseInStore) {
           responseInStore.value = response.value;
           responseInStore.status = codedResponse.status;
-          responseInStore.code = codedResponse.code;
-          responseInStore.score = codedResponse.score;
+          responseInStore.code = codedResponse.code || 0;
+          responseInStore.score = codedResponse.score || 0;
         } else {
           this.allResponses.push(codedResponse);
         }
@@ -170,7 +156,7 @@ export class ResponsesService {
       this.lastResponsesString = responsesAsString;
       // only set response progress if it is relevant for the progress and the status is VALUE_CHANGED
       if (responses.some(r => r.status === 'VALUE_CHANGED')) {
-        const getResponsesCompleteOutput = this.getResponsesComplete();
+        const getResponsesCompleteOutput = this.getResponseStatus();
         this.responseProgress.set(getResponsesCompleteOutput);
       }
       const unitState: UnitState = {
@@ -190,25 +176,33 @@ export class ResponsesService {
         this.veronaPostService.sendVopStateChangedNotification({ unitState });
         console.log('unit state changed: ', unitState);
       }
-      if (this.feedbackDefinitions.length > 0 && responses.length > 0) {
-        this.provideFeedback(responses[0].id);
-      }
     }
   }
 
+  /**
+   * Helper Function to check if responseValue is inside range
+   * @param responseValue - as string of form 'x,y'
+   * @param range - as string of form 'x1,y1-x2,y2'
+   * @return boolean
+   * @private
+   */
   private static isPositionInRange(responseValue: string, range: string): boolean {
     if (responseValue && range) {
       const responseMatches = responseValue.match(/\d+/g);
-      if (responseMatches && responseMatches.length > 1) {
+      if (responseMatches && responseMatches.length === 2) {
         const responseX = Number.parseInt(responseMatches[0], 10);
+        // @ts-ignore
         const responseY = Number.parseInt(responseMatches[1], 10);
         const rangeMatches = range.match(/\d+/g);
-        if (rangeMatches && rangeMatches.length > 3) {
+        if (rangeMatches && rangeMatches.length === 4) {
           const rangeX1 = Number.parseInt(rangeMatches[0], 10);
+          // @ts-ignore
           const rangeY1 = Number.parseInt(rangeMatches[1], 10);
+          // @ts-ignore
           const rangeX2 = Number.parseInt(rangeMatches[2], 10);
+          // @ts-ignore
           const rangeY2 = Number.parseInt(rangeMatches[3], 10);
-          let compareXOk = false;
+          let compareXOk: boolean;
           if (rangeX1 < rangeX2) {
             compareXOk = responseX >= rangeX1 && responseX <= rangeX2;
           } else {
@@ -229,6 +223,7 @@ export class ResponsesService {
   /**
    * Coding for a given response
    * @param givenResponse
+   * @return Response
    * @private
    */
   private getCodedResponse(givenResponse: Response): Response {
@@ -239,56 +234,64 @@ export class ResponsesService {
       code: givenResponse.code || 0,
       score: givenResponse.score || 0
     };
-    if (givenResponse.status === 'VALUE_CHANGED') {
-      const codingScheme = this.variableInfo.find(v => v.variableId === givenResponse.id);
-      if (codingScheme && codingScheme.codes && codingScheme.codes.length > 0) {
-        let valueAsNumber = Number.MIN_VALUE;
-        let valueAsString = givenResponse.value.toString();
-        if (codingScheme.codingSource === 'SUM') {
-          const matches1 = valueAsString.match(/1/g);
-          valueAsNumber = matches1 ? matches1.length : 0;
-          valueAsString = valueAsNumber.toString();
-        } else if (codingScheme.codingSource === 'VALUE_TO_UPPER') {
-          valueAsString = valueAsString.toUpperCase();
-        }
-        let newCode = Number.MIN_VALUE;
-        let newScore = Number.MIN_VALUE;
-        codingScheme.codes.forEach(c => {
-          if (newCode === Number.MIN_VALUE) {
-            let codeFound: boolean;
-            if (c.method === 'EQUALS') {
-              codeFound = valueAsString === c.parameter;
-            } else if (c.method === 'IN_POSITION_RANGE') {
-              codeFound = ResponsesService.isPositionInRange(valueAsString, c.parameter);
-            } else {
-              if (!Array.isArray(givenResponse.value) && typeof givenResponse.value === 'string') {
-                valueAsNumber = Number.parseInt(givenResponse.value, 10);
-              }
-              const parameterAsNumber = Number.parseInt(c.parameter, 10);
-              if (c.method === 'GREATER_THAN') {
-                codeFound = valueAsNumber > parameterAsNumber;
-              } else {
-                codeFound = valueAsNumber < parameterAsNumber;
-              }
-            }
-            if (codeFound) {
-              newCode = c.code;
-              newScore = c.score;
-            }
-          }
-        });
-        newResponse.status = 'CODING_COMPLETE';
-        if (newCode > Number.MIN_VALUE) {
-          newResponse.code = newCode;
-          newResponse.score = newScore;
-        } else {
-          newResponse.score = 0;
-          const allCodes = codingScheme.codes.map(c => c.code);
-          if (allCodes.includes(0)) {
-            newCode = Math.max(...allCodes) + 1;
+    // do nothing if not VALUE_CHANGED
+    if (givenResponse.status !== 'VALUE_CHANGED') return newResponse;
+
+    const codingScheme = this.variableInfo.find(v => v.variableId === givenResponse.id);
+    if (codingScheme && codingScheme.codes && codingScheme.codes.length > 0) {
+      let valueAsNumber = Number.MIN_VALUE;
+      let valueAsString = givenResponse.value?.toString() || '';
+
+      // calculate value as a string according to codingSource
+      if (codingScheme.codingSource === 'SUM') {
+        // SUM of ones in a string of zeros and ones
+        const matches1 = valueAsString.match(/1/g);
+        valueAsNumber = matches1 ? matches1.length : 0;
+        valueAsString = valueAsNumber.toString();
+      } else if (codingScheme.codingSource === 'VALUE_TO_UPPER') {
+        valueAsString = valueAsString.toUpperCase();
+      } else if (codingScheme.codingSource === 'SUM_CHAR_MATCHES') {
+        // TODO
+      }
+
+      let newCode = Number.MIN_VALUE;
+      let newScore = Number.MIN_VALUE;
+      codingScheme.codes.forEach(c => {
+        if (newCode === Number.MIN_VALUE) {
+          let codeFound: boolean;
+          if (c.method === 'EQUALS') {
+            codeFound = valueAsString === c.parameter;
+          } else if (c.method === 'IN_POSITION_RANGE') {
+            codeFound = ResponsesService.isPositionInRange(valueAsString, c.parameter);
           } else {
-            newCode = 0;
+            if (!Array.isArray(givenResponse.value) && typeof givenResponse.value === 'string') {
+              valueAsNumber = Number.parseInt(givenResponse.value, 10);
+            }
+            const parameterAsNumber = Number.parseInt(c.parameter, 10);
+            if (c.method === 'GREATER_THAN') {
+              codeFound = valueAsNumber > parameterAsNumber;
+            } else {
+              codeFound = valueAsNumber < parameterAsNumber;
+            }
           }
+          if (codeFound) {
+            newCode = c.code;
+            newScore = c.score;
+          }
+        }
+      });
+      newResponse.status = 'CODING_COMPLETE';
+
+      if (newCode > Number.MIN_VALUE) {
+        newResponse.code = newCode;
+        newResponse.score = newScore;
+      } else {
+        newResponse.score = 0;
+        const allCodes = codingScheme.codes.map(c => c.code);
+        if (allCodes.includes(0)) {
+          newCode = Math.max(...allCodes) + 1;
+        } else {
+          newCode = 0;
         }
       }
     }
@@ -296,7 +299,7 @@ export class ResponsesService {
   }
 
   /**
-   * Returns returns a response for one specific variableId
+   * Returns the response for a specific variableId
    * @param id variableId
    * @returns Response
    * */
@@ -305,32 +308,40 @@ export class ResponsesService {
   }
 
   /**
-   * Check for Response Complete
-   * @private
+   * Check the ResponseStatus
+   * @return Progress
    */
-  private getResponsesComplete(): Progress {
+  getResponseStatus(): Progress {
+    // check for any response at all
     if (this.allResponses.length === 0) return 'none';
+
+    // check if coding infos are provided
     if (!this.variableInfo || this.variableInfo.length === 0) return 'complete';
+
     const onAny = this.variableInfo.filter(coding => coding.responseComplete === 'ON_ANY_RESPONSE')
       .map(coding => coding.variableId);
     const onFullCredit = this.variableInfo
       .filter(coding => coding.responseComplete === 'ON_FULL_CREDIT');
+
+    // check for all coding info are neither ON_ANY_RESPONSE nor ON_FULL_CREDIT
     if (onAny.length + onFullCredit.length === 0) return 'complete';
-    let isComplete = true;
+
+
     onAny.forEach(id => {
       const myResponse = this.allResponses
         .find(r => r.id === id && r.status === 'CODING_COMPLETE');
-      if (!myResponse) isComplete = false;
+      if (!myResponse) return 'some';
     });
-    if (isComplete) {
-      onFullCredit.forEach(vi => {
-        const maxScore = Math.max(...vi.codes.map(c => c.score));
-        const myResponse = this.allResponses
-          .find(r => r.id === vi.variableId && r.status === 'CODING_COMPLETE');
-        if (!myResponse || myResponse.score < maxScore) isComplete = false;
-      });
-    }
-    return isComplete ? 'complete' : 'some';
+
+
+    onFullCredit.forEach(vi => {
+      const maxScore = Math.max(...vi.codes.map(c => c.score));
+      const myResponse = this.allResponses
+        .find(r => r.id === vi.variableId && r.status === 'CODING_COMPLETE');
+      if (!myResponse || myResponse.score < maxScore) return 'some';
+    });
+
+    return 'complete';
   }
 
   /**
@@ -342,69 +353,6 @@ export class ResponsesService {
     // TODO check for other possibilities
     if (this.mainAudioComplete()) return 'complete';
     return 'some';
-  }
-
-  /**
-   * return pendingAudioSource and reset it
-   * @param setAsPlayed
-   */
-  getAudioFeedback(setAsPlayed: boolean): string {
-    const returnValue = this.pendingAudioFeedbackSource;
-    if (setAsPlayed) {
-      this.pendingAudioFeedbackSource = '';
-      this.pendingAudioFeedback.set(false);
-    }
-    return returnValue;
-  }
-
-  private provideFeedback(startVariable: string): void {
-    this.pendingAudioFeedback.set(false);
-    this.pendingAudioFeedbackSource = '';
-    const responsesToCheck: string[] = [startVariable,
-      ...this.allResponses.filter(r => r.id !== startVariable).map(r => r.id)];
-    const audioToPlay: string = responsesToCheck.map(varId => {
-      const responseToCheck = this.allResponses.find(r => r.id === varId);
-      if (responseToCheck) {
-        const feedbacksToUse = this.feedbackDefinitions
-          .filter(f => f.variableId === responseToCheck.id);
-        const feedbackToTake = feedbacksToUse.find(f => {
-          let valueToCompare: string | number | boolean;
-          if (f.source === 'VALUE') {
-            if (Array.isArray(responseToCheck.value)) {
-              valueToCompare = responseToCheck.value.length > 0 ? responseToCheck.value[0] : '';
-            } else {
-              valueToCompare = responseToCheck.value;
-            }
-          } else {
-            valueToCompare = f.source === 'SCORE' ? responseToCheck.score : responseToCheck.code;
-          }
-          if (f.method === 'EQUALS') {
-            const valueToCompareAsString = typeof valueToCompare === 'string' ?
-              valueToCompare : valueToCompare.toString();
-            return valueToCompareAsString === f.parameter;
-          }
-          let valueAsNumber = Number.MIN_VALUE;
-          if (typeof valueToCompare === 'number') {
-            valueAsNumber = valueToCompare;
-          } else if (typeof valueToCompare === 'boolean') {
-            valueAsNumber = valueToCompare ? 1 : 0;
-          } else {
-            valueAsNumber = Number.parseInt(valueToCompare, 10);
-          }
-          const parameterAsNumber = Number.parseInt(f.parameter, 10);
-          if (f.method === 'GREATER_THAN') {
-            return valueAsNumber > parameterAsNumber;
-          }
-          return valueAsNumber < parameterAsNumber;
-        });
-        return feedbackToTake ? feedbackToTake.audioSource : '';
-      }
-      return '';
-    }).find(sourceString => !!sourceString);
-    if (audioToPlay) {
-      this.pendingAudioFeedback.set(true);
-      this.pendingAudioFeedbackSource = audioToPlay;
-    }
   }
 
   resetState() {
@@ -444,7 +392,7 @@ export class ResponsesService {
             const n = this.asNumberOrZero(mainAudioResponse.value);
             this.mainAudioComplete.set(n >= 1);
             if (n >= 1) {
-              this._firstInteractionDone.set(true);
+              this.#firstInteractionDone.set(true);
             }
           } else {
             this.mainAudioComplete.set(false);
@@ -456,7 +404,7 @@ export class ResponsesService {
               r.id !== 'mainAudio' && r.id !== 'videoPlayer');
           if (hasInteractionValueChanged) {
             this.responseProgress.set('complete');
-            this._firstInteractionDone.set(true);
+            this.#firstInteractionDone.set(true);
           } else if (unitState.responseProgress) {
             // fall back to provided responseProgress from unitState when available
             this.responseProgress.set(unitState.responseProgress);
@@ -494,8 +442,4 @@ export class ResponsesService {
       this.veronaPostService.sendVopStateChangedNotification({ unitState: unitStateToPost });
     }
   }
-}
-
-export interface StarsResponse extends Response {
-  relevantForResponsesProgress:boolean;
 }

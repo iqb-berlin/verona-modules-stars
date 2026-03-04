@@ -5,12 +5,12 @@
     <stars-standalone-menu></stars-standalone-menu>
   }
 
-  @if (unitService.showFirstClickLayer()) {
+  @if (stateService.showFirstClickLayer()) {
     <stars-click-layer></stars-click-layer>
   }
 
   <!-- audio component (show if player is not hidden) -->
-  @if ((unitService.mainAudio().audioSource || unitService.openingImageParams().audioSource) && !unitService.showingOpeningImage()) {
+  @if ((unitService.mainAudio().audioSource || unitService.openingImageParams().audioSource) && !stateService.openingImageActive()) {
     <stars-audio [audio]="unitService.currentAudioSrc()" [firstAudioOptions]="unitService.firstAudioOptions()"></stars-audio>
   }
 
@@ -32,15 +32,12 @@
     <div class="interaction-disabled-overlay" (click)="disabledOverlay($event)" data-cy="interaction-disabled-overlay"></div>
   }
 
-  <!-- TODO remove this, better use css classes -->
-  @let interactionAreaOffsetTopPx = hasRibbonBars() ? 95 : 125;
-  @let interactionAreaOffsetBottomPx = hasRibbonBars() ? 95 : 125;
   <!-- show ribbons when in practice mode -->
   @if (hasRibbonBars()) {
     <stars-ribbon-bar></stars-ribbon-bar>
   }
 
-  @if (unitService.openingFlowActive()) {
+  @if (stateService.openingImageActive()) {
     <stars-opening-image
       [parameters]="unitService.openingImageParams()"
     ></stars-opening-image>

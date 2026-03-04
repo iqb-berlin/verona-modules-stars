@@ -3,7 +3,7 @@ import {
 } from '@angular/core';
 
 import { Response } from '@iqbspecs/response/response.interface';
-
+import { StarsResponse } from '../../services/responses.service';
 import { VeronaPostService } from '../../services/verona-post.service';
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
 import {
@@ -17,7 +17,6 @@ import { AudioButtonComponent } from '../../shared/audio-button/audio-button.com
 @Component({
   selector: 'stars-interaction-buttons',
   templateUrl: './interaction-buttons.component.html',
-  standalone: true,
   imports: [
     StandardButtonComponent,
     AudioButtonComponent
@@ -107,7 +106,8 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
           this.responses.emit([{
             id: this.localParameters.variableId,
             status: 'DISPLAYED',
-            value: 0
+            value: 0,
+            relevantForResponsesProgress: false
           }]);
           this.hasRestoredFromFormerState = true;
         }
@@ -361,7 +361,7 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
       this.selectedValues().map(item => (item ? 1 : 0)).join('') :
       (this.selectedValues().findIndex(item => item) + 1).toString();
 
-    const response = <Response>{
+    const response = <StarsResponse>{
       id: this.localParameters.variableId,
       status: status,
       value: value,
@@ -394,4 +394,5 @@ interface RowOption {
   option: SelectionOption;
   index: number;
   id: string;
+}
 }

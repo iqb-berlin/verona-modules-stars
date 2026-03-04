@@ -2,8 +2,8 @@ import {
   Component, EventEmitter, inject, Output, signal
 } from '@angular/core';
 
-import { ResponsesService } from '../../services/responses.service';
 import { AudioService } from '../../services/audio.service';
+import { FeedbackService } from '../../services/feedback.service';
 
 @Component({
   selector: 'stars-continue-button',
@@ -14,7 +14,7 @@ import { AudioService } from '../../services/audio.service';
 
 export class ContinueButtonComponent {
   @Output() navigate = new EventEmitter();
-  responseService = inject(ResponsesService);
+  feedbackService = inject(FeedbackService);
   audioService = inject(AudioService);
 
   clicked = signal(false);
@@ -29,8 +29,8 @@ export class ContinueButtonComponent {
       this.clicked.set(false);
     }, 200);
 
-    if (this.responseService.pendingAudioFeedback()) {
-      const newAudioSource = this.responseService.getAudioFeedback(true);
+    if (this.feedbackService.pendingAudioFeedback()) {
+      const newAudioSource = this.feedbackService.getFeedbackAudio(true);
       if (newAudioSource !== this.lastAudioSource) {
         this.audioService.setAudioSrc({
           audioSource: newAudioSource,

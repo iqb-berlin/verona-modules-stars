@@ -1,0 +1,7 @@
+export enum StateEnum {
+  INIT = 'INIT',
+  OPENING = 'OPENING',
+  INTERACTION = 'INTERACTION',
+  FEEDBACK = 'FEEDBACK',
+  META = 'META '
+}

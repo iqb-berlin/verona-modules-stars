@@ -31,6 +31,7 @@ export interface UnitDefinition {
   firstAudioOptions?: FirstAudioOptionsParams;
   continueButtonShow?: ContinueButtonEnum;
   openingImage?: OpeningImageParams;
+  metaInteraction?: MetaInteractionParams;
   mainAudio?: MainAudio;
   interactionType: InteractionEnum;
   interactionMaxTimeMS: number
@@ -150,4 +151,10 @@ export interface AudioOptions extends MainAudio {
   audioId: string;
   value?: string;
   maxPlay?: number;
+}
+
+export interface MetaInteractionParams {
+  audioSource?: string;
+  interactionType: InteractionEnum;
+  interactionParameters: InteractionParameters;
 }

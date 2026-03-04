@@ -26,13 +26,13 @@ export class AudioService {
   private readonly _audioElement: HTMLAudioElement | null = null;
 
   /** Signals for audioId, maxPlay, playCount, and isPlaying derive from the audio source. */
-  _audioId = signal<string>('audio');
+  _audioId = signal('audio');
   audioId = this._audioId.asReadonly();
-  _maxPlay = signal<number>(0);
+  _maxPlay = signal(0);
   maxPlay = this._maxPlay.asReadonly();
-  _playCount = signal<number>(0);
+  _playCount = signal(0);
   playCount = this._playCount.asReadonly();
-  _isPlaying = signal<boolean>(false);
+  _isPlaying = signal(false);
   isPlaying = this._isPlaying.asReadonly();
 
   /** The currently loaded audio source. */
@@ -40,7 +40,8 @@ export class AudioService {
   currentSource = this._currentSource.asReadonly();
 
   private currentTime = 0;
-  private percentElapsed = 0;
+  _percentElapsed = signal(0);
+  percentElapsed = this._percentElapsed.asReadonly();
 
   /** Player status used to track the current state of the audio player. */
   private playerStatus = new BehaviorSubject<AudioPlayerStatus>(AudioPlayerStatus.EMPTY);
@@ -74,7 +75,7 @@ export class AudioService {
       case 'ended':
         this._isPlaying.set(false);
         this._playCount.set(this.playCount() + 1);
-        this.percentElapsed = 0;
+        this._percentElapsed.set(0);
         this.playerStatus.next(AudioPlayerStatus.ENDED);
         this.sendPlaybackTimeChanged();
         break;
@@ -99,7 +100,7 @@ export class AudioService {
 
   setPercentElapsed(d: number, ct: number) {
     if (d === 0) return;
-    this.percentElapsed = (ct / d);
+    this._percentElapsed.set(ct / d);
   }
 
   getPlayerStatus(): Observable<AudioPlayerStatus> {
@@ -138,7 +139,7 @@ export class AudioService {
       this._audioId.set(variableId);
       this._maxPlay.set(audio.maxPlay || 0);
       this._playCount.set(formerResponse.value as number || 0);
-      this.percentElapsed = 0;
+      this._percentElapsed.set(0);
       this.currentTime = 0;
 
       // If no valid source: reset element, mark NO_SOURCE, and resolve(false)
@@ -213,7 +214,7 @@ export class AudioService {
 
   /** send playback time as a percentage of audio duration as a response */
   sendPlaybackTimeChanged(): void {
-    let audioValue = this.percentElapsed || 0;
+    let audioValue = this.percentElapsed() || 0;
     audioValue += this.playCount();
 
     this.responsesService.newResponses([{

@@ -1,9 +1,13 @@
+export type FeedbackChain = 'NO_FEEDBACK' | 'FEEDBACK_PLAYING' | 'SHOW_ANSWER' | 'WAIT_FOR_AUDIO';
+
 export interface FeedbackDefinition {
   variableId: string;
-  source: 'VALUE' | 'CODE' | 'SCORE';
-  method: 'EQUALS' | 'GREATER_THAN' | 'LESS_THAN';
+  source?: 'VALUE' | 'CODE' | 'SCORE';
+  method?: 'EQUALS' | 'GREATER_THAN' | 'LESS_THAN';
   parameter: string;
   audioSource: string;
+  showAnswerOnFeedback?: boolean;
+  timeElapsedToShowAnswer?: number;
 }
 
 export interface AudioFeedback {

@@ -12,14 +12,13 @@ import {
 } from '@angular/cdk/drag-drop';
 
 import { Response } from '@iqbspecs/response/response.interface';
-
+import { StarsResponse } from '../../services/responses.service';
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
 import { InteractionDropParams } from '../../models/unit-definition';
 import { StandardButtonComponent } from '../../shared/standard-button/standard-button.component';
 import { parseTranslate, updateTransitionDisabledSet } from '../../shared/utils/drag-drop.util';
 import {
-  calculateButtonCenter,
-  getDropLandingArgs,
+  calculateButtonCenter, getDropLandingArgs,
   getDropLandingTranslate
 } from '../../shared/utils/interaction-drop.util';
 
@@ -30,7 +29,6 @@ import {
 @Component({
   selector: 'stars-interaction-drop',
   templateUrl: './interaction-drop.component.html',
-  standalone: true,
   imports: [StandardButtonComponent, CdkDrag],
   styleUrls: ['./interaction-drop.component.scss']
 })
@@ -65,7 +63,8 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
   /** Suppress accidental clicks right after a drag */
   private suppressClick = false;
 
-
+  /** Boolean to track if the former state has been restored from response. */
+  private hasRestoredFromFormerState = false;
 
   /** Reference to the container element for attaching event listeners */
   @ViewChild('dropContainer', { static: true }) dropContainerRef!: ElementRef<HTMLElement>;
@@ -88,8 +87,11 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
   constructor() {
     super();
     effect(() => {
+      this.resetSelection();
+
       const parameters = this.parameters() as InteractionDropParams;
       this.localParameters = InteractionDropComponent.createDefaultParameters();
+      this.hasRestoredFromFormerState = false;
 
       if (parameters) {
         this.localParameters.options = parameters.options || [];
@@ -103,29 +105,31 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
           this.scheduleRecalcAfterLayout();
         }
 
-        // Always reset visual selection and button positions before attempting to restore.
-        // This ensures no visual leakage from previously loaded units.
-        this.resetSelection();
+        // Attempt to restore former state once
+        if (!this.hasRestoredFromFormerState) {
+          const formerStateResponses: Response[] = parameters.formerState || [];
 
-        // Attempt to restore former state
-        const formerStateResponses: Response[] = parameters.formerState || [];
+          if (Array.isArray(formerStateResponses) && formerStateResponses.length > 0) {
+            const foundResponse = formerStateResponses
+              .find(r => r.id === this.localParameters.variableId);
 
-        if (Array.isArray(formerStateResponses) && formerStateResponses.length > 0) {
-          const foundResponse = formerStateResponses
-            .find(r => r.id === this.localParameters.variableId);
-
-          if (foundResponse && foundResponse.value != null && foundResponse.value !== 0 && foundResponse.value !== '0') {
-            this.restoreFromFormerState(foundResponse);
-            return;
+            if (foundResponse && foundResponse.value != null) {
+              this.restoreFromFormerState(foundResponse);
+              this.hasRestoredFromFormerState = true;
+              return;
+            }
           }
-        }
 
-        // No valid former state - initialize as new
-        this.responses.emit([{
-          id: this.localParameters.variableId,
-          status: 'DISPLAYED',
-          value: 0
-        }]);
+          // No valid former state - initialize as new
+          this.resetSelection();
+          this.responses.emit([{
+            id: this.localParameters.variableId,
+            status: 'DISPLAYED',
+            value: 0,
+            relevantForResponsesProgress: false
+          }]);
+          this.hasRestoredFromFormerState = true;
+        }
       }
     });
   }
@@ -442,10 +446,11 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
    * Emits response for selection change
    */
   private emitSelectionResponse(): void {
-    const response: Response = {
+    const response: StarsResponse = {
       id: this.localParameters.variableId ?? 'DROP',
       status: 'VALUE_CHANGED',
-      value: this.selectedValue() + 1
+      value: this.selectedValue() + 1,
+      relevantForResponsesProgress: true
     };
     this.responses.emit([response]);
   }
