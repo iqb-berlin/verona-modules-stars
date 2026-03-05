@@ -2,15 +2,11 @@
 @use 'variables';
 
 .audio-button-container {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  flex-direction: row;
-
   .custom-audio-button {
     width: 80px;
     height: 80px;
-    margin-top: 20px;
+    padding: 0;
+    box-sizing: border-box;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent; /* removes focus ring on tap */
     outline: none;
@@ -20,6 +16,12 @@
     &:focus, &:active {
       outline: none;
       background-color: transparent;
+    }
+
+    svg {
+      @include variables.svg-styles;
+      width: 80px;
+      height: 80px;
     }
 
     &.moving-button {
@@ -48,17 +50,26 @@
 }
 
 .audio-instruction-container {
-  min-width: 20px;
-  position: absolute;
-  top: 20px;
+  @include variables.circle-button-wrapper;
+  top: 10px;
   left: 20px;
-  z-index: 100;
-}
 
-.audio-button-wrapper {
-  display: block;
-  width: auto;
-  margin-bottom: 0.75rem;
+  .audio-button-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  &.has-ribbons {
+    top: 32px;
+  }
+
+  &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 
 @keyframes moving {
