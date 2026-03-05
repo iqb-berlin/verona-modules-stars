@@ -11,6 +11,7 @@
     -webkit-tap-highlight-color: transparent; /* removes focus ring on tap */
     outline: none;
     -webkit-touch-callout: none; /* prevents callout on long press (iOS) */
+    filter: drop-shadow(5px 5px 0 rgba(0, 0, 0, 0.2));
 
     &:focus, &:active {
       outline: none;
@@ -21,10 +22,6 @@
       @include variables.svg-styles;
       width: 80px;
       height: 80px;
-    }
-
-    ::ng-deep .white-circle {
-      filter: drop-shadow(5px 5px 0 rgba(0, 0, 0, 0.2));
     }
 
     &.moving-button {
