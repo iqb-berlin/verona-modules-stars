@@ -7,6 +7,16 @@
     height: 80px;
     padding: 0;
     box-sizing: border-box;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent; /* removes focus ring on tap */
+    outline: none;
+    -webkit-touch-callout: none; /* prevents callout on long press (iOS) */
+
+    &:focus, &:active {
+      outline: none;
+      background-color: transparent;
+    }
+
     svg {
       @include variables.svg-styles;
       width: 80px;
@@ -25,8 +35,8 @@
       animation: moving-play 1s infinite;
       animation-direction: alternate-reverse;
 
-      ::ng-deep .white-circle {
-        fill: #0050E5;
+      .white-circle {
+        fill: colors.$highlight;
       }
 
       g path {
@@ -38,6 +48,9 @@
   }
 }
 
+.disabled {
+  @include variables.disabled-button;
+}
 
 .audio-instruction-container {
   @include variables.circle-button-wrapper;

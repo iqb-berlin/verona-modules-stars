@@ -137,6 +137,11 @@ $layoutPadding: 90px;
   }
 }
 
+@mixin disabled-button {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 @mixin circle-button-wrapper {
   position: absolute;
   width: 80px;

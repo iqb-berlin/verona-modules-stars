@@ -4,6 +4,7 @@
 .button-option {
   position: relative;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 
   input, label {
     position: absolute;

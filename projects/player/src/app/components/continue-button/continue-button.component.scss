@@ -24,6 +24,7 @@
     background-color: transparent;
     border: none;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
 
     svg {
       @include variables.svg-styles;
