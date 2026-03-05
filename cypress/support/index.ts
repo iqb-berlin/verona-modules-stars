@@ -22,6 +22,11 @@ declare global {
       setupTestData(configFile: string, interactionType: string): Chainable<JQuery<HTMLElement>>;
 
       /**
+       * Clear all cached unit states from previous setupTestData calls
+       */
+      clearUnitStates(): Chainable<void>;
+
+      /**
        * Click on the click layer
        * */
       removeClickLayer(): Chainable<void>;

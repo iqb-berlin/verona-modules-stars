@@ -121,6 +121,22 @@ export class AudioService {
     this._isPlaying.set(false);
   }
 
+  reset() {
+    this.pause();
+    if (this._audioElement) {
+      this._audioElement.currentTime = 0;
+      this._audioElement.src = '';
+      this._audioElement.load();
+    }
+    this._audioId.set('');
+    this._maxPlay.set(0);
+    this._playCount.set(0);
+    this.percentElapsed = 0;
+    this.currentTime = 0;
+    this._currentSource.set(undefined);
+    this.playerStatus.next(AudioPlayerStatus.EMPTY);
+  }
+
   /**
    * Function to set the audio source and reset the playback position to the beginning.
    * Uses READY from AudioPlayerStatus to resolve when the audio is ready to play.
@@ -131,7 +147,11 @@ export class AudioService {
     return new Promise(resolve => {
       // normalize and check for a valid source first
       const source = (audio?.audioSource || '').trim();
-      const variableId = audio.audioId || 'audio';
+      const variableId = audio.audioId || '';
+      if (!variableId) {
+        resolve(false);
+        return;
+      }
       const formerResponse = this.responsesService.getResponseByVariableId(variableId);
 
       // update meta/signals
@@ -213,11 +233,14 @@ export class AudioService {
 
   /** send playback time as a percentage of audio duration as a response */
   sendPlaybackTimeChanged(): void {
+    const audioId = this.audioId();
+    if (!audioId) return;
+
     let audioValue = this.percentElapsed || 0;
     audioValue += this.playCount();
 
     this.responsesService.newResponses([{
-      id: this.audioId(),
+      id: audioId,
       value: audioValue,
       status: 'VALUE_CHANGED',
       relevantForResponsesProgress: false

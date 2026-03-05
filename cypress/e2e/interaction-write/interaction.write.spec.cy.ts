@@ -6,6 +6,10 @@ describe('Interaction WRITE Component', () => {
   const interactionType = 'write';
   const defaultTestFile = 'write_characters_test';
 
+  beforeEach(() => {
+    cy.clearUnitStates();
+  });
+
   it('has stimulus wrapper with an image inside', () => {
     cy.setupTestData(defaultTestFile, interactionType);
     cy.get('[data-cy=stimulus-wrapper]')

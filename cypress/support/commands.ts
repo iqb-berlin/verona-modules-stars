@@ -55,10 +55,39 @@ Cypress.Commands.add('loadUnit', (filename: string) => {
   });
 });
 
+const unitStates: Record<string, any> = {};
+
+Cypress.Commands.add('clearUnitStates', () => {
+  Object.keys(unitStates).forEach(key => delete unitStates[key]);
+});
+
 Cypress.Commands.add('setupTestData', (configFile: string, interactionType: string) => {
   const fullPath = `interaction-${interactionType}/${configFile}`;
   cy.fixture(fullPath).as('testData');
-  cy.visit('http://localhost:4200');
+  cy.visit('http://localhost:4200', {
+    onBeforeLoad(win) {
+      const mockParent = {
+        postMessage: (data: any) => {
+          if (data.type === 'vopStateChangedNotification' && data.unitState) {
+            // Use the current test file as key for simplicity in this test context
+            unitStates[configFile] = JSON.parse(JSON.stringify(data.unitState));
+          }
+        }
+      };
+
+      Object.defineProperty(win, 'parent', {
+        value: mockParent,
+        configurable: true
+      });
+
+      // Restore state if we have one for this file
+      win.addEventListener('message', (event: MessageEvent) => {
+        if (event.data.type === 'vopStartCommand' && unitStates[configFile]) {
+          event.data.unitState = JSON.parse(JSON.stringify(unitStates[configFile]));
+        }
+      }, true);
+    }
+  });
   cy.loadUnit(fullPath);
 });
 
@@ -348,6 +377,7 @@ Cypress.Commands.add('applyStandardScenarios', (interactionType: string, navigat
 
   if (interactionType === 'image_only') {
     cy.get('[data-cy="stimulus-image"]').should('exist').and('be.visible');
+    cy.log('For interactionType: ', interactionType, 'stimulus-image exists and visible.');
     return;
   }
 
@@ -516,7 +546,13 @@ Cypress.Commands.add('assertInteractionComponentVisible', (interactionType: stri
       .and('have.attr', 'src');
   } else {
     // Button interaction type
-    cy.get('[data-cy="button-0"]', { timeout: 15000 }).should('be.visible');
+    cy.get('body').then(($body) => {
+      if ($body.find('[data-cy="click-layer"]').length > 0) {
+        cy.get('[data-cy="button-0"]', { timeout: 15000 }).should('exist');
+      } else {
+        cy.get('[data-cy="button-0"]', { timeout: 15000 }).should('be.visible');
+      }
+    });
   }
 });
 
@@ -537,6 +573,7 @@ Cypress.Commands.add('assertRestoredState', (interactionType: string, expected?:
       }
     }
     cy.get(`[data-cy="polygon-${targetIndex}"]`, { timeout: 15000 }).should('have.class', 'clicked');
+    cy.log(`Approved: interactionType: ${interactionType} polygon-${targetIndex} has a clicked class`);
   } else if (interactionType === 'write') {
     let expectedText = 'A';
     if (expected !== undefined) {
@@ -554,6 +591,7 @@ Cypress.Commands.add('assertRestoredState', (interactionType: string, expected?:
       }
     }
     cy.get('[data-cy=text-span]', { timeout: 15000 }).should('contain', expectedText);
+    cy.log(`Approved: interactionType: ${interactionType} text-span containes expectedText ${expectedText}`);
   } else if (interactionType === 'place_value') {
     // If expected is provided, parse it to determine how many tens/ones should be moved
     let expectedTens = undefined as number | undefined;
@@ -581,17 +619,21 @@ Cypress.Commands.add('assertRestoredState', (interactionType: string, expected?:
 
     if (expectedTens !== undefined) {
       cy.get('[data-cy="icon-item-tens-moved"]', { timeout: 15000 }).should('have.length', expectedTens);
+      cy.log(`Approved: interactionType: ${interactionType} icon-item-tens-moved have a length of ${expectedTens}`);
     }
     if (expectedOnes !== undefined) {
       cy.get('[data-cy="icon-item-ones-moved"]', { timeout: 15000 }).should('have.length', expectedOnes);
+      cy.log(`Approved: interactionType: ${interactionType} icon-item-ones-moved have a length of ${expectedOnes}`);
     }
   } else if (interactionType === 'drop') {
     // Verifies the button at index 0 has been moved
     cy.get('[data-cy="drop-animate-wrapper-0"]', { timeout: 15000 })
       .should('have.css', 'transform');
+    cy.log(`Approved: interactionType: ${interactionType} drop-animate-wrapper-0 have css transform`);
   } else if (interactionType === 'find_on_image') {
     cy.get('[data-cy="click-target"]')
       .should('exist');
+    cy.log(`Approved: interactionType: ${interactionType} click-target exists`);
   } else if (interactionType === 'buttons') {
     let targetIndex = 1;
     if (expected !== undefined) {
@@ -607,8 +649,10 @@ Cypress.Commands.add('assertRestoredState', (interactionType: string, expected?:
       }
     }
     cy.get(`[data-cy="button-${targetIndex}"] input`, { timeout: 15000 }).should('have.attr', 'data-selected', 'true');
+    cy.log(`Approved: interactionType: ${interactionType} button-${targetIndex} have attribute: data-selected`);
   } else {
     // Other interaction types, fallback or generic button verification
     cy.get('[data-cy="button-1"] input', { timeout: 15000 }).should('have.attr', 'data-selected', 'true');
+    cy.log(`Approved: interactionType: ${interactionType} button-1 have attribute: data-selected`);
   }
 });

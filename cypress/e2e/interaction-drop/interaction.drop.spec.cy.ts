@@ -15,6 +15,10 @@ describe('Interaction DROP Component', () => {
   const interactionType = 'drop';
   const defaultTestFile = 'drop_4_option_test';
 
+  beforeEach(() => {
+    cy.clearUnitStates();
+  });
+
   const testFileWithImageLandingXY = `${interactionType}_imagePosition_top_imageLandingXY_100-100_test`;
   const dropImage = '[data-cy="drop-image"]';
   const buttonIndex = 1;

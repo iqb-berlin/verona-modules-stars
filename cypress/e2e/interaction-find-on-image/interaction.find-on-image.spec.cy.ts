@@ -12,6 +12,7 @@ describe('Interaction FIND_ON_IMAGE Component', () => {
   const defaultTestFile = 'find_on_image_test';
 
   beforeEach(() => {
+    cy.clearUnitStates();
     cy.setupTestData(defaultTestFile, interactionType);
   });
 

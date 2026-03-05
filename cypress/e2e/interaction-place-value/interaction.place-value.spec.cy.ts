@@ -9,6 +9,10 @@ describe('PLACE_VALUE Interaction E2E Tests', () => {
   const interactionType = 'place_value';
   const defaultTestFile = 'place_value_test';
 
+  beforeEach(() => {
+    cy.clearUnitStates();
+  });
+
   const setupAndAssert = (file: string) => {
     cy.setupTestData(file, interactionType);
     cy.get('[data-cy="interaction-place-value"]').should('exist');

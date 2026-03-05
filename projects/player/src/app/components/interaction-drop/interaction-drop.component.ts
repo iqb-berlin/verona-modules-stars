@@ -105,6 +105,7 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
         // This ensures no visual leakage from previously loaded units.
         this.resetSelection();
 
+        let restored = false;
         if (Array.isArray(formerStateResponses) && formerStateResponses.length > 0) {
           const foundResponse = formerStateResponses.find(r => r.id === this.localParameters.variableId);
 
@@ -113,9 +114,11 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
           if (foundResponse && foundResponse.value != null &&
             foundResponse.value !== 0 && foundResponse.value !== '0') {
             this.restoreFromFormerState(foundResponse);
-            return;
+            restored = true;
           }
+        }
 
+        if (!restored) {
           // No valid former state - initialize as new with a 0 value (no selection)
           this.responses.emit([{
             id: this.localParameters.variableId,

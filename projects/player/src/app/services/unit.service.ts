@@ -11,6 +11,7 @@ import {
   UnitDefinition
 } from '../models/unit-definition';
 import { ResponsesService } from './responses.service';
+import { AudioService } from './audio.service';
 
 export enum MainPlayerStatus {
   PAUSED = 'PAUSED',
@@ -26,6 +27,7 @@ export enum MainPlayerStatus {
 
 export class UnitService {
   responsesService = inject(ResponsesService);
+  audioService = inject(AudioService);
 
   firstAudioOptions = signal<FirstAudioOptionsParams | undefined>(undefined);
   mainAudio = signal<AudioOptions>({} as AudioOptions);
@@ -72,6 +74,7 @@ export class UnitService {
   /** Marks the first click as done to hide the layer and allow audio playback */
   setFirstClickLayerClicked() {
     this._firstClickLayerClicked.set(true);
+    this.responsesService.updatePresentationProgress('some');
   }
 
   finishOpeningFlow() {
@@ -80,6 +83,7 @@ export class UnitService {
   }
 
   reset() {
+    this.audioService.reset();
     this.mainAudio.set({} as AudioOptions);
     this.firstAudioOptions.set(undefined);
     this.backgroundColor.set('#EEE');

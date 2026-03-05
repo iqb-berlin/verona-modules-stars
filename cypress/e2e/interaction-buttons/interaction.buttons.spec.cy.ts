@@ -10,6 +10,10 @@ describe('Interaction BUTTONS Component', () => {
   const interactionType = 'buttons';
   const defaultTestFile = 'buttons_test';
 
+  beforeEach(() => {
+    cy.clearUnitStates();
+  });
+
   // Small helpers local to this spec
   const assertButtonExists = () => {
     cy.get('[data-cy="button-0"]').should('exist');
@@ -254,18 +258,19 @@ describe('Interaction BUTTONS Component', () => {
 
   describe('Navigation on triggerNavigationOnSelect', () => {
     it('requests navigation to next unit when triggerNavigationOnSelect is true', () => {
-      // Spy on postMessage of the parent window (used by VeronaPostService)
-      cy.window().then(window => {
-        // In Cypress E2E, AUT runs in an iframe; Verona posts to win.parent
-        const target = window.parent || window;
-        cy.spy(target, 'postMessage').as('postMessage');
-      });
-
       cy.setupTestData(
         'buttons_buttonType_circle_option_icon_triggerNavigationOnSelect_true_test.json',
         interactionType
       );
       assertButtonExists();
+
+      // Spy on postMessage of the parent window (used by VeronaPostService)
+      // We do this AFTER setupTestData so we are spying on the mockParent created there
+      cy.window().then(window => {
+        // In Cypress E2E, AUT runs in an iframe; Verona posts to win.parent
+        const target = window.parent || window;
+        cy.spy(target, 'postMessage').as('postMessage');
+      });
 
       // Click any button should trigger navigation after a small delay in the component
       cy.get('[data-cy="button-0"]').click();

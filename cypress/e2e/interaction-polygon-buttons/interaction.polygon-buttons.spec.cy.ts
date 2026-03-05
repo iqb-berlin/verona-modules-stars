@@ -8,6 +8,10 @@ describe('Interaction POLYGON BUTTONS Component', () => {
   const interactionType = 'polygon_buttons';
   const defaultTestFile = 'polygon_buttons_test';
 
+  beforeEach(() => {
+    cy.clearUnitStates();
+  });
+
   // Small helpers
   const assertPolygonExists = (index = 0) => {
     cy.get(`[data-cy="polygon-${index}"]`).should('exist');
