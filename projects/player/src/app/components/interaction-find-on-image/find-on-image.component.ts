@@ -31,8 +31,10 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
   buttonDisabled = signal(true);
   /** Signal holding inline CSS for the optional show-area overlay (top/left/width/height). */
   showAreaStyle = signal('');
-  /** Boolean to track if the former state has been restored from response. */
-  private hasRestoredFromFormerState = false;
+  /** The last restored value to avoid redundant restorations within the same unit. */
+  private lastRestoredValue = '';
+  /** The currently loaded unit identity (variableId + imageSource). */
+  private currentUnitIdentity = '';
   /** Temporarily stores a Response to be restored later when the image DOM node is available. */
   private pendingRestoreResponse: Response | null = null;
   /** Reference to the native HTMLImageElement. */
@@ -47,58 +49,119 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
   private imgLeft = 0;
   /** Image load event handler. */
   private imageLoadHandler: ((ev?: Event) => void) | null = null;
+  /** Reference to the pending restoration timer. */
+  private restoreTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Tracks the last seen parameters object reference to detect new vopStartCommand
+   * loads even if identity is the same. */
+  private lastParametersRef: unknown | null = null;
 
   constructor() {
     super();
 
     effect(() => {
       const parameters = this.parameters() as InteractionFindOnImageParams;
-      this.localParameters = this.createDefaultParameters();
-      this.hasRestoredFromFormerState = false;
-      this.buttonDisabled.set(true);
-      if (parameters) {
-        this.localParameters.variableId = parameters.variableId || 'FIND_ON_IMAGE';
-        this.localParameters.imageSource = parameters.imageSource || '';
-        this.localParameters.text = parameters.text || '';
-        this.localParameters.showArea = parameters.showArea || '';
-        this.localParameters.size = parameters.size || 'SMALL';
-        if (this.localParameters.showArea) {
-          if (this.imageRef) {
-            this.setShowArea();
-          } else {
-            this.pendingShowArea = true;
-          }
-        }
-        // Only restore from former state once, on initial load
-        if (!this.hasRestoredFromFormerState) {
-          const formerStateResponses: Response[] = parameters.formerState || [];
+      if (!parameters) return;
 
-          if (Array.isArray(formerStateResponses) && formerStateResponses.length > 0) {
-            const foundResponse = formerStateResponses.find(r => r.id === this.localParameters.variableId);
+      // Detect a brand-new vopStartCommand by reference change of parameters object
+      const isNewParametersObject = this.lastParametersRef !== parameters;
+      if (isNewParametersObject) {
+        this.lastParametersRef = parameters;
+        // Always clear visuals and allow a fresh init/restore for this load
+        this.resetVisualState();
+        this.lastRestoredValue = '';
+        // Reset identity so we recompute it below
+        this.currentUnitIdentity = '';
+        this.localParameters = this.createDefaultParameters();
+      }
 
-            if (foundResponse && foundResponse.value) {
-              // If image is ready, restore now, otherwise store pending restore for ngAfterViewInit
-              if (this.imageRef && this.imageRef.nativeElement) {
-                this.restoreFromFormerState(foundResponse);
-              } else {
-                this.pendingRestoreResponse = foundResponse;
-              }
-              this.hasRestoredFromFormerState = true;
-              return;
-            }
-          }
+      const newVariableId = parameters.variableId || 'FIND_ON_IMAGE';
+      const newImageSource = parameters.imageSource || '';
+      const newText = parameters.text || '';
+      const newShowArea = parameters.showArea || '';
+      const newSize = parameters.size || 'SMALL';
+      // Create an identity string from all unit definition parameters (NOT including formerState)
+      const newIdentity = `${newVariableId}|${newImageSource}|${newText}|${newShowArea}|${newSize}`;
 
-          // No former state - initialize as new
-          this.responses.emit([{
-            id: this.localParameters.variableId,
-            status: 'DISPLAYED',
-            value: '',
-            relevantForResponsesProgress: false
-          }]);
-          this.hasRestoredFromFormerState = true;
+      // 1. New unit identity check: reset flags if the definition actually differs
+      if (this.currentUnitIdentity !== newIdentity) {
+        // Only reset flags here; visuals already cleared above on new parameters object
+        this.currentUnitIdentity = newIdentity;
+        this.lastRestoredValue = '';
+        // Also clear cached image ref so we don't use stale one
+        this.cachedImgEl = null;
+      }
+
+      // 2. Update localParameters with incoming parameter values
+      this.localParameters.variableId = newVariableId;
+      this.localParameters.imageSource = newImageSource;
+      this.localParameters.text = newText;
+      this.localParameters.showArea = newShowArea;
+      this.localParameters.size = newSize;
+
+      if (this.localParameters.showArea) {
+        if (this.imageRef) {
+          this.setShowArea();
+        } else {
+          this.pendingShowArea = true;
         }
       }
+
+      // 3. One-time initialization/restoration logic for the current load
+      const formerStateResponses: Response[] = parameters.formerState || [];
+      const foundResponse = Array.isArray(formerStateResponses) ?
+        formerStateResponses.find(r => r.id === this.localParameters.variableId) :
+        null;
+
+      if (foundResponse && foundResponse.value) {
+        // Only call restore if the value is different from what's currently shown/captured
+        if (foundResponse.value !== this.lastRestoredValue) {
+          if (this.imageRef && this.imageRef.nativeElement) {
+            this.restoreFromFormerState(foundResponse);
+          } else {
+            this.pendingRestoreResponse = foundResponse;
+          }
+          this.lastRestoredValue = foundResponse.value as string;
+        }
+      } else {
+        // Force UI to clear visuals when initializing as new
+        this.buttonDisabled.set(true);
+        this.clickTargetTop.set('0px');
+        this.clickTargetLeft.set('0px');
+        this.clickTargetSize.set('0px');
+
+        // No former state: emit DISPLAYED only once for this load
+        this.responses.emit([{
+          id: this.localParameters.variableId,
+          status: 'DISPLAYED',
+          value: '',
+          relevantForResponsesProgress: false
+        }]);
+        this.lastRestoredValue = '';
+      }
     });
+  }
+
+  /**
+   * Resets all visual and internal state variables to their defaults.
+   * This is called whenever the component parameters change to ensure no leakage between units.
+   */
+  private resetVisualState(): void {
+    this.buttonDisabled.set(true);
+    this.clickTargetTop.set('0px');
+    this.clickTargetLeft.set('0px');
+    this.clickTargetSize.set('0px');
+    this.showAreaStyle.set('');
+    this.pendingShowArea = false;
+    this.pendingRestoreResponse = null;
+    this.cachedImgEl = null;
+    this.imgWidth = 0;
+    this.imgHeight = 0;
+    this.imgLeft = 0;
+    this.imgTop = 0;
+    if (this.restoreTimer) {
+      clearTimeout(this.restoreTimer);
+      this.restoreTimer = null;
+    }
   }
 
   private updateImageMetrics(): void {
@@ -112,10 +175,13 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
       return;
     }
     this.cachedImgEl = imgEl;
-    this.imgWidth = imgEl.width;
-    this.imgHeight = imgEl.height;
-    this.imgTop = imgEl.offsetTop;
+
+    // Compute metrics from actual rendered geometry to match visual placement
+    // Using offsetLeft and offsetTop which are relative to the offsetParent (image-wrapper)
+    this.imgWidth = imgEl.width || imgEl.naturalWidth;
+    this.imgHeight = imgEl.height || imgEl.naturalHeight;
     this.imgLeft = imgEl.offsetLeft;
+    this.imgTop = imgEl.offsetTop;
   }
 
   ngAfterViewInit() {
@@ -160,10 +226,15 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
       this.imageRef.nativeElement.removeEventListener('load', this.imageLoadHandler);
       this.imageLoadHandler = null;
     }
+    if (this.restoreTimer) {
+      clearTimeout(this.restoreTimer);
+      this.restoreTimer = null;
+    }
   }
 
   setShowArea() {
     this.updateImageMetrics();
+    if (!this.localParameters || !this.localParameters.showArea) return;
     const area = this.localParameters.showArea.match(/\d+/g);
     if (!area || area.length < 4 || this.imgWidth === 0) return;
 
@@ -194,9 +265,10 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
 
     const x = Math.round(((event.layerX - this.imgLeft) / this.imgWidth) * 100);
     const y = Math.round(((event.layerY - this.imgTop) / this.imgHeight) * 100);
+    this.lastRestoredValue = `${x},${y}`;
 
     this.responses.emit([{
-      id: this.localParameters.variableId,
+      id: this.localParameters.variableId || 'FIND_ON_IMAGE',
       status: 'VALUE_CHANGED',
       value: `${x},${y}`,
       relevantForResponsesProgress: true
@@ -227,7 +299,14 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
     }
 
     const imgEl = this.cachedImgEl;
-    const imageNotReady = (!imgEl.complete) || this.imgWidth === 0 || this.imgHeight === 0;
+
+    // Check if the current image source matches what we expect from parameters
+    // This prevents using metrics from a previous image that hasn't swapped out yet
+    const currentSrc = imgEl.getAttribute('src');
+    const expectedSrc = this.localParameters.imageSource;
+    const isDifferentImage = expectedSrc && currentSrc && !currentSrc.includes(expectedSrc);
+
+    const imageNotReady = (!imgEl.complete) || this.imgWidth === 0 || this.imgHeight === 0 || isDifferentImage;
     if (imageNotReady) {
       const oneTimeHandler = () => {
         imgEl.removeEventListener('load', oneTimeHandler);

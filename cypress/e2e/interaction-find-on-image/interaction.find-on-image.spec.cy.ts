@@ -5,12 +5,14 @@ import {
 import { testContinueButtonFeatures } from '../shared/continue-button.spec.cy';
 import { testRibbonBars } from '../shared/ribbon-bar.spec.cy';
 import { testAudioFeedback } from '../shared/audio-feedback.spec.cy';
+import { testFormerStateFeatures } from "../shared/former-state.spec.cy";
 
 describe('Interaction FIND_ON_IMAGE Component', () => {
   const interactionType = 'find_on_image';
   const defaultTestFile = 'find_on_image_test';
 
   beforeEach(() => {
+    cy.clearUnitStates();
     cy.setupTestData(defaultTestFile, interactionType);
   });
 
@@ -98,9 +100,10 @@ describe('Interaction FIND_ON_IMAGE Component', () => {
   });
 
   // Test base features for the FIND_ON_IMAGE interaction type
-  describe('Shared behaviors', () => {
+  describe('Base features', () => {
     testContinueButtonFeatures(interactionType);
     testRibbonBars(interactionType, `${interactionType}_ribbonBars_true_test`);
     testAudioFeedback(interactionType, `${interactionType}_feedback_test`);
+    testFormerStateFeatures(interactionType, defaultTestFile);
   });
 });

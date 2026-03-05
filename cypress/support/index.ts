@@ -22,6 +22,11 @@ declare global {
       setupTestData(configFile: string, interactionType: string): Chainable<JQuery<HTMLElement>>;
 
       /**
+       * Clear all cached unit states from previous setupTestData calls
+       */
+      clearUnitStates(): Chainable<void>;
+
+      /**
        * Click on the click layer
        * */
       removeClickLayer(): Chainable<void>;
@@ -100,8 +105,9 @@ declare global {
       /**
        * Apply standard scenarios that are wrong based on interaction type
        * @param interactionType - The type of interaction
+       * @param navigator - Optional navigator to choose what to click (e.g., 'character-button-b', 'button-2', 'polygon-3', '[data-cy=...]', '100,150', [200,350])
        */
-      applyStandardScenarios(interactionType: string): Chainable<void>;
+      applyStandardScenarios(interactionType: string, navigator?: unknown): Chainable<void>;
 
       /**
        * Apply correct answer scenarios based on interaction type
@@ -110,6 +116,20 @@ declare global {
        */
       applyCorrectAnswerScenarios(interactionType: string, dataToCheck: UnitDefinition): Chainable<void>;
 
+      /**
+       * Asserts that the interaction container or a primary element is visible
+       * Useful for waiting for a unit to load.
+       * @param interactionType - the type of interaction.
+       */
+      assertInteractionComponentVisible(interactionType:string): Chainable<void>;
+
+      /**
+       * Asserts that the interaction's visual state has been restored correctly from a former unit state
+       * This should be used after a former state has been applied (e.g. via vopStartCommand)
+       * @param interactionType - the type of interaction
+       * @param expected - Optional expected state descriptor (e.g., for place_value: 'tens,ones' like '1,2' or a number 12)
+       */
+      assertRestoredState(interactionType:string, expected?: unknown): Chainable<void>;
     }
   }
 }

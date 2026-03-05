@@ -75,5 +75,17 @@ export function testMainAudioFeatures(interactionType: string, configFile: strin
       // After many times clicked, the container should still exist
       cy.get('[data-cy="audio-button-container"]').should('exist');
     });
+
+    it('stops playing and resets when navigating to a new unit', () => {
+      // 1. Start audio in first unit
+      cy.get('[data-cy="speaker-icon"]').click();
+      cy.get('[data-cy="custom-audio-button"]').should('have.class', 'playing');
+
+      // 2. Navigate to second unit (same config or different)
+      cy.setupTestData(`${interactionType}_maxPlay_0_test.json`, `${interactionType}`);
+
+      // 3. Verify audio is NOT playing in new unit
+      cy.get('[data-cy="custom-audio-button"]').should('not.have.class', 'playing');
+    });
   });
 }
