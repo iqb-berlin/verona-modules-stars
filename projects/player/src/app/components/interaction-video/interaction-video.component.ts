@@ -36,7 +36,6 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
 
     effect(() => {
       const parameters = this.parameters() as InteractionVideoParams;
-      console.log('InteractionVideoComponent loaded with parameters:', parameters);
       this.localParameters = this.createDefaultParameters();
 
       if (parameters) {
@@ -48,8 +47,8 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
         this.localParameters.imageSource = parameters.imageSource || '';
         this.localParameters.videoSource = parameters.videoSource || '';
         this.localParameters.text = parameters.text || '';
-        this.localParameters.triggerNavigationOnSelect = parameters.triggerNavigationOnSelect || false;
-        this.localParameters.variableId = parameters.variableId || 'VIDEO';
+        this.localParameters.triggerNavigationOnEnd = parameters.triggerNavigationOnEnd || false;
+        this.localParameters.variableId = parameters.variableId || 'videoPlayer';
         this.responses.emit([{
           id: this.localParameters.variableId,
           status: 'DISPLAYED',
@@ -98,7 +97,6 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
   }
 
   ended() {
-    console.log('video is ended...');
     this._isPlaying.set(false);
     this.percentElapsed = 0;
     this.playCount += 1;
@@ -110,9 +108,9 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
     this.videoPlayerRef.nativeElement.currentTime = 0;
     this.videoPlayerRef.nativeElement.load();
 
-    // Check if triggerNavigationOnSelect is enabled
-    if (this.localParameters.triggerNavigationOnSelect === true) {
-      this.localParameters.triggerNavigationOnSelect = false;
+    // Check if triggerNavigationOnEnd is enabled
+    if (this.localParameters.triggerNavigationOnEnd === true) {
+      this.localParameters.triggerNavigationOnEnd = false;
       setTimeout(() => {
         this.veronaPostService.sendVopUnitNavigationRequestedNotification('next');
       }, 500);
@@ -123,10 +121,8 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
     let videoValue = this.percentElapsed || 0;
     videoValue += this.playCount;
 
-    console.log(`Sending playback update: percentElapsed=${this.percentElapsed}, playCount=${this.playCount}, videoValue=${videoValue}`);
-
     const response: StarsResponse = {
-      id: 'VIDEO',
+      id: 'videoPlayer',
       value: videoValue,
       status: 'VALUE_CHANGED',
       relevantForResponsesProgress: false
@@ -138,11 +134,11 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
   // eslint-disable-next-line class-methods-use-this
   private createDefaultParameters(): InteractionVideoParams {
     return {
-      variableId: 'VIDEO',
+      variableId: 'videoPlayer',
       imageSource: '',
       videoSource: '',
       text: '',
-      triggerNavigationOnSelect: false
+      triggerNavigationOnEnd: false
     };
   }
 }

@@ -119,7 +119,7 @@ export interface InteractionVideoParams {
   videoSource: string;
   imageSource?: string;
   text?: string;
-  triggerNavigationOnSelect?: boolean;
+  triggerNavigationOnEnd?: boolean;
 }
 
 export interface InteractionPolygonButtonsParams {
