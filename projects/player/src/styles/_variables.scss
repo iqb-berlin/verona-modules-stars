@@ -5,7 +5,7 @@ $small-gap-margin: 24px;
 $big-gap-margin: 32px;
 $img-border: 6px;
 $border-radius: 20px;
-$icons-border-radius: 15px;
+$icons-border-radius: 16px;
 $font-family: 'IQBprimar', 'Quicksand', sans-serif;
 $font-weight-600: 600;
 $big-text-font-size: 112px;
@@ -135,4 +135,9 @@ $layoutPadding: 90px;
     width: auto;
     height: auto;
   }
+}
+
+@mixin disabled-button {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

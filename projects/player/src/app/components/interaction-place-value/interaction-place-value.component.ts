@@ -218,7 +218,7 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
     const marginBetweenTensAndOnes = (tensRows > 0 && onesRows > 0) ?
       marginBetweenRows : 0;
 
-    return tensHeight + marginBetweenTensAndOnes + onesHeight + (2 * this.marginBetweenElements);
+    return tensHeight + marginBetweenTensAndOnes + onesHeight + (3 * this.marginBetweenElements);
   });
 
   /** Check if tens wrapper should be disabled */
