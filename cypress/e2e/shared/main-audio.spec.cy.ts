@@ -86,12 +86,6 @@ export function testMainAudioFeatures(interactionType: string, configFile: strin
 
       // 3. Verify audio is NOT playing in new unit
       cy.get('[data-cy="custom-audio-button"]').should('not.have.class', 'playing');
-
-      // 4. Verify no progress leaked to new unit
-      // vopStateChangedNotification should have responseProgress: none
-      // Since we don't easily have access to outgoing messages here without setupTestDataWithPostMessageMock,
-      // we can at least check that the continue button (if set to ON_ANY_RESPONSE) is not visible.
-      // But we already know it shouldn't be if it's a new unit.
     });
   });
 }

@@ -48,7 +48,9 @@ export function testFormerStateFeatures(interactionType: string, defaultTestFile
     it('preserves the click-layer state when navigating between multiple units', () => {
       const firstTestFile = `${interactionType}_firstClickLayer_true_test`;
       const secondTestFile = `${interactionType}_firstClickLayer_true_second_test`;
-      if (interactionType !== 'buttons') {
+
+      if (interactionType === 'find_on_image') {
+        cy.log('Skipping test for find_on_image as it does not support firstClickLayer');
         return;
       }
 
@@ -57,8 +59,10 @@ export function testFormerStateFeatures(interactionType: string, defaultTestFile
       cy.setupTestData(firstTestFile, interactionType);
       cy.get('[data-cy="click-layer"]').should('exist');
       cy.get('[data-cy="click-layer"]').click();
+      cy.wait(1000);
       cy.get('[data-cy="click-layer"]').should('not.exist');
       cy.assertInteractionComponentVisible(interactionType);
+      cy.wait(1000);
 
       // 2. Load and DO NOT resolve Unit B
       cy.log('First load Unit B and DO NOT click on click-layer');
