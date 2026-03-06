@@ -13,6 +13,7 @@ export type InteractionEnum = 'BUTTONS' |
 'VIDEO' |
 'IMAGE_ONLY' |
 'PLACE_VALUE' |
+'NUMBER_LINE' |
 'NONE';
 export type IconButtonTypeEnum = 'CHECK_GREEN' | 'CLOSE_RED' | 'CLAP_HANDS' | 'SMILEY_1' | 'SMILEY_2' |
 'SMILEY_3' | 'SMILEY_4' | 'SMILEY_5' | 'ONES' | 'TENS';
@@ -127,6 +128,14 @@ export interface InteractionPolygonButtonsParams {
   options: SelectionOption[];
   multiSelect?: boolean;
   formerState?: Response[];
+}
+
+export interface InteractionNumberLineParams {
+  variableId?: string;
+  firstNumber: number;
+  lastNumber: number;
+  emptyNumber: number;
+  style?: string;
 }
 
 export interface MainAudio {

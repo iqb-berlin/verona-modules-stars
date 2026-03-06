@@ -73,6 +73,10 @@
     <stars-interaction-place-value class="interaction"
       [parameters]="getParametersWithFormerState()"
       (responses)="responsesService.newResponses($event)"></stars-interaction-place-value>
+  } @else if (!unitService.openingFlowActive() && unitService.interaction() === 'NUMBER_LINE') {
+    <stars-interaction-number-line class="interaction"
+      [parameters]="getParametersWithFormerState()"
+      (responses)="responsesService.newResponses($event)"></stars-interaction-number-line>
   }
 
   <!-- lower ribbons -->
