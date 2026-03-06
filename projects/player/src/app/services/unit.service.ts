@@ -1,4 +1,7 @@
-import { Injectable, signal } from '@angular/core';
+import {
+  computed, inject, Injectable,
+  signal
+} from '@angular/core';
 
 import {
   AudioOptions,
@@ -7,6 +10,8 @@ import {
   InteractionEnum, OpeningImageParams,
   UnitDefinition
 } from '../models/unit-definition';
+import { ResponsesService } from './responses.service';
+import { AudioService } from './audio.service';
 
 export enum MainPlayerStatus {
   PAUSED = 'PAUSED',
@@ -21,6 +26,9 @@ export enum MainPlayerStatus {
 })
 
 export class UnitService {
+  responsesService = inject(ResponsesService);
+  audioService = inject(AudioService);
+
   firstAudioOptions = signal<FirstAudioOptionsParams | undefined>(undefined);
   mainAudio = signal<AudioOptions>({} as AudioOptions);
   backgroundColor = signal('#EEE');
@@ -37,7 +45,23 @@ export class UnitService {
   showingOpeningImage = signal<boolean>(false);
 
   /** To show the first click layer */
-  firstClick = signal<boolean>(false);
+  private _firstClickLayerClicked = signal<boolean>(false);
+  firstClickLayerClicked = this._firstClickLayerClicked.asReadonly();
+
+  /** Any interaction done: click layer clicked, audio heard, or response given */
+  interactionDone = computed(() => this._firstClickLayerClicked() ||
+      this.responsesService.mainAudioComplete() ||
+      this.responsesService.responseProgress() !== 'none' ||
+      this.responsesService.getPresentationStatus() === 'complete');
+
+  /** Whether to show the first click layer based on configuration and interaction status */
+  showFirstClickLayer = computed(() => {
+    const options = this.firstAudioOptions();
+    const mainAudio = this.mainAudio();
+    return !!options?.firstClickLayer &&
+      !!mainAudio?.audioSource &&
+      !this.interactionDone();
+  });
 
   /** Opening flow is active: interactions and main audio hidden */
   private _openingFlowActive = signal<boolean>(false);
@@ -47,12 +71,19 @@ export class UnitService {
   private _currentAudioSrc = signal<AudioOptions>({} as AudioOptions);
   currentAudioSrc = this._currentAudioSrc.asReadonly();
 
+  /** Marks the first click as done to hide the layer and allow audio playback */
+  setFirstClickLayerClicked() {
+    this._firstClickLayerClicked.set(true);
+    this.responsesService.updatePresentationProgress('some');
+  }
+
   finishOpeningFlow() {
     this._openingFlowActive.set(false);
     if (this.mainAudio().audioSource) this._currentAudioSrc.set(this.mainAudio());
   }
 
   reset() {
+    this.audioService.reset();
     this.mainAudio.set({} as AudioOptions);
     this.firstAudioOptions.set(undefined);
     this.backgroundColor.set('#EEE');
@@ -65,7 +96,7 @@ export class UnitService {
     this.openingImageParams.set({} as OpeningImageParams);
     this.showingOpeningImage.set(false);
     this._openingFlowActive.set(false);
-    this.firstClick.set(false);
+    this._firstClickLayerClicked.set(false);
   }
 
   setNewData(unitDefinition: unknown) {

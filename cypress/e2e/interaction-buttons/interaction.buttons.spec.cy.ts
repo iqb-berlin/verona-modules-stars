@@ -4,10 +4,15 @@ import {
 } from '../../../projects/player/src/app/models/unit-definition';
 import { testBaseFeatures } from '../shared/base-features.spec.cy';
 import { testResponsiveImageFeatures } from '../shared/responsive-image.spec.cy';
+import { testFormerStateFeatures } from '../shared/former-state.spec.cy';
 
 describe('Interaction BUTTONS Component', () => {
   const interactionType = 'buttons';
   const defaultTestFile = 'buttons_test';
+
+  beforeEach(() => {
+    cy.clearUnitStates();
+  });
 
   // Small helpers local to this spec
   const assertButtonExists = () => {
@@ -159,7 +164,7 @@ describe('Interaction BUTTONS Component', () => {
       // eslint-disable-next-line max-len
       // Keep below variable in sync with projects/player/src/app/components/interaction-buttons/interaction-buttons.component.html
       const paddingZero = 0;
-      const defaultOffset = 90;
+      const defaultPadding = 90;
 
       const imageConfigs = [
         {
@@ -178,16 +183,16 @@ describe('Interaction BUTTONS Component', () => {
         cy.get('[data-cy="stimulus-image"]').should('exist').and('be.visible');
 
         if (imageUseFullArea) {
-          cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-bottom', '60px');
+          cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-bottom', `${defaultPadding}px`);
           cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-top', `${paddingZero}px`);
           cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-left', `${paddingZero}px`);
           cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-right', `${paddingZero}px`);
         } else {
           cy.get('[data-cy="buttons-container"]')
-            .should('have.css', 'padding-bottom', `${defaultOffset}px`);
+            .should('have.css', 'padding-bottom', `${defaultPadding}px`);
           cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-top', `${paddingZero}px`);
-          cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-left', `${defaultOffset}px`);
-          cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-right', `${defaultOffset}px`);
+          cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-left', `${defaultPadding}px`);
+          cy.get('[data-cy="buttons-container"]').should('have.css', 'padding-right', `${defaultPadding}px`);
         }
       });
     });
@@ -253,18 +258,19 @@ describe('Interaction BUTTONS Component', () => {
 
   describe('Navigation on triggerNavigationOnSelect', () => {
     it('requests navigation to next unit when triggerNavigationOnSelect is true', () => {
-      // Spy on postMessage of the parent window (used by VeronaPostService)
-      cy.window().then(window => {
-        // In Cypress E2E, AUT runs in an iframe; Verona posts to win.parent
-        const target = window.parent || window;
-        cy.spy(target, 'postMessage').as('postMessage');
-      });
-
       cy.setupTestData(
         'buttons_buttonType_circle_option_icon_triggerNavigationOnSelect_true_test.json',
         interactionType
       );
       assertButtonExists();
+
+      // Spy on postMessage of the parent window (used by VeronaPostService)
+      // We do this AFTER setupTestData so we are spying on the mockParent created there
+      cy.window().then(window => {
+        // In Cypress E2E, AUT runs in an iframe; Verona posts to win.parent
+        const target = window.parent || window;
+        cy.spy(target, 'postMessage').as('postMessage');
+      });
 
       // Click any button should trigger navigation after a small delay in the component
       cy.get('[data-cy="button-0"]').click();
@@ -281,5 +287,8 @@ describe('Interaction BUTTONS Component', () => {
 
   // Test base features for the BUTTONS interaction type
   testBaseFeatures(interactionType, defaultTestFile);
+  // Test former state features for the BUTTONS interaction type
+  testFormerStateFeatures(interactionType, defaultTestFile);
+  // Test responsive image features for the BUTTONS interaction type
   testResponsiveImageFeatures(interactionType, `${interactionType}_imagePosition_top_test`, '[data-cy="stimulus-image"]');
 });

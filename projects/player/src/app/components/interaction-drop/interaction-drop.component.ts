@@ -18,7 +18,7 @@ import { InteractionDropParams } from '../../models/unit-definition';
 import { StandardButtonComponent } from '../../shared/standard-button/standard-button.component';
 import { parseTranslate, updateTransitionDisabledSet } from '../../shared/utils/drag-drop.util';
 import {
-  calculateButtonCenter, getDropLandingArgs,
+  getDropLandingArgs,
   getDropLandingTranslate
 } from '../../shared/utils/interaction-drop.util';
 
@@ -63,9 +63,6 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
   /** Suppress accidental clicks right after a drag */
   private suppressClick = false;
 
-  /** Boolean to track if the former state has been restored from response. */
-  private hasRestoredFromFormerState = false;
-
   /** Reference to the container element for attaching event listeners */
   @ViewChild('dropContainer', { static: true }) dropContainerRef!: ElementRef<HTMLElement>;
 
@@ -89,7 +86,6 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
     effect(() => {
       const parameters = this.parameters() as InteractionDropParams;
       this.localParameters = InteractionDropComponent.createDefaultParameters();
-      this.hasRestoredFromFormerState = false;
 
       if (parameters) {
         this.localParameters.options = parameters.options || [];
@@ -97,35 +93,39 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
         this.localParameters.imageSource = parameters.imageSource || '';
         this.localParameters.text = parameters.text || '';
         this.localParameters.imagePosition = parameters.imagePosition || 'BOTTOM'; // Default to BOTTOM
-        this.localParameters.imageLandingXY = parameters.imageLandingXY || '';
+        this.localParameters.imageLandingXY = parameters.imageLandingXY || '50, 50';
 
         if (this.viewInited) {
           this.scheduleRecalcAfterLayout();
         }
 
-        // Attempt to restore former state once
-        if (!this.hasRestoredFromFormerState) {
-          const formerStateResponses: StarsResponse[] = (parameters as any).formerState || [];
+        const formerStateResponses: StarsResponse[] = (parameters as any).formerState || [];
 
-          if (Array.isArray(formerStateResponses) && formerStateResponses.length > 0) {
-            const foundResponse = formerStateResponses.find(r => r.id === this.localParameters.variableId);
+        // Always reset visual selection and button positions before attempting to restore.
+        // This ensures no visual leakage from previously loaded units.
+        this.resetSelection();
 
-            if (foundResponse && foundResponse.value != null) {
-              this.restoreFromFormerState(foundResponse);
-              this.hasRestoredFromFormerState = true;
-              return;
-            }
+        let restored = false;
+        if (Array.isArray(formerStateResponses) && formerStateResponses.length > 0) {
+          const foundResponse = formerStateResponses.find(r => r.id === this.localParameters.variableId);
+
+          // Only restore if we have a valid non-zero value.
+          // A value of 0 or '0' means no button is currently dropped/selected.
+          if (foundResponse && foundResponse.value != null &&
+            foundResponse.value !== 0 && foundResponse.value !== '0') {
+            this.restoreFromFormerState(foundResponse);
+            restored = true;
           }
+        }
 
-          // No valid former state - initialize as new
-          this.resetSelection();
+        if (!restored) {
+          // No valid former state - initialize as new with a 0 value (no selection)
           this.responses.emit([{
             id: this.localParameters.variableId,
             status: 'DISPLAYED',
             value: 0,
             relevantForResponsesProgress: false
           }]);
-          this.hasRestoredFromFormerState = true;
         }
       }
     });
@@ -269,10 +269,7 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
       this.settledTransform.set(null);
     }
 
-    this.lastDragWasFromSettled = false;
-    if (currentSettled !== null && currentSettled === index && this.settledTransform()) {
-      this.lastDragWasFromSettled = true;
-    }
+    this.lastDragWasFromSettled = !!(currentSettled !== null && currentSettled === index && this.settledTransform());
 
     // Disable transitions for the dragging button so it keeps up with the pointer
     this.addTransitionDisabled(index);
@@ -352,31 +349,23 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
     const imgElement = this.imageRef.nativeElement;
 
     for (let index = 0; index < totalButtons; index++) {
-      const { currentButtonCenter, containerCenter } = calculateButtonCenter(totalButtons, index);
+      const buttonElement =
+        this.dropContainerRef.nativeElement.querySelector(`[data-cy="drop-animate-wrapper-${index}"]`) as HTMLElement;
+      if (buttonElement) {
+        const {
+          buttonCenterX, imgWidth, imgHeight, imageTop, imageLeft, buttonCenterY
+        } = getDropLandingArgs(imgElement, buttonElement, containerElement);
 
-      if (this.localParameters.imageLandingXY !== '') {
-        const buttonElement =
-          this.dropContainerRef.nativeElement.querySelector(`[data-cy="drop-animate-wrapper-${index}"]`) as HTMLElement;
-        if (buttonElement) {
-          const {
-            buttonCenterX, imgWidth, imgHeight, imageTop, imageLeft, buttonCenterY
-          } = getDropLandingArgs(imgElement, buttonElement, containerElement);
-
-          const { xPx, yPx } = getDropLandingTranslate(
-            this.localParameters.imageLandingXY ?? '',
-            buttonCenterX,
-            imgWidth,
-            imgHeight,
-            imageLeft,
-            imageTop,
-            buttonCenterY
-          );
-          transforms[index] = `translate(${xPx}, ${yPx})`;
-        }
-      } else {
-        const baseOffsetX = containerCenter - currentButtonCenter;
-        const transformY = this.localParameters.imagePosition === 'TOP' ? '-280px' : '280px';
-        transforms[index] = `translate(${baseOffsetX}px, ${transformY})`;
+        const { xPx, yPx } = getDropLandingTranslate(
+          this.localParameters.imageLandingXY || '50, 50',
+          buttonCenterX,
+          imgWidth,
+          imgHeight,
+          imageLeft,
+          imageTop,
+          buttonCenterY
+        );
+        transforms[index] = `translate(${xPx}, ${yPx})`;
       }
     }
 
@@ -474,7 +463,7 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
       options: [],
       imageSource: '',
       imagePosition: 'BOTTOM',
-      imageLandingXY: '',
+      imageLandingXY: '50, 50',
       text: ''
     };
   }

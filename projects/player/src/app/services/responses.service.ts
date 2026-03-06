@@ -12,8 +12,6 @@ import { FeedbackDefinition } from '../models/feedback';
 })
 
 export class ResponsesService {
-  // TODO change to readonly and add support function interactionDone
-  firstInteractionDone = signal(false);
   unitDefinitionProblem = signal('');
   responseProgress = signal<Progress>('none');
   mainAudioComplete = signal(false);
@@ -28,6 +26,7 @@ export class ResponsesService {
   private pendingAudioFeedbackSource = '';
   feedbackDefinitions: FeedbackDefinition[] = [];
   formerStateResponses = signal<Response[]>([]);
+  presentationProgress = signal<Progress>('some');
 
   /**
   * Interpret mixed input as a number
@@ -46,8 +45,11 @@ export class ResponsesService {
     return 0;
   }
 
-  setNewData(unitDefinition: UnitDefinition = null) {
-    this.firstInteractionDone.set(false);
+  /**
+   * Resets all state-related properties and signals to their initial values.
+   * This ensures a clean state whenever a new unit is loaded.
+   */
+  reset() {
     this.unitDefinitionProblem.set('');
     this.videoComplete.set(false);
     this.variableInfo = [];
@@ -56,7 +58,18 @@ export class ResponsesService {
     this.pendingAudioFeedback.set(false);
     this.pendingAudioFeedbackSource = '';
     this.feedbackDefinitions = [];
+    this.responseProgress.set('none');
+    this.presentationProgress.set('some');
+    this.mainAudioComplete.set(false);
+    this.formerStateResponses.set([]);
+  }
 
+  /**
+   * Initializes the service with a new unit definition.
+   * Calls reset() at the beginning to ensure any previous unit state is cleared.
+   */
+  setNewData(unitDefinition: UnitDefinition = null) {
+    this.reset();
     if (unitDefinition) {
       const problems: string[] = [];
       if (unitDefinition.variableInfo && unitDefinition.variableInfo.length > 0) {
@@ -106,22 +119,6 @@ export class ResponsesService {
       }
       if (problems.length > 0) this.unitDefinitionProblem.set(problems.join('; '));
     }
-
-    // Restore from former state if available
-    const former = this.formerStateResponses();
-    if (former && former.length > 0) {
-      const mainAudioResp = former.find(r => r.id === 'mainAudio');
-      if (mainAudioResp) {
-        const n = this.asNumberOrZero(mainAudioResp.value);
-        if (n >= 1) {
-          this.mainAudioComplete.set(true);
-          this.firstInteractionDone.set(true);
-        }
-      }
-      // Restore allResponses from former state
-      this.allResponses = JSON.parse(JSON.stringify(former));
-      this.lastResponsesString = JSON.stringify(former);
-    }
   }
 
   newResponses(responses: StarsResponse[]) {
@@ -144,6 +141,7 @@ export class ResponsesService {
         }
         if (incomingN >= 1 || this.mainAudioComplete()) {
           this.mainAudioComplete.set(true);
+          this.presentationProgress.set('complete');
         }
       } else {
         // Default behavior for all other responses
@@ -316,9 +314,33 @@ export class ResponsesService {
     return isComplete ? 'complete' : 'some';
   }
 
-  private getPresentationStatus(): Progress {
-    if (this.mainAudioComplete()) return 'complete';
-    return 'some';
+  getPresentationStatus(): Progress {
+    return this.presentationProgress();
+  }
+
+  /**
+   * Updates the unit's presentation progress (e.g., 'none', 'some', 'complete').
+   * This status is used to track whether the user has interacted with the unit's
+   * presentation elements, such as dismissing the click-layer or finishing the main audio.
+   * A 'complete' status cannot be downgraded to 'some' or 'none'.
+   * Each update triggers a vopStateChangedNotification to the Verona host.
+   */
+  updatePresentationProgress(progress: Progress): void {
+    if (this.presentationProgress() === 'complete' && progress !== 'complete') {
+      return;
+    }
+    this.presentationProgress.set(progress);
+    const unitState: UnitState = {
+      unitStateDataType: UnitStateDataType,
+      dataParts: {
+        responses: this.lastResponsesString
+      },
+      responseProgress: this.responseProgress(),
+      presentationProgress: this.presentationProgress()
+    };
+    if (this.veronaPostService) {
+      this.veronaPostService.sendVopStateChangedNotification({ unitState });
+    }
   }
 
   getAudioFeedback(setAsPlayed: boolean): string {
@@ -384,64 +406,54 @@ export class ResponsesService {
     const prevPresentation = this.getPresentationStatus();
     const prevResponse = this.responseProgress();
 
-    if (!unitState) {
-      this.formerStateResponses.set([]);
-      this.mainAudioComplete.set(false);
-      this.allResponses = [];
-      this.lastResponsesString = '';
-      this.responseProgress.set('none');
-    } else if (unitState.dataParts) {
-      const dataParts = unitState.dataParts || {};
-      const responsesJson = Object.values(dataParts)[0];
+    // Reset all state to defaults first
+    this.formerStateResponses.set([]);
+    this.mainAudioComplete.set(false);
+    this.presentationProgress.set('some');
+    this.allResponses = [];
+    this.lastResponsesString = '';
+    this.responseProgress.set('none');
 
-      if (responsesJson) {
-        try {
-          const parsedResponses = JSON.parse(responsesJson as string) as Response[];
-          this.formerStateResponses.set(parsedResponses);
+    if (unitState) {
+      if (unitState.presentationProgress) {
+        this.presentationProgress.set(unitState.presentationProgress);
+      }
+      if (unitState.dataParts) {
+        const dataParts = unitState.dataParts || {};
+        const responsesJson = dataParts['responses'];
 
-          this.allResponses = JSON.parse(JSON.stringify(parsedResponses));
-          this.lastResponsesString = responsesJson as string;
+        if (responsesJson) {
+          try {
+            const parsedResponses = JSON.parse(responsesJson as string) as Response[];
+            this.formerStateResponses.set(parsedResponses);
 
-          // Restore mainAudio completion from saved responses
-          const mainAudioResp = parsedResponses.find(r => r.id === 'mainAudio');
-          if (mainAudioResp) {
-            const n = this.asNumberOrZero(mainAudioResp.value);
-            this.mainAudioComplete.set(n >= 1);
-            if (n >= 1) {
-              this.firstInteractionDone.set(true);
+            this.allResponses = JSON.parse(JSON.stringify(parsedResponses));
+            this.lastResponsesString = responsesJson as string;
+
+            // Restore mainAudio completion from saved responses
+            const mainAudioResp = parsedResponses.find(r => r.id === 'mainAudio');
+            if (mainAudioResp) {
+              const n = this.asNumberOrZero(mainAudioResp.value);
+              this.mainAudioComplete.set(n >= 1);
             }
-          } else {
-            this.mainAudioComplete.set(false);
-          }
+            if (this.mainAudioComplete()) {
+              this.presentationProgress.set('complete');
+            }
 
-          // Restore responseProgress: if any interaction response has VALUE_CHANGED (or CODING_COMPLETE), mark complete
-          const hasInteractionValueChanged =
-            parsedResponses.some(r => (r.status === 'VALUE_CHANGED' || r.status === 'CODING_COMPLETE') &&
-              r.id !== 'mainAudio' && r.id !== 'videoPlayer');
-          if (hasInteractionValueChanged) {
-            this.responseProgress.set('complete');
-            this.firstInteractionDone.set(true);
-          } else if (unitState.responseProgress) {
-            // fall back to provided responseProgress from unitState when available
-            this.responseProgress.set(unitState.responseProgress);
-          } else {
-            this.responseProgress.set('none');
+            // Restore responseProgress: if any interaction response has VALUE_CHANGED (or CODING_COMPLETE), mark complete
+            const hasInteractionValueChanged =
+              parsedResponses.some(r => (r.status === 'VALUE_CHANGED' || r.status === 'CODING_COMPLETE') &&
+                r.id !== 'mainAudio' && r.id !== 'videoPlayer');
+            if (hasInteractionValueChanged) {
+              this.responseProgress.set('complete');
+            } else if (unitState.responseProgress) {
+              // fall back to provided responseProgress from unitState when available
+              this.responseProgress.set(unitState.responseProgress);
+            }
+          } catch (error) {
+            console.warn('RESPONSE SERVICE Failed to parse former state responses:', error);
           }
-        } catch (error) {
-          console.warn('RESPONSE SERVICE Failed to parse former state responses:', error);
-          this.formerStateResponses.set([]);
-          this.mainAudioComplete.set(false);
-          this.allResponses = [];
-          this.lastResponsesString = '';
-          this.responseProgress.set('none');
         }
-      } else {
-        // No responses present in former state
-        this.formerStateResponses.set([]);
-        this.mainAudioComplete.set(false);
-        this.allResponses = [];
-        this.lastResponsesString = '';
-        this.responseProgress.set('none');
       }
     }
 

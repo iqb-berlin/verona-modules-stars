@@ -69,6 +69,11 @@
   border-radius: variables.$icons-border-radius;
   transform-origin: center center;
   transition: transform 1s ease-in-out;
+
+  svg {
+    background-color: #CDCDCD;
+    border-radius: variables.$icons-border-radius;
+  }
 }
 .icon-item.tens {
   width: 390px;
@@ -82,7 +87,7 @@
 
 .icon-item.no-transition {
   transition: none;
-  border-radius: variables.$icons-border-radius;;
+  border-radius: variables.$icons-border-radius;
 }
 
 .icon-item.animating,
@@ -93,6 +98,8 @@
   position: absolute;
   top: 0;
   left: 0;
+  box-shadow: none;
+  border-radius: variables.$icons-border-radius;
 }
 
 /* Wrapper items should be positioned absolutely so they stack on top of each other */
@@ -121,7 +128,7 @@
 .ones-wrapper.disabled {
   position: relative;
   background-color: rgba(0, 0, 0, 0.06);
-  border-radius: 15px;
+  border-radius: variables.$icons-border-radius;
 }
 .tens-wrapper.disabled::after,
 .ones-wrapper.disabled::after {
@@ -145,11 +152,11 @@
 }
 
 /* Apply box-shadows only to the bottom wrapper item to give a depth effect. */
-.tens-wrapper .icon-item:first-child:not(.moved) {
+.tens-wrapper .icon-item:first-child:not(.moved):not(.animating):not(.dragging) {
   @include variables.default-box-shadow;
 }
 
-.ones-wrapper .icon-item:first-child:not(.moved) {
+.ones-wrapper .icon-item:first-child:not(.moved):not(.animating):not(.dragging) {
   box-shadow: 3.91px 3.91px 0 0.2px rgba(0, 0, 0, 0.2);
 }
 
@@ -158,11 +165,10 @@
   box-shadow: none;
 }
 
-.icon-item.tens.moved {
+.icon-item.tens.moved:not(.animating):not(.dragging) {
   @include variables.default-box-shadow;
 }
 
-.icon-item.ones.moved {
+.icon-item.ones.moved:not(.animating):not(.dragging) {
   box-shadow: 3.91px 3.91px 0 0.2px rgba(0, 0, 0, 0.2);
 }
-
