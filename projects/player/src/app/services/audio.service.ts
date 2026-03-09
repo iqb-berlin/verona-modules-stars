@@ -221,7 +221,6 @@ export class AudioService {
     const audioId = this.audioId();
     if (!audioId) return;
 
-    let audioValue = this.percentElapsed || 0;
     let audioValue = this.percentElapsed() || 0;
     audioValue += this.playCount();
 

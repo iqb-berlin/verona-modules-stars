@@ -130,13 +130,12 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
         this.clickTargetLeft.set('0px');
         this.clickTargetSize.set('0px');
 
-          // No former state - initialize as new
-          this.responses.emit([{
-            id: this.localParameters.variableId,
-            status: 'DISPLAYED',
-            value: ''
-          }]);
-        }
+        // No former state - initialize as new
+        this.responses.emit([{
+          id: this.localParameters.variableId,
+          status: 'DISPLAYED',
+          value: ''
+        }]);
       }
     });
   }
