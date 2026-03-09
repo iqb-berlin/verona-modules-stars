@@ -4,7 +4,9 @@ import {
 import {
   CdkDrag, CdkDragEnd
 } from '@angular/cdk/drag-drop';
+
 import { Response } from '@iqbspecs/response/response.interface';
+
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
 import { IconButtonTypeEnum, InteractionPlaceValueParams } from '../../models/unit-definition';
 import { parseTranslate, updateTransitionDisabledSet } from '../../shared/utils/drag-drop.util';
@@ -117,8 +119,7 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
           this.responses.emit([{
             id: this.localParameters.variableId,
             status: 'DISPLAYED',
-            value: '',
-            relevantForResponsesProgress: false
+            value: ''
           }]);
           this.hasRestoredFromFormerState = true;
         }
@@ -700,14 +701,12 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
       {
         id: this.localParameters?.variableId || 'PLACE_VALUE',
         status: 'VALUE_CHANGED',
-        value: (tensCount * 10) + onesCount,
-        relevantForResponsesProgress: true
+        value: (tensCount * 10) + onesCount
       },
       {
         id: this.localParameters?.variableId ? `${this.localParameters?.variableId}_TENS` : 'PLACE_VALUE_TENS',
         status: 'VALUE_CHANGED',
-        value: tensCount,
-        relevantForResponsesProgress: true
+        value: tensCount
       }
     ]);
   }

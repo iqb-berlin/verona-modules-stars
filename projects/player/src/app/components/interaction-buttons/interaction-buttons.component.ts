@@ -3,7 +3,7 @@ import {
 } from '@angular/core';
 
 import { Response } from '@iqbspecs/response/response.interface';
-import { StarsResponse } from '../../services/responses.service';
+
 import { VeronaPostService } from '../../services/verona-post.service';
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
 import {
@@ -27,8 +27,10 @@ import { AudioButtonComponent } from '../../shared/audio-button/audio-button.com
 export class InteractionButtonsComponent extends InteractionComponentDirective {
   /** Local copy of the component parameters with defaults applied. */
   localParameters!: InteractionButtonParams;
-  /** Array of booleans for each option. */
+  /** Array of booleans for each option for selected values. */
   selectedValues = signal<boolean[]>([]);
+  /** Array of booleans for each option for hint values. */
+  hintValues = signal<boolean[]>([]);
   /** Options sorted by rows. */
   optionRows: Array<Array<RowOption>> = [];
   /** Boolean to track if the former the state has been restored from response. */
@@ -106,11 +108,33 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
           this.responses.emit([{
             id: this.localParameters.variableId,
             status: 'DISPLAYED',
-            value: 0,
-            relevantForResponsesProgress: false
+            value: 0
           }]);
           this.hasRestoredFromFormerState = true;
         }
+      }
+    });
+
+    effect(() => {
+      const hints = this.showHint();
+      if (!hints || hints.length === 0) {
+        return;
+      }
+
+      if (this.localParameters.multiSelect) {
+        // set multiselect: "010" => [false, true, false]
+        const selectedStates = hints
+          .split('')
+          .map((char: string) => char === '1');
+        this.hintValues.set(selectedStates);
+      } else {
+        // set single select: "2" => [false, true, false]
+        const selectedIndex = parseInt(hints, 10) - 1;
+        const selectedStates = Array.from(
+          { length: this.selectedValues().length },
+          (_, i) => i === selectedIndex
+        );
+        this.hintValues.set(selectedStates);
       }
     });
   }
@@ -138,6 +162,10 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
     const numberOfOptions = this.localParameters.options?.buttons?.length ||
       this.localParameters.options?.repeatButton?.numberOfOptions || 0;
     this.selectedValues.set(Array.from(
+      { length: numberOfOptions },
+      () => false
+    ));
+    this.hintValues.set(Array.from(
       { length: numberOfOptions },
       () => false
     ));
@@ -361,11 +389,10 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
       this.selectedValues().map(item => (item ? 1 : 0)).join('') :
       (this.selectedValues().findIndex(item => item) + 1).toString();
 
-    const response = <StarsResponse>{
+    const response = <Response>{
       id: this.localParameters.variableId,
       status: status,
-      value: value,
-      relevantForResponsesProgress: relevant
+      value: value
     };
 
     this.responses.emit([response]);
@@ -394,5 +421,4 @@ interface RowOption {
   option: SelectionOption;
   index: number;
   id: string;
-}
 }

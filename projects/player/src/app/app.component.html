@@ -11,7 +11,7 @@
 
   <!-- audio component (show if player is not hidden) -->
   @if ((unitService.mainAudio().audioSource || unitService.openingImageParams().audioSource) && !stateService.openingImageActive()) {
-    <stars-audio [audio]="unitService.currentAudioSrc()" [firstAudioOptions]="unitService.firstAudioOptions()"></stars-audio>
+    <stars-audio [audio]="stateService.currentAudioSrc()" [firstAudioOptions]="unitService.firstAudioOptions()"></stars-audio>
   }
 
   <!-- Continue Button (hidden during opening flow) -->

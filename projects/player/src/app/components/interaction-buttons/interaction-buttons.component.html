@@ -42,7 +42,7 @@
                 [image]="button.option.imageSource"
                 [icon]="button.option.icon"
                 [selected]="selectedValues()[button.index]"
-                [hintSelect]=""
+                [hintSelect]="hintValues()[button.index] || false"
                 [type]="localParameters.buttonType"
                 [attr.data-cy]="button.option.audioSource ? 'button-with-audioSource-' + button.index : 'button-' + button.index"
                 (buttonClick)="onButtonClick(button.index)">

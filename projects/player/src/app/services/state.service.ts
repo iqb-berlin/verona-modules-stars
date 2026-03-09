@@ -29,13 +29,17 @@ export class StateService {
   openingImageActive = this.#openingImageActive.asReadonly();
   #metaInteractionActive = signal(false);
   metaInteractionActive = this.#metaInteractionActive.asReadonly();
+  /** current audio source for the main audio */
+  #currentAudioSrc = signal<AudioOptions>({} as AudioOptions);
+  currentAudioSrc = this.#currentAudioSrc.asReadonly();
 
   private state: StateEnum = StateEnum.INIT;
 
   setNewData(unitDefinition: UnitDefinition) {
     this.#firstInteractionDone.set(false);
     this.#firstClickLayerActive.set(unitDefinition.firstAudioOptions?.firstClickLayer ?? false);
-    this.#showMainAudio.set(unitDefinition.mainAudio?.audioSource !== undefined);
+    this.#showMainAudio.set(this.unitService.openingImageParams().audioSource !== undefined ||
+      unitDefinition.mainAudio?.audioSource !== undefined);
   }
 
   /** Whether to show the first click layer based on configuration and interaction status */
@@ -48,14 +52,13 @@ export class StateService {
   });
 
   // Public helpers for OpeningImageComponent
-  startOpeningFlow(params: OpeningImageParams = {} as OpeningImageParams) {
-    this.unitService.openingImageParams.set(params);
+  startOpeningImage(params: OpeningImageParams = {} as OpeningImageParams) {
     this.#openingImageActive.set(true);
   }
 
-  finishOpeningFlow() {
+  finishOpeningImage() {
     this.#openingImageActive.set(false);
-    if (this.unitService.mainAudio().audioSource) this._currentAudioSrc.set(this.unitService.mainAudio());
+    if (this.unitService.mainAudio().audioSource) this.#currentAudioSrc.set(this.unitService.mainAudio());
   }
 
   /** Any interaction done: click layer clicked, audio heard, or response given */
@@ -69,12 +72,6 @@ export class StateService {
     this.#firstClickLayerActive.set(false);
     this.#firstInteractionDone.set(true);
   }
-
-  /** Player button status: ready, paused, playing, ended, hide */
-  /** current audio source for the main audio */
-  private _currentAudioSrc = signal<AudioOptions>({} as AudioOptions);
-  currentAudioSrc = this._currentAudioSrc.asReadonly();
-
 
   continueButtonClicked() {
     if (this.feedbackService.pendingAudioFeedback()) {

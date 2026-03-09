@@ -6,7 +6,8 @@ import {
 } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import { StarsResponse } from '../../services/responses.service';
+import { Response } from '@iqbspecs/response/response.interface';
+
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
 import { InteractionVideoParams } from '../../models/unit-definition';
 
@@ -43,8 +44,7 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
         this.responses.emit([{
           id: this.localParameters.variableId,
           status: 'DISPLAYED',
-          value: '',
-          relevantForResponsesProgress: false
+          value: ''
         }]);
 
         this._isPlaying.set(false);
@@ -104,11 +104,10 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
     let videoValue = this.percentElapsed || 0;
     videoValue += this.playCount;
 
-    const response: StarsResponse = {
+    const response: Response = {
       id: 'videoPlayer',
       value: videoValue,
-      status: 'VALUE_CHANGED',
-      relevantForResponsesProgress: false
+      status: 'VALUE_CHANGED'
     };
 
     this.responses.emit([response]);

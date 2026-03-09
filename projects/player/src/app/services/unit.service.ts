@@ -19,7 +19,7 @@ import {
  * UnitService holds UnitDefinition, calculate Parameters, Fallback versioning
  */
 export class UnitService {
-  // TODO make more signals readonly
+  // TODO make these signals readonly
   firstAudioOptions = signal<FirstAudioOptionsParams>({} as FirstAudioOptionsParams);
   mainAudio = signal<AudioOptions>({} as AudioOptions);
   backgroundColor = signal('#EEE');
@@ -29,6 +29,7 @@ export class UnitService {
   ribbonBars = signal<boolean>(false);
   disableInteractionUntilComplete = signal(false);
   openingImageParams = signal<OpeningImageParams>({} as OpeningImageParams);
+  // TODO not included yet in stars unit definition
   metaInteraction = signal<MetaInteractionParams>({} as MetaInteractionParams);
 
   reset() {
@@ -78,5 +79,7 @@ export class UnitService {
     this.parameters.set(def.interactionParameters || {});
     this.ribbonBars.set(def.ribbonBars || false);
     this.disableInteractionUntilComplete.set(def.mainAudio?.disableInteractionUntilComplete || false);
+    this.openingImageParams.set(def.openingImage || {} as OpeningImageParams);
+    this.metaInteraction.set(def.metaInteraction || {}  as MetaInteractionParams);
   }
 }

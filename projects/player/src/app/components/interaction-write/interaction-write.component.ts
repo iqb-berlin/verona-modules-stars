@@ -1,7 +1,7 @@
 import { Component, effect } from '@angular/core';
 
 import { Response } from '@iqbspecs/response/response.interface';
-import { StarsResponse } from '../../services/responses.service';
+
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
 import { InteractionWriteParams } from '../../models/unit-definition';
 
@@ -72,8 +72,7 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
           this.responses.emit([{
             id: this.localParameters.variableId,
             status: 'DISPLAYED',
-            value: '',
-            relevantForResponsesProgress: false
+            value: ''
           }]);
           this.hasRestoredFromFormerState = true;
         }
@@ -90,7 +89,7 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
   }
 
   addChar(button: string) {
-    if (this.localParameters.maxInputLength !== null &&
+    if (this.localParameters.maxInputLength !== undefined &&
       this.currentText.length >= this.localParameters.maxInputLength) {
       return;
     }
@@ -98,7 +97,7 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
     const charToAdd = this.currentText.length === 0 ? this.capitalize(button) : button;
     this.currentText += charToAdd;
 
-    this.isDisabled = this.localParameters.maxInputLength !== null &&
+    this.isDisabled = this.localParameters.maxInputLength !== undefined &&
       this.currentText.length >= this.localParameters.maxInputLength;
 
     this.valueChanged();
@@ -107,18 +106,17 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
   deleteChar() {
     if (this.currentText.length > 0) {
       this.currentText = this.currentText.slice(0, -1);
-      this.isDisabled = this.localParameters.maxInputLength !== null &&
+      this.isDisabled = this.localParameters.maxInputLength !== undefined &&
         this.currentText.length >= this.localParameters.maxInputLength;
       this.valueChanged();
     }
   }
 
   private valueChanged() {
-    const response: StarsResponse = {
-      id: this.localParameters.variableId,
+    const response: Response = {
+      id: this.localParameters.variableId || 'WRITE',
       status: 'VALUE_CHANGED',
-      value: this.currentText,
-      relevantForResponsesProgress: true
+      value: this.currentText
     };
 
     this.responses.emit([response]);
@@ -132,7 +130,7 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
     if (!response.value || typeof response.value !== 'string') return;
 
     this.currentText = response.value;
-    this.isDisabled = this.localParameters.maxInputLength !== null &&
+    this.isDisabled = this.localParameters.maxInputLength !== undefined &&
       this.currentText.length >= this.localParameters.maxInputLength;
   }
 

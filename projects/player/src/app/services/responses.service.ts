@@ -12,23 +12,25 @@ import { FeedbackDefinition } from '../models/feedback';
   providedIn: 'root'
 })
 
+/**
+ * Response Service calculates responses, coding etc., send value changed
+ */
 export class ResponsesService {
+  veronaPostService = inject(VeronaPostService);
+
   #firstInteractionDone = signal(false);
   firstInteractionDone = this.#firstInteractionDone.asReadonly();
 
+  formerStateResponses = signal<Response[]>([]);
   responseProgress = signal<Progress>('none');
   mainAudioComplete = signal(false);
   videoComplete = signal(false);
 
   allResponses: Response[] = [];
   variableInfo: VariableInfo[] = [];
-  veronaPostService = inject(VeronaPostService);
   hasParentWindow = window === window.parent;
-  lastResponsesString = '';
-  pendingAudioFeedback = signal(false);
-  private pendingAudioFeedbackSource = '';
-  feedbackDefinitions: FeedbackDefinition[] = [];
-  formerStateResponses = signal<Response[]>([]);
+  // Helper to prevent unnecessary calculations
+  private lastResponsesString = '';
 
   /**
    * Interpret mixed input as a number
@@ -48,18 +50,31 @@ export class ResponsesService {
   }
 
   /**
+   * Reset
+   */
+  resetData() {
+    this.#firstInteractionDone.set(false);
+    this.formerStateResponses.set([]);
+    this.mainAudioComplete.set(false);
+    this.videoComplete.set(false);
+    this.allResponses = [];
+    this.variableInfo = [];
+    this.lastResponsesString = '';
+    this.responseProgress.set('none');
+  }
+
+  /**
    * Set New Data for ResponseService aka new unit has been loaded
    * incl. reset all variables
    * @param unitDefinition
    */
   setNewData(unitDefinition: UnitDefinition) {
-    this.#firstInteractionDone.set(false);
-    this.videoComplete.set(false);
-    this.variableInfo = [];
+    this.resetData();
+
+    this.mainAudioComplete.set(false);
+
     this.allResponses = [];
     this.lastResponsesString = '';
-    this.pendingAudioFeedback.set(false);
-    this.pendingAudioFeedbackSource = '';
 
     if (unitDefinition) {
       if (unitDefinition.variableInfo && unitDefinition.variableInfo.length > 0) {
@@ -180,47 +195,6 @@ export class ResponsesService {
   }
 
   /**
-   * Helper Function to check if responseValue is inside range
-   * @param responseValue - as string of form 'x,y'
-   * @param range - as string of form 'x1,y1-x2,y2'
-   * @return boolean
-   * @private
-   */
-  private static isPositionInRange(responseValue: string, range: string): boolean {
-    if (responseValue && range) {
-      const responseMatches = responseValue.match(/\d+/g);
-      if (responseMatches && responseMatches.length === 2) {
-        const responseX = Number.parseInt(responseMatches[0], 10);
-        // @ts-ignore
-        const responseY = Number.parseInt(responseMatches[1], 10);
-        const rangeMatches = range.match(/\d+/g);
-        if (rangeMatches && rangeMatches.length === 4) {
-          const rangeX1 = Number.parseInt(rangeMatches[0], 10);
-          // @ts-ignore
-          const rangeY1 = Number.parseInt(rangeMatches[1], 10);
-          // @ts-ignore
-          const rangeX2 = Number.parseInt(rangeMatches[2], 10);
-          // @ts-ignore
-          const rangeY2 = Number.parseInt(rangeMatches[3], 10);
-          let compareXOk: boolean;
-          if (rangeX1 < rangeX2) {
-            compareXOk = responseX >= rangeX1 && responseX <= rangeX2;
-          } else {
-            compareXOk = responseX <= rangeX1 && responseX >= rangeX2;
-          }
-          if (compareXOk) {
-            if (rangeY1 < rangeY2) {
-              return responseY >= rangeY1 && responseY <= rangeY2;
-            }
-            return responseY <= rangeY1 && responseY >= rangeY2;
-          }
-        }
-      }
-    }
-    return false;
-  }
-
-  /**
    * Coding for a given response
    * @param givenResponse
    * @return Response
@@ -299,6 +273,47 @@ export class ResponsesService {
   }
 
   /**
+   * Helper Function to check if responseValue is inside range
+   * @param responseValue - as string of form 'x,y'
+   * @param range - as string of form 'x1,y1-x2,y2'
+   * @return boolean
+   * @private
+   */
+  private static isPositionInRange(responseValue: string, range: string): boolean {
+    if (responseValue && range) {
+      const responseMatches = responseValue.match(/\d+/g);
+      if (responseMatches && responseMatches.length === 2) {
+        const responseX = Number.parseInt(responseMatches[0], 10);
+        // @ts-ignore
+        const responseY = Number.parseInt(responseMatches[1], 10);
+        const rangeMatches = range.match(/\d+/g);
+        if (rangeMatches && rangeMatches.length === 4) {
+          const rangeX1 = Number.parseInt(rangeMatches[0], 10);
+          // @ts-ignore
+          const rangeY1 = Number.parseInt(rangeMatches[1], 10);
+          // @ts-ignore
+          const rangeX2 = Number.parseInt(rangeMatches[2], 10);
+          // @ts-ignore
+          const rangeY2 = Number.parseInt(rangeMatches[3], 10);
+          let compareXOk: boolean;
+          if (rangeX1 < rangeX2) {
+            compareXOk = responseX >= rangeX1 && responseX <= rangeX2;
+          } else {
+            compareXOk = responseX <= rangeX1 && responseX >= rangeX2;
+          }
+          if (compareXOk) {
+            if (rangeY1 < rangeY2) {
+              return responseY >= rangeY1 && responseY <= rangeY2;
+            }
+            return responseY <= rangeY1 && responseY >= rangeY2;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
    * Returns the response for a specific variableId
    * @param id variableId
    * @returns Response
@@ -355,14 +370,6 @@ export class ResponsesService {
     return 'some';
   }
 
-  resetState() {
-    this.formerStateResponses.set([]);
-    this.mainAudioComplete.set(false);
-    this.allResponses = [];
-    this.lastResponsesString = '';
-    this.responseProgress.set('none');
-  }
-
   /**
    * set state of former state
    * @param unitState
@@ -372,7 +379,7 @@ export class ResponsesService {
     const prevResponse = this.responseProgress();
 
     if (!unitState) {
-      this.resetState();
+      this.resetData();
     } else if (unitState.dataParts) {
       const dataParts = unitState.dataParts || {};
       // TODO check if dataParts never can have more than one key (responses)
@@ -413,11 +420,11 @@ export class ResponsesService {
           }
         } catch (error) {
           console.warn('RESPONSE SERVICE Failed to parse former state responses:', error);
-          this.resetState();
+          this.resetData();
         }
       } else {
         // No responses present in former state
-        this.resetState();
+        this.resetData();
       }
     }
 

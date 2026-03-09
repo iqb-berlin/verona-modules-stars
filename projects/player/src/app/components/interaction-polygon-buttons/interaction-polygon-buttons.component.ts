@@ -1,10 +1,10 @@
 import {
   Component, effect, inject, signal
 } from '@angular/core';
+
 import { Response } from '@iqbspecs/response/response.interface';
 
 import { VeronaPostService } from '../../services/verona-post.service';
-import { StarsResponse } from '../../services/responses.service';
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
 import { InteractionPolygonButtonsParams } from '../../models/unit-definition';
 
@@ -57,8 +57,7 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
         this.responses.emit([{
           id: this.localParameters.variableId || '',
           status: 'DISPLAYED',
-          value: 0,
-          relevantForResponsesProgress: false
+          value: 0
         }]);
         this.hasRestoredFromFormerState = true;
       }
@@ -121,11 +120,10 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
       this.selectedValues().map(item => (item ? 1 : 0)).join('') :
       (this.selectedValues().findIndex(item => item) + 1).toString();
 
-    const response: StarsResponse = {
+    const response: Response = {
       id: this.localParameters.variableId || '',
       status: status,
-      value: value,
-      relevantForResponsesProgress: relevant
+      value: value
     };
 
     this.responses.emit([response]);

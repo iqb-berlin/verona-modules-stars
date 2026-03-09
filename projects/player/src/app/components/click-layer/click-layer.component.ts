@@ -1,7 +1,8 @@
 import {
   Component, inject
 } from '@angular/core';
-import { UnitService } from '../../services/unit.service';
+
+import { StateService } from "../../services/state.service";
 
 @Component({
   selector: 'stars-click-layer',
@@ -10,9 +11,5 @@ import { UnitService } from '../../services/unit.service';
 })
 
 export class ClickLayerComponent {
-  unitService = inject(UnitService);
-
-  handleClick() {
-    this.unitService.setFirstClickLayerClicked();
-  }
+  stateService = inject(StateService);
 }

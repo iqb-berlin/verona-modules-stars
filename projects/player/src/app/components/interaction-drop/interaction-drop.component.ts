@@ -12,7 +12,7 @@ import {
 } from '@angular/cdk/drag-drop';
 
 import { Response } from '@iqbspecs/response/response.interface';
-import { StarsResponse } from '../../services/responses.service';
+
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
 import { InteractionDropParams } from '../../models/unit-definition';
 import { StandardButtonComponent } from '../../shared/standard-button/standard-button.component';
@@ -125,8 +125,7 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
           this.responses.emit([{
             id: this.localParameters.variableId,
             status: 'DISPLAYED',
-            value: 0,
-            relevantForResponsesProgress: false
+            value: 0
           }]);
           this.hasRestoredFromFormerState = true;
         }
@@ -446,11 +445,10 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
    * Emits response for selection change
    */
   private emitSelectionResponse(): void {
-    const response: StarsResponse = {
+    const response: Response = {
       id: this.localParameters.variableId ?? 'DROP',
       status: 'VALUE_CHANGED',
-      value: this.selectedValue() + 1,
-      relevantForResponsesProgress: true
+      value: this.selectedValue() + 1
     };
     this.responses.emit([response]);
   }

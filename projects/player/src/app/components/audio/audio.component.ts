@@ -40,7 +40,7 @@ export class AudioComponent {
 
     effect(() => {
       // play audio when triggered from the firstClickLayer
-      if (this.unitService.firstClickLayerClicked()) {
+      if (this.stateService.firstClickLayerActive()) {
         this.play();
       }
     });
@@ -63,9 +63,9 @@ export class AudioComponent {
         clearTimeout(this.animateTimer);
       }
 
-      if (this.firstAudioOptions()?.animateButton && !this.unitService.interactionDone()) {
+      if (this.firstAudioOptions()?.animateButton && !this.stateService.interactionDone()) {
         this.animateTimer = setTimeout(() => {
-          if (!this.unitService.interactionDone()) {
+          if (!this.stateService.interactionDone()) {
             this.movingButton.set(true);
           }
         }, 10000);
@@ -77,7 +77,7 @@ export class AudioComponent {
   }
 
   play() {
-    const audio = this.unitService.currentAudioSrc();
+    const audio = this.stateService.currentAudioSrc();
 
     if (audio && audio.audioId) {
       this.audioService.setAudioSrc(audio).then(() => {
