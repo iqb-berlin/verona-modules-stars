@@ -21,17 +21,9 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
   /** An array of lowercase alphabet characters. */
   characterList = [...'abcdefghijklmnopqrstuvwxyz'];
   numbersList: string[] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-  numbersListBlock = [
-    ['1', '2', '3'],
-    ['4', '5', '6'],
-    ['7', '8', '9'],
-    ['0']
-  ];
 
   /** Small array of additional characters (German umlauts). */
   umlautListChars = [...'äöü'];
-  /** Boolean to track if the former state has been restored from response. */
-  private hasRestoredFromFormerState = false;
 
   constructor() {
     super();
@@ -39,8 +31,6 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
     effect(() => {
       const parameters = this.parameters() as InteractionWriteParams;
       this.localParameters = this.createDefaultParameters();
-      this.hasRestoredFromFormerState = false;
-
       if (parameters) {
         this.localParameters.addBackspaceKey = parameters.addBackspaceKey || true;
         this.localParameters.addUmlautKeys = parameters.addUmlautKeys || true;
@@ -50,32 +40,35 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
         this.localParameters.maxInputLength = parameters.maxInputLength || 10;
         this.localParameters.imageSource = parameters.imageSource || '';
         this.localParameters.text = parameters.text || '';
-        // Only restore from former state once, on initial load
-        if (!this.hasRestoredFromFormerState) {
-          const formerStateResponses: Response[] = (parameters as any).formerState || [];
 
-          if (Array.isArray(formerStateResponses) && formerStateResponses.length > 0) {
-            const found = formerStateResponses.find(r => r.id === this.localParameters.variableId);
+        const formerStateResponses: Response[] = (parameters as any).formerState || [];
 
-            if (found && typeof found.value === 'string') {
-              this.restoreFromFormerState(found);
-              this.hasRestoredFromFormerState = true;
-              return;
-            }
+        // Explicitly reset the text and input status before attempting restoration
+        // This prevents state "leakage" if a previous unit used the same variableId
+        this.currentText = '';
+        this.isDisabled = this.localParameters?.maxInputLength !== null &&
+          this.localParameters?.maxInputLength !== undefined &&
+          this.currentText.length >= this.localParameters.maxInputLength;
+
+        if (Array.isArray(formerStateResponses) && formerStateResponses.length > 0) {
+          const found = formerStateResponses.find(r => r.id === this.localParameters.variableId);
+
+          if (found && typeof found.value === 'string') {
+            this.restoreFromFormerState(found);
+            return;
           }
-
-          // No former state - initialize as new
-          this.currentText = '';
-          this.isDisabled = this.localParameters.maxInputLength !== null &&
-            this.currentText.length >= this.localParameters.maxInputLength;
-
-          this.responses.emit([{
-            id: this.localParameters.variableId,
-            status: 'DISPLAYED',
-            value: ''
-          }]);
-          this.hasRestoredFromFormerState = true;
         }
+
+        // No former state - initialize as new
+        this.currentText = '';
+        this.isDisabled = this.localParameters.maxInputLength !== null &&
+          this.currentText.length >= this.localParameters.maxInputLength;
+
+        this.responses.emit([{
+          id: this.localParameters.variableId,
+          status: 'DISPLAYED',
+          value: ''
+        }]);
       }
 
       if (!this.currentText) this.currentText = '';
@@ -89,7 +82,8 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
   }
 
   addChar(button: string) {
-    if (this.localParameters.maxInputLength !== undefined &&
+    if (this.localParameters?.maxInputLength !== null &&
+      this.localParameters?.maxInputLength !== undefined &&
       this.currentText.length >= this.localParameters.maxInputLength) {
       return;
     }
@@ -97,7 +91,8 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
     const charToAdd = this.currentText.length === 0 ? this.capitalize(button) : button;
     this.currentText += charToAdd;
 
-    this.isDisabled = this.localParameters.maxInputLength !== undefined &&
+    this.isDisabled = this.localParameters?.maxInputLength !== null &&
+      this.localParameters?.maxInputLength !== undefined &&
       this.currentText.length >= this.localParameters.maxInputLength;
 
     this.valueChanged();
@@ -106,7 +101,8 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
   deleteChar() {
     if (this.currentText.length > 0) {
       this.currentText = this.currentText.slice(0, -1);
-      this.isDisabled = this.localParameters.maxInputLength !== undefined &&
+      this.isDisabled = this.localParameters?.maxInputLength !== null &&
+        this.localParameters?.maxInputLength !== undefined &&
         this.currentText.length >= this.localParameters.maxInputLength;
       this.valueChanged();
     }
@@ -130,7 +126,8 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
     if (!response.value || typeof response.value !== 'string') return;
 
     this.currentText = response.value;
-    this.isDisabled = this.localParameters.maxInputLength !== undefined &&
+    this.isDisabled = this.localParameters?.maxInputLength !== null &&
+      this.localParameters?.maxInputLength !== undefined &&
       this.currentText.length >= this.localParameters.maxInputLength;
   }
 

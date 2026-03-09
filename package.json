@@ -1,6 +1,6 @@
 {
   "name": "verona-modules-stars",
-  "version": "0.6.23",
+  "version": "0.6.29",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -9,11 +9,11 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "validate-data": "validate-json cypress/fixtures/deutsch/interaction-buttons stars-unit-definition 1.2",
+    "validate-data": "validate-json cypress/fixtures/deutsch/interaction-buttons stars-unit-definition 1.10",
     "build": "ng build --configuration production --output-hashing=none",
     "postbuild": "node projects/tools/distpacker.js dist/stars-player/browser index_packed.html",
     "e2e": "npx cypress run",
-    "cy:open": "cypress open --browser chrome cypress/e2e/deutsch/interaction-find-on-image",
+    "cy:open": "cypress open --browser chrome cypress/e2e/interaction-find-on-image",
     "test": "start-server-and-test start http://localhost:4200 cy:open"
   },
   "dependencies": {
@@ -28,14 +28,15 @@
     "rxjs": "~7.8.1"
   },
   "devDependencies": {
-    "@angular-eslint/builder": "^19.8.1",
-    "@angular-eslint/eslint-plugin": "^19.8.1",
-    "@angular-eslint/eslint-plugin-template": "^19.8.1",
-    "@angular-eslint/schematics": "^19.8.1",
-    "@angular-eslint/template-parser": "^19.8.1",
-    "@angular/build": "^20.3.18",
-    "@angular/cli": "^20.3.18",
-    "@angular/compiler-cli": "^20.3.17",
+    "@angular-eslint/builder": "^20.7.0",
+    "@angular-eslint/eslint-plugin": "^20.7.0",
+    "@angular-eslint/eslint-plugin-template": "^20.7.0",
+    "@angular-eslint/schematics": "^20.7.0",
+    "@angular-eslint/template-parser": "^20.7.0",
+    "@angular/build": "^20.3.15",
+    "@angular/cli": "~20.3.15",
+    "@angular/compiler-cli": "^20.3.16",
+    "@iqb/eslint-config": "^2.0.0",
     "@iqbspecs/validate-json": "^0.1.0",
     "@types/jasmine": "~3.6.0",
     "@types/jasminewd2": "~2.0.10",
@@ -66,6 +67,7 @@
     "typescript": "^5.8.3"
   },
   "eslintConfig": {
+    "extends": "@iqb/eslint-config",
     "parserOptions": {
       "project": "./tsconfig.base.json"
     },

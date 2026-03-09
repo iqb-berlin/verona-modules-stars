@@ -1,6 +1,6 @@
 <div class="write-container" data-cy="write-container" [class]="localParameters.keyboardMode.toLowerCase() + '-type'">
   <div class="stimulus-wrapper" data-cy="stimulus-wrapper">
-    <img [src]="localParameters.imageSource" [alt]="" data-cy="stimulus-image">
+    <img [src]="localParameters.imageSource" [alt]="localParameters.text || ''" data-cy="stimulus-image">
   </div>
 
   <div class="input-wrapper">

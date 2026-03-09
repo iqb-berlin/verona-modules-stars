@@ -132,7 +132,11 @@ export class AudioService {
     return new Promise(resolve => {
       // normalize and check for a valid source first
       const source = (audio?.audioSource || '').trim();
-      const variableId = audio.audioId || 'audio';
+      const variableId = audio.audioId || '';
+      if (!variableId) {
+        resolve(false);
+        return;
+      }
       const formerResponse = this.responsesService.getResponseByVariableId(variableId);
 
       // update meta/signals
@@ -214,11 +218,15 @@ export class AudioService {
 
   /** send playback time as a percentage of audio duration as a response */
   sendPlaybackTimeChanged(): void {
+    const audioId = this.audioId();
+    if (!audioId) return;
+
+    let audioValue = this.percentElapsed || 0;
     let audioValue = this.percentElapsed() || 0;
     audioValue += this.playCount();
 
     this.responsesService.newResponses([{
-      id: this.audioId(),
+      id: audioId,
       value: audioValue,
       status: 'VALUE_CHANGED'
     }]);

@@ -36,6 +36,7 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
   /** Boolean to track if the former the state has been restored from response. */
   // TODO no need for this, if parameters change state has to be set
   private hasRestoredFromFormerState = false;
+
   /** Flag to mark images useFullArea: true. */
   useFullArea = false;
 
@@ -50,7 +51,6 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
     effect(() => {
       const parameters = this.parameters() as InteractionButtonParams;
       this.localParameters = this.createDefaultParameters();
-      this.hasRestoredFromFormerState = false;
 
       if (parameters) {
         this.localParameters.options = parameters.options || {};
@@ -87,31 +87,27 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
         this.optionRows = this.getRowsOptions();
 
         // Only restore from former state once, on initial load
-        if (!this.hasRestoredFromFormerState) {
-          this.resetSelection();
-          const formerStateResponse: Response[] = parameters.formerState || [];
+        const formerStateResponse: Response[] = parameters.formerState || [];
 
-          if (Array.isArray(formerStateResponse) && formerStateResponse.length > 0) {
-            const foundResponse = formerStateResponse.find(
-              response => response.id === this.localParameters.variableId
-            );
+        if (Array.isArray(formerStateResponse) && formerStateResponse.length > 0) {
+          const foundResponse = formerStateResponse.find(
+            response => response.id === this.localParameters.variableId
+          );
 
-            if (foundResponse && foundResponse.value) {
-              this.restoreFromFormerState(foundResponse);
-              this.hasRestoredFromFormerState = true;
-              return;
-            }
+          if (foundResponse && foundResponse.value) {
+            this.restoreFromFormerState(foundResponse);
+            return;
           }
-
-          // No former state found - initialize as new
-          this.resetSelection();
-          this.responses.emit([{
-            id: this.localParameters.variableId,
-            status: 'DISPLAYED',
-            value: 0
-          }]);
-          this.hasRestoredFromFormerState = true;
         }
+
+        // No former state found - initialize as new
+        this.resetSelection();
+        this.responses.emit([{
+          id: this.localParameters.variableId,
+          status: 'DISPLAYED',
+          value: 0,
+          relevantForResponsesProgress: false
+        }]);
       }
     });
 

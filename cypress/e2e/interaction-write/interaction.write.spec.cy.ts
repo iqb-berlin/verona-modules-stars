@@ -1,9 +1,14 @@
 import { InteractionWriteParams, UnitDefinition } from '../../../projects/player/src/app/models/unit-definition';
 import { testBaseFeatures } from '../shared/base-features.spec.cy';
+import { testFormerStateFeatures } from '../shared/former-state.spec.cy';
 
 describe('Interaction WRITE Component', () => {
   const interactionType = 'write';
   const defaultTestFile = 'write_characters_test';
+
+  beforeEach(() => {
+    cy.clearUnitStates();
+  });
 
   it('has stimulus wrapper with an image inside', () => {
     cy.setupTestData(defaultTestFile, interactionType);
@@ -131,4 +136,6 @@ describe('Interaction WRITE Component', () => {
 
   // Test base features for the WRITE interaction type
   testBaseFeatures(interactionType, defaultTestFile);
+  // Test former state features for the WRITE interaction type
+  testFormerStateFeatures(interactionType, defaultTestFile);
 });

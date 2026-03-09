@@ -1,5 +1,5 @@
 import {
-  AfterViewInit, Component, effect, ElementRef, signal, ViewChild
+  AfterViewInit, Component, effect, ElementRef, signal, ViewChild, inject
 } from '@angular/core';
 import {
   fromEvent, Subject, tap, throttleTime
@@ -10,6 +10,7 @@ import { Response } from '@iqbspecs/response/response.interface';
 
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
 import { InteractionVideoParams } from '../../models/unit-definition';
+import { VeronaPostService } from '../../services/verona-post.service';
 
 @Component({
   selector: 'stars-interaction-video',
@@ -29,6 +30,8 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
   @ViewChild('videoPlayer', { static: false }) videoPlayerRef!: ElementRef<HTMLVideoElement>;
   private ngUnsubscribe = new Subject();
 
+  veronaPostService = inject(VeronaPostService);
+
   constructor() {
     super();
 
@@ -37,10 +40,16 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
       this.localParameters = this.createDefaultParameters();
 
       if (parameters) {
+        // Reset internal playback state for new unit
+        this.playCount = 0;
+        this.currentTime = 0;
+        this.percentElapsed = 0;
+
         this.localParameters.imageSource = parameters.imageSource || '';
         this.localParameters.videoSource = parameters.videoSource || '';
         this.localParameters.text = parameters.text || '';
-        this.localParameters.variableId = parameters.variableId || 'VIDEO';
+        this.localParameters.triggerNavigationOnEnd = parameters.triggerNavigationOnEnd || false;
+        this.localParameters.variableId = parameters.variableId || 'videoPlayer';
         this.responses.emit([{
           id: this.localParameters.variableId,
           status: 'DISPLAYED',
@@ -98,6 +107,14 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
     this.currentTime = 0;
     this.videoPlayerRef.nativeElement.currentTime = 0;
     this.videoPlayerRef.nativeElement.load();
+
+    // Check if triggerNavigationOnEnd is enabled
+    if (this.localParameters.triggerNavigationOnEnd === true) {
+      this.localParameters.triggerNavigationOnEnd = false;
+      setTimeout(() => {
+        this.veronaPostService.sendVopUnitNavigationRequestedNotification('next');
+      }, 500);
+    }
   }
 
   sendPlaybackTimeChanged(): void {
@@ -119,7 +136,8 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
       variableId: 'videoPlayer',
       imageSource: '',
       videoSource: '',
-      text: ''
+      text: '',
+      triggerNavigationOnEnd: false
     };
   }
 }

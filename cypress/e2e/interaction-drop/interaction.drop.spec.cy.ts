@@ -3,6 +3,7 @@ import {
   UnitDefinition
 } from '../../../projects/player/src/app/models/unit-definition';
 import { testBaseFeatures } from '../shared/base-features.spec.cy';
+import { testFormerStateFeatures } from '../shared/former-state.spec.cy';
 import { testResponsiveImageFeatures } from '../shared/responsive-image.spec.cy';
 import {
   formatPxValue,
@@ -14,11 +15,11 @@ describe('Interaction DROP Component', () => {
   const interactionType = 'drop';
   const defaultTestFile = 'drop_4_option_test';
 
+  beforeEach(() => {
+    cy.clearUnitStates();
+  });
+
   const testFileWithImageLandingXY = `${interactionType}_imagePosition_top_imageLandingXY_100-100_test`;
-  /** Ref from the value on interaction-drop.component.ts calculateButtonTransformValues function. */
-  const yValueToBottom = 280;
-  /** Ref from the value on interaction-drop.component.ts calculateButtonTransformValues function. */
-  const yValueToTop = -280;
   const dropImage = '[data-cy="drop-image"]';
   const buttonIndex = 1;
 
@@ -60,19 +61,22 @@ describe('Interaction DROP Component', () => {
   };
 
   /**
-   * Sets up test data with imageLandingXY and retrieves DOM elements needed for drop interaction tests.
+   * Sets up test data and retrieves DOM elements needed for drop interaction tests.
    * Calculates landing coordinates and transform values for the drop animation.
    *
+   * @param {string} [testFile] - Optional test file name. If not provided, uses testFileWithImageLandingXY.
    * @returns {Cypress.Chainable<any>} - Chainable resolving to calculated test values and DOM elements.
    */
-  const getTestSetupWithImageLandingXY = (
+  const getTestSetup = (
+    testFile?: string
   ): Cypress.Chainable<any> => {
-    cy.setupTestData(testFileWithImageLandingXY, interactionType);
+    const fileToUse = testFile || testFileWithImageLandingXY;
+    cy.setupTestData(fileToUse, interactionType);
 
     return cy.get('@testData').then(data => {
       const testData = data as unknown as UnitDefinition;
       const dropParams = testData.interactionParameters as InteractionDropParams;
-      const imageLandingXY = dropParams.imageLandingXY;
+      const imageLandingXY = dropParams.imageLandingXY || '50, 50';
 
       return cy.get(dropImage)
         .should('be.visible')
@@ -90,21 +94,17 @@ describe('Interaction DROP Component', () => {
                 buttonCenterX, imgWidth, imgHeight, imageTop, imageLeft, buttonCenterY
               } = getDropLandingArgs(imgElement, buttonElement, containerElement);
 
-              let xPx = '';
-              let yPx = '';
-              if (typeof imageLandingXY === 'string' && imageLandingXY.trim() !== '') {
-                const translate = getDropLandingTranslate(
-                  imageLandingXY,
-                  buttonCenterX,
-                  imgWidth,
-                  imgHeight,
-                  imageLeft,
-                  imageTop,
-                  buttonCenterY
-                );
-                xPx = translate.xPx;
-                yPx = translate.yPx;
-              }
+              const translate = getDropLandingTranslate(
+                imageLandingXY,
+                buttonCenterX,
+                imgWidth,
+                imgHeight,
+                imageLeft,
+                imageTop,
+                buttonCenterY
+              );
+              const xPx = translate.xPx;
+              const yPx = translate.yPx;
 
               return {
                 testData,
@@ -169,58 +169,26 @@ describe('Interaction DROP Component', () => {
   });
 
   // Image position
-  describe('Image position', () => {
-    describe('BOTTOM', () => {
-      beforeEach(() => {
-        cy.setupTestData(defaultTestFile, interactionType);
-      });
-
-      it('applies correct styles and downward movement', () => {
-        let testData: UnitDefinition;
-        cy.get('@testData').then(data => {
-          testData = data as unknown as UnitDefinition;
-
-          const dropParams = testData.interactionParameters as InteractionDropParams;
-          const imagePosition = dropParams.imagePosition;
-          if (imagePosition === 'BOTTOM') {
-            cy.get('[data-cy="drop-container"]').should('have.css', 'flex-direction', 'column-reverse');
-            assertStartAnimation();
-            cy.get(`[data-cy="drop-animate-wrapper-${buttonIndex}"]`)
-              .should($el => {
-                const style = $el.attr('style') || '';
-                expect(style).to.contain('transform');
-                const { yValue } = getTransformTranslateValues(style);
-                expect(yValue.trim()).to.equal(`${yValueToBottom}px`);
-              });
-          }
-        });
+  describe('Default imageLandingXY', () => {
+    it('applies default "50, 50" transform values when imageLandingXY is an empty string', () => {
+      getTestSetup('drop_imageLandingXY_empty_test').then(result => {
+        const { xPx, yPx } = result as {
+          xPx: string;
+          yPx: string;
+        };
+        assertStartAnimation();
+        assertTransformTranslate(xPx, yPx);
       });
     });
 
-    describe('TOP', () => {
-      beforeEach(() => {
-        cy.setupTestData(`${interactionType}_imagePosition_top_test`, interactionType);
-      });
-
-      it('applies correct styles and upward movement', () => {
-        let testData: UnitDefinition;
-        cy.get('@testData').then(data => {
-          testData = data as unknown as UnitDefinition;
-
-          const dropParams = testData.interactionParameters as InteractionDropParams;
-          const imagePosition = dropParams.imagePosition;
-          if (imagePosition === 'TOP') {
-            cy.get('[data-cy="drop-container"]').should('have.css', 'flex-direction', 'column');
-            assertStartAnimation();
-            cy.get(`[data-cy="drop-animate-wrapper-${buttonIndex}"]`)
-              .should($el => {
-                const style = $el.attr('style') || '';
-                expect(style).to.contain('transform');
-                const { yValue } = getTransformTranslateValues(style);
-                expect(yValue.trim()).to.equal(`${yValueToTop}px`);
-              });
-          }
-        });
+    it('applies default "50, 50" transform values when imageLandingXY property is missing', () => {
+      getTestSetup('drop_no_imageLandingXY_property_test').then(result => {
+        const { xPx, yPx } = result as {
+          xPx: string;
+          yPx: string;
+        };
+        assertStartAnimation();
+        assertTransformTranslate(xPx, yPx);
       });
     });
   });
@@ -228,7 +196,7 @@ describe('Interaction DROP Component', () => {
   // Landing coordinates
   describe('Landing coordinates', () => {
     it('applies correct transform values when imageLandingXY exists', () => {
-      getTestSetupWithImageLandingXY().then(result => {
+      getTestSetup().then(result => {
         const { imageLandingXY, xPx, yPx } = result as {
           imageLandingXY: string;
           xPx: string;
@@ -269,7 +237,7 @@ describe('Interaction DROP Component', () => {
   // Drag and drop
   describe('Drag and drop', () => {
     it('handles drag events correctly', () => {
-      getTestSetupWithImageLandingXY().then(result => {
+      getTestSetup().then(result => {
         const { imageLandingXY, xPx, yPx } = result as {
           imageLandingXY: string;
           xPx: string;
@@ -296,5 +264,8 @@ describe('Interaction DROP Component', () => {
 
   // Test base features for the DROP interaction type
   testBaseFeatures(interactionType, defaultTestFile);
+  // Test former state features for the DROP interaction type
+  testFormerStateFeatures(interactionType, defaultTestFile);
+  // Test responsive image features for the DROP interaction type
   testResponsiveImageFeatures(interactionType, `${interactionType}_imagePosition_top_test`, '[data-cy="drop-image"]');
 });
