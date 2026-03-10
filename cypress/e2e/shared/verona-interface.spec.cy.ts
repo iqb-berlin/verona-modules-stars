@@ -81,10 +81,6 @@ export function veronaInterfaceFeatures(interactionType: string) {
           });
 
         // Check if the UI is rendered
-        // cy.get(containerSelector)
-        //   .should('exist');
-
-        // Check if the UI is rendered
         cy.assertInteractionComponentVisible(interactionType);
 
         cy.get('@incomingMessages')

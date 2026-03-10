@@ -56,7 +56,7 @@ export function testMainAudioFeatures(interactionType: string, configFile: strin
       }
     });
 
-    it.only('is limitless clickable when maxPlay is 0', () => {
+    it('is limitless clickable when maxPlay is 0', () => {
       // Set up test data
       cy.setupTestData(`${interactionType}_maxPlay_0_test.json`, `${interactionType}`);
 
@@ -76,7 +76,7 @@ export function testMainAudioFeatures(interactionType: string, configFile: strin
       cy.get('[data-cy="audio-button-container"]').should('exist');
     });
 
-    it.only('stops playing and resets when navigating to a new unit', () => {
+    it('stops playing and resets when navigating to a new unit', () => {
       // 1. Start audio in first unit
       cy.get('[data-cy="speaker-icon"]').click();
       cy.get('[data-cy="custom-audio-button"]').should('have.class', 'playing');
