@@ -4,7 +4,7 @@ import { testFormerStateFeatures } from '../shared/former-state.spec.cy';
 
 describe('Interaction WRITE Component', () => {
   const interactionType = 'write';
-  const defaultTestFile = 'write_characters_test';
+  const defaultTestFile = 'write_test';
 
   beforeEach(() => {
     cy.clearUnitStates();

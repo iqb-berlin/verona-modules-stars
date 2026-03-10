@@ -1,8 +1,36 @@
 @use '_variables.scss';
+@use '_colors.scss';
 
 .number-line-container {
   @include variables.flex-center;
   flex-direction: column;
+  padding: 20px;
+}
+
+.svg-container {
+  width: 100%;
+  height: 100%;
+  margin-bottom: 20px;
+
+  svg {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+.number-text {
+  font-size: 20px;
+  pointer-events: none;
+}
+
+rect {
+  stroke-width: 0.5px;
+
+  &.empty-field {
+    stroke-dasharray: 2, 2;
+    stroke: colors.$highlight;
+    stroke-width: 1px;
+  }
 }
 
 .keyboard-wrapper {

@@ -1,4 +1,26 @@
-<div class="number-line-container">hello
+<div class="number-line-container">
+  <div class="svg-container">
+    <svg width="1000" height="400" viewBox="0 0 600 150" xmlns="http://www.w3.org/2000/svg">
+      <path
+        #numberLinePath
+        id="numberLinePath"
+        d="M 10 90 C 150 10, 270 10, 360 90 S 530 160, 590 90"
+        stroke="black"
+        fill="transparent" />
+      @for (item of numberLineItems; track item.value) {
+        <g [attr.transform]="'translate(' + item.x + ',' + item.y + ')'">
+          <rect x="-20" y="-22" width="40" height="44" rx="2" ry="2"
+                [class.empty-field]="item.isEmpty"
+                fill="white" stroke="black" />
+          <text x="0" y="0" text-anchor="middle" dominant-baseline="central"
+                class="number-text">
+            {{ item.isEmpty ? emptyNumberValue : item.value }}
+          </text>
+        </g>
+      }
+    </svg>
+  </div>
+
   <div class="keyboard-wrapper" data-cy="keyboard-wrapper">
     @for (button of numbersList; track $index) {
       <button type="button"
