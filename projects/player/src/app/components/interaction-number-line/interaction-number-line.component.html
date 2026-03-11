@@ -7,7 +7,7 @@
         d="M 10 90 C 150 10, 270 10, 360 90 S 530 160, 590 90"
         stroke="black"
         fill="transparent" />
-      @for (item of numberLineItems; track item.value) {
+      @for (item of numberLineItems(); track item.value) {
         <g [attr.transform]="'translate(' + item.x + ',' + item.y + ')'">
           <rect x="-20" y="-22" width="40" height="44" rx="2" ry="2"
                 [class.empty-field]="item.isEmpty"
@@ -37,7 +37,7 @@
             class="keyboard-button backspace-button"
             [attr.aria-label]="'Backspace'"
             (click)="handleBackButtonClick()"
-            [disabled]="isDisabled"
+            [disabled]="emptyNumberValue.length === 0"
             [attr.data-cy]="'backspace-button'"
     >
       <svg xmlns="http://www.w3.org/2000/svg" height="32" viewBox="0 -960 960 960" width="32"
