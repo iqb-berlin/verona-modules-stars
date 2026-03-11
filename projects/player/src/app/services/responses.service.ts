@@ -5,7 +5,7 @@ import { Progress, UnitState, UnitStateDataType } from '../models/verona';
 import { VeronaPostService } from './verona-post.service';
 import { UnitDefinition } from '../models/unit-definition';
 import { Code, VariableInfo } from '../models/responses';
-import { FeedbackDefinition } from '../models/feedback';
+import { FeedbackDefinition, ShowResponse } from '../models/feedback';
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +23,11 @@ export class ResponsesService {
   hasParentWindow = window === window.parent;
   lastResponsesString = '';
   pendingAudioFeedback = signal(false);
+  feedbackHint = signal('');
+  feedbackActive = signal(false);
   private pendingAudioFeedbackSource = '';
+  private pendingFeedbackHint = '';
+  private pendingHintDelay = 0;
   feedbackDefinitions: FeedbackDefinition[] = [];
   formerStateResponses = signal<Response[]>([]);
   presentationProgress = signal<Progress>('some');
@@ -57,7 +61,11 @@ export class ResponsesService {
     this.lastResponsesString = '';
     this.pendingAudioFeedback.set(false);
     this.pendingAudioFeedbackSource = '';
+    this.feedbackHint.set('');
+    this.feedbackActive.set(false);
     this.feedbackDefinitions = [];
+    this.pendingFeedbackHint = '';
+    this.pendingHintDelay = 0;
     this.responseProgress.set('none');
     this.presentationProgress.set('some');
     this.mainAudioComplete.set(false);
@@ -105,12 +113,18 @@ export class ResponsesService {
         unitDefinition.audioFeedback.feedback.length > 0) {
         unitDefinition.audioFeedback.feedback.forEach(f => {
           if (f.variableId && f.variableId.length > 0 && f.parameter && f.audioSource) {
+            let showResponse: ShowResponse = {
+              variableId: f.showResponse?.variableId || '',
+              value: f.showResponse?.value || '',
+              delayMS: f.showResponse?.delayMS || 0
+            };
             this.feedbackDefinitions.push({
               variableId: f.variableId,
               source: f.source || 'CODE',
               method: f.method || 'EQUALS',
               parameter: f.parameter,
-              audioSource: f.audioSource
+              audioSource: f.audioSource,
+              showResponse: showResponse
             });
           } else {
             problems.push('audioFeedback: variableId or parameter or audioSource missing');
@@ -352,12 +366,25 @@ export class ResponsesService {
     return returnValue;
   }
 
+  startFeedback() {
+    if (this.pendingFeedbackHint === '') return;
+    if (this.pendingHintDelay != 0) {
+      setTimeout(() => {
+        this.feedbackHint.set(this.pendingFeedbackHint);
+      }, this.pendingHintDelay);
+    } else {
+      this.feedbackHint.set(this.pendingFeedbackHint);
+    }
+    console.log('hint', this.pendingFeedbackHint);
+    this.feedbackActive.set(true);
+  }
+
   private provideFeedback(startVariable: string): void {
     this.pendingAudioFeedback.set(false);
     this.pendingAudioFeedbackSource = '';
     const responsesToCheck: string[] = [startVariable,
       ...this.allResponses.filter(r => r.id !== startVariable).map(r => r.id)];
-    const audioToPlay: string = responsesToCheck.map(varId => {
+    const audioToPlay = responsesToCheck.map(varId => {
       const responseToCheck = this.allResponses.find(r => r.id === varId);
       if (responseToCheck) {
         const feedbacksToUse = this.feedbackDefinitions
@@ -392,13 +419,18 @@ export class ResponsesService {
           }
           return valueAsNumber < parameterAsNumber;
         });
-        return feedbackToTake ? feedbackToTake.audioSource : '';
+        return feedbackToTake || undefined;
       }
-      return '';
+      return undefined;
     }).find(sourceString => !!sourceString);
     if (audioToPlay) {
+      console.log('audioToPlay', audioToPlay);
       this.pendingAudioFeedback.set(true);
-      this.pendingAudioFeedbackSource = audioToPlay;
+      this.pendingAudioFeedbackSource = audioToPlay.audioSource;
+      if (audioToPlay.showResponse?.variableId) {
+        this.pendingFeedbackHint = audioToPlay.showResponse.value;
+        this.pendingHintDelay = audioToPlay.showResponse.delayMS || 0;
+      }
     }
   }
 

@@ -3,7 +3,7 @@ import {
 } from '@angular/core';
 
 import { Response } from '@iqbspecs/response/response.interface';
-import { StarsResponse } from '../../services/responses.service';
+
 import { VeronaPostService } from '../../services/verona-post.service';
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
 import {
@@ -13,6 +13,7 @@ import {
 } from '../../models/unit-definition';
 import { StandardButtonComponent } from '../../shared/standard-button/standard-button.component';
 import { AudioButtonComponent } from '../../shared/audio-button/audio-button.component';
+import { StarsResponse } from "../../services/responses.service";
 
 @Component({
   selector: 'stars-interaction-buttons',
@@ -27,8 +28,10 @@ import { AudioButtonComponent } from '../../shared/audio-button/audio-button.com
 export class InteractionButtonsComponent extends InteractionComponentDirective {
   /** Local copy of the component parameters with defaults applied. */
   localParameters!: InteractionButtonParams;
-  /** Array of booleans for each option. */
+  /** Array of booleans for each option for selected values. */
   selectedValues = signal<boolean[]>([]);
+  /** Array of booleans for each option for hint values. */
+  hintValues = signal<boolean[]>([]);
   /** Options sorted by rows. */
   optionRows: Array<Array<RowOption>> = [];
 
@@ -101,8 +104,31 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
           id: this.localParameters.variableId,
           status: 'DISPLAYED',
           value: 0,
-          relevantForResponsesProgress: false
+          relevantForResponsesProgress: true
         }]);
+      }
+    });
+
+    effect(() => {
+      const hints = this.showHint();
+      if (!hints || hints.length === 0) {
+        return;
+      }
+
+      if (this.localParameters.multiSelect) {
+        // set multiselect: "010" => [false, true, false]
+        const selectedStates = hints
+          .split('')
+          .map((char: string) => char === '1');
+        this.hintValues.set(selectedStates);
+      } else {
+        // set single select: "2" => [false, true, false]
+        const selectedIndex = parseInt(hints, 10) - 1;
+        const selectedStates = Array.from(
+          { length: this.selectedValues().length },
+          (_, i) => i === selectedIndex
+        );
+        this.hintValues.set(selectedStates);
       }
     });
   }
@@ -130,6 +156,10 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
     const numberOfOptions = this.localParameters.options?.buttons?.length ||
       this.localParameters.options?.repeatButton?.numberOfOptions || 0;
     this.selectedValues.set(Array.from(
+      { length: numberOfOptions },
+      () => false
+    ));
+    this.hintValues.set(Array.from(
       { length: numberOfOptions },
       () => false
     ));
@@ -215,6 +245,7 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
     return rows;
   }
 
+  // TODO simplify, actually no need for it
   // eslint-disable-next-line class-methods-use-this
   private getCustomDistribution(totalOptions: number, numberOfRows: number): number[] {
     if (numberOfRows === 1) {
@@ -283,7 +314,7 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
     // Update UI state
     this.updateSelection(index);
 
-    // Emit the restored state
+    // Emit the stored state
     this.emitResponse('VALUE_CHANGED', true);
 
     // Check if triggerNavigationOnSelect is enabled

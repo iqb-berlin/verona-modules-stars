@@ -53,6 +53,13 @@
     box-shadow: none;
   }
 
+  input.hint + label {
+    border-radius: variables.$border-radius;
+    border-color: colors.$yellow;
+    transition: all 0.2s ease;
+    box-shadow: none;
+  }
+
   &.circle-type {
     width: 100px;
     height: 100px;
@@ -214,7 +221,7 @@
   &.tall_rectangle-type {
     @include variables.tall-rectangle-button-size;
     input, label {
-      box-shadow: 0px 0px 0px 0px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.2);
     }
 
     label {
