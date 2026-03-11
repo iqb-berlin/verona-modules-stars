@@ -40,7 +40,7 @@ export class AudioComponent {
 
     effect(() => {
       // play audio when triggered from the firstClickLayer
-      if (this.stateService.firstClickLayerActive()) {
+      if (this.stateService.showFirstClickLayer()) {
         this.play();
       }
     });
