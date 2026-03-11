@@ -22,7 +22,7 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
   numbersList: string[] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
   /** List of number line items with their values and calculated SVG coordinates. */
-  numberLineItems = signal<{ value: number, x: number, y: number, isEmpty: boolean }[]>([]);
+  numberLineItems = signal<{ value: number, x: number, y: number, isEmpty: boolean, isTickOnly: boolean }[]>([]);
   /** Current value of the empty number field on the number line. */
   emptyNumberValue: string = '';
 
@@ -42,7 +42,7 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
         this.localParameters.firstNumber = parameters.firstNumber ?? 0;
         this.localParameters.lastNumber = parameters.lastNumber ?? 20;
         this.localParameters.emptyNumber = parameters.emptyNumber ?? 9;
-        this.localParameters.style = parameters.style || 'number_line';
+        this.localParameters.style = parameters.style || 'WAVE';
         this.localParameters.variableId = parameters.variableId || 'NUMBER_LINE';
 
         // Reset the input state whenever parameters change
@@ -118,7 +118,9 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
       return;
     }
 
-    const { firstNumber, lastNumber, emptyNumber } = this.localParameters;
+    const {
+      firstNumber, lastNumber, emptyNumber, style
+    } = this.localParameters;
     const count = lastNumber - firstNumber + 1;
     const items = [];
 
@@ -140,11 +142,19 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
       const value = firstNumber + i;
       const distance = startPadding + (i / (count - 1)) * availableLength;
       const point = path.getPointAtLength(distance);
+      const isEmpty = value === emptyNumber;
+      const isTickOnly = style === 'RULER' &&
+                         value % 5 !== 0 &&
+                         value !== firstNumber &&
+                         value !== lastNumber &&
+                         !isEmpty;
+
       items.push({
         value,
         x: point.x,
         y: point.y,
-        isEmpty: value === emptyNumber
+        isEmpty,
+        isTickOnly
       });
     }
     this.numberLineItems.set(items);
@@ -172,7 +182,7 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
   private emitResponse() {
     this.responses.emit([{
       id: this.localParameters.variableId || 'NUMBER_LINE',
-      status: 'VALUE_CHANGED',
+      status: this.emptyNumberValue.length >= 1 ? 'VALUE_CHANGED' : 'DISPLAYED',
       value: this.emptyNumberValue,
       relevantForResponsesProgress: true
     }]);
@@ -196,7 +206,7 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
       firstNumber: 0,
       lastNumber: 20,
       emptyNumber: 9,
-      style: 'number_line'
+      style: 'WAVE'
     };
   }
 }

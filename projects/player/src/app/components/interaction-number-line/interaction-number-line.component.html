@@ -1,21 +1,72 @@
-<div class="number-line-container">
+<div class="number-line-container" data-cy="interaction-number-line">
   <div class="svg-container">
     <svg width="1000" height="400" viewBox="0 0 600 150" xmlns="http://www.w3.org/2000/svg">
-      <path
-        #numberLinePath
-        id="numberLinePath"
-        d="M 10 90 C 150 10, 270 10, 360 90 S 530 160, 590 90"
-        stroke="black"
-        fill="transparent" />
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5"
+                markerWidth="6" markerHeight="6"
+                orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" />
+        </marker>
+      </defs>
+      @if (localParameters.style === 'RULER') {
+        <path
+          #numberLinePath
+          id="numberLinePath"
+          d="M 10 90 H 590"
+          stroke="black"
+          stroke-width="2"
+          fill="transparent"
+          marker-end="url(#arrow)" />
+      } @else {
+        <path
+          #numberLinePath
+          id="numberLinePath"
+          d="M 10 90 C 150 10, 270 10, 360 90 S 530 160, 590 90"
+          stroke="black"
+          fill="transparent" />
+      }
+
       @for (item of numberLineItems(); track item.value) {
-        <g [attr.transform]="'translate(' + item.x + ',' + item.y + ')'">
-          <rect x="-20" y="-22" width="40" height="44" rx="2" ry="2"
-                [class.empty-field]="item.isEmpty"
-                fill="white" stroke="black" />
-          <text x="0" y="0" text-anchor="middle" dominant-baseline="central"
-                class="number-text">
-            {{ item.isEmpty ? emptyNumberValue : item.value }}
-          </text>
+        <g [attr.transform]="'translate(' + item.x + ',' + item.y + ')'" data-cy="number-line-item">
+          @if (item.isEmpty) {
+            @if (localParameters.style === 'RULER') {
+              <g transform="translate(0, -30)" data-cy="empty-number-group">
+                <line x1="0" y1="30" x2="0" y2="0" stroke="#1154f8" stroke-width="2" />
+                <rect x="-20" y="-44" width="40" height="44" rx="2" ry="2"
+                      class="empty-field"
+                      fill="white" stroke="black" data-cy="empty-number-box" />
+                <text x="0" y="-22" text-anchor="middle" dominant-baseline="central"
+                      class="number-text" data-cy="empty-number-text">
+                  {{ emptyNumberValue }}
+                </text>
+              </g>
+            } @else {
+              <rect x="-20" y="-22" width="40" height="44" rx="2" ry="2"
+                    class="empty-field"
+                    fill="white" stroke="black" data-cy="empty-number-box" />
+              <text x="0" y="0" text-anchor="middle" dominant-baseline="central"
+                    class="number-text" data-cy="empty-number-text">
+                {{ emptyNumberValue }}
+              </text>
+            }
+          } @else if (item.isTickOnly) {
+            <line x1="0" y1="-10" x2="0" y2="10" stroke="black" stroke-width="1.5" data-cy="tick-mark" />
+          } @else {
+            @if (localParameters.style === 'RULER') {
+              <line x1="0" y1="-15" x2="0" y2="15" stroke="black" stroke-width="2" data-cy="ruler-tick-mark" />
+              <text x="0" y="30" text-anchor="middle" dominant-baseline="central"
+                    class="number-text" data-cy="number-label">
+                {{ item.value }}
+              </text>
+            } @else {
+              <rect x="-20" y="-22" width="40" height="44" rx="2" ry="2"
+                    fill="white" stroke="black" data-cy="number-box" />
+              <text x="0" y="0" text-anchor="middle" dominant-baseline="central"
+                    class="number-text" data-cy="number-label">
+                {{ item.value }}
+              </text>
+            }
+          }
         </g>
       }
     </svg>

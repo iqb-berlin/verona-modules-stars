@@ -471,6 +471,32 @@ Cypress.Commands.add('applyStandardScenarios', (interactionType: string, navigat
     return;
   }
 
+  if (interactionType === 'number_line') {
+    if (navigator !== undefined) {
+      if (typeof navigator === 'string') {
+        // allow '1' | 'keyboard-button-1'
+        const numMatch = navigator.match(/^\d+$/);
+        if (numMatch && numMatch[0]) {
+          const num = numMatch[0];
+          cy.get(`[data-cy=keyboard-button-${num}]`).click();
+          cy.wait(500); // Wait for potential state changes
+          return;
+        }
+        const btnMatch = navigator.match(/^keyboard-button-(\d)$/);
+        if (btnMatch && btnMatch[1]) {
+          const num = btnMatch[1];
+          cy.get(`[data-cy=keyboard-button-${num}]`).click();
+          cy.wait(500);
+          return;
+        }
+      }
+    }
+    // Default behavior
+    cy.get('[data-cy=keyboard-button-1]').click();
+    cy.wait(500);
+    return;
+  }
+
   // Default for BUTTONS, DROP and others
   if (navigator !== undefined) {
     if (typeof navigator === 'number') {
@@ -512,6 +538,11 @@ Cypress.Commands.add('applyCorrectAnswerScenarios', (interactionType: string, da
     const targetTens = Math.floor(targetValue / 10);
     const targetOnes = targetValue % 10;
     cy.movePlaceValueIcons(targetTens, targetOnes);
+  } else if (interactionType === 'number_line') {
+    // For number_line, write the correct answer on the keyboard
+    for (const char of correctAnswerParam) {
+      cy.get(`[data-cy=keyboard-button-${char}]`).click();
+    }
   } else {
     // For other interaction types (buttons, drop, polygon_buttons),
     // find the button containing the correct answer
@@ -537,6 +568,8 @@ Cypress.Commands.add('assertInteractionComponentVisible', (interactionType: stri
     cy.get('[data-cy=write-container]', { timeout: 15000 }).should('be.visible');
   } else if (interactionType === 'place_value') {
     cy.get('[data-cy="interaction-place-value"]', { timeout: 15000 }).should('be.visible');
+  } else if (interactionType === 'number_line') {
+    cy.get('[data-cy="interaction-number-line"]', { timeout: 15000 }).should('be.visible');
   } else if (interactionType === 'drop') {
     cy.get('[data-cy="drop-container"]', { timeout: 15000 }).should('be.visible');
   } else if (interactionType === 'find_on_image') {
@@ -625,6 +658,25 @@ Cypress.Commands.add('assertRestoredState', (interactionType: string, expected?:
       cy.get('[data-cy="icon-item-ones-moved"]', { timeout: 15000 }).should('have.length', expectedOnes);
       cy.log(`Approved: interactionType: ${interactionType} icon-item-ones-moved have a length of ${expectedOnes}`);
     }
+  } else if (interactionType === 'number_line') {
+    let expectedText = '1';
+    if (expected !== undefined) {
+      if (typeof expected === 'string') {
+        const numMatch = expected.match(/^\d+$/);
+        if (numMatch) {
+          expectedText = numMatch[0];
+        } else {
+          const btnMatch = expected.match(/^keyboard-button-(\d)$/);
+          if (btnMatch && btnMatch[1]) {
+            expectedText = btnMatch[1];
+          }
+        }
+      }
+    }
+    cy.get('[data-cy=empty-number-text]', { timeout: 15000 }).invoke('text').then((text) => {
+      expect(text.trim()).to.contain(expectedText);
+    });
+    cy.log(`Approved: interactionType: ${interactionType} empty-number-text contains expectedText ${expectedText}`);
   } else if (interactionType === 'drop') {
     // Verifies the button at index 0 has been moved
     cy.get('[data-cy="drop-animate-wrapper-0"]', { timeout: 15000 })

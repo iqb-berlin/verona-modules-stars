@@ -1,0 +1,24 @@
+{
+  "id": "stars-unit-definition",
+  "version": "2.3",
+  "backgroundColor": "#E1E9FF",
+  "continueButtonShow": "ALWAYS",
+  "ribbonBars": true,
+  "firstAudioOptions": {
+    "firstClickLayer": false,
+    "animateButton": true
+  },
+  "mainAudio": {
+    "audioSource": "data:audio/wav;base64,UklGRiQAAABXQVZFRm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=",
+    "maxPlay": 3,
+    "disableInteractionUntilComplete": false
+  },
+  "interactionType": "NUMBER_LINE",
+  "interactionParameters": {
+    "variableId": "NUMBER_LINE",
+    "firstNumber": 7,
+    "lastNumber": 18,
+    "emptyNumber": 9,
+    "style": "WAVE"
+  }
+}

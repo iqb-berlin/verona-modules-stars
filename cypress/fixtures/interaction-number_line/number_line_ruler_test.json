@@ -19,6 +19,6 @@
     "firstNumber": 7,
     "lastNumber": 18,
     "emptyNumber": 9,
-    "style": "number_line"
+    "style": "RULER"
   }
 }
