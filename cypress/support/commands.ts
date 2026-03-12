@@ -346,6 +346,45 @@ Cypress.Commands.add('clearTextInput', (testData?: UnitDefinition) => {
   performBackspace();
 });
 
+Cypress.Commands.add('clearNumberLineInput', () => {
+  const maxLimit = 10;
+  let safetyCounter = 0;
+
+  const performBackspace = () => {
+    if (safetyCounter >= maxLimit) {
+      cy.log('Safety limit reached while clearing number line input');
+      return;
+    }
+
+    // eslint-disable-next-line no-plusplus
+    safetyCounter++;
+
+    cy.document().then(doc => {
+      const textElement = doc.querySelector('[data-cy=empty-number-text]');
+
+      if (!textElement) {
+        cy.log('Number line input fully cleared - empty-number-text element no longer exists');
+        return;
+      }
+
+      const currentText = textElement.textContent?.trim() || '';
+
+      if (!currentText) {
+        cy.log('Number line input exists but is empty - clearing complete');
+        return;
+      }
+
+      cy.log(`Clearing character from number line: "${currentText}"`);
+      cy.get('[data-cy=backspace-button]').click();
+
+      // Continue clearing
+      performBackspace();
+    });
+  };
+
+  performBackspace();
+});
+
 Cypress.Commands.add('movePlaceValueIcons', (targetTens: number, targetOnes: number) => {
   // Check how many are already moved
   cy.get('body').then($body => {
@@ -539,10 +578,10 @@ Cypress.Commands.add('applyCorrectAnswerScenarios', (interactionType: string, da
     const targetOnes = targetValue % 10;
     cy.movePlaceValueIcons(targetTens, targetOnes);
   } else if (interactionType === 'number_line') {
-    // For number_line, write the correct answer on the keyboard
-    for (const char of correctAnswerParam) {
-      cy.get(`[data-cy=keyboard-button-${char}]`).click();
-    }
+    // For number_line, clear the input first and then write the correct answer on the keyboard
+    cy.clearNumberLineInput();
+    const targetValue = Number.parseInt(correctAnswerParam, 10);
+    cy.get(`[data-cy=keyboard-button-${targetValue}]`).click();
   } else {
     // For other interaction types (buttons, drop, polygon_buttons),
     // find the button containing the correct answer
@@ -578,14 +617,7 @@ Cypress.Commands.add('assertInteractionComponentVisible', (interactionType: stri
       .and('be.visible')
       .and('have.attr', 'src');
   } else {
-    // Button interaction type
-    cy.get('body').then(($body) => {
-      if ($body.find('[data-cy="click-layer"]').length > 0) {
-        cy.get('[data-cy="button-0"]', { timeout: 15000 }).should('exist');
-      } else {
-        cy.get('[data-cy="button-0"]', { timeout: 15000 }).should('be.visible');
-      }
-    });
+    cy.get('[data-cy="buttons-container"]', { timeout: 15000 }).should('be.visible');
   }
 });
 

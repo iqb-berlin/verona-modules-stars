@@ -1,6 +1,7 @@
 import { InteractionWriteParams, UnitDefinition } from '../../../projects/player/src/app/models/unit-definition';
 import { testBaseFeatures } from '../shared/base-features.spec.cy';
 import { testFormerStateFeatures } from '../shared/former-state.spec.cy';
+import { testKeyboardInteractions } from '../shared/keyboard-interactions.spec.cy';
 
 describe('Interaction WRITE Component', () => {
   const interactionType = 'write';
@@ -138,4 +139,6 @@ describe('Interaction WRITE Component', () => {
   testBaseFeatures(interactionType, defaultTestFile);
   // Test former state features for the WRITE interaction type
   testFormerStateFeatures(interactionType, defaultTestFile);
+  // Test keyboard interactions for NUMBERS_LINE mode
+  testKeyboardInteractions(interactionType, 'write_numbersLine_test');
 });

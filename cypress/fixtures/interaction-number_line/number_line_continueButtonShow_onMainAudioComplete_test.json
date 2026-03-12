@@ -20,5 +20,20 @@
     "lastNumber": 15,
     "emptyNumber": 9,
     "style": "WAVE"
-  }
+  },
+  "variableInfo": [
+    {
+      "variableId": "NUMBER_LINE",
+      "responseComplete": "ON_FULL_CREDIT",
+      "codingSource": "VALUE",
+      "codes": [
+        {
+          "method": "EQUALS",
+          "parameter": "9",
+          "code": 1,
+          "score": 1
+        }
+      ]
+    }
+  ]
 }
