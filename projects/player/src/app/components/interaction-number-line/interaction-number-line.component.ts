@@ -23,8 +23,8 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
 
   /** List of number line items with their values and calculated SVG coordinates. */
   numberLineItems = signal<{ value: number, x: number, y: number, isEmpty: boolean, isTickOnly: boolean }[]>([]);
-  /** Current value of the empty number field on the number line. */
-  emptyNumberValue: string = '';
+  /** Current value of the numberInput field on the number line. */
+  numberInputValue: string = '';
 
   /** Observer to detect when the number line SVG path's dimensions change. */
   private resizeObserver: ResizeObserver | undefined;
@@ -41,12 +41,12 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
       if (parameters) {
         this.localParameters.firstNumber = parameters.firstNumber ?? 0;
         this.localParameters.lastNumber = parameters.lastNumber ?? 20;
-        this.localParameters.emptyNumber = parameters.emptyNumber ?? 9;
+        this.localParameters.numberInput = parameters.numberInput;
         this.localParameters.style = parameters.style || 'WAVE';
         this.localParameters.variableId = parameters.variableId || 'NUMBER_LINE';
 
         // Reset the input state whenever parameters change
-        this.emptyNumberValue = '';
+        this.numberInputValue = '';
         this.updateButtonStates();
 
         this.calculateNumberPositions();
@@ -69,7 +69,7 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
           value: '',
           relevantForResponsesProgress: false
         }]);
-        if (!this.emptyNumberValue) this.emptyNumberValue = '';
+        if (!this.numberInputValue) this.numberInputValue = '';
       }
     });
   }
@@ -118,9 +118,10 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
       return;
     }
 
-    const {
-      firstNumber, lastNumber, emptyNumber, style
-    } = this.localParameters;
+    const firstNumber = this.localParameters.firstNumber ?? 0;
+    const lastNumber = this.localParameters.lastNumber ?? 20;
+    const numberInput = this.localParameters.numberInput;
+    const style = this.localParameters.style;
     const count = lastNumber - firstNumber + 1;
     const items = [];
 
@@ -142,7 +143,7 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
       const value = firstNumber + i;
       const distance = startPadding + (i / (count - 1)) * availableLength;
       const point = path.getPointAtLength(distance);
-      const isEmpty = value === emptyNumber;
+      const isEmpty = value === numberInput;
       const isTickOnly = style === 'RULER' &&
                          value % 5 !== 0 &&
                          value !== firstNumber &&
@@ -162,28 +163,28 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
 
   handleKeyboardClick(button: string) {
     if (this.isDisabled) return;
-    this.emptyNumberValue += button;
-    this.updateButtonStates(this.emptyNumberValue);
+    this.numberInputValue += button;
+    this.updateButtonStates(this.numberInputValue);
     this.emitResponse();
   }
 
   handleBackButtonClick() {
-    if (this.emptyNumberValue.length === 0) return;
-    this.emptyNumberValue = this.emptyNumberValue.slice(0, -1);
-    this.updateButtonStates(this.emptyNumberValue);
+    if (this.numberInputValue.length === 0) return;
+    this.numberInputValue = this.numberInputValue.slice(0, -1);
+    this.updateButtonStates(this.numberInputValue);
     this.emitResponse();
   }
 
   private updateButtonStates(value?: string) {
-    const currentVal = value ?? this.emptyNumberValue;
+    const currentVal = value ?? this.numberInputValue;
     this.isDisabled = currentVal.length >= 2;
   }
 
   private emitResponse() {
     this.responses.emit([{
       id: this.localParameters.variableId || 'NUMBER_LINE',
-      status: this.emptyNumberValue.length >= 1 ? 'VALUE_CHANGED' : 'DISPLAYED',
-      value: this.emptyNumberValue,
+      status: this.numberInputValue.length >= 1 ? 'VALUE_CHANGED' : 'DISPLAYED',
+      value: this.numberInputValue,
       relevantForResponsesProgress: true
     }]);
   }
@@ -195,7 +196,7 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
   private restoreFromFormerState(response: Response): void {
     if (!response.value || typeof response.value !== 'string') return;
 
-    this.emptyNumberValue = response.value;
+    this.numberInputValue = response.value;
     this.updateButtonStates();
   }
 
@@ -205,7 +206,7 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
       variableId: 'NUMBER_LINE',
       firstNumber: 0,
       lastNumber: 20,
-      emptyNumber: 9,
+      numberInput: 9,
       style: 'WAVE'
     };
   }

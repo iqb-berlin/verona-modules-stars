@@ -7,7 +7,7 @@ export function testKeyboardInteractions(interactionType: string, defaultTestFil
     };
 
     const getDisplayTextSelector = () => {
-      return interactionType === 'number_line' ? '[data-cy="empty-number-text"]' : '[data-cy="text-span"]';
+      return interactionType === 'number_line' ? '[data-cy="number-input-text"]' : '[data-cy="text-span"]';
     };
 
     const getKeyboardButtonSelector = (button: string) => {
@@ -24,13 +24,13 @@ export function testKeyboardInteractions(interactionType: string, defaultTestFil
 
       // Type "1"
       cy.get(getKeyboardButtonSelector('1')).click();
-      cy.get(displayTextSelector).invoke('text').then((text) => {
+      cy.get(displayTextSelector).invoke('text').then(text => {
         expect(text.trim()).to.equal('1');
       });
 
       // Type "2"
       cy.get(getKeyboardButtonSelector('2')).click();
-      cy.get(displayTextSelector).invoke('text').then((text) => {
+      cy.get(displayTextSelector).invoke('text').then(text => {
         expect(text.trim()).to.equal('12');
       });
 

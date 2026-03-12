@@ -30,23 +30,23 @@
         <g [attr.transform]="'translate(' + item.x + ',' + item.y + ')'" data-cy="number-line-item">
           @if (item.isEmpty) {
             @if (localParameters.style === 'RULER') {
-              <g transform="translate(0, -30)" data-cy="empty-number-group">
+              <g transform="translate(0, -30)" data-cy="number-input-group">
                 <line x1="0" y1="30" x2="0" y2="0" stroke="#1154f8" stroke-width="2" />
                 <rect x="-20" y="-44" width="40" height="44" rx="2" ry="2"
-                      class="empty-field"
-                      fill="white" stroke="black" data-cy="empty-number-box" />
+                      class="number-input-field"
+                      fill="white" stroke="black" data-cy="number-input-box" />
                 <text x="0" y="-22" text-anchor="middle" dominant-baseline="central"
-                      class="number-text" data-cy="empty-number-text">
-                  {{ emptyNumberValue }}
+                      class="number-input-text" data-cy="number-input-text">
+                  {{ numberInputValue }}
                 </text>
               </g>
             } @else {
               <rect x="-20" y="-22" width="40" height="44" rx="2" ry="2"
-                    class="empty-field"
-                    fill="white" stroke="black" data-cy="empty-number-box" />
+                    class="number-input-field"
+                    fill="white" stroke="black" data-cy="number-input-box" />
               <text x="0" y="0" text-anchor="middle" dominant-baseline="central"
-                    class="number-text" data-cy="empty-number-text">
-                {{ emptyNumberValue }}
+                    class="number-input-text" data-cy="number-input-text">
+                {{ numberInputValue }}
               </text>
             }
           } @else if (item.isTickOnly) {
@@ -88,7 +88,7 @@
             class="keyboard-button backspace-button"
             [attr.aria-label]="'Backspace'"
             (click)="handleBackButtonClick()"
-            [disabled]="emptyNumberValue.length === 0"
+            [disabled]="numberInputValue.length === 0"
             [attr.data-cy]="'backspace-button'"
     >
       <svg xmlns="http://www.w3.org/2000/svg" height="32" viewBox="0 -960 960 960" width="32"

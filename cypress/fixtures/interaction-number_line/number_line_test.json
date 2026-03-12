@@ -1,6 +1,6 @@
 {
   "id": "stars-unit-definition",
-  "version": "2.3",
+  "version": "2.4",
   "backgroundColor": "#E1E9FF",
   "continueButtonShow": "ALWAYS",
   "ribbonBars": false,
@@ -18,7 +18,7 @@
     "variableId": "NUMBER_LINE",
     "firstNumber": 7,
     "lastNumber": 18,
-    "emptyNumber": 9,
+    "numberInput": 9,
     "style": "WAVE"
   },
   "variableInfo": [

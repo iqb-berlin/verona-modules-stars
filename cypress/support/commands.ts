@@ -360,10 +360,10 @@ Cypress.Commands.add('clearNumberLineInput', () => {
     safetyCounter++;
 
     cy.document().then(doc => {
-      const textElement = doc.querySelector('[data-cy=empty-number-text]');
+      const textElement = doc.querySelector('[data-cy=number-input-text]');
 
       if (!textElement) {
-        cy.log('Number line input fully cleared - empty-number-text element no longer exists');
+        cy.log('Number line input fully cleared - number-input-text element no longer exists');
         return;
       }
 
@@ -705,10 +705,10 @@ Cypress.Commands.add('assertRestoredState', (interactionType: string, expected?:
         }
       }
     }
-    cy.get('[data-cy=empty-number-text]', { timeout: 15000 }).invoke('text').then((text) => {
+    cy.get('[data-cy=number-input-text]', { timeout: 15000 }).invoke('text').then((text) => {
       expect(text.trim()).to.contain(expectedText);
     });
-    cy.log(`Approved: interactionType: ${interactionType} empty-number-text contains expectedText ${expectedText}`);
+    cy.log(`Approved: interactionType: ${interactionType} number-input-text contains expectedText ${expectedText}`);
   } else if (interactionType === 'drop') {
     // Verifies the button at index 0 has been moved
     cy.get('[data-cy="drop-animate-wrapper-0"]', { timeout: 15000 })

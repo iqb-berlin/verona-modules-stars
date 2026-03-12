@@ -132,9 +132,9 @@ export interface InteractionPolygonButtonsParams {
 
 export interface InteractionNumberLineParams {
   variableId?: string;
-  firstNumber: number;
-  lastNumber: number;
-  emptyNumber: number;
+  firstNumber?: number;
+  lastNumber?: number;
+  numberInput: number;
   style?: string;
   formerState?: Response[];
 }
