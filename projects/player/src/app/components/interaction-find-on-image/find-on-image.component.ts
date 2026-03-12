@@ -55,6 +55,10 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
    * loads even if identity is the same. */
   private lastParametersRef: unknown | null = null;
 
+  hintXPos = 0;
+  hintYPos = 0;
+  hasHint = signal(false);
+
   constructor() {
     super();
 
@@ -138,6 +142,22 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
         }]);
         this.lastRestoredValue = '';
       }
+    });
+
+    effect(() => {
+      const hints = this.showHint();
+      if (!hints || hints.length === 0) {
+        return;
+      }
+      const parts = hints.split(',').map(p => p.trim());
+      if (parts.length < 2) return;
+
+      const percentX = Number.parseInt(parts[0]!, 10);
+      const percentY = Number.parseInt(parts[1]!, 10);
+      if (Number.isNaN(percentX) || Number.isNaN(percentY)) return
+      this.clickTargetLeft.set(`${percentX}px`);
+      this.clickTargetTop.set(`${percentY}px`);
+      this.hasHint.set(true);
     });
   }
 
@@ -306,6 +326,7 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
     const expectedSrc = this.localParameters.imageSource;
     const isDifferentImage = expectedSrc && currentSrc && !currentSrc.includes(expectedSrc);
 
+    // TODO check first if image is present and calculate afterwards
     const imageNotReady = (!imgEl.complete) || this.imgWidth === 0 || this.imgHeight === 0 || isDifferentImage;
     if (imageNotReady) {
       const oneTimeHandler = () => {

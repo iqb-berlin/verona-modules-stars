@@ -125,10 +125,11 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
         // set single select: "2" => [false, true, false]
         const selectedIndex = parseInt(hints, 10) - 1;
         const selectedStates = Array.from(
-          { length: this.selectedValues().length },
+          { length: this.localParameters.options?.buttons?.length || 0 },
           (_, i) => i === selectedIndex
         );
         this.hintValues.set(selectedStates);
+        this.selectedValues.set([]);
       }
     });
   }

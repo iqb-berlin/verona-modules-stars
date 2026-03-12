@@ -76,6 +76,7 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
           (_, i) => i === selectedIndex
         );
         this.hintValues.set(selectedStates);
+        this.selectedValues.set([]);
         console.log('hints', this.hintValues());
       }
     });
