@@ -25,5 +25,20 @@
         "label": "Rectangle"
       }
     ]
-  }
+  },
+  "variableInfo": [
+    {
+      "variableId": "POLYGON_BUTTONS",
+      "responseComplete": "ON_FULL_CREDIT",
+      "codingSource": "VALUE",
+      "codes": [
+        {
+          "method": "EQUALS",
+          "parameter": "1",
+          "code": 1,
+          "score": 1
+        }
+      ]
+    }
+  ]
 }

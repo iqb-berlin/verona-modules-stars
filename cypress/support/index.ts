@@ -96,6 +96,11 @@ declare global {
       clearTextInput(testData?: UnitDefinition): Chainable<void>
 
       /**
+       * Custom command to clear number line input by clicking backspace until empty-number-text is empty
+       */
+      clearNumberLineInput(): Chainable<void>
+
+      /**
        * Move specified number of tens and ones in place_value interaction
        * @param targetTens - Number of tens to move
        * @param targetOnes - Number of ones to move

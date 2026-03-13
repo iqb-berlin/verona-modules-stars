@@ -13,7 +13,7 @@ import {
 
 describe('Interaction DROP Component', () => {
   const interactionType = 'drop';
-  const defaultTestFile = 'drop_4_option_test';
+  const defaultTestFile = 'drop_test';
 
   beforeEach(() => {
     cy.clearUnitStates();

@@ -346,6 +346,45 @@ Cypress.Commands.add('clearTextInput', (testData?: UnitDefinition) => {
   performBackspace();
 });
 
+Cypress.Commands.add('clearNumberLineInput', () => {
+  const maxLimit = 10;
+  let safetyCounter = 0;
+
+  const performBackspace = () => {
+    if (safetyCounter >= maxLimit) {
+      cy.log('Safety limit reached while clearing number line input');
+      return;
+    }
+
+    // eslint-disable-next-line no-plusplus
+    safetyCounter++;
+
+    cy.document().then(doc => {
+      const textElement = doc.querySelector('[data-cy=number-input-text]');
+
+      if (!textElement) {
+        cy.log('Number line input fully cleared - number-input-text element no longer exists');
+        return;
+      }
+
+      const currentText = textElement.textContent?.trim() || '';
+
+      if (!currentText) {
+        cy.log('Number line input exists but is empty - clearing complete');
+        return;
+      }
+
+      cy.log(`Clearing character from number line: "${currentText}"`);
+      cy.get('[data-cy=backspace-button]').click();
+
+      // Continue clearing
+      performBackspace();
+    });
+  };
+
+  performBackspace();
+});
+
 Cypress.Commands.add('movePlaceValueIcons', (targetTens: number, targetOnes: number) => {
   // Check how many are already moved
   cy.get('body').then($body => {
@@ -471,6 +510,32 @@ Cypress.Commands.add('applyStandardScenarios', (interactionType: string, navigat
     return;
   }
 
+  if (interactionType === 'number_line') {
+    if (navigator !== undefined) {
+      if (typeof navigator === 'string') {
+        // allow '1' | 'keyboard-button-1'
+        const numMatch = navigator.match(/^\d+$/);
+        if (numMatch && numMatch[0]) {
+          const num = numMatch[0];
+          cy.get(`[data-cy=keyboard-button-${num}]`).click();
+          cy.wait(500); // Wait for potential state changes
+          return;
+        }
+        const btnMatch = navigator.match(/^keyboard-button-(\d)$/);
+        if (btnMatch && btnMatch[1]) {
+          const num = btnMatch[1];
+          cy.get(`[data-cy=keyboard-button-${num}]`).click();
+          cy.wait(500);
+          return;
+        }
+      }
+    }
+    // Default behavior
+    cy.get('[data-cy=keyboard-button-1]').click();
+    cy.wait(500);
+    return;
+  }
+
   // Default for BUTTONS, DROP and others
   if (navigator !== undefined) {
     if (typeof navigator === 'number') {
@@ -512,6 +577,11 @@ Cypress.Commands.add('applyCorrectAnswerScenarios', (interactionType: string, da
     const targetTens = Math.floor(targetValue / 10);
     const targetOnes = targetValue % 10;
     cy.movePlaceValueIcons(targetTens, targetOnes);
+  } else if (interactionType === 'number_line') {
+    // For number_line, clear the input first and then write the correct answer on the keyboard
+    cy.clearNumberLineInput();
+    const targetValue = Number.parseInt(correctAnswerParam, 10);
+    cy.get(`[data-cy=keyboard-button-${targetValue}]`).click();
   } else {
     // For other interaction types (buttons, drop, polygon_buttons),
     // find the button containing the correct answer
@@ -601,6 +671,8 @@ Cypress.Commands.add('assertInteractionComponentVisible', (interactionType: stri
     cy.get('[data-cy=write-container]', { timeout: 15000 }).should('be.visible');
   } else if (interactionType === 'place_value') {
     cy.get('[data-cy="interaction-place-value"]', { timeout: 15000 }).should('be.visible');
+  } else if (interactionType === 'number_line') {
+    cy.get('[data-cy="interaction-number-line"]', { timeout: 15000 }).should('be.visible');
   } else if (interactionType === 'drop') {
     cy.get('[data-cy="drop-container"]', { timeout: 15000 }).should('be.visible');
   } else if (interactionType === 'find_on_image') {
@@ -609,14 +681,7 @@ Cypress.Commands.add('assertInteractionComponentVisible', (interactionType: stri
       .and('be.visible')
       .and('have.attr', 'src');
   } else {
-    // Button interaction type
-    cy.get('body').then(($body) => {
-      if ($body.find('[data-cy="click-layer"]').length > 0) {
-        cy.get('[data-cy="button-0"]', { timeout: 15000 }).should('exist');
-      } else {
-        cy.get('[data-cy="button-0"]', { timeout: 15000 }).should('be.visible');
-      }
-    });
+    cy.get('[data-cy="buttons-container"]', { timeout: 15000 }).should('be.visible');
   }
 });
 
@@ -689,6 +754,25 @@ Cypress.Commands.add('assertRestoredState', (interactionType: string, expected?:
       cy.get('[data-cy="icon-item-ones-moved"]', { timeout: 15000 }).should('have.length', expectedOnes);
       cy.log(`Approved: interactionType: ${interactionType} icon-item-ones-moved have a length of ${expectedOnes}`);
     }
+  } else if (interactionType === 'number_line') {
+    let expectedText = '1';
+    if (expected !== undefined) {
+      if (typeof expected === 'string') {
+        const numMatch = expected.match(/^\d+$/);
+        if (numMatch) {
+          expectedText = numMatch[0];
+        } else {
+          const btnMatch = expected.match(/^keyboard-button-(\d)$/);
+          if (btnMatch && btnMatch[1]) {
+            expectedText = btnMatch[1];
+          }
+        }
+      }
+    }
+    cy.get('[data-cy=number-input-text]', { timeout: 15000 }).invoke('text').then((text) => {
+      expect(text.trim()).to.contain(expectedText);
+    });
+    cy.log(`Approved: interactionType: ${interactionType} number-input-text contains expectedText ${expectedText}`);
   } else if (interactionType === 'drop') {
     // Verifies the button at index 0 has been moved
     cy.get('[data-cy="drop-animate-wrapper-0"]', { timeout: 15000 })
