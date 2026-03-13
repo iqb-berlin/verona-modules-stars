@@ -57,6 +57,7 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
     });
 
     effect(() => {
+      this.resetSelection()
       const hints = this.showHint();
       if (!hints || hints.length === 0) {
         return;
