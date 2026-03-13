@@ -375,7 +375,6 @@ export class ResponsesService {
     } else {
       this.feedbackHint.set(this.pendingFeedbackHint);
     }
-    console.log('hint', this.pendingFeedbackHint);
     this.feedbackActive.set(true);
   }
 
@@ -424,13 +423,10 @@ export class ResponsesService {
       return undefined;
     }).find(sourceString => !!sourceString);
     if (audioToPlay) {
-      console.log('audioToPlay', audioToPlay);
       this.pendingAudioFeedback.set(true);
       this.pendingAudioFeedbackSource = audioToPlay.audioSource;
-      if (audioToPlay.showResponse?.variableId) {
-        this.pendingFeedbackHint = audioToPlay.showResponse.value;
-        this.pendingHintDelay = audioToPlay.showResponse.delayMS || 0;
-      }
+      this.pendingFeedbackHint = audioToPlay.showResponse?.value || '';
+      this.pendingHintDelay = audioToPlay.showResponse?.delayMS || 0;
     }
   }
 

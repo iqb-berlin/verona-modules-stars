@@ -112,6 +112,7 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
     effect(() => {
       const hints = this.showHint();
       if (!hints || hints.length === 0) {
+        this.hintValues.set([]);
         return;
       }
 
@@ -121,6 +122,7 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
           .split('')
           .map((char: string) => char === '1');
         this.hintValues.set(selectedStates);
+        this.selectedValues.set([]);
       } else {
         // set single select: "2" => [false, true, false]
         const selectedIndex = parseInt(hints, 10) - 1;
