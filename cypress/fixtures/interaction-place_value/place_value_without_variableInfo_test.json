@@ -20,20 +20,5 @@
     "numberOfRows": 5,
     "maxNumberOfTens": 3,
     "maxNumberOfOnes": 5
-  },
-  "variableInfo": [
-    {
-      "variableId": "PLACE_VALUE",
-      "responseComplete": "ON_ANY_RESPONSE",
-      "codingSource": "VALUE",
-      "codes": [
-        {
-          "method": "EQUALS",
-          "parameter": "22",
-          "code": 1,
-          "score": 1
-        }
-      ]
-    }
-  ]
+  }
 }

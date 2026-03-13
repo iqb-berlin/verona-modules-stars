@@ -13,6 +13,7 @@ export type InteractionEnum = 'BUTTONS' |
 'VIDEO' |
 'IMAGE_ONLY' |
 'PLACE_VALUE' |
+'NUMBER_LINE' |
 'NONE';
 export type IconButtonTypeEnum = 'CHECK_GREEN' | 'CLOSE_RED' | 'CLAP_HANDS' | 'SMILEY_1' | 'SMILEY_2' |
 'SMILEY_3' | 'SMILEY_4' | 'SMILEY_5' | 'ONES' | 'TENS';
@@ -23,7 +24,7 @@ export type TargetSizeEnum = 'MEDIUM' | 'LARGE' | 'SMALL';
 export type LayoutEnum = 'LEFT_CENTER' | 'TOP_CENTER' | 'LEFT_BOTTOM' | 'LEFT_CENTER_50';
 
 export type InteractionParameters = InteractionButtonParams | InteractionWriteParams | InteractionDropParams |
-InteractionVideoParams | InteractionFindOnImageParams | InteractionPolygonButtonsParams | InteractionPlaceValueParams;
+InteractionVideoParams | InteractionFindOnImageParams | InteractionPolygonButtonsParams | InteractionPlaceValueParams | InteractionNumberLineParams;
 export interface UnitDefinition {
   id: string;
   version?: string;
@@ -126,6 +127,15 @@ export interface InteractionPolygonButtonsParams {
   variableId?: string;
   options: SelectionOption[];
   multiSelect?: boolean;
+  formerState?: Response[];
+}
+
+export interface InteractionNumberLineParams {
+  variableId?: string;
+  firstNumber?: number;
+  lastNumber?: number;
+  numberInput: number;
+  style?: string;
   formerState?: Response[];
 }
 

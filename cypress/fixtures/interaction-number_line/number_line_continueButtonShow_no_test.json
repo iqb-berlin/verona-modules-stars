@@ -1,9 +1,9 @@
 {
   "id": "stars-unit-definition",
-  "version": "2.3",
+  "version": "2.4",
   "backgroundColor": "#E1E9FF",
+  "continueButtonShow": "NO",
   "ribbonBars": false,
-  "continueButtonShow": "ALWAYS",
   "firstAudioOptions": {
     "firstClickLayer": false,
     "animateButton": false
@@ -13,27 +13,12 @@
     "maxPlay": 3,
     "disableInteractionUntilComplete": false
   },
-  "interactionType": "PLACE_VALUE",
+  "interactionType": "NUMBER_LINE",
   "interactionParameters": {
-    "variableId": "PLACE_VALUE",
-    "value": 22,
-    "numberOfRows": 5,
-    "maxNumberOfTens": 3,
-    "maxNumberOfOnes": 5
-  },
-  "variableInfo": [
-    {
-      "variableId": "PLACE_VALUE",
-      "responseComplete": "ON_ANY_RESPONSE",
-      "codingSource": "VALUE",
-      "codes": [
-        {
-          "method": "EQUALS",
-          "parameter": "22",
-          "code": 1,
-          "score": 1
-        }
-      ]
-    }
-  ]
+    "variableId": "NUMBER_LINE",
+    "firstNumber": 5,
+    "lastNumber": 15,
+    "numberInput": 9,
+    "style": "WAVE"
+  }
 }

@@ -246,13 +246,25 @@ export class ResponsesService {
       const codingScheme = this.variableInfo.find(v => v.variableId === givenResponse.id);
       if (codingScheme && codingScheme.codes && codingScheme.codes.length > 0) {
         let valueAsNumber = Number.MIN_VALUE;
-        let valueAsString = givenResponse.value.toString();
+        let valueAsString = givenResponse.value?.toString() || '';
         if (codingScheme.codingSource === 'SUM') {
+          // Sum of ones on the string - for multiselect items
           const matches1 = valueAsString.match(/1/g);
           valueAsNumber = matches1 ? matches1.length : 0;
           valueAsString = valueAsNumber.toString();
         } else if (codingScheme.codingSource === 'VALUE_TO_UPPER') {
+          // string to upper for write items
           valueAsString = valueAsString.toUpperCase();
+        } else if (codingScheme.codingSource === 'SUM_CHAR_MATCHES') {
+          // 'bitwise' AND of strings with ones and zeros - for multiselect items
+          if (codingScheme.codingSourceParameter && codingScheme.codingSourceParameter.length == valueAsString.length) {
+            let count = 0;
+            for(let i = 0; i < valueAsString.length; i++) {
+              count += (valueAsString.charCodeAt(i) === codingScheme.codingSourceParameter.charCodeAt(i)) ?
+                1 : 0;
+            }
+            valueAsString = count.toString();
+          }
         }
         let newCode = Number.MIN_VALUE;
         let newScore = Number.MIN_VALUE;
