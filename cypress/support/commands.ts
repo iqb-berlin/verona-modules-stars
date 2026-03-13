@@ -599,6 +599,70 @@ Cypress.Commands.add('applyCorrectAnswerScenarios', (interactionType: string, da
   }
 });
 
+Cypress.Commands.add('clickMultiselectButtons', (interactionType: string, unit: UnitDefinition, correct: boolean) => {
+  const variableInfo = unit.variableInfo?.[0];
+  if (!variableInfo || variableInfo.codingSource !== 'SUM_CHAR_MATCHES') {
+    return;
+  }
+  const codingSourceParameter = variableInfo.codingSourceParameter;
+  if (!codingSourceParameter) {
+    return;
+  }
+
+  const codeToTarget = correct ? 1 : 2;
+  const targetCode = variableInfo.codes.find(c => c.code === codeToTarget);
+
+  if (!targetCode) {
+    return;
+  }
+
+  const numberOfMatches = parseInt(targetCode.parameter, 10);
+
+  // SUM_CHAR_MATCHES logic:
+  // The 'codingSourceParameter' (e.g., "011") defines the correct state for each button
+  //   '1' means the button should be selected (clicked)
+  //   '0' means the button should not be selected (not clicked)
+  //
+  // A match at index 'i' occurs if the user's final selection at that index matches
+  // the character at index 'i' in 'codingSourceParameter'
+  //
+  // The code/score is determined by the total number of matches across all buttons
+  // To achieve a target 'numberOfMatches' (number of matches), we:
+  //   1. Keep 'numberOfMatches' positions identical to 'codingSourceParameter'
+  //   2. Flip the remaining positions (totalLength - numberOfMatches) to ensure they DON'T match
+
+  const totalLength = codingSourceParameter.length;
+  // Ensure the remaining position do not match the codingSourceParameter
+  const numToFlip = totalLength - numberOfMatches;
+
+  // Generate the target button states by flipping the first 'numToFlip' characters
+  // Flipping ensures that these positions will definitely NOT match the codingSourceParameter,
+  // while the remaining positions will match perfectly
+  const buttonsToClick: boolean[] = [];
+  for (let i = 0; i < totalLength; i++) {
+    const originalChar = codingSourceParameter[i];
+    let targetChar = originalChar;
+    if (i < numToFlip) {
+      // Flip the bit: '1' becomes '0', '0' becomes '1'.
+      // This results in a mismatch at this index.
+      targetChar = originalChar === '1' ? '0' : '1';
+    }
+    // If targetChar is '1', the button needs to be in a 'clicked' state.
+    buttonsToClick.push(targetChar === '1');
+  }
+
+  // Iterate through the generated states and click the buttons that should be '1'
+  // Since we start from an unselected state, clicking a button once sets it to '1'
+  for (let i = 0; i < buttonsToClick.length; i++) {
+    if (buttonsToClick[i]) {
+      const buttonSelector = interactionType === 'polygon_buttons' ?
+        `[data-cy="polygon-${i}"]` :
+        `[data-cy="button-${i}"]`;
+      cy.get(buttonSelector).click();
+    }
+  }
+});
+
 Cypress.Commands.add('assertInteractionComponentVisible', (interactionType: string) => {
   cy.log(`Waiting for interaction visibility: ${interactionType}`);
   if (interactionType === 'polygon_buttons') {
@@ -739,4 +803,12 @@ Cypress.Commands.add('assertRestoredState', (interactionType: string, expected?:
     cy.get('[data-cy="button-1"] input', { timeout: 15000 }).should('have.attr', 'data-selected', 'true');
     cy.log(`Approved: interactionType: ${interactionType} button-1 have attribute: data-selected`);
   }
+});
+
+Cypress.Commands.add('clickCorrectMultiselectButtons', (interactionType: string, unit: UnitDefinition) => {
+  cy.clickMultiselectButtons(interactionType, unit, true);
+});
+
+Cypress.Commands.add('clickIncorrectMultiselectButtons', (interactionType: string, unit: UnitDefinition) => {
+  cy.clickMultiselectButtons(interactionType, unit, false);
 });

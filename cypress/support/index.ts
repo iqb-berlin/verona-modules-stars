@@ -135,6 +135,14 @@ declare global {
        * @param expected - Optional expected state descriptor (e.g., for place_value: 'tens,ones' like '1,2' or a number 12)
        */
       assertRestoredState(interactionType:string, expected?: unknown): Chainable<void>;
+
+      /**
+       * Click multiselect buttons based on coding scheme
+       * @param interactionType - interactionType parameter of component being tested (eg: buttons, polygon_buttons...)
+       * @param unit - The unit definition data
+       * @param correct - Boolean value to click either correct or incorrect buttons
+       */
+      clickMultiselectButtons(interactionType: string, unit: UnitDefinition, correct: boolean): Chainable<void>;
     }
   }
 }
