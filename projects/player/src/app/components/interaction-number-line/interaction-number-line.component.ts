@@ -13,7 +13,8 @@ import { InteractionNumberLineParams } from '../../models/unit-definition';
 })
 
 export class InteractionNumberLineComponent extends InteractionComponentDirective implements AfterViewInit, OnDestroy {
-  @ViewChild('numberLinePath') numberLinePath!: ElementRef<SVGPathElement>;
+  @ViewChild('numberLinePathWave') numberLinePathWave!: ElementRef<SVGPathElement>;
+  @ViewChild('numberLinePathRuler') numberLinePathRuler!: ElementRef<SVGPathElement>;
   localParameters!: InteractionNumberLineParams;
 
   /** Boolean flag indicating whether the write interaction input is currently disabled. */
@@ -49,7 +50,8 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
         this.numberInputValue = '';
         this.updateButtonStates();
 
-        this.calculateNumberPositions();
+        // Schedule calculation for after the DOM has updated
+        this.scheduleCalculation();
 
         const formerStateResponses: Response[] = parameters.formerState || [];
 
@@ -79,11 +81,14 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
       this.resizeObserver = new ResizeObserver(() => {
         this.calculateNumberPositions();
       });
-      if (this.numberLinePath?.nativeElement) {
-        this.resizeObserver.observe(this.numberLinePath.nativeElement);
+      if (this.numberLinePathWave?.nativeElement) {
+        this.resizeObserver.observe(this.numberLinePathWave.nativeElement);
+      }
+      if (this.numberLinePathRuler?.nativeElement) {
+        this.resizeObserver.observe(this.numberLinePathRuler.nativeElement);
       }
     }
-    setTimeout(() => this.calculateNumberPositions(), 0);
+    this.scheduleCalculation();
   }
 
   ngOnDestroy() {
@@ -113,8 +118,12 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
       this.animationFrameId = undefined;
     }
 
-    if (!this.numberLinePath?.nativeElement) {
-      this.animationFrameId = requestAnimationFrame(() => this.calculateNumberPositions());
+    const pathElement = this.localParameters?.style === 'WAVE' ?
+      this.numberLinePathWave : this.numberLinePathRuler;
+
+    if (!pathElement?.nativeElement) {
+      // If the path is not yet available, wait for next cycle
+      this.scheduleCalculation();
       return;
     }
 
@@ -125,7 +134,7 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
     const count = lastNumber - firstNumber + 1;
     const items = [];
 
-    const path = this.numberLinePath.nativeElement;
+    const path = pathElement.nativeElement;
     const totalLength = path.getTotalLength();
 
     if (totalLength === 0) {
@@ -144,6 +153,8 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
       const distance = startPadding + (i / (count - 1)) * availableLength;
       const point = path.getPointAtLength(distance);
       const isEmpty = value === numberInput;
+      // For RULER style, only show a tick mark if the number is not a multiple of 5,
+      // not the first/last number, and not the input field.
       const isTickOnly = style === 'RULER' &&
                          value % 5 !== 0 &&
                          value !== firstNumber &&
@@ -159,6 +170,14 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
       });
     }
     this.numberLineItems.set(items);
+  }
+
+  /**
+   * Schedules a recalculation of number positions.
+   * Uses setTimeout(0) to ensure it runs after Angular's change detection and DOM updates.
+   */
+  private scheduleCalculation() {
+    setTimeout(() => this.calculateNumberPositions(), 0);
   }
 
   handleKeyboardClick(button: string) {
