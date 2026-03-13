@@ -23,6 +23,7 @@ export class StandardButtonComponent {
   text = input<string>();
   icon = input<string>();
   selected = input<boolean>();
+  hintSelect = input<boolean>(false);
   isSmallText = input<boolean>(false);
   type = input<ButtonTypeEnum>();
   repeatButtons = input<boolean>(false);
