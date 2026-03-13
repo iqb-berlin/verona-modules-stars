@@ -55,7 +55,7 @@
 
   input.hint + label {
     border-radius: variables.$border-radius;
-    border-color: colors.$yellow;
+    border-color: colors.$hint;
     transition: all 0.2s ease;
     box-shadow: none;
   }
