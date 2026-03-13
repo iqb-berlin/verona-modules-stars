@@ -11,6 +11,7 @@
     (click)="onClick()"
     [checked]="selected()"
     [attr.data-selected]="selected()"
+    [class.hint]="hintSelect()"
   />
   <label [for]="id() + '_' + value()">
     @if (type() === 'CIRCLE') {

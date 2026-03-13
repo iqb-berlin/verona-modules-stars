@@ -134,6 +134,35 @@ describe('Interaction VIDEO Component', () => {
     cy.assertContinueButtonExistsAndVisible();
   });
 
+  describe('Navigation on triggerNavigationOnEnd', () => {
+    it('requests navigation to next unit when triggerNavigationOnEnd is true and video ends', () => {
+      cy.setupTestData(
+        'video_triggerNavigationOnEnd_true_test.json',
+        interactionType
+      );
+
+      // Spy on postMessage of the parent window (used by VeronaPostService)
+      cy.window().then(window => {
+        const target = window.parent || window;
+        cy.spy(target, 'postMessage').as('postMessage');
+      });
+
+      // Start the video
+      clickVideoPlay();
+
+      playVideoFaster();
+
+      // Wait for navigation after small delay in component
+      cy.wait(600);
+
+      cy.get('@postMessage').should('have.been.called');
+      cy.get('@postMessage').should('have.been.calledWithMatch', Cypress.sinon.match({
+        type: 'vopUnitNavigationRequestedNotification',
+        target: 'next'
+      }));
+    });
+  });
+
   // Test base features for the VIDEO interaction type
   describe('Shared Features', () => {
     testRibbonBars(interactionType, `${interactionType}_ribbonBars_true_test`);

@@ -157,3 +157,33 @@ $layoutPadding: 90px;
   display: block;
   flex: 0 0 auto;
 }
+
+@mixin keyboard-numbers-button {
+  width: 70px;
+  height: 70px;
+  margin: 3px;
+  font-size: 40px;
+}
+
+@mixin keyboard-numbers-button-wrapper {
+  @include flex-center;
+  flex-direction: row;
+  position: relative;
+}
+
+@mixin keyboard-numbers-button-extra-styles {
+  border: none;
+  border-radius: 12px;
+  background-color: white;
+  cursor: pointer;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+
+  &:active:not(:disabled) {
+    background-color: #d0d0d0;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}

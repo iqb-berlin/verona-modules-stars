@@ -35,6 +35,7 @@
           [inputType]="'radio'"
           [image]="option.imageSource"
           [selected]="this.selectedValue() === $index"
+          [hintSelect]="(this.selectedValue() === $index) && hasHint()"
           [type]="'SMALL_SQUARE'"
           [attr.data-cy]="'button-' + $index"
           (buttonClick)="onButtonClick($index)">

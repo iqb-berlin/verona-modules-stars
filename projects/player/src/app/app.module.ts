@@ -26,34 +26,36 @@ import { InteractionPolygonButtonsComponent }
 import { OpeningImageComponent } from './components/opening-image/opening-image.component';
 import { AudioButtonComponent } from './shared/audio-button/audio-button.component';
 import { InteractionPlaceValueComponent } from './components/interaction-place-value/interaction-place-value.component';
+import { InteractionNumberLineComponent } from "./components/interaction-number-line/interaction-number-line.component";
 
 @NgModule({
   declarations: [
     AppComponent
   ],
-  imports: [
-    BrowserModule,
-    CommonModule,
-    NgOptimizedImage,
-    ContinueButtonComponent,
-    StandaloneMenuComponent,
-    SafeResourceUrlPipe,
-    LinebreaksHtmlPipe,
-    AudioComponent,
-    AudioButtonComponent,
-    ClickLayerComponent,
-    InteractionButtonsComponent,
-    ContinueButtonComponent,
-    StandardButtonComponent,
-    InteractionDropComponent,
-    InteractionWriteComponent,
-    InteractionVideoComponent,
-    InteractionFindOnImageComponent,
-    RibbonBarComponent,
-    InteractionPolygonButtonsComponent,
-    OpeningImageComponent,
-    InteractionPlaceValueComponent
-  ],
+    imports: [
+        BrowserModule,
+        CommonModule,
+        NgOptimizedImage,
+        ContinueButtonComponent,
+        StandaloneMenuComponent,
+        SafeResourceUrlPipe,
+        LinebreaksHtmlPipe,
+        AudioComponent,
+        AudioButtonComponent,
+        ClickLayerComponent,
+        InteractionButtonsComponent,
+        ContinueButtonComponent,
+        StandardButtonComponent,
+        InteractionDropComponent,
+        InteractionWriteComponent,
+        InteractionVideoComponent,
+        InteractionFindOnImageComponent,
+        RibbonBarComponent,
+        InteractionPolygonButtonsComponent,
+        OpeningImageComponent,
+        InteractionPlaceValueComponent,
+        InteractionNumberLineComponent
+    ],
   providers: [
     provideZonelessChangeDetection(),
     ResponsesService,

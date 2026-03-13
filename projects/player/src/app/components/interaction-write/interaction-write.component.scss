@@ -1,3 +1,4 @@
+@use '_colors.scss';
 @use '_variables.scss';
 
 .write-container {
@@ -42,6 +43,10 @@
     letter-spacing: 0.15rem;
     text-align: center;
     min-height: 2rem;
+
+    &.hint {
+      color: colors.$hint;
+    }
   }
 }
 
@@ -67,10 +72,7 @@
   }
 
   .keyboard-button {
-    width: 70px;
-    height: 70px;
-    margin: 3px;
-    font-size: 40px;
+    @include variables.keyboard-numbers-button;
   }
 
   .backspace-button {
@@ -101,9 +103,7 @@
 }
 
 .keyboard-wrapper {
-  @include variables.flex-center;
-  flex-direction: row;
-  position: relative;
+  @include variables.keyboard-numbers-button-wrapper;
 
   .grapheme-list {
     float: left;
@@ -111,26 +111,11 @@
 }
 
 .keyboard-button {
+  @include variables.keyboard-numbers-button-extra-styles;
   margin: 5px;
-  justify-content: center;
-  align-items: center;
   width: 55px;
   height: 55px;
   font-size: 1.4rem;
-  border: none;
-  border-radius: 12px;
-  background-color: white;
-  cursor: pointer;
-  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
-
-  &:active:not(:disabled) {
-    background-color: #d0d0d0;
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
 }
 
 .backspace-button {
