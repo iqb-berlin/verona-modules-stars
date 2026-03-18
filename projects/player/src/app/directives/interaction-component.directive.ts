@@ -8,7 +8,9 @@ export interface OnShowHint {
   showHint(value: string): void;
 }
 
-@Directive()
+@Directive({
+  standalone: true
+})
 export abstract class InteractionComponentDirective {
   parameters = input.required<unknown>();
   showHint = input<string>('');

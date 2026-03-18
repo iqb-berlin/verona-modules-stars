@@ -22,7 +22,8 @@ import { StarsResponse } from "../../services/responses.service";
     StandardButtonComponent,
     AudioButtonComponent
   ],
-  styleUrls: ['./interaction-buttons.component.scss']
+  styleUrls: ['./interaction-buttons.component.scss'],
+  standalone: true
 })
 
 export class InteractionButtonsComponent extends InteractionComponentDirective {

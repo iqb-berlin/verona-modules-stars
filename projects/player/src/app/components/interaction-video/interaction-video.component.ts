@@ -14,7 +14,8 @@ import { VeronaPostService } from '../../services/verona-post.service';
 @Component({
   selector: 'stars-interaction-video',
   templateUrl: './interaction-video.component.html',
-  styleUrls: ['./interaction-video.component.scss']
+  styleUrls: ['./interaction-video.component.scss'],
+  standalone: true
 })
 
 export class InteractionVideoComponent extends InteractionComponentDirective implements AfterViewInit {

@@ -30,7 +30,8 @@ import {
   selector: 'stars-interaction-drop',
   templateUrl: './interaction-drop.component.html',
   imports: [StandardButtonComponent, CdkDrag],
-  styleUrls: ['./interaction-drop.component.scss']
+  styleUrls: ['./interaction-drop.component.scss'],
+  standalone: true
 })
 export class InteractionDropComponent extends InteractionComponentDirective implements AfterViewInit, OnDestroy {
   /** Local parameters for the drop interaction */

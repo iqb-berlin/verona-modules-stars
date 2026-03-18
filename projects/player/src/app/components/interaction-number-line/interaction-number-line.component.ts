@@ -9,7 +9,8 @@ import { InteractionNumberLineParams } from '../../models/unit-definition';
 @Component({
   selector: 'stars-interaction-number-line',
   templateUrl: './interaction-number-line.component.html',
-  styleUrls: ['./interaction-number-line.component.scss']
+  styleUrls: ['./interaction-number-line.component.scss'],
+  standalone: true
 })
 
 export class InteractionNumberLineComponent extends InteractionComponentDirective implements AfterViewInit, OnDestroy {

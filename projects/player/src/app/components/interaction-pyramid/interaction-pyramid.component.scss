@@ -1,0 +1,16 @@
+@use '_variables.scss';
+@use '_colors.scss';
+
+.pyramid-container {
+  display: flex;
+}
+
+.keyboard-wrapper {
+  @include variables.keyboard-numbers-button-wrapper;
+  padding-top: 32px;
+}
+
+.keyboard-button {
+  @include variables.keyboard-numbers-button;
+  @include variables.keyboard-numbers-button-extra-styles;
+}

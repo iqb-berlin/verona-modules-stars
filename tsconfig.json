@@ -7,8 +7,11 @@
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "nodenext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "target": "esnext",
+    "resolveJsonModule": true,
+    "noEmit": true,
     "types": ["node", "cypress"],
     // For nodejs:
     // "lib": ["esnext"],
@@ -40,5 +43,6 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
+    "allowImportingTsExtensions": true
   }
 }

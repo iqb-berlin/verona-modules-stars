@@ -85,6 +85,10 @@
     <stars-interaction-number-line class="interaction"
       [parameters]="getParametersWithFormerState()"
       (responses)="responsesService.newResponses($event)"></stars-interaction-number-line>
+  } @else if (!unitService.openingFlowActive() && unitService.interaction() === 'PYRAMID') {
+    <stars-interaction-pyramid class="interaction"
+      [parameters]="getParametersWithFormerState()"
+      (responses)="responsesService.newResponses($event)"></stars-interaction-pyramid>
   }
 
   <!-- lower ribbons -->

@@ -6,7 +6,8 @@ import { UnitService } from '../../services/unit.service';
 @Component({
   selector: 'stars-click-layer',
   templateUrl: './click-layer.component.html',
-  styleUrls: ['./click-layer.component.scss']
+  styleUrls: ['./click-layer.component.scss'],
+  standalone: true
 })
 
 export class ClickLayerComponent {

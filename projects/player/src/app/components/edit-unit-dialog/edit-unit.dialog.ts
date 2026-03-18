@@ -5,6 +5,7 @@ import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 
 @Component({
+  standalone: true,
   template: `<h1>Edit unit definition</h1>
   <div>
     <textarea cdkTextareaAutosize #unitDefinitionElement

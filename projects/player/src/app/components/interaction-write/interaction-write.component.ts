@@ -8,7 +8,8 @@ import { InteractionWriteParams } from '../../models/unit-definition';
 @Component({
   selector: 'stars-interaction-write',
   templateUrl: 'interaction-write.component.html',
-  styleUrls: ['interaction-write.component.scss']
+  styleUrls: ['interaction-write.component.scss'],
+  standalone: true
 })
 
 export class InteractionWriteComponent extends InteractionComponentDirective {

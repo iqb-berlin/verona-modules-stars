@@ -8,7 +8,8 @@ import { AudioOptions } from '../../models/unit-definition';
 @Component({
   selector: 'stars-audio-button',
   templateUrl: 'audio-button.component.html',
-  styleUrl: 'audio-button.component.scss'
+  styleUrl: 'audio-button.component.scss',
+  standalone: true
 })
 
 export class AudioButtonComponent {
