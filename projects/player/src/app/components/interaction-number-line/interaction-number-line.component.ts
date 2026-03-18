@@ -23,7 +23,15 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
   numbersList: string[] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
   /** List of number line items with their values and calculated SVG coordinates. */
-  numberLineItems = signal<{ value: number, x: number, y: number, isEmpty: boolean, isTickOnly: boolean }[]>([]);
+  numberLineItems = signal<{
+    value: number,
+    x: number,
+    y: number,
+    isEmpty: boolean,
+    isTickOnly: boolean,
+    isBigLabel: boolean,
+    isSmallLabel: boolean
+  }[]>([]);
   /** Current value of the numberInput field on the number line. */
   numberInputValue: string = '';
 
@@ -143,9 +151,9 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
       return;
     }
 
-    // Leave 10% padding at the start and end of the spline
-    const startPadding = 0.1 * totalLength;
-    const endPadding = 0.1 * totalLength;
+    // Leave 7% padding at the start and end of the spline
+    const startPadding = 0.07 * totalLength;
+    const endPadding = 0.07 * totalLength;
     const availableLength = totalLength - startPadding - endPadding;
 
     for (let i = 0; i < count; i++) {
@@ -161,12 +169,19 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
                          value !== lastNumber &&
                          !isEmpty;
 
+      // Logic for label sizes in RULER style
+      const isBigLabel = style === 'RULER' &&
+                         (value === firstNumber || value === lastNumber || value % 10 === 0);
+      const isSmallLabel = style === 'RULER' && value % 5 === 0 && !isBigLabel;
+
       items.push({
         value,
         x: point.x,
         y: point.y,
         isEmpty,
-        isTickOnly
+        isTickOnly,
+        isBigLabel,
+        isSmallLabel
       });
     }
     this.numberLineItems.set(items);

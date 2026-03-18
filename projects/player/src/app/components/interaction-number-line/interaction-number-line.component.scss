@@ -19,19 +19,32 @@
 }
 
 .number-input-text {
-  font-size: 20px;
   pointer-events: none;
 }
 
-rect {
-  stroke-width: 0.5px;
-
-  &.number-input-field {
-    stroke-dasharray: 2, 2;
-    stroke: colors.$highlight;
-    stroke-width: 1px;
-  }
+.number-text-wave, .number-input-text-wave {
+  font-weight: 400;
+  font-size: 28px;
 }
+
+.number-input-text-ruler {
+  font-size: 38px;
+}
+
+.number-text-ruler-big {
+  font-size: 32px;
+}
+
+.number-text-ruler-small {
+  font-size: 24px;
+}
+
+.number-input-field-wave {
+  stroke-dasharray: 2, 2;
+  stroke: colors.$highlight;
+  stroke-width: 1px;
+}
+
 
 .keyboard-wrapper {
   @include variables.keyboard-numbers-button-wrapper;
