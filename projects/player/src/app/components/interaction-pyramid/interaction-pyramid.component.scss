@@ -3,11 +3,105 @@
 
 .pyramid-container {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  gap: 40px;
+}
+
+.pyramids-wrapper {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 50px;
+  gap: 120px;
+  width: 100%;
+}
+
+.pyramid-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  &.example-pyramid {
+    .number-box {
+      background-color: transparent;
+    }
+  }
+}
+
+.pyramid-top {
+  margin-bottom: 5px;
+}
+
+.pyramid-lines {
+  display: flex;
+  justify-content: center;
+  width: 200px;
+  height: 60px;
+  position: relative;
+  margin-top: -5px;
+  margin-bottom: 5px;
+
+  .line {
+    width: 3px;
+    height: 50px;
+    background-color: black;
+    position: absolute;
+    top: 10px;
+  }
+
+  .left-line {
+    transform: rotate(45deg);
+    transform-origin: top center;
+    left: 30%;
+  }
+
+  .right-line {
+    transform: rotate(-45deg);
+    transform-origin: top center;
+    right: 30%;
+  }
+}
+
+.pyramid-bottom {
+  display: flex;
+  gap: 116px;
+}
+
+.number-box {
+  width: 80px;
+  height: 80px;
+  background-color: colors.$white;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 42px;
+  color: black;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  user-select: none;
+
+  &.input-box {
+    cursor: pointer;
+    border: 2px solid transparent;
+
+    &.selected {
+      border-color: colors.$highlight;
+      box-shadow: 0 0 12px rgba(colors.$highlight, 0.6);
+      z-index: 1;
+    }
+
+    &:empty::before {
+      content: '';
+      display: inline-block;
+    }
+  }
 }
 
 .keyboard-wrapper {
   @include variables.keyboard-numbers-button-wrapper;
-  padding-top: 32px;
 }
 
 .keyboard-button {

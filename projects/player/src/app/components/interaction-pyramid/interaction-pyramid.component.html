@@ -1,5 +1,47 @@
-<div class="pyramid-container" data-cy="interaction-pyramid">hello
+<div class="pyramid-container" data-cy="interaction-pyramid">
+  <div class="pyramids-wrapper">
+    @if (localParameters?.example) {
+      <div class="pyramid-box example-pyramid">
+        <div class="pyramid-top">
+          <div class="number-box">{{ localParameters.example.topNumber }}</div>
+        </div>
+        <div class="pyramid-lines">
+          <div class="line left-line"></div>
+          <div class="line right-line"></div>
+        </div>
+        <div class="pyramid-bottom">
+          <div class="number-box">{{ localParameters.example.bottomLeftNumber }}</div>
+          <div class="number-box">{{ localParameters.example.bottomRightNumber }}</div>
+        </div>
+      </div>
+    }
 
+    @if (localParameters) {
+      <div class="pyramid-box interactive-pyramid">
+        <div class="pyramid-top">
+          <div class="number-box">{{ localParameters.topNumber }}</div>
+        </div>
+        <div class="pyramid-lines">
+          <div class="line left-line"></div>
+          <div class="line right-line"></div>
+        </div>
+        <div class="pyramid-bottom">
+          <div class="number-box input-box"
+               [class.selected]="selectedInput() === 'LEFT'"
+               (click)="selectInput('LEFT')"
+               data-cy="input-left">
+            {{ bottomLeftValue() }}
+          </div>
+          <div class="number-box input-box"
+               [class.selected]="selectedInput() === 'RIGHT'"
+               (click)="selectInput('RIGHT')"
+               data-cy="input-right">
+            {{ bottomRightValue() }}
+          </div>
+        </div>
+      </div>
+    }
+  </div>
 
   <div class="keyboard-wrapper" data-cy="keyboard-wrapper">
     @for (button of numbersList; track $index) {
@@ -7,7 +49,7 @@
               class="keyboard-button"
               [attr.aria-label]="button"
               (click)="handleKeyboardClick(button)"
-              [disabled]=false
+              [disabled]="keyboardDisabled()"
               [attr.data-cy]="'keyboard-button-' + button"
       >
         {{ button }}
@@ -17,7 +59,7 @@
             class="keyboard-button backspace-button"
             [attr.aria-label]="'Backspace'"
             (click)="handleBackButtonClick()"
-            [disabled]=false
+            [disabled]="selectedInput() === 'LEFT' ? bottomLeftValue().length === 0 : bottomRightValue().length === 0"
             [attr.data-cy]="'backspace-button'"
     >
       <svg xmlns="http://www.w3.org/2000/svg" height="32" viewBox="0 -960 960 960" width="32"
@@ -26,5 +68,4 @@
       </svg>
     </button>
   </div>
-
 </div>

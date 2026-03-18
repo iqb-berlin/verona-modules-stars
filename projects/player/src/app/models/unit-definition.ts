@@ -142,12 +142,13 @@ export interface InteractionNumberLineParams {
 
 export interface InteractionPyramidParams {
   variableId?: string;
-  example: {
+  example?: {
     topNumber: number;
     bottomLeftNumber: number;
     bottomRightNumber: number;
-  },
+  } | undefined;
   topNumber: number;
+  formerState?: Response[] | undefined;
 }
 
 export interface MainAudio {
