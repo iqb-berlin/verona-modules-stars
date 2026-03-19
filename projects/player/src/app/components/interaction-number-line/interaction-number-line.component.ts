@@ -25,15 +25,14 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
   /** List of number line items with their values and calculated SVG coordinates. */
   numberLineItems = signal<{
     value: number,
+    index: number,
     x: number,
     y: number,
-    isEmpty: boolean,
-    isTickOnly: boolean,
-    isBigLabel: boolean,
-    isSmallLabel: boolean
+    isEmpty: boolean
   }[]>([]);
   /** Current value of the numberInput field on the number line. */
   numberInputValue: string = '';
+  hasHint = signal(false);
 
   /** Observer to detect when the number line SVG path's dimensions change. */
   private resizeObserver: ResizeObserver | undefined;
@@ -56,6 +55,7 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
 
         // Reset the input state whenever parameters change
         this.numberInputValue = '';
+        this.hasHint.set(false);
         this.updateButtonStates();
 
         // Schedule calculation for after the DOM has updated
@@ -81,6 +81,17 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
         }]);
         if (!this.numberInputValue) this.numberInputValue = '';
       }
+    });
+
+    effect(() => {
+      const hints = this.showHint();
+      if (!hints || hints.length === 0) {
+        this.hasHint.set(false);
+        return;
+      }
+      this.numberInputValue = hints;
+      this.hasHint.set(true);
+      this.updateButtonStates();
     });
   }
 
@@ -152,7 +163,7 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
     }
 
     // Leave 7% padding at the start and end of the spline
-    const startPadding = 0.07 * totalLength;
+    const startPadding = style === 'RULER' ? 0 : 0.07 * totalLength;
     const endPadding = 0.07 * totalLength;
     const availableLength = totalLength - startPadding - endPadding;
 
@@ -161,27 +172,13 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
       const distance = startPadding + (i / (count - 1)) * availableLength;
       const point = path.getPointAtLength(distance);
       const isEmpty = value === numberInput;
-      // For RULER style, only show a tick mark if the number is not a multiple of 5,
-      // not the first/last number, and not the input field.
-      const isTickOnly = style === 'RULER' &&
-                         value % 5 !== 0 &&
-                         value !== firstNumber &&
-                         value !== lastNumber &&
-                         !isEmpty;
-
-      // Logic for label sizes in RULER style
-      const isBigLabel = style === 'RULER' &&
-                         (value === firstNumber || value === lastNumber || value % 10 === 0);
-      const isSmallLabel = style === 'RULER' && value % 5 === 0 && !isBigLabel;
 
       items.push({
         value,
+        index: i,
         x: point.x,
         y: point.y,
-        isEmpty,
-        isTickOnly,
-        isBigLabel,
-        isSmallLabel
+        isEmpty
       });
     }
     this.numberLineItems.set(items);
@@ -192,12 +189,15 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
    * Uses setTimeout(0) to ensure it runs after Angular's change detection and DOM updates.
    */
   private scheduleCalculation() {
-    setTimeout(() => this.calculateNumberPositions(), 0);
+    setTimeout(() => {
+      this.calculateNumberPositions();
+    }, 0);
   }
 
   handleKeyboardClick(button: string) {
     if (this.isDisabled) return;
     this.numberInputValue += button;
+    this.hasHint.set(false);
     this.updateButtonStates(this.numberInputValue);
     this.emitResponse();
   }
@@ -205,6 +205,7 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
   handleBackButtonClick() {
     if (this.numberInputValue.length === 0) return;
     this.numberInputValue = this.numberInputValue.slice(0, -1);
+    this.hasHint.set(false);
     this.updateButtonStates(this.numberInputValue);
     this.emitResponse();
   }

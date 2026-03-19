@@ -84,6 +84,7 @@
   } @else if (!unitService.openingFlowActive() && unitService.interaction() === 'NUMBER_LINE') {
     <stars-interaction-number-line class="interaction"
       [parameters]="getParametersWithFormerState()"
+      [showHint]="responsesService.feedbackHint()"
       (responses)="responsesService.newResponses($event)"></stars-interaction-number-line>
   }
 
