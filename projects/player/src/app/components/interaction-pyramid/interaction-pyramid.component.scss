@@ -71,14 +71,14 @@
 }
 
 .number-box {
-  width: 80px;
-  height: 80px;
+  width: 110px;
+  height: 110px;
   background-color: colors.$white;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 42px;
+  font-size: 64px;
   color: black;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   user-select: none;
@@ -90,6 +90,12 @@
     &.selected {
       border-color: colors.$highlight;
       box-shadow: 0 0 12px rgba(colors.$highlight, 0.6);
+      z-index: 1;
+    }
+
+    &.hint {
+      border-color: #e0f;
+      box-shadow: 0 0 12px rgba(#e0f, 0.6);
       z-index: 1;
     }
 

@@ -24,6 +24,10 @@ export class InteractionPyramidComponent extends InteractionComponentDirective {
   /** Currently selected input field ('LEFT' or 'RIGHT') */
   selectedInput = signal<'LEFT' | 'RIGHT'>('LEFT');
 
+  /** Whether a hint is currently being shown for each input field */
+  hasLeftHint = signal<boolean>(false);
+  hasRightHint = signal<boolean>(false);
+
   /** Whether the keyboard buttons should be disabled (max 2 digits per field) */
   keyboardDisabled = signal<boolean>(false);
 
@@ -51,6 +55,36 @@ export class InteractionPyramidComponent extends InteractionComponentDirective {
         }
         this.updateButtonStates();
       }
+    });
+
+    effect(() => {
+      const hints = this.showHint();
+      if (!hints || hints.length === 0) {
+        this.hasLeftHint.set(false);
+        this.hasRightHint.set(false);
+        return;
+      }
+      console.log('inside effect, there is hints', hints);
+      const parts = hints.split('_');
+
+      console.log('there is hints, parts', parts);
+      if (parts.length === 2) {
+        if (parts[0]) {
+          this.bottomLeftValue.set(parts[0]);
+          this.hasLeftHint.set(true);
+        } else {
+          this.bottomLeftValue.set('');
+          this.hasLeftHint.set(false);
+        }
+        if (parts[1]) {
+          this.bottomRightValue.set(parts[1]);
+          this.hasRightHint.set(true);
+        } else {
+          this.bottomRightValue.set('');
+          this.hasRightHint.set(false);
+        }
+      }
+      this.updateButtonStates();
     });
   }
 

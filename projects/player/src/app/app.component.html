@@ -88,6 +88,7 @@
   } @else if (!unitService.openingFlowActive() && unitService.interaction() === 'PYRAMID') {
     <stars-interaction-pyramid class="interaction"
       [parameters]="getParametersWithFormerState()"
+      [showHint]="responsesService.feedbackHint()"
       (responses)="responsesService.newResponses($event)"></stars-interaction-pyramid>
   }
 

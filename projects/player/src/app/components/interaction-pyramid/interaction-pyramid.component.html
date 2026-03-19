@@ -1,23 +1,23 @@
 <div class="pyramid-container" data-cy="interaction-pyramid">
   <div class="pyramids-wrapper">
     @if (localParameters?.example) {
-      <div class="pyramid-box example-pyramid">
+      <div class="pyramid-box example-pyramid" data-cy="example-pyramid">
         <div class="pyramid-top">
-          <div class="number-box">{{ localParameters.example.topNumber }}</div>
+          <div class="number-box" data-cy="example-pyramid-top-value">{{ localParameters.example.topNumber }}</div>
         </div>
         <div class="pyramid-lines">
           <div class="line left-line"></div>
           <div class="line right-line"></div>
         </div>
         <div class="pyramid-bottom">
-          <div class="number-box">{{ localParameters.example.bottomLeftNumber }}</div>
+          <div class="number-box" data-cy="example-pyramid-top-value">{{ localParameters.example.bottomLeftNumber }}</div>
           <div class="number-box">{{ localParameters.example.bottomRightNumber }}</div>
         </div>
       </div>
     }
 
     @if (localParameters) {
-      <div class="pyramid-box interactive-pyramid">
+      <div class="pyramid-box interactive-pyramid" data-cy="interactive-pyramid">
         <div class="pyramid-top">
           <div class="number-box">{{ localParameters.topNumber }}</div>
         </div>
@@ -28,12 +28,14 @@
         <div class="pyramid-bottom">
           <div class="number-box input-box"
                [class.selected]="selectedInput() === 'LEFT'"
+               [class.hint]="hasLeftHint()"
                (click)="selectInput('LEFT')"
                data-cy="input-left">
             {{ bottomLeftValue() }}
           </div>
           <div class="number-box input-box"
                [class.selected]="selectedInput() === 'RIGHT'"
+               [class.hint]="hasRightHint()"
                (click)="selectInput('RIGHT')"
                data-cy="input-right">
             {{ bottomRightValue() }}
