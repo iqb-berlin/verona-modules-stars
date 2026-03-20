@@ -18,7 +18,7 @@
     "variableId": "NUMBER_LINE",
     "firstNumber": 5,
     "lastNumber": 15,
-    "emptyNumber": 9,
+    "numberInput": 9,
     "style": "WAVE"
   }
 }

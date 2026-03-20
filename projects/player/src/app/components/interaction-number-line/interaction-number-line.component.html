@@ -1,6 +1,6 @@
 <div class="number-line-container" data-cy="interaction-number-line">
   <div class="svg-container">
-    <svg width="1000" height="400" viewBox="0 0 600 150" xmlns="http://www.w3.org/2000/svg">
+    <svg width="1000" height="400" viewBox="0 0 600 240" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5"
                 markerWidth="6" markerHeight="6"
@@ -13,25 +13,25 @@
         <path
           #numberLinePathWave
           id="numberLinePathWave"
-          d="M 10 90 C 150 10, 270 10, 360 90 S 530 160, 590 90"
+          d="M 10 150 C 200 60, 320 60, 360 120 S 500 180, 590 120"
           stroke="black"
           fill="transparent" />
 
         @for (item of numberLineItems(); track item.value) {
           <g [attr.transform]="'translate(' + item.x + ',' + item.y + ')'" data-cy="number-line-item">
             @if (item.isEmpty) {
-              <rect x="-20" y="-22" width="40" height="44" rx="2" ry="2"
-                    class="number-input-field"
+              <rect x="-20" y="-24" width="42" height="46" rx="2" ry="2"
+                    class="number-input-field-wave"
                     fill="white" stroke="black" data-cy="number-input-box" />
               <text x="0" y="0" text-anchor="middle" dominant-baseline="central"
-                    class="number-input-text" data-cy="number-input-text">
+                    class="number-input-text-wave" [class.hint]="hasHint()" data-cy="number-input-text">
                 {{ numberInputValue }}
               </text>
             } @else {
-              <rect x="-20" y="-22" width="40" height="44" rx="2" ry="2"
+              <rect x="-20" y="-24" width="42" height="46" rx="2" ry="2"
                     fill="white" stroke="black" data-cy="number-box" />
               <text x="0" y="0" text-anchor="middle" dominant-baseline="central"
-                    class="number-text" data-cy="number-label">
+                    class="number-text-wave" data-cy="number-label">
                 {{ item.value }}
               </text>
             }
@@ -41,36 +41,41 @@
         <path
           #numberLinePathRuler
           id="numberLinePathRuler"
-          d="M 10 90 H 590"
+          d="M 50 120 H 590"
           stroke="black"
           stroke-width="2"
           fill="transparent"
           marker-end="url(#arrow)" />
 
-        @for (item of numberLineItems(); track item.value) {
-          <g [attr.transform]="'translate(' + item.x + ',' + item.y + ')'" data-cy="number-line-item">
-            @if (item.isEmpty) {
-              <g transform="translate(0, -30)" data-cy="number-input-group">
-                <line x1="0" y1="30" x2="0" y2="0" stroke="#1154f8" stroke-width="2" />
-                <rect x="-20" y="-44" width="40" height="44" rx="2" ry="2"
-                      class="number-input-field"
-                      fill="white" stroke="black" data-cy="number-input-box" />
-                <text x="0" y="-22" text-anchor="middle" dominant-baseline="central"
-                      class="number-input-text" data-cy="number-input-text">
-                  {{ numberInputValue }}
+        <g class="ruler-items">
+          @for (item of numberLineItems(); track item.value) {
+            <g [attr.transform]="'translate(' + item.x + ',' + item.y + ')'"
+               [attr.data-index]="item.index"
+               [class.is-empty]="item.isEmpty"
+               class="number-line-item"
+               data-cy="number-line-item">
+              @if (item.isEmpty) {
+                <g transform="translate(0, -50)" data-cy="number-input-group">
+                  <line x1="0" y1="60" x2="0" y2="0" stroke="#0050E5" stroke-width="3" />
+                  <rect x="-25" y="-47" width="50" height="54" rx="2" ry="2"
+                        class="number-input-field-ruler"
+                        fill="white" data-cy="number-input-box" />
+                  <text x="0" y="-20" text-anchor="middle" dominant-baseline="central"
+                        class="number-input-text-ruler" [class.hint]="hasHint()" data-cy="number-input-text">
+                    {{ numberInputValue }}
+                  </text>
+                </g>
+              } @else {
+                <line class="tick-mark" x1="0" y1="5" x2="0" y2="-30" stroke="black" stroke-width="2" data-cy="ruler-tick-mark" />
+                <text x="0" y="25" text-anchor="middle" dominant-baseline="central"
+                      class="number-text-ruler"
+                      data-cy="number-label">
+                  {{ item.value }}
                 </text>
-              </g>
-            } @else if (item.isTickOnly) {
-              <line x1="0" y1="-10" x2="0" y2="10" stroke="black" stroke-width="1.5" data-cy="tick-mark" />
-            } @else {
-              <line x1="0" y1="-15" x2="0" y2="15" stroke="black" stroke-width="2" data-cy="ruler-tick-mark" />
-              <text x="0" y="30" text-anchor="middle" dominant-baseline="central"
-                    class="number-text" data-cy="number-label">
-                {{ item.value }}
-              </text>
-            }
-          </g>
-        }
+              }
+            </g>
+          }
+        </g>
       }
     </svg>
   </div>
@@ -99,5 +104,5 @@
         <path d="m456-320 104-104 104 104 56-56-104-104 104-104-56-56-104 104-104-104-56 56 104 104-104 104 56 56Zm-96 160q-19 0-36-8.5T296-192L80-480l216-288q11-15 28-23.5t36-8.5h440q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H360ZM180-480l180 240h440v-480H360L180-480Zm400 0Z"/>
       </svg>
     </button>
-    </div>
+  </div>
 </div>

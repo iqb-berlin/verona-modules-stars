@@ -16,9 +16,9 @@
   "interactionType": "NUMBER_LINE",
   "interactionParameters": {
     "variableId": "NUMBER_LINE",
-    "firstNumber": 7,
-    "lastNumber": 18,
-    "numberInput": 9,
-    "style": "WAVE"
+    "firstNumber": 6,
+    "lastNumber": 25,
+    "numberInput": 14,
+    "style": "RULER"
   }
 }

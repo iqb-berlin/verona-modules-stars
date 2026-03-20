@@ -47,7 +47,7 @@
   z-index: 1;
 
   &.active-drag {
-    z-index: 10000;
+    z-index: 100;
   }
 }
 
@@ -93,7 +93,7 @@
 .icon-item.animating,
 .icon-item.dragging {
   /* Keep the icons on top while animating and dragging */
-  z-index: 10001 !important;
+  z-index: 101 !important;
   /* Keep absolute positioning to avoid reflow/jump during animation */
   position: absolute;
   top: 0;

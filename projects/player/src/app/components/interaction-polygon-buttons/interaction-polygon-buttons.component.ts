@@ -87,6 +87,7 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
     const numberOfOptions = this.localParameters?.options?.length || 0;
     // Always set a NEW array reference
     this.selectedValues.set(Array(numberOfOptions).fill(false));
+    this.hintValues.set(Array(numberOfOptions).fill(false));
   }
 
   click(index: number) {
