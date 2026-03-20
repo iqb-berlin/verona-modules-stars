@@ -155,8 +155,18 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
       const percentX = Number.parseInt(parts[0]!, 10);
       const percentY = Number.parseInt(parts[1]!, 10);
       if (Number.isNaN(percentX) || Number.isNaN(percentY)) return
-      this.clickTargetLeft.set(`${percentX}px`);
-      this.clickTargetTop.set(`${percentY}px`);
+
+      // convert percent to pixels within image
+      const xWithinImage = Math.round((percentX / 100) * this.imgWidth);
+      const yWithinImage = Math.round((percentY / 100) * this.imgHeight);
+
+      // compute absolute coordinates consistent with the onClick usage
+      const xAbs = Math.max(this.imgLeft, Math.min(this.imgLeft + this.imgWidth, this.imgLeft + xWithinImage));
+      const yAbs = Math.max(this.imgTop, Math.min(this.imgTop + this.imgHeight, this.imgTop + yWithinImage));
+
+      this.clickTargetLeft.set(`${xAbs}px`);
+      this.clickTargetTop.set(`${yAbs}px`);
+
       this.hasHint.set(true);
     });
   }

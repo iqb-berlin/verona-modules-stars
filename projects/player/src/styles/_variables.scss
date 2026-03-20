@@ -146,7 +146,7 @@ $layoutPadding: 90px;
   position: absolute;
   width: 80px;
   height: 80px;
-  z-index: 100;
+  z-index: 200;
   display: flex;
   justify-content: center;
 }
@@ -185,5 +185,17 @@ $layoutPadding: 90px;
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+}
+
+@mixin backspace-button {
+  position: absolute;
+  top: 0;
+  right: -140px;
+  width: 100px;
+  background-color: #d0d0d0;
+
+  svg {
+    margin-top: 8px;
   }
 }
