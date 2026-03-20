@@ -187,3 +187,15 @@ $layoutPadding: 90px;
     cursor: not-allowed;
   }
 }
+
+@mixin backspace-button {
+  position: absolute;
+  top: 0;
+  right: -140px;
+  width: 100px;
+  background-color: #d0d0d0;
+
+  svg {
+    margin-top: 8px;
+  }
+}
