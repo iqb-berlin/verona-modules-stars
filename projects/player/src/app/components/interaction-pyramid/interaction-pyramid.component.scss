@@ -114,3 +114,9 @@
   @include variables.keyboard-numbers-button;
   @include variables.keyboard-numbers-button-extra-styles;
 }
+
+
+.backspace-button {
+  @include variables.backspace-button;
+  @include variables.backspace-button-extra-styles;
+}

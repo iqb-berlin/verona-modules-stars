@@ -91,16 +91,6 @@
 }
 
 .backspace-button {
-  position: absolute;
-  top: 0;
-  right: -100px;
-  background-color: #d0d0d0;
-  width: 70px;
-  height: 70px;
-  margin: 3px;
-  font-size: 40px;
-
-  svg {
-    margin-top: 8px;
-  }
+  @include variables.backspace-button;
+  @include variables.backspace-button-extra-styles;
 }
