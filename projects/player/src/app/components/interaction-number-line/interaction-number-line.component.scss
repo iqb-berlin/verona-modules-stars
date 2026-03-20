@@ -83,10 +83,24 @@
 
 .keyboard-wrapper {
   @include variables.keyboard-numbers-button-wrapper;
-  padding-top: 32px;
 }
 
 .keyboard-button {
   @include variables.keyboard-numbers-button;
   @include variables.keyboard-numbers-button-extra-styles;
+}
+
+.backspace-button {
+  position: absolute;
+  top: 0;
+  right: -100px;
+  background-color: #d0d0d0;
+  width: 70px;
+  height: 70px;
+  margin: 3px;
+  font-size: 40px;
+
+  svg {
+    margin-top: 8px;
+  }
 }
