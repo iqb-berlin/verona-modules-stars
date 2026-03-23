@@ -41,7 +41,7 @@ export class ContinueButtonComponent {
           this.audioService.getPlayFinished('AudioFeedback').then(() => {
             // TODO add here automatic function when audio finished aka navigation next
           });
-          this.responseService.startFeedback();
+          this.feedbackService.startFeedback();
         });
         this.lastAudioSource = newAudioSource;
       } else {

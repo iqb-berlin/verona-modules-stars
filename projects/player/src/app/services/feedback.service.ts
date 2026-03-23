@@ -1,7 +1,7 @@
 import { effect, inject, Injectable, signal } from '@angular/core';
 
 import { UnitDefinition } from '../models/unit-definition';
-import { FeedbackDefinition } from "../models/feedback";
+import { FeedbackDefinition, ShowResponse } from "../models/feedback";
 import { ResponsesService } from "./responses.service";
 import { AudioService } from "./audio.service";
 
@@ -16,19 +16,41 @@ export class FeedbackService {
   // provides Info on FeedbackAudio available
   #pendingAudioFeedback = signal(false);
   pendingAudioFeedback = this.#pendingAudioFeedback.asReadonly();
+  // sets to  hint answer to be shown when available
+  #feedbackHint = signal('');
+  feedbackHint = this.#feedbackHint.asReadonly();
+  // feedback is runnning
+  #feedbackActive = signal(false);
+  feedbackActive = this.#feedbackActive.asReadonly();
+
   private pendingAudioFeedbackSource = '';
-  private timeToShow = 0;
+  private pendingFeedbackHint = '';
+  private pendingHintDelay = 0;
+
 
   private feedbackDefinitions: FeedbackDefinition[] = [];
 
   constructor() {
     effect(() => {
-      if (this.audioService.audioId() === 'AudioFeedback' && this.timeToShow > 0) {
-        if (this.timeToShow >= this.audioService.percentElapsed()) {
+      if (this.audioService.audioId() === 'AudioFeedback' && this.pendingHintDelay > 0) {
+        if (this.pendingHintDelay >= this.audioService.percentElapsed()) {
           this.showAnswers();
         }
       }
     });
+  }
+
+  /**
+   * Reset
+   */
+  resetData() {
+    this.#pendingAudioFeedback.set(false);
+    this.pendingAudioFeedbackSource = '';
+    this.#feedbackHint.set('');
+    this.#feedbackActive.set(false);
+    this.feedbackDefinitions = [];
+    this.pendingFeedbackHint = '';
+    this.pendingHintDelay = 0;
   }
 
   /**
@@ -40,14 +62,18 @@ export class FeedbackService {
     if (unitDefinition.audioFeedback?.feedback && unitDefinition.audioFeedback.feedback.length > 0) {
       unitDefinition.audioFeedback.feedback.forEach(f => {
         if (f.variableId && f.variableId.length > 0 && f.parameter && f.audioSource) {
+          let showResponse: ShowResponse = {
+            variableId: f.showResponse?.variableId || '',
+            value: f.showResponse?.value || '',
+            delayMS: f.showResponse?.delayMS || 0
+          };
           this.feedbackDefinitions.push({
             variableId: f.variableId,
             source: f.source || 'CODE',
             method: f.method || 'EQUALS',
             parameter: f.parameter,
             audioSource: f.audioSource,
-            showAnswerOnFeedback: f.showAnswerOnFeedback || false,
-            timeElapsedToShowAnswer: f.timeElapsedToShowAnswer || 0,
+            showResponse: showResponse
           });
         }
       });
@@ -67,6 +93,18 @@ export class FeedbackService {
     return returnValue;
   }
 
+  startFeedback() {
+    if (this.pendingFeedbackHint === '') return;
+    if (this.pendingHintDelay != 0) {
+      setTimeout(() => {
+        this.#feedbackHint.set(this.pendingFeedbackHint);
+      }, this.pendingHintDelay);
+    } else {
+      this.#feedbackHint.set(this.pendingFeedbackHint);
+    }
+    this.#feedbackActive.set(true);
+  }
+
   private provideFeedback(startVariable: string): void {
     // reset Audio
     this.#pendingAudioFeedback.set(false);
@@ -74,7 +112,7 @@ export class FeedbackService {
 
     const responsesToCheck: string[] = [startVariable,
       ...this.responseService.allResponses.filter(r => r.id !== startVariable).map(r => r.id)];
-    const audioToPlay: string = responsesToCheck.map(varId => {
+    const audioToPlay: any = responsesToCheck.map(varId => {
       const responseToCheck = this.responseService.allResponses.find(r => r.id === varId);
       if (responseToCheck) {
         const feedbacksToUse = this.feedbackDefinitions
@@ -115,7 +153,9 @@ export class FeedbackService {
     }).find(sourceString => !!sourceString);
     if (audioToPlay) {
       this.#pendingAudioFeedback.set(true);
-      this.pendingAudioFeedbackSource = audioToPlay;
+      this.pendingAudioFeedbackSource = audioToPlay.audioSource;
+      this.pendingFeedbackHint = audioToPlay.showResponse?.value || '';
+      this.pendingHintDelay = audioToPlay.showResponse?.delayMS || 0;
     }
   }
 

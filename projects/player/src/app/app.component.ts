@@ -1,5 +1,5 @@
 import {
-  Component, computed, HostListener, OnInit
+  Component, computed, HostListener, inject, OnInit
 } from '@angular/core';
 
 import { VeronaPostService } from './services/verona-post.service';
@@ -7,8 +7,9 @@ import { VeronaSubscriptionService } from './services/verona-subscription.servic
 import { UnitService } from './services/unit.service';
 import { MetadataService } from './services/metadata.service';
 import { ResponsesService } from './services/responses.service';
-import { VopStartCommand } from './models/verona';
 import { StateService } from './services/state.service';
+import { FeedbackService } from "./services/feedback.service";
+import { VopStartCommand } from './models/verona';
 
 @Component({
   selector: 'stars-player',
@@ -18,29 +19,25 @@ import { StateService } from './services/state.service';
 })
 
 export class AppComponent implements OnInit {
+  public unitService = inject(UnitService);
+  public stateService = inject(StateService);
+  public responsesService = inject(ResponsesService);
+  public feedbackService = inject(FeedbackService);
+  private veronaPostService = inject(VeronaPostService);
+  private veronaSubscriptionService = inject(VeronaSubscriptionService);
+  private metadataService = inject(MetadataService);
+
   isStandalone: boolean | undefined;
 
-  hasRibbonBars(): boolean {
-    return this.unitService.ribbonBars();
-  }
-
+  /**
+   * put formerState to Unit parameters if available
+   */
   getParametersWithFormerState = computed(() => {
-    const params = this.unitService.parameters();
-    const baseParams = params as Record<string, any> || {};
     return {
-      ...baseParams,
+      ...this.unitService.parameters(),
       formerState: this.responsesService.formerStateResponses()
     };
   });
-
-  constructor(
-    public unitService: UnitService,
-    public stateService: StateService,
-    public responsesService: ResponsesService,
-    public veronaPostService: VeronaPostService,
-    private veronaSubscriptionService: VeronaSubscriptionService,
-    private metadataService: MetadataService
-  ) { }
 
   ngOnInit(): void {
     this.veronaSubscriptionService.vopStartCommand
@@ -56,9 +53,13 @@ export class AppComponent implements OnInit {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  disabledOverlay(event: Event): void {
+  preventClick(event: Event): void {
     event.preventDefault();
     event.stopPropagation();
+  }
+
+  continueButtonClicked(): void {
+    this.stateService.continueButtonClicked();
   }
 
   @HostListener('window:blur')
@@ -70,6 +71,4 @@ export class AppComponent implements OnInit {
   onFocus(): void {
     this.veronaPostService.sendVopWindowFocusChangedNotification(true);
   }
-
-  protected readonly UnitService = UnitService;
 }

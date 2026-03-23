@@ -8,6 +8,8 @@ import { AudioService } from "./audio.service";
 import { AudioOptions, OpeningImageParams, UnitDefinition } from '../models/unit-definition';
 import { StateEnum } from "../models/state";
 import { UnitService } from "./unit.service";
+import { Progress, UnitState, UnitStateDataType } from "../models/verona";
+import { VeronaPostService } from "./verona-post.service";
 
 @Injectable({
   providedIn: 'root'
@@ -17,10 +19,18 @@ export class StateService {
   private feedbackService = inject(FeedbackService);
   private responsesService = inject(ResponsesService);
   private unitService = inject(UnitService);
+  private veronaPostService = inject(VeronaPostService);
   private audioService = inject(AudioService);
 
-  #firstInteractionDone = signal(false);
-  firstInteractionDone = this.#firstInteractionDone.asReadonly();
+  #presentationProgress = signal<Progress>('none');
+  #responseProgress = signal<Progress>('none');
+  private lastResponsesString = '';
+
+  #mainAudioComplete = signal(false);
+
+  #interactionDone = signal(false);
+  interactionDone = this.#interactionDone.asReadonly();
+
   #showMainAudio = signal(false);
   showMainAudio = this.#showMainAudio.asReadonly();
   #showFirstClickLayer = signal(false);
@@ -35,8 +45,18 @@ export class StateService {
 
   private state: StateEnum = StateEnum.INIT;
 
+  practiceMode = computed(() => {
+    return this.unitService.ribbonBars();
+  });
+
+  showDisableInteractionLayer = computed(() => {
+    return (this.unitService.disableInteractionUntilComplete() && !this.responsesService.mainAudioComplete()) ||
+      this.feedbackService.feedbackActive();
+  });
+
+
   setNewData(unitDefinition: UnitDefinition) {
-    this.#firstInteractionDone.set(false);
+    this.#interactionDone.set(false);
     this.#showMainAudio.set(this.unitService.openingImageParams().audioSource !== undefined ||
       unitDefinition.mainAudio?.audioSource !== undefined);
   }
@@ -54,13 +74,17 @@ export class StateService {
 
   layerClicked() {
     this.#showFirstClickLayer.set(false);
-    this.#firstInteractionDone.set(true);
+    this.#interactionDone.set(true);
   }
 
   continueButtonClicked() {
     if (this.feedbackService.pendingAudioFeedback()) {
 
     }
+  }
+
+  mainAudioClicked() {
+    this.#interactionDone.set(true);
   }
 
   newResponse(response: Response[]) {
@@ -78,5 +102,41 @@ export class StateService {
     // calc PresentationState
 
     // send Response
+  }
+
+  /**
+   * Updates the unit's presentation progress (e.g., 'none', 'some', 'complete').
+   * This status is used to track whether the user has interacted with the unit's
+   * presentation elements, such as dismissing the click-layer or finishing the main audio.
+   * A 'complete' status cannot be downgraded to 'some' or 'none'.
+   * Each update triggers a vopStateChangedNotification to the Verona host.
+   */
+  updatePresentationProgress(progress: Progress): void {
+    if (this.#presentationProgress() === 'complete' && progress !== 'complete') {
+      return;
+    }
+    this.#presentationProgress.set(progress);
+    const unitState: UnitState = {
+      unitStateDataType: UnitStateDataType,
+      dataParts: {
+        responses: this.lastResponsesString
+      },
+      responseProgress: this.#responseProgress(),
+      presentationProgress: this.getPresentationStatus()
+    };
+    if (this.veronaPostService) {
+      this.veronaPostService.sendVopStateChangedNotification({ unitState });
+    }
+  }
+
+  /**
+   * Get PresentationStatus
+   * when loaded -> 'some'
+   * when audio finished -> 'complete'
+   */
+  getPresentationStatus(): Progress {
+    // TODO check for other possibilities
+    if (this.#mainAudioComplete()) return 'complete';
+    return 'some';
   }
 }

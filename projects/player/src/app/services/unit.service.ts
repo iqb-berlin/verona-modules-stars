@@ -80,6 +80,5 @@ export class UnitService {
     this.ribbonBars.set(def.ribbonBars || false);
     this.disableInteractionUntilComplete.set(def.mainAudio?.disableInteractionUntilComplete || false);
     this.openingImageParams.set(def.openingImage || {} as OpeningImageParams);
-    this.metaInteraction.set(def.metaInteraction || {}  as MetaInteractionParams);
   }
 }

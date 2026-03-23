@@ -23,6 +23,7 @@ export type TargetSizeEnum = 'MEDIUM' | 'LARGE' | 'SMALL';
 export type LayoutEnum = 'LEFT_CENTER' | 'TOP_CENTER' | 'LEFT_BOTTOM' | 'LEFT_CENTER_50';
 export type InteractionParameters = InteractionButtonParams | InteractionWriteParams | InteractionDropParams |
 InteractionVideoParams | InteractionFindOnImageParams | InteractionPolygonButtonsParams | InteractionPlaceValueParams | InteractionNumberLineParams;
+
 export interface UnitDefinition {
   id: string;
   version?: string;

@@ -24,17 +24,16 @@
         (responsesService.responseProgress() === "some" || responsesService.responseProgress() === "complete")) ||
       (unitService.continueButton() === "ON_RESPONSES_COMPLETE" && responsesService.responseProgress() === "complete")) {
     <stars-continue-button
-      (navigate)="veronaPostService.sendVopUnitNavigationRequestedNotification('next')"></stars-continue-button>
+      (navigate)="continueButtonClicked()"></stars-continue-button>
   }
 
   <!-- disable interaction until complete via overlay -->
-  @if ((unitService.disableInteractionUntilComplete() && !responsesService.mainAudioComplete()) ||
-    responsesService.feedbackActive()) {
-    <div class="interaction-disabled-overlay" (click)="disabledOverlay($event)" data-cy="interaction-disabled-overlay"></div>
+  @if (!stateService.showDisableInteractionLayer()) {
+    <div class="interaction-disabled-overlay" (click)="preventClick($event)" data-cy="interaction-disabled-overlay"></div>
   }
 
   <!-- show ribbons when in practice mode -->
-  @if (hasRibbonBars()) {
+  @if (stateService.practiceMode()) {
     <stars-ribbon-bar></stars-ribbon-bar>
   }
 
@@ -101,7 +100,7 @@
   }
 
   <!-- lower ribbons -->
-  @if (hasRibbonBars()) {
+  @if (stateService.practiceMode()) {
     <stars-ribbon-bar></stars-ribbon-bar>
   }
 </div>

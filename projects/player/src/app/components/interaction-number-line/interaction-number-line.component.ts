@@ -3,6 +3,7 @@ import {
 } from '@angular/core';
 
 import { Response } from '@iqbspecs/response/response.interface';
+
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
 import { InteractionNumberLineParams } from '../../models/unit-definition';
 
@@ -76,8 +77,7 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
         this.responses.emit([{
           id: this.localParameters.variableId,
           status: 'DISPLAYED',
-          value: '',
-          relevantForResponsesProgress: false
+          value: ''
         }]);
         if (!this.numberInputValue) this.numberInputValue = '';
       }
@@ -219,8 +219,7 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
     this.responses.emit([{
       id: this.localParameters.variableId || 'NUMBER_LINE',
       status: this.numberInputValue.length >= 1 ? 'VALUE_CHANGED' : 'DISPLAYED',
-      value: this.numberInputValue,
-      relevantForResponsesProgress: true
+      value: this.numberInputValue
     }]);
   }
 
