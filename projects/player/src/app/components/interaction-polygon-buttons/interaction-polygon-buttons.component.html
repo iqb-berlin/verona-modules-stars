@@ -3,6 +3,7 @@
     @for (option of localParameters.options; track $index) {
       <path (click)="click($index)"
             [class.clicked]="selectedValues()[$index]"
+            [class.hint]="hintValues()[$index] || false"
             [id]="$index"
             [attr.d]="option.svgPath"
             [attr.data-cy]="'polygon-' + $index" />

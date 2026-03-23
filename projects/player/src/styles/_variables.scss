@@ -146,7 +146,7 @@ $layoutPadding: 90px;
   position: absolute;
   width: 80px;
   height: 80px;
-  z-index: 100;
+  z-index: 200;
   display: flex;
   justify-content: center;
 }
@@ -156,4 +156,46 @@ $layoutPadding: 90px;
   height: 100%;
   display: block;
   flex: 0 0 auto;
+}
+
+@mixin keyboard-numbers-button {
+  width: 70px;
+  height: 70px;
+  margin: 3px;
+  font-size: 40px;
+}
+
+@mixin keyboard-numbers-button-wrapper {
+  @include flex-center;
+  flex-direction: row;
+  position: relative;
+}
+
+@mixin keyboard-numbers-button-extra-styles {
+  border: none;
+  border-radius: 12px;
+  background-color: white;
+  cursor: pointer;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+
+  &:active:not(:disabled) {
+    background-color: #d0d0d0;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+@mixin backspace-button {
+  position: absolute;
+  top: 0;
+  right: -140px;
+  width: 100px;
+  background-color: #d0d0d0;
+
+  svg {
+    margin-top: 8px;
+  }
 }

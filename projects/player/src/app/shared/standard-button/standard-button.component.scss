@@ -53,10 +53,9 @@
     box-shadow: none;
   }
 
-  input.hint {
+  input.hint + label {
     border-radius: variables.$border-radius;
-    border-width: 2px;
-    border-color: red;
+    border-color: colors.$hint;
     transition: all 0.2s ease;
     box-shadow: none;
   }
@@ -222,7 +221,7 @@
   &.tall_rectangle-type {
     @include variables.tall-rectangle-button-size;
     input, label {
-      box-shadow: 0px 0px 0px 0px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.2);
     }
 
     label {

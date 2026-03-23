@@ -63,6 +63,8 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
   /** Suppress accidental clicks right after a drag */
   private suppressClick = false;
 
+  hasHint = signal(false);
+
   /** Reference to the container element for attaching event listeners */
   @ViewChild('dropContainer', { static: true }) dropContainerRef!: ElementRef<HTMLElement>;
 
@@ -127,6 +129,31 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
           }]);
         }
       }
+    });
+
+    effect(() => {
+      const hints = this.showHint();
+      if (!hints || hints.length === 0) {
+        return;
+      }
+      const numeric = parseInt(hints, 10);
+      const selectedIndex = !Number.isNaN(numeric) ? numeric - 1 : -1;
+
+      this.removeTransitionDisabled(this.selectedValue());
+      this.updateButtonTransform(this.selectedValue(), '');
+
+      if (selectedIndex >= 0 && selectedIndex < this.localParameters.options.length) {
+        this.selectedValue.set(selectedIndex);
+      }
+
+      const transforms = this.preCalculatedTransforms();
+      const transformValue = transforms[selectedIndex];
+      if (transformValue) {
+        this.updateButtonTransform(selectedIndex, transformValue);
+        this.settledTransform.set(transformValue);
+        this.settledButtonIndex.set(selectedIndex);
+      }
+      this.hasHint.set(true);
     });
   }
 

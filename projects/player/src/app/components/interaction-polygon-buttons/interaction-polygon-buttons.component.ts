@@ -19,8 +19,12 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
   localParameters!: InteractionPolygonButtonsParams;
   /** Array of booleans for each option. */
   selectedValues = signal<boolean[]>([]);
+  /** Array of booleans for each option for hint values. */
+  hintValues = signal<boolean[]>([]);
 
   constructor() {
+    super();
+
     effect(() => {
       const parameters = this.parameters() as InteractionPolygonButtonsParams;
       this.localParameters = this.createDefaultParameters();
@@ -52,13 +56,39 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
         value: 0
       }]);
     });
-    super();
+
+    effect(() => {
+      this.resetSelection()
+      const hints = this.showHint();
+      if (!hints || hints.length === 0) {
+        return;
+      }
+
+      if (this.localParameters.multiSelect) {
+        // set multiselect: "010" => [false, true, false]
+        const selectedStates = hints
+          .split('')
+          .map((char: string) => char === '1');
+        this.hintValues.set(selectedStates);
+      } else {
+        // set single select: "2" => [false, true, false]
+        const selectedIndex = parseInt(hints, 10) - 1;
+        const selectedStates = Array.from(
+          { length: this.selectedValues().length },
+          (_, i) => i === selectedIndex
+        );
+        this.hintValues.set(selectedStates);
+        this.selectedValues.set([]);
+        console.log('hints', this.hintValues());
+      }
+    });
   }
 
   private resetSelection(): void {
     const numberOfOptions = this.localParameters?.options?.length || 0;
     // Always set a NEW array reference
     this.selectedValues.set(Array(numberOfOptions).fill(false));
+    this.hintValues.set(Array(numberOfOptions).fill(false));
   }
 
   click(index: number) {

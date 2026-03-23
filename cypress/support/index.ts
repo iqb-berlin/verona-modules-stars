@@ -96,6 +96,11 @@ declare global {
       clearTextInput(testData?: UnitDefinition): Chainable<void>
 
       /**
+       * Custom command to clear number line input by clicking backspace until empty-number-text is empty
+       */
+      clearNumberLineInput(): Chainable<void>
+
+      /**
        * Move specified number of tens and ones in place_value interaction
        * @param targetTens - Number of tens to move
        * @param targetOnes - Number of ones to move
@@ -130,6 +135,14 @@ declare global {
        * @param expected - Optional expected state descriptor (e.g., for place_value: 'tens,ones' like '1,2' or a number 12)
        */
       assertRestoredState(interactionType:string, expected?: unknown): Chainable<void>;
+
+      /**
+       * Click multiselect buttons based on coding scheme
+       * @param interactionType - interactionType parameter of component being tested (eg: buttons, polygon_buttons...)
+       * @param unit - The unit definition data
+       * @param correct - Boolean value to click either correct or incorrect buttons
+       */
+      clickMultiselectButtons(interactionType: string, unit: UnitDefinition, correct: boolean): Chainable<void>;
     }
   }
 }

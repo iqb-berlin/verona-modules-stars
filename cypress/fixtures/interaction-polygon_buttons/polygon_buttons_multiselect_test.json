@@ -1,8 +1,8 @@
 {
   "id": "stars-unit-definition",
-  "version": "1.10",
+  "version": "2.3",
   "backgroundColor": "#3cf",
-  "continueButtonShow": "ON_ANY_RESPONSE",
+  "continueButtonShow": "ALWAYS",
   "firstAudioOptions": {
     "firstClickLayer": false,
     "animateButton": false
@@ -22,8 +22,52 @@
       },
       {
         "svgPath": "M 200,400 l 0,150 l 150,0 l 0,-150 z",
-        "label": "Rectangle"
+        "label": "Rectangle 1"
+      },
+      {
+        "svgPath": "M 610,500 l -142,0 l 0,80 l 182,0 l 0,-40 z",
+        "label": "Rectangle 2"
+      },
+      {
+        "svgPath": "M 850,170 l 60,0 l -30,230 z",
+        "label": "Triangle 1"
+      },
+      {
+        "svgPath": "M 710,380 l 76,18 l -9,38 l 38,9 l -18,76 l -38,-9 l -9,38 l -76,-18 l 9,-38 l -38,-9 l 18,-76 l 38,9 z",
+        "label": "12-sided polygon (Dodecagon)"
+      },
+      {
+        "svgPath": "M 840,480 l 102,32 l -74,78 z",
+        "label": "Triangle 2"
       }
     ]
-  }
+  },
+  "variableInfo": [
+    {
+      "variableId": "POLYGON_BUTTONS",
+      "responseComplete": "ALWAYS",
+      "codingSource": "SUM_CHAR_MATCHES",
+      "codingSourceParameter": "011000",
+      "codes": [
+        {
+          "method": "EQUALS",
+          "parameter": "6",
+          "code": 1,
+          "score": 1
+        },
+        {
+          "method": "EQUALS",
+          "parameter": "2",
+          "code": 2,
+          "score": 1
+        },
+        {
+          "method": "EQUALS",
+          "parameter": "3",
+          "code": 3,
+          "score": 1
+        }
+      ]
+    }
+  ]
 }

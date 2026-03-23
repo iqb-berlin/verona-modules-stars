@@ -1,0 +1,106 @@
+@use '_variables.scss';
+@use '_colors.scss';
+
+.number-line-container {
+  @include variables.flex-center;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.svg-container {
+  width: 100%;
+  height: 100%;
+  margin-bottom: 20px;
+
+  svg {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+.number-input-text {
+  pointer-events: none;
+}
+
+.number-input-text-wave, .number-input-text-ruler {
+  &.hint {
+    fill: colors.$hint;
+  }
+}
+
+.number-text-wave, .number-input-text-wave {
+  font-weight: 400;
+  font-size: 28px;
+}
+
+.number-input-text-ruler {
+  font-size: 42px;
+}
+
+.number-input-field-wave {
+  stroke-dasharray: 2, 2;
+  stroke: colors.$highlight;
+  stroke-width: 1px;
+}
+
+.number-text-ruler {
+  font-size: 24px;
+  display: none; // Hide labels by default
+
+  // Always show labels for first and last items
+  .ruler-items .number-line-item:first-child &,
+  .ruler-items .number-line-item:last-child & {
+    display: block;
+    font-size: 32px;
+  }
+
+  // Every 5th item from the start: show label with font-size 28px
+  .ruler-items .number-line-item:nth-child(5n + 1) & {
+    display: block;
+    font-size: 28px;
+  }
+
+  // Every 10th item from the start: show label with font-size 36px
+  .ruler-items .number-line-item:nth-child(10n + 1) & {
+    display: block;
+    font-size: 36px;
+  }
+}
+
+.number-line-item:not(.is-empty) {
+  .tick-mark {
+    transform-origin: 0 0;
+    transform: scaleY(0.5) translateY(-5px);
+  }
+
+  // Big ticks for first, last, and every 5th item
+  &:first-child,
+  &:last-child,
+  &:nth-child(5n + 1) {
+    .tick-mark { transform: scaleY(1); stroke-width: 2.5; }
+  }
+}
+
+.keyboard-wrapper {
+  @include variables.keyboard-numbers-button-wrapper;
+}
+
+.keyboard-button {
+  @include variables.keyboard-numbers-button;
+  @include variables.keyboard-numbers-button-extra-styles;
+}
+
+.backspace-button {
+  position: absolute;
+  top: 0;
+  right: -100px;
+  background-color: #d0d0d0;
+  width: 70px;
+  height: 70px;
+  margin: 3px;
+  font-size: 40px;
+
+  svg {
+    margin-top: 8px;
+  }
+}

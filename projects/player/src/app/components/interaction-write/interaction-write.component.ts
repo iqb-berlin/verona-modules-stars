@@ -1,4 +1,4 @@
-import { Component, effect } from '@angular/core';
+import { Component, effect, signal } from '@angular/core';
 
 import { Response } from '@iqbspecs/response/response.interface';
 
@@ -18,6 +18,7 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
   isDisabled: boolean = false;
   /** The current text entered by the user. Initialized as an empty string. */
   currentText: string = '';
+  hasHint = signal(false);
   /** An array of lowercase alphabet characters. */
   characterList = [...'abcdefghijklmnopqrstuvwxyz'];
   numbersList: string[] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
@@ -72,6 +73,15 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
       }
 
       if (!this.currentText) this.currentText = '';
+    });
+
+    effect(() => {
+      const hints = this.showHint();
+      if (!hints || hints.length === 0) {
+        return;
+      }
+      this.currentText = hints;
+      this.hasHint.set(true);
     });
   }
 

@@ -29,6 +29,8 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
   private static readonly MARGIN_BETWEEN_ROWS = 12;
   private static readonly TENS_ICON_INTERNAL_PADDING = 12;
 
+  hasHint = signal(false);
+
   /** Image panel (up) and icon wrappers (down) element refs */
   @ViewChild('iconsUpperPanel', { static: false }) iconsUpperPanel?: ElementRef<HTMLElement>;
   @ViewChild('tensWrapper', { static: false }) tensWrapper?: ElementRef<HTMLElement>;
@@ -130,6 +132,65 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
       void this.onesCountAtTheTopPanel();
       // Recompute positions for all without marking everything as animating
       this.scheduleLayoutUpdate();
+    });
+
+    effect(() => {
+      const hints = this.showHint();
+      if (!hints || hints.length === 0) {
+        return;
+      }
+
+      // Parse numeric value from response
+      const numeric = parseInt(hints, 10);
+      const total = Number.isFinite(numeric) ? Math.max(0, numeric) : 0;
+
+      // Determine desired tens and ones within configured caps
+      const desiredTens = Math.min(this.maxNumberOfTens, Math.floor(total / 10));
+      const desiredOnes = Math.min(this.maxNumberOfOnes, total % 10);
+
+      // Reset internal state
+      this.resetSelection();
+
+      // Build new tens and ones arrays using the highest available stacked ids (top of wrapper)
+      const tensAll = this.tensArray();
+      const onesAll = this.onesArray();
+
+      const newTens: CountItem[] = [];
+      for (let i = tensAll.length - 1; i >= 0 && newTens.length < desiredTens; i -= 1) {
+        const tensItem = tensAll[i];
+        if (tensItem) {
+          this.addedSeqCounter += 1;
+          this.addedSequence.set(tensItem.id, this.addedSeqCounter);
+          this.tensSlotIndex.set(tensItem.id, this.nextTensSlot);
+          this.nextTensSlot += 1;
+          newTens.push(tensItem);
+        }
+      }
+
+      const newOnes: CountItem[] = [];
+      for (let i = onesAll.length - 1; i >= 0 && newOnes.length < desiredOnes; i -= 1) {
+        const onesItem = onesAll[i];
+        if (onesItem) {
+          this.addedSeqCounter += 1;
+          this.addedSequence.set(onesItem.id, this.addedSeqCounter);
+          this.onesSlotIndex.set(onesItem.id, this.nextOnesSlot);
+          this.nextOnesSlot += 1;
+          newOnes.push(onesItem);
+        }
+      }
+
+      // Apply restored arrays
+      this.tensCountAtTheTopPanel.set(newTens);
+      this.onesCountAtTheTopPanel.set(newOnes);
+
+      // Collect all restored item IDs for animation
+      // This allows the UI to animate icons "moving up" from their starting positions
+      // to their restored slots in the upper panel
+      const restoredIds = [...newTens.map(t => t.id), ...newOnes.map(o => o.id)];
+
+      // Recalculate layout and mark items as animating for visual transition
+      // Passing the IDs triggers the CSS transition for these specific elements
+      this.scheduleLayoutUpdate(restoredIds);
     });
   }
 

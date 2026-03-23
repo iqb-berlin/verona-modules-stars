@@ -2,7 +2,8 @@
   <button class="audio-button"
         (click)="play()"
         [class.disabled]="disabled() && !isPlaying()"
-        [class.playing]="isPlaying()">
+        [class.playing]="isPlaying()"
+        [class.is-playing]="isPlaying()">
     <div class="speaker-icon" data-cy="speaker-icon">
       <svg width="50" height="50" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
         <rect class="white-circle" x="0" y="0" width="50" height="50" rx="25" fill="white"/>

@@ -1,10 +1,10 @@
 {
   "name": "verona-modules-stars",
-  "version": "0.6.29",
+  "version": "0.6.31",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/iqb-berlin/verona-modules-nemo"
+    "url": "https://github.com/iqb-berlin/verona-modules-stars"
   },
   "scripts": {
     "ng": "ng",

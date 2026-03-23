@@ -2,7 +2,7 @@
   position: absolute;
   top: 20px;
   right: 20px;
-  z-index: 100;
+  z-index: 250;
 }
 .menu-bar-item {
   cursor: pointer;

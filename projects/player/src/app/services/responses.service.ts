@@ -6,7 +6,7 @@ import { Progress, UnitState, UnitStateDataType } from '../models/verona';
 import { VeronaPostService } from './verona-post.service';
 import { UnitDefinition } from '../models/unit-definition';
 import { Code, VariableInfo } from '../models/responses';
-import { FeedbackDefinition } from '../models/feedback';
+import { FeedbackDefinition, ShowResponse } from '../models/feedback';
 
 @Injectable({
   providedIn: 'root'
@@ -31,6 +31,12 @@ export class ResponsesService {
   hasParentWindow = window === window.parent;
   // Helper to prevent unnecessary calculations
   private lastResponsesString = '';
+
+  feedbackHint = signal('');
+  feedbackActive = signal(false);
+  private pendingAudioFeedbackSource = '';
+  private pendingFeedbackHint = '';
+  private pendingHintDelay = 0;
 
   /**
    * Interpret mixed input as a number
@@ -61,6 +67,14 @@ export class ResponsesService {
     this.variableInfo = [];
     this.lastResponsesString = '';
     this.responseProgress.set('none');
+
+    this.pendingAudioFeedback.set(false);
+    this.pendingAudioFeedbackSource = '';
+    this.feedbackHint.set('');
+    this.feedbackActive.set(false);
+    this.feedbackDefinitions = [];
+    this.pendingFeedbackHint = '';
+    this.pendingHintDelay = 0;
   }
 
   /**
@@ -105,6 +119,28 @@ export class ResponsesService {
         });
       }
     }
+
+    if (unitDefinition.audioFeedback && unitDefinition.audioFeedback.feedback &&
+      unitDefinition.audioFeedback.feedback.length > 0) {
+      unitDefinition.audioFeedback.feedback.forEach(f => {
+        if (f.variableId && f.variableId.length > 0 && f.parameter && f.audioSource) {
+          let showResponse: ShowResponse = {
+            variableId: f.showResponse?.variableId || '',
+            value: f.showResponse?.value || '',
+            delayMS: f.showResponse?.delayMS || 0
+          };
+          this.feedbackDefinitions.push({
+            variableId: f.variableId,
+            source: f.source || 'CODE',
+            method: f.method || 'EQUALS',
+            parameter: f.parameter,
+            audioSource: f.audioSource,
+            showResponse: showResponse
+          });
+        } else {
+          problems.push('audioFeedback: variableId or parameter or audioSource missing');
+        }
+      });
 
     // Restore from former state if available
     // TODO duplicated code with setFormerState() ???
@@ -266,6 +302,68 @@ export class ResponsesService {
           newCode = Math.max(...allCodes) + 1;
         } else {
           newCode = 0;
+    if (givenResponse.status === 'VALUE_CHANGED') {
+      const codingScheme = this.variableInfo.find(v => v.variableId === givenResponse.id);
+      if (codingScheme && codingScheme.codes && codingScheme.codes.length > 0) {
+        let valueAsNumber = Number.MIN_VALUE;
+        let valueAsString = givenResponse.value?.toString() || '';
+        if (codingScheme.codingSource === 'SUM') {
+          // Sum of ones on the string - for multiselect items
+          const matches1 = valueAsString.match(/1/g);
+          valueAsNumber = matches1 ? matches1.length : 0;
+          valueAsString = valueAsNumber.toString();
+        } else if (codingScheme.codingSource === 'VALUE_TO_UPPER') {
+          // string to upper for write items
+          valueAsString = valueAsString.toUpperCase();
+        } else if (codingScheme.codingSource === 'SUM_CHAR_MATCHES') {
+          // 'bitwise' AND of strings with ones and zeros - for multiselect items
+          if (codingScheme.codingSourceParameter && codingScheme.codingSourceParameter.length == valueAsString.length) {
+            let count = 0;
+            for(let i = 0; i < valueAsString.length; i++) {
+              count += (valueAsString.charCodeAt(i) === codingScheme.codingSourceParameter.charCodeAt(i)) ?
+                1 : 0;
+            }
+            valueAsString = count.toString();
+          }
+        }
+        let newCode = Number.MIN_VALUE;
+        let newScore = Number.MIN_VALUE;
+        codingScheme.codes.forEach(c => {
+          if (newCode === Number.MIN_VALUE) {
+            let codeFound: boolean;
+            if (c.method === 'EQUALS') {
+              codeFound = valueAsString === c.parameter;
+            } else if (c.method === 'IN_POSITION_RANGE') {
+              codeFound = ResponsesService.isPositionInRange(valueAsString, c.parameter);
+            } else {
+              if (!Array.isArray(givenResponse.value) && typeof givenResponse.value === 'string') {
+                valueAsNumber = Number.parseInt(givenResponse.value, 10);
+              }
+              const parameterAsNumber = Number.parseInt(c.parameter, 10);
+              if (c.method === 'GREATER_THAN') {
+                codeFound = valueAsNumber > parameterAsNumber;
+              } else {
+                codeFound = valueAsNumber < parameterAsNumber;
+              }
+            }
+            if (codeFound) {
+              newCode = c.code;
+              newScore = c.score;
+            }
+          }
+        });
+        newResponse.status = 'CODING_COMPLETE';
+        if (newCode > Number.MIN_VALUE) {
+          newResponse.code = newCode;
+          newResponse.score = newScore;
+        } else {
+          newResponse.score = 0;
+          const allCodes = codingScheme.codes.map(c => c.code);
+          if (allCodes.includes(0)) {
+            newCode = Math.max(...allCodes) + 1;
+          } else {
+            newCode = 0;
+          }
         }
       }
     }
@@ -369,6 +467,104 @@ export class ResponsesService {
     if (this.mainAudioComplete()) return 'complete';
     return 'some';
   }
+
+        /**
+         * Updates the unit's presentation progress (e.g., 'none', 'some', 'complete').
+         * This status is used to track whether the user has interacted with the unit's
+         * presentation elements, such as dismissing the click-layer or finishing the main audio.
+         * A 'complete' status cannot be downgraded to 'some' or 'none'.
+         * Each update triggers a vopStateChangedNotification to the Verona host.
+         */
+        updatePresentationProgress(progress: Progress): void {
+          if (this.presentationProgress() === 'complete' && progress !== 'complete') {
+          return;
+        }
+        this.presentationProgress.set(progress);
+        const unitState: UnitState = {
+          unitStateDataType: UnitStateDataType,
+          dataParts: {
+            responses: this.lastResponsesString
+          },
+          responseProgress: this.responseProgress(),
+          presentationProgress: this.presentationProgress()
+        };
+        if (this.veronaPostService) {
+          this.veronaPostService.sendVopStateChangedNotification({ unitState });
+        }
+      }
+
+        getAudioFeedback(setAsPlayed: boolean): string {
+          const returnValue = this.pendingAudioFeedbackSource;
+          if (setAsPlayed) {
+            this.pendingAudioFeedbackSource = '';
+            this.pendingAudioFeedback.set(false);
+          }
+          return returnValue;
+        }
+
+        startFeedback() {
+          if (this.pendingFeedbackHint === '') return;
+          if (this.pendingHintDelay != 0) {
+            setTimeout(() => {
+              this.feedbackHint.set(this.pendingFeedbackHint);
+            }, this.pendingHintDelay);
+          } else {
+            this.feedbackHint.set(this.pendingFeedbackHint);
+          }
+          this.feedbackActive.set(true);
+        }
+
+      private provideFeedback(startVariable: string): void {
+          this.pendingAudioFeedback.set(false);
+          this.pendingAudioFeedbackSource = '';
+          const responsesToCheck: string[] = [startVariable,
+          ...this.allResponses.filter(r => r.id !== startVariable).map(r => r.id)];
+        const audioToPlay = responsesToCheck.map(varId => {
+          const responseToCheck = this.allResponses.find(r => r.id === varId);
+          if (responseToCheck) {
+            const feedbacksToUse = this.feedbackDefinitions
+              .filter(f => f.variableId === responseToCheck.id);
+            const feedbackToTake = feedbacksToUse.find(f => {
+              let valueToCompare: string | number | boolean;
+              if (f.source === 'VALUE') {
+                if (Array.isArray(responseToCheck.value)) {
+                  valueToCompare = responseToCheck.value.length > 0 ? responseToCheck.value[0] : '';
+                } else {
+                  valueToCompare = responseToCheck.value;
+                }
+              } else {
+                valueToCompare = f.source === 'SCORE' ? responseToCheck.score : responseToCheck.code;
+              }
+              if (f.method === 'EQUALS') {
+                const valueToCompareAsString = typeof valueToCompare === 'string' ?
+                  valueToCompare : valueToCompare.toString();
+                return valueToCompareAsString === f.parameter;
+              }
+              let valueAsNumber: number;
+              if (typeof valueToCompare === 'number') {
+                valueAsNumber = valueToCompare;
+              } else if (typeof valueToCompare === 'boolean') {
+                valueAsNumber = valueToCompare ? 1 : 0;
+              } else {
+                valueAsNumber = Number.parseInt(valueToCompare, 10);
+              }
+              const parameterAsNumber = Number.parseInt(f.parameter, 10);
+              if (f.method === 'GREATER_THAN') {
+                return valueAsNumber > parameterAsNumber;
+              }
+              return valueAsNumber < parameterAsNumber;
+            });
+            return feedbackToTake || undefined;
+          }
+          return undefined;
+        }).find(sourceString => !!sourceString);
+        if (audioToPlay) {
+          this.pendingAudioFeedback.set(true);
+          this.pendingAudioFeedbackSource = audioToPlay.audioSource;
+          this.pendingFeedbackHint = audioToPlay.showResponse?.value || '';
+          this.pendingHintDelay = audioToPlay.showResponse?.delayMS || 0;
+        }
+      }
 
   /**
    * set state of former state

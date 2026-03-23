@@ -6,11 +6,16 @@ export interface FeedbackDefinition {
   method?: 'EQUALS' | 'GREATER_THAN' | 'LESS_THAN';
   parameter: string;
   audioSource: string;
-  showAnswerOnFeedback?: boolean;
-  timeElapsedToShowAnswer?: number;
+  showResponse?: ShowResponse;
 }
 
 export interface AudioFeedback {
   trigger: 'CONTINUE_BUTTON_CLICK' | 'ANY_RESPONSE';
   feedback: FeedbackDefinition[];
+}
+
+export interface ShowResponse {
+  variableId: string;
+  value: string;
+  delayMS?: number;
 }

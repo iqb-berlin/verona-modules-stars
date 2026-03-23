@@ -6,7 +6,7 @@
   <div class="input-wrapper">
     <div class="text-wrapper" data-cy="text-wrapper">
       <div class="text-display" data-cy="text-display">
-        <div class="text-content">
+        <div class="text-content" [class.hint]="hasHint()">
           @if (currentText) {
             <span data-cy="text-span">{{ currentText }}</span>
           }
