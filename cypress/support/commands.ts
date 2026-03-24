@@ -670,7 +670,6 @@ Cypress.Commands.add('applyCorrectAnswerScenarios', (interactionType: string, da
     // For pyramid, the correctAnswerParam is in the format "left_right"
     const parts = correctAnswerParam.split('_');
 
-    cy.log('correct answer parts', parts);
     const left = parts[0] || '';
     const right = parts[1] || '';
 
@@ -806,7 +805,6 @@ Cypress.Commands.add('assertRestoredState', (interactionType: string, expected?:
       }
     }
 
-    cy.log('I WILL CLIKC ON THIS ON POLYGON BUTTONS', targetIndex);
     cy.get(`[data-cy="polygon-${targetIndex}"]`, { timeout: 15000 }).should('have.class', 'clicked');
     cy.log(`Approved: interactionType: ${interactionType} polygon-${targetIndex} has a clicked class`);
   } else if (interactionType === 'write') {

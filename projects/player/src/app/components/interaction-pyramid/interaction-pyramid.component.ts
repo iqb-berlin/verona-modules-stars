@@ -65,10 +65,7 @@ export class InteractionPyramidComponent extends InteractionComponentDirective {
         this.hasRightHint.set(false);
         return;
       }
-      console.log('inside effect, there is hints', hints);
       const parts = hints.split('_');
-
-      console.log('there is hints, parts', parts);
       if (parts.length === 2) {
         if (parts[0]) {
           this.bottomLeftValue.set(parts[0]);
