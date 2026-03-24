@@ -28,6 +28,7 @@ import { AudioButtonComponent } from './shared/audio-button/audio-button.compone
 import { InteractionPlaceValueComponent } from './components/interaction-place-value/interaction-place-value.component';
 import { InteractionNumberLineComponent } from './components/interaction-number-line/interaction-number-line.component';
 import { InteractionPyramidComponent } from './components/interaction-pyramid/interaction-pyramid.component';
+import { InteractionEquationComponent } from './components/interaction-equation/interaction-equation.component';
 
 @NgModule({
   declarations: [
@@ -55,7 +56,8 @@ import { InteractionPyramidComponent } from './components/interaction-pyramid/in
         OpeningImageComponent,
         InteractionPlaceValueComponent,
         InteractionNumberLineComponent,
-        InteractionPyramidComponent
+        InteractionPyramidComponent,
+        InteractionEquationComponent
     ],
   providers: [
     provideZonelessChangeDetection(),
