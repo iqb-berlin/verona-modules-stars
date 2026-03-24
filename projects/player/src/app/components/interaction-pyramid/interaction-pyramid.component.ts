@@ -36,11 +36,12 @@ export class InteractionPyramidComponent extends InteractionComponentDirective {
 
     effect(() => {
       const parameters = this.parameters() as InteractionPyramidParams;
+      this.localParameters = this.createDefaultParameters();
       if (parameters) {
         // Build object without inserting optional properties as undefined
         this.localParameters = {
-          variableId: parameters.variableId || 'PYRAMID',
-          topNumber: parameters.topNumber,
+          variableId: parameters.variableId || this.localParameters.variableId,
+          topNumber: parameters.topNumber ?? this.localParameters.topNumber,
           ...(parameters.example ? { example: parameters.example } : {}),
           ...(parameters.formerState ? { formerState: parameters.formerState } : {})
         } as InteractionPyramidParams;

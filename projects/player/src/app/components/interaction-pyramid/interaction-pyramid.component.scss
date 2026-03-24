@@ -26,7 +26,7 @@
 
   &.example-pyramid {
     .number-box {
-      background-color: transparent;
+      background-color: #d3d7d8;
     }
   }
 }
@@ -108,6 +108,7 @@
 
 .keyboard-wrapper {
   @include variables.keyboard-numbers-button-wrapper;
+  left: -45px;
 }
 
 .keyboard-button {

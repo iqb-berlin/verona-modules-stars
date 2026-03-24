@@ -7,6 +7,7 @@ describe('Interaction IMAGE_ONLY Component', () => {
   const defaultTestFile = 'image_only_test';
 
   beforeEach(() => {
+    cy.clearUnitStates();
     // Set up test data
     cy.setupTestData(defaultTestFile, interactionType);
   });

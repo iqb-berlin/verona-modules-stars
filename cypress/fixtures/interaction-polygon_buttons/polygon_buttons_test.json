@@ -29,7 +29,7 @@
   "variableInfo": [
     {
       "variableId": "POLYGON_BUTTONS",
-      "responseComplete": "ON_FULL_CREDIT",
+      "responseComplete": "ON_ANY_RESPONSE",
       "codingSource": "VALUE",
       "codes": [
         {

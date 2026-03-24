@@ -26,7 +26,7 @@
   "variableInfo": [
     {
       "variableId": "PYRAMID",
-      "responseComplete": "ON_ANY_RESPONSE",
+      "responseComplete": "ON_FULL_CREDIT",
       "codingSource": "VALUE",
       "codes": [
         {
