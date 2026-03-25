@@ -101,6 +101,11 @@ declare global {
       clearNumberLineInput(): Chainable<void>
 
       /**
+       * Custom command to clear pyramid input by clicking backspace until both left and right inputs are empty
+       */
+      clearPyramidInput(): Chainable<void>
+
+      /**
        * Move specified number of tens and ones in place_value interaction
        * @param targetTens - Number of tens to move
        * @param targetOnes - Number of ones to move

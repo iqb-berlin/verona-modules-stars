@@ -10,7 +10,8 @@ import { UnitService } from '../../services/unit.service';
 @Component({
   selector: 'stars-audio',
   templateUrl: 'audio.component.html',
-  styleUrl: 'audio.component.scss'
+  styleUrl: 'audio.component.scss',
+  standalone: true
 })
 
 export class AudioComponent {

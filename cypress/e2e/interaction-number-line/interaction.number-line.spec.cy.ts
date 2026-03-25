@@ -32,8 +32,8 @@ describe('NUMBER_LINE Interaction E2E Tests', () => {
         // Check if all numbers are rendered (either as label or tick)
         cy.get('[data-cy="number-line-item"]').should('have.length', lastNumber - firstNumber + 1);
 
-        // Check if empty number box exists
-        cy.get('[data-cy="number-input-box"]').should('exist');
+        // Check if empty number-box-wave exists (Default value for style is WAVE)
+        cy.get('[data-cy="number-input-box-wave"]').should('exist');
         cy.get('[data-cy="number-input-text"]').invoke('text').then((text) => {
           expect(text.trim()).to.equal('');
         });
@@ -46,7 +46,7 @@ describe('NUMBER_LINE Interaction E2E Tests', () => {
     cy.setupTestData(defaultTestFile, interactionType);
     cy.get('[data-cy="interaction-number-line"]').within(() => {
       // In WAVE mode, we should have rects for labels
-      cy.get('[data-cy="number-input-box"]').should('exist');
+      cy.get('[data-cy="number-input-box-wave"]').should('exist');
       // And no special ruler markers
       cy.get('[data-cy="ruler-tick-mark"]').should('not.exist');
     });
@@ -57,7 +57,7 @@ describe('NUMBER_LINE Interaction E2E Tests', () => {
       // In RULER mode, we should have ruler tick marks
       cy.get('[data-cy="ruler-tick-mark"]').should('exist');
       // Should have small ticks for intermediate numbers
-      cy.get('[data-cy="tick-mark"]').should('exist');
+      cy.get('[data-cy="ruler-blue-input-line"]').should('exist');
     });
   });
 

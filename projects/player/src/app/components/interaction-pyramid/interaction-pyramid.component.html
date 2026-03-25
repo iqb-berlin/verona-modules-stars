@@ -1,0 +1,73 @@
+<div class="pyramid-container" data-cy="interaction-pyramid">
+  <div class="pyramids-wrapper">
+    @if (localParameters?.example) {
+      <div class="pyramid-box example-pyramid" data-cy="example-pyramid">
+        <div class="pyramid-top">
+          <div class="number-box" data-cy="example-pyramid-top-value">{{ localParameters.example.topNumber }}</div>
+        </div>
+        <div class="pyramid-lines">
+          <div class="line left-line"></div>
+          <div class="line right-line"></div>
+        </div>
+        <div class="pyramid-bottom">
+          <div class="number-box" data-cy="example-pyramid-bottom-left-value">{{ localParameters.example.bottomLeftNumber }}</div>
+          <div class="number-box" data-cy="example-pyramid-bottom-right-value">{{ localParameters.example.bottomRightNumber }}</div>
+        </div>
+      </div>
+    }
+
+    @if (localParameters) {
+      <div class="pyramid-box interactive-pyramid" data-cy="interactive-pyramid">
+        <div class="pyramid-top">
+          <div class="number-box" data-cy="interactive-pyramid-top-value">{{ localParameters.topNumber }}</div>
+        </div>
+        <div class="pyramid-lines">
+          <div class="line left-line"></div>
+          <div class="line right-line"></div>
+        </div>
+        <div class="pyramid-bottom">
+          <div class="number-box input-box"
+               [class.selected]="selectedInput() === 'LEFT'"
+               [class.hint]="hasLeftHint()"
+               (click)="selectInput('LEFT')"
+               data-cy="interactive-pyramid-input-left">
+            {{ bottomLeftValue() }}
+          </div>
+          <div class="number-box input-box"
+               [class.selected]="selectedInput() === 'RIGHT'"
+               [class.hint]="hasRightHint()"
+               (click)="selectInput('RIGHT')"
+               data-cy="interactive-pyramid-input-right">
+            {{ bottomRightValue() }}
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="keyboard-wrapper" data-cy="keyboard-wrapper">
+    @for (button of numbersList; track $index) {
+      <button type="button"
+              class="keyboard-button"
+              [attr.aria-label]="button"
+              (click)="handleKeyboardClick(button)"
+              [disabled]="keyboardDisabled()"
+              [attr.data-cy]="'keyboard-button-' + button"
+      >
+        {{ button }}
+      </button>
+    }
+    <button type="button"
+            class="keyboard-button backspace-button"
+            [attr.aria-label]="'Backspace'"
+            (click)="handleBackButtonClick()"
+            [disabled]="selectedInput() === 'LEFT' ? bottomLeftValue().length === 0 : bottomRightValue().length === 0"
+            [attr.data-cy]="'backspace-button'"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" height="32" viewBox="0 -960 960 960" width="32"
+           fill="currentColor">
+        <path d="m456-320 104-104 104 104 56-56-104-104 104-104-56-56-104 104-104-104-56 56 104 104-104 104 56 56Zm-96 160q-19 0-36-8.5T296-192L80-480l216-288q11-15 28-23.5t36-8.5h440q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H360ZM180-480l180 240h440v-480H360L180-480Zm400 0Z"/>
+      </svg>
+    </button>
+  </div>
+</div>

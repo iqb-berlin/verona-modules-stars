@@ -191,11 +191,17 @@ $layoutPadding: 90px;
 @mixin backspace-button {
   position: absolute;
   top: 0;
-  right: -140px;
-  width: 100px;
   background-color: #d0d0d0;
 
   svg {
     margin-top: 8px;
   }
+}
+
+@mixin backspace-button-extra-styles {
+  right: -100px;
+  width: 70px;
+  height: 70px;
+  margin: 3px;
+  font-size: 40px;
 }
