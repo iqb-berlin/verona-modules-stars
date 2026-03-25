@@ -11,7 +11,6 @@ import { parseTranslate, updateTransitionDisabledSet } from '../../shared/utils/
   selector: 'stars-interaction-place-value',
   templateUrl: './interaction-place-value.component.html',
   styleUrls: ['./interaction-place-value.component.scss'],
-  standalone: true,
   imports: [CdkDrag]
 })
 export class InteractionPlaceValueComponent extends InteractionComponentDirective {

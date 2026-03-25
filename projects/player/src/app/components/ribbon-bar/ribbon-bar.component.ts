@@ -9,8 +9,7 @@ import { UnitService } from '../../services/unit.service';
     <div [class]="ribbonClass()" data-cy="ribbon-bar">
     </div>
   `,
-  styleUrls: ['./ribbon-bar.component.scss'],
-  standalone: true,
+  styleUrls: ['./ribbon-bar.component.scss']
 })
 export class RibbonBarComponent {
   private unitService = inject(UnitService);

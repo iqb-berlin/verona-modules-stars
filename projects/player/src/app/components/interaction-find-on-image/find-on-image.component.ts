@@ -10,8 +10,7 @@ import { InteractionFindOnImageParams } from '../../models/unit-definition';
 @Component({
   selector: 'stars-interaction-find-on-image',
   templateUrl: './find-on-image.component.html',
-  styleUrls: ['./find-on-image.component.scss'],
-  standalone: true
+  styleUrls: ['./find-on-image.component.scss']
 })
 
 export class InteractionFindOnImageComponent extends InteractionComponentDirective implements AfterViewInit, OnDestroy {
