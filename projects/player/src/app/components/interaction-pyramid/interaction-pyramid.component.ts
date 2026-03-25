@@ -7,8 +7,7 @@ import { StarsResponse } from '../../services/responses.service';
 @Component({
   selector: 'stars-interaction-pyramid',
   templateUrl: './interaction-pyramid.component.html',
-  styleUrls: ['./interaction-pyramid.component.scss'],
-  standalone: true
+  styleUrls: ['./interaction-pyramid.component.scss']
 })
 export class InteractionPyramidComponent extends InteractionComponentDirective {
   /** Local copy of the component parameters with defaults applied. */

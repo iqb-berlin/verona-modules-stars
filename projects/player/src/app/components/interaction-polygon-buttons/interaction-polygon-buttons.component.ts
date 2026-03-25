@@ -10,8 +10,7 @@ import { InteractionPolygonButtonsParams } from '../../models/unit-definition';
 @Component({
   selector: 'stars-interaction-polygon-buttons',
   templateUrl: './interaction-polygon-buttons.component.html',
-  styleUrls: ['./interaction-polygon-buttons.component.scss'],
-  standalone: true
+  styleUrls: ['./interaction-polygon-buttons.component.scss']
 })
 
 export class InteractionPolygonButtonsComponent extends InteractionComponentDirective {

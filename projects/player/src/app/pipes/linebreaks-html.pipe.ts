@@ -1,8 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'lineBreaksHtml',
-  standalone: true
+  name: 'lineBreaksHtml'
 })
 export class LinebreaksHtmlPipe implements PipeTransform {
   transform(text: string): string {
