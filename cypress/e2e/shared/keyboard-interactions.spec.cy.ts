@@ -7,6 +7,8 @@ export function testKeyboardInteractions(interactionType: string, defaultTestFil
         containerSelector = '[data-cy="interaction-number-line"]';
       } else if (interactionType === 'pyramid') {
         containerSelector = '[data-cy="interaction-pyramid"]';
+      } else if (interactionType === 'equation') {
+        containerSelector = '[data-cy="interaction-equation"]';
       } else {
         containerSelector = '[data-cy="write-container"]';
       }
@@ -23,11 +25,14 @@ export function testKeyboardInteractions(interactionType: string, defaultTestFil
       if (interactionType === 'pyramid') {
         return '[data-cy="interactive-pyramid-input-left"]';
       }
+      if (interactionType === 'equation') {
+        return '[data-cy="operand1"]';
+      }
       return '[data-cy="text-span"]';
     };
 
     const getKeyboardButtonSelector = (button: string) => {
-      if (interactionType === 'number_line' || interactionType === 'pyramid') {
+      if (interactionType === 'number_line' || interactionType === 'pyramid' || interactionType === 'equation') {
         return `[data-cy="keyboard-button-${button}"]`;
       }
       return `[data-cy="numbers-button-${button}"]`;
@@ -61,7 +66,7 @@ export function testKeyboardInteractions(interactionType: string, defaultTestFil
 
       // Backspace again
       cy.get('[data-cy="backspace-button"]').click();
-      if (interactionType === 'number_line' || interactionType === 'pyramid') {
+      if (interactionType === 'number_line' || interactionType === 'pyramid' || interactionType === 'equation') {
         cy.get(displayTextSelector).invoke('text').then((text) => {
           expect(text.trim()).to.equal('');
         });

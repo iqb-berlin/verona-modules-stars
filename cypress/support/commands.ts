@@ -36,10 +36,7 @@
 //   }
 // }
 
-import {
-  InteractionParameters,
-  UnitDefinition
-} from '../../projects/player/src/app/models/unit-definition';
+import { InteractionParameters, UnitDefinition } from '../../projects/player/src/app/models/unit-definition';
 import { getButtonOptions, getCorrectAnswerParam, getIndexByOneBasedInput } from './utils';
 
 Cypress.Commands.add('loadUnit', (filename: string) => {
@@ -431,6 +428,35 @@ Cypress.Commands.add('clearPyramidInput', () => {
   performBackspaceForInput('[data-cy="interactive-pyramid-input-right"]');
 });
 
+Cypress.Commands.add('clearEquationInput', () => {
+  const fields = ['operand1', 'operator', 'operand2', 'result'];
+  fields.forEach(field => {
+    const selector = `[data-cy="${field}"]`;
+    cy.get('body').then($body => {
+      const $el = $body.find(`${selector}.editable`);
+      if ($el.length > 0) {
+        cy.wrap($el).click();
+        // Clear digits
+        if (field !== 'operator') {
+          const backspaceUntilEmpty = () => {
+            cy.get(selector).then($field => {
+              if ($field.text().trim() !== '') {
+                cy.get('[data-cy="backspace-button"]').then($btn => {
+                  if (!$btn.is(':disabled')) {
+                    cy.wrap($btn).click();
+                    backspaceUntilEmpty();
+                  }
+                });
+              }
+            });
+          };
+          backspaceUntilEmpty();
+        }
+      }
+    });
+  });
+});
+
 Cypress.Commands.add('movePlaceValueIcons', (targetTens: number, targetOnes: number) => {
   // Check how many are already moved
   cy.get('body').then($body => {
@@ -618,6 +644,39 @@ Cypress.Commands.add('applyStandardScenarios', (interactionType: string, navigat
     return;
   }
 
+  if (interactionType === 'equation') {
+    if (navigator !== undefined && typeof navigator === 'string') {
+      const parts = navigator.split('_');
+      cy.get('.field-container.editable').each(($el, index) => {
+        if (index < parts.length) {
+          const val = parts[index] || '';
+          if (val === '') return;
+          cy.wrap($el).click();
+          if ($el.hasClass('operator')) {
+            cy.get(`[data-cy="operator-button-${val}"]`).click();
+          } else {
+            val.split('').forEach(char => {
+              cy.get(`[data-cy="keyboard-button-${char}"]`).click();
+            });
+          }
+        }
+      });
+      cy.wait(500);
+      return;
+    }
+    // Default behavior
+    cy.get('.field-container.editable').first().click();
+    cy.get('.keyboard-wrapper').then($wrapper => {
+      if ($wrapper.find('.operator-keyboard').length > 0) {
+        cy.get('.operator-keyboard .keyboard-button').first().click();
+      } else if ($wrapper.find('.number-keyboard').length > 0) {
+        cy.get('[data-cy="keyboard-button-1"]').click();
+      }
+    });
+    cy.wait(500);
+    return;
+  }
+
   // Default for BUTTONS, DROP and others
   if (navigator !== undefined) {
     if (typeof navigator === 'number') {
@@ -682,6 +741,30 @@ Cypress.Commands.add('applyCorrectAnswerScenarios', (interactionType: string, da
     right.split('').forEach(char => {
       cy.get(`[data-cy="keyboard-button-${char}"]`).click();
     });
+  } else if (interactionType === 'equation') {
+    cy.clearEquationInput();
+    const interactionParams = dataToCheck.interactionParameters as InteractionEquationParams;
+    const editableFields: string[] = [];
+    if (interactionParams.fixOperand1 === undefined) editableFields.push('operand1');
+    if (interactionParams.operators.length > 1) editableFields.push('operator');
+    if (interactionParams.fixOperand2 === undefined) editableFields.push('operand2');
+    if (interactionParams.fixResult === undefined) editableFields.push('result');
+
+    const parts = correctAnswerParam.split('_');
+    if (parts.length === editableFields.length) {
+      editableFields.forEach((field, index) => {
+        const val = parts[index] || '';
+        if (val === '') return;
+        cy.get(`[data-cy="${field}"]`).click();
+        if (field === 'operator') {
+          cy.get(`[data-cy="operator-button-${val}"]`).click();
+        } else {
+          val.split('').forEach(char => {
+            cy.get(`[data-cy="keyboard-button-${char}"]`).click();
+          });
+        }
+      });
+    }
   } else {
     // For other interaction types (buttons, drop, polygon_buttons),
     // find the button containing the correct answer
@@ -782,6 +865,8 @@ Cypress.Commands.add('assertInteractionComponentVisible', (interactionType: stri
       .and('have.attr', 'src');
   } else if (interactionType === 'pyramid') {
     cy.get('[data-cy="interaction-pyramid"]', { timeout: 15000 }).should('be.visible');
+  } else if (interactionType === 'equation') {
+    cy.get('[data-cy="interaction-equation"]', { timeout: 15000 }).should('be.visible');
   } else {
     cy.get('[data-cy="buttons-container"]', { timeout: 15000 }).should('be.visible');
   }
@@ -896,6 +981,21 @@ Cypress.Commands.add('assertRestoredState', (interactionType: string, expected?:
       cy.get('[data-cy="interactive-pyramid-input-right"]', { timeout: 15000 }).should('contain', expectedRight);
     }
     cy.log(`Approved: interactionType: ${interactionType} inputs contain expected values ${expectedLeft}_${expectedRight}`);
+  } else if (interactionType === 'equation') {
+    let expectedValue = '1';
+    if (expected !== undefined && typeof expected === 'string') {
+      expectedValue = expected;
+    }
+    const parts = expectedValue.split('_');
+    cy.get('.field-container.editable', { timeout: 15000 }).each(($el, index) => {
+      if (index < parts.length) {
+        const val = parts[index] || '';
+        cy.wrap($el).find('.field-value').invoke('text').then(text => {
+          expect(text.trim()).to.equal(val);
+        });
+      }
+    });
+    cy.log(`Approved: interactionType: ${interactionType} editable fields contains expected values ${expectedValue}`);
   } else if (interactionType === 'drop') {
     // Verifies the button at index 0 has been moved
     cy.get('[data-cy="drop-animate-wrapper-0"]', { timeout: 15000 })
