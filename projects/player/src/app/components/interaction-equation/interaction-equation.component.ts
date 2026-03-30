@@ -1,15 +1,14 @@
-import { Component, effect, signal } from '@angular/core';
+import { Component, computed, effect, signal, WritableSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Response } from '@iqbspecs/response/response.interface';
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
-import { InteractionEquationParams, InteractionPyramidParams } from '../../models/unit-definition';
+import { InteractionEquationParams } from '../../models/unit-definition';
 import { StarsResponse } from '../../services/responses.service';
 
 @Component({
   selector: 'stars-interaction-equation',
   templateUrl: './interaction-equation.component.html',
   styleUrls: ['./interaction-equation.component.scss'],
-  standalone: true,
   imports: [CommonModule]
 })
 export class InteractionEquationComponent extends InteractionComponentDirective {
@@ -19,87 +18,280 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
   /** Numbers to be shown in the keyboard */
   numbersList: string[] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
+  /** Value of the fixOperand1 parameter or empty string if not exists */
   currentOperand1 = signal<string>('');
+
+  /** Value of the operator parameter */
   currentOperator = signal<string>('');
+
+  /** Value of the fixOperand2 parameter or empty string if not exists */
   currentOperand2 = signal<string>('');
+
+  /** Value of the fixResult parameter or empty string if not exists */
   currentResult = signal<string>('');
 
-  focusedField = signal<'operand1' | 'operator' | 'operand2' | 'result' | null>(null);
-  keyboardDisabled = signal<boolean>(false);
+  /** If there is a hint to be shown */
+  hasHint = signal(false);
+
+  /** Tracks which fields are currently displaying a hint (used for coloring) */
+  hintedFields = signal<Set<'operand1' | 'operator' | 'operand2' | 'result'>>(new Set());
+
+  /** Tracks the currently selected field to manage input and keyboard state */
+  selectedField = signal<'operand1' | 'operator' | 'operand2' | 'result' | null>(null);
+
+  /** Tracks the number of empty editable fields in the equation */
+  emptyFieldsCount = signal<number>(0);
+
+  /** Derives whether the keyboard should be disabled based on the focused field's length */
+  keyboardDisabled = computed<boolean>(() => {
+    const field = this.selectedField
+    ();
+    if (!field || field === 'operator') {
+      return false;
+    }
+    const targetSignal = this.getFieldSignal(field);
+    const currentValue = targetSignal ? targetSignal() : '';
+    return currentValue.length >= 2;
+  });
+
+
+  private currentUnitIdentity: string = '';
+  private lastParametersRef: unknown | null = null;
 
   constructor() {
     super();
 
     effect(() => {
       const parameters = this.parameters() as InteractionEquationParams;
-      this.localParameters = this.createDefaultParameters();
-      if (parameters) {
+      if (!parameters) return;
+
+      const isNewParametersObject = this.lastParametersRef !== parameters;
+      const newVariableId = parameters.variableId || 'EQUATION';
+      const newIdentity = [
+        newVariableId,
+        parameters.fixOperand1,
+        parameters.fixOperand2,
+        parameters.fixResult,
+        (parameters.operators || []).join(','),
+        parameters.imageSource || ''
+      ].join('|');
+
+      if (isNewParametersObject || this.currentUnitIdentity !== newIdentity) {
+        this.lastParametersRef = parameters;
+        this.currentUnitIdentity = newIdentity;
+
         this.localParameters = {
-          variableId: parameters.variableId || this.localParameters.variableId,
-          imageSource: parameters.imageSource || this.localParameters.imageSource,
-          fixOperand1: parameters.fixOperand1,
-          operators: parameters.operators || this.localParameters.operators || [],
-          fixOperand2: parameters.fixOperand2,
-          fixResult: parameters.fixResult,
-          formerState: parameters.formerState
-        } as InteractionEquationParams;
+          ...this.createDefaultParameters(),
+          ...parameters,
+          variableId: newVariableId
+        };
+
+        // Reset selection before restore or initialize to avoid state leakage
+        this.resetSelection();
+
+        // Initialize values first to ensure fixed fields from parameters are populated
+        this.initializeValues();
 
         const formerStateResponses: Response[] = this.localParameters.formerState || [];
         const found = formerStateResponses.find(r => r.id === this.localParameters.variableId);
 
-        if (found && typeof found.value === 'string') {
-          const responseValue = `${this.currentOperand1()}_${this.currentOperator()}_${this.currentOperand2()}_${this.currentResult()}`;
-          if (found.value !== responseValue) {
-            this.restoreFromFormerState(found.value);
-          }
-        } else if (!this.currentOperand1() && !this.currentOperator() && !this.currentOperand2() && !this.currentResult()) {
-          this.initializeValues();
+        if (found && typeof found.value === 'string' && found.value !== '') {
+          this.restoreFromFormerState(found.value);
+        } else {
+          // No valid former state - already initialized with defaults by initializeValues()
           this.emitResponse('DISPLAYED');
         }
+      } else {
+        // Same unit, just keep localParameters' formerState in sync if needed
+        this.localParameters.formerState = parameters.formerState;
+      }
+    });
+
+    effect(() => {
+      const hint = this.showHint();
+      if (hint) {
+        this.applyHint(hint);
+      } else {
+        this.clearHint();
       }
     });
   }
 
+  /**
+   * Processes and displays hints for editable fields.
+   * @param hint The hint string to apply, separated by underscores.
+   */
+  private applyHint(hint: string) {
+    const parts = hint.split('_');
+    const editableFields = this.getEditableFields();
+
+    if (parts.length === editableFields.length) {
+      const newHintedFields = new Set<'operand1' | 'operator' | 'operand2' | 'result'>();
+      editableFields.forEach((field, index) => {
+        const value = parts[index] || '';
+        const targetSignal = this.getFieldSignal(field);
+        if (targetSignal) {
+          targetSignal.set(value);
+        }
+
+        if (value !== '' && this.isFieldEditable(field)) {
+          newHintedFields.add(field);
+        }
+      });
+
+      this.hintedFields.set(newHintedFields);
+      this.hasHint.set(newHintedFields.size > 0);
+    }
+  }
+
+  /**
+   * Clears currently displayed hints.
+   */
+  private clearHint() {
+    this.hasHint.set(false);
+    this.hintedFields.set(new Set());
+  }
+
+  /**
+   * Resets all signal-based state to initial empty values.
+   */
+  private resetSelection() {
+    this.currentOperand1.set('');
+    this.currentOperator.set('');
+    this.currentOperand2.set('');
+    this.currentResult.set('');
+    this.selectedField.set(null);
+    this.hasHint.set(false);
+    this.hintedFields.set(new Set());
+  }
+
+  /**
+   * Concatenates the current values of editable fields into a single response string.
+   * @returns A string of values separated by underscores.
+   */
+  private constructResponseValue(): string {
+    const editableFields = this.getEditableFields();
+    return editableFields.map(field => {
+      if (field === 'operand1') return this.currentOperand1();
+      if (field === 'operator') return this.currentOperator();
+      if (field === 'operand2') return this.currentOperand2();
+      if (field === 'result') return this.currentResult();
+      return '';
+    }).join('_');
+  }
+
+  /**
+   * Filters all possible equation fields to return only those that are editable.
+   * @returns An array of editable field names.
+   */
+  private getEditableFields(): ('operand1' | 'operator' | 'operand2' | 'result')[] {
+    const fields: ('operand1' | 'operator' | 'operand2' | 'result')[] = ['operand1', 'operator', 'operand2', 'result'];
+    return fields.filter(field => this.isFieldEditable(field));
+  }
+
+  /**
+   * Restores the component state from a previously saved response value.
+   * @param value The saved response string.
+   */
   private restoreFromFormerState(value: string) {
     if (!value || typeof value !== 'string') return;
+
     const parts = value.split('_');
-    if (parts.length === 4) {
-      this.currentOperand1.set(parts[0]);
-      this.currentOperator.set(parts[1]);
-      this.currentOperand2.set(parts[2]);
-      this.currentResult.set(parts[3]);
-      this.updateKeyboardStatus();
+    const editableFields = this.getEditableFields();
+
+    if (parts.length === editableFields.length) {
+      editableFields.forEach((field, index) => {
+        const val = parts[index] || '';
+        const targetSignal = this.getFieldSignal(field);
+        if (targetSignal) {
+          targetSignal.set(val);
+        }
+      });
     }
-  }
 
-  private initializeValues() {
-    this.currentOperand1.set(this.localParameters.fixOperand1 !== undefined ? this.localParameters.fixOperand1.toString() : '');
-    this.currentOperand2.set(this.localParameters.fixOperand2 !== undefined ? this.localParameters.fixOperand2.toString() : '');
-    this.currentResult.set(this.localParameters.fixResult !== undefined ? this.localParameters.fixResult.toString() : '');
+    // Set focus if there's exactly one empty editable field.
+    const emptyFields = editableFields.filter(field => {
+      const targetSignal = this.getFieldSignal(field);
+      return targetSignal ? targetSignal() === '' : true;
+    });
 
-    if (this.localParameters.operators.length === 1) {
-      this.currentOperator.set(this.localParameters.operators[0]);
+    this.emptyFieldsCount.set(emptyFields.length);
+    if (emptyFields.length === 1 && emptyFields[0]) {
+      this.selectedField.set(emptyFields[0]);
     } else {
-      this.currentOperator.set('');
+      this.selectedField.set(null);
     }
+  }
 
-    // Set initial focus to the first empty field
+  /**
+   * Initializes field values based on parameters.
+   * @param onlyFixed If true, only initializes fields with fixed values from parameters.
+   */
+  private initializeValues(onlyFixed: boolean = false) {
     const fields: ('operand1' | 'operator' | 'operand2' | 'result')[] = ['operand1', 'operator', 'operand2', 'result'];
-    const firstEditableField = fields.find(field => this.isFieldEditable(field));
-    if (firstEditableField) {
-      this.focusedField.set(firstEditableField);
-      this.updateKeyboardStatus();
+    const paramKeys = {
+      operand1: 'fixOperand1',
+      operand2: 'fixOperand2',
+      result: 'fixResult'
+    } as const;
+
+    fields.forEach(field => {
+      const targetSignal = this.getFieldSignal(field);
+      if (field === 'operator') {
+        if (this.localParameters.operators.length === 1) {
+          this.currentOperator.set(this.localParameters.operators[0] || '');
+        } else if (!onlyFixed) {
+          this.currentOperator.set('');
+        }
+        return;
+      }
+
+      const key = paramKeys[field as keyof typeof paramKeys];
+      const fixValue = (this.localParameters as any)[key];
+      if (fixValue !== undefined) {
+        if (targetSignal) targetSignal.set(fixValue.toString());
+      } else if (!onlyFixed) {
+        if (targetSignal) targetSignal.set('');
+      }
+    });
+
+    if (!onlyFixed) {
+      // Set initial focus if there's exactly one empty editable field.
+      const editableFields = this.getEditableFields();
+      const emptyFields = editableFields.filter(field => {
+        const targetSignal = this.getFieldSignal(field);
+        return targetSignal ? targetSignal() === '' : true;
+      });
+
+      this.emptyFieldsCount.set(emptyFields.length);
+      if (emptyFields.length === 1 && emptyFields[0]) {
+        this.selectedField.set(emptyFields[0]);
+      } else {
+        this.selectedField.set(null);
+      }
     }
   }
 
-  setFocus(field: 'operand1' | 'operator' | 'operand2' | 'result') {
-    if (this.isFieldEditable(field)) {
-      this.focusedField.set(field);
-      this.updateKeyboardStatus();
+  /**
+   * Sets the selected field if it is editable.
+   * @param field The field to select.
+   */
+  setSelectedField(field: 'operand1' | 'operator' | 'operand2' | 'result') {
+    const editable = this.isFieldEditable(field);
+    if (editable) {
+      if (this.hasHint() !== false) this.hasHint.set(false);
+      if (this.hintedFields().size !== 0) this.hintedFields.set(new Set());
+      if (this.selectedField() !== field) this.selectedField.set(field);
     }
   }
 
-  isFieldEditable(field: 'operand1' | 'operator' | 'operand2' | 'result'): boolean {
+  /**
+   * Determines if a specific field is editable based on the current parameters.
+   * @param field The field to check.
+   * @returns True if the field is editable.
+   */
+  isFieldEditable(field: 'operand1' | 'operator' | 'operand2' | 'result' | null | undefined): boolean {
+    if (!field) return false;
     const editabilityMap = {
       operand1: this.localParameters.fixOperand1 === undefined,
       operator: this.localParameters.operators.length > 1,
@@ -109,88 +301,92 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
     return editabilityMap[field];
   }
 
-  getFieldSignal(field: 'operand1' | 'operand2' | 'result'): any {
-    const signalMap: Record<string, any> = {
+  /**
+   * Returns the signal associated with a specific field.
+   * @param field The field name.
+   * @returns The Signal for the field, or undefined if not found.
+   */
+  getFieldSignal(field: 'operand1' | 'operator' | 'operand2' | 'result' | null | undefined): WritableSignal<string> | undefined {
+    if (!field) return undefined;
+    const signalMap: Record<string, WritableSignal<string>> = {
       operand1: this.currentOperand1,
+      operator: this.currentOperator,
       operand2: this.currentOperand2,
       result: this.currentResult
     };
     return signalMap[field];
   }
 
+  /**
+   * Handles keyboard button clicks by updating the currently focused field.
+   * @param button The value of the clicked keyboard button.
+   */
   handleKeyboardClick(button: string) {
-    const field = this.focusedField();
-    if (!field) return;
+    const field = this.selectedField();
+    if (!field || this.keyboardDisabled()) return;
 
-    if (field === 'operator') {
-      if (this.localParameters.operators.includes(button)) {
-        this.currentOperator.set(button);
+    if (this.hasHint() !== false) this.hasHint.set(false);
+    if (this.hintedFields().size !== 0) this.hintedFields.set(new Set());
+
+    const targetSignal = this.getFieldSignal(field);
+    if (targetSignal) {
+      if (field === 'operator') {
+        targetSignal.set(button);
+        this.emitResponse('VALUE_CHANGED');
         this.moveToNextField();
-        this.updateKeyboardStatus();
+      } else {
+        const newValue = targetSignal() + button;
+        targetSignal.set(newValue);
+        this.emitResponse('VALUE_CHANGED');
+        if (newValue.length >= 2) {
+          this.moveToNextField();
+        }
       }
-      return;
     }
-
-    if (this.keyboardDisabled()) return;
-
-    if (field === 'operand1') {
-      const newValue = this.currentOperand1() + button;
-      this.currentOperand1.set(newValue);
-    } else if (field === 'operand2') {
-      const newValue = this.currentOperand2() + button;
-      this.currentOperand2.set(newValue);
-    } else if (field === 'result') {
-      const newValue = this.currentResult() + button;
-      this.currentResult.set(newValue);
-    }
-    this.updateKeyboardStatus();
-    this.emitResponse('VALUE_CHANGED');
   }
 
+  /**
+   * Removes the last character from the currently focused field.
+   */
   handleBackButtonClick() {
-    const field = this.focusedField();
+    const field = this.selectedField();
     if (!field) return;
 
-    if (field === 'operator') {
-      this.currentOperator.set('');
-      this.updateKeyboardStatus();
-      return;
-    }
+    if (this.hasHint() !== false) this.hasHint.set(false);
+    if (this.hintedFields().size !== 0) this.hintedFields.set(new Set());
 
     const targetSignal = this.getFieldSignal(field);
     if (targetSignal && targetSignal().length > 0) {
       targetSignal.set(targetSignal().slice(0, -1));
-      this.updateKeyboardStatus();
       this.emitResponse('VALUE_CHANGED');
     }
   }
 
-  private updateKeyboardStatus() {
-    const field = this.focusedField();
-    if (!field || field === 'operator') {
-      this.keyboardDisabled.set(false);
-      return;
-    }
-    const targetSignal = this.getFieldSignal(field);
-    console.log('update keyboard status, field is', field, 'target signal is', targetSignal());
-    if (targetSignal) {
-      this.keyboardDisabled.set(targetSignal().length >= 2);
-    }
-  }
 
+  /**
+   * Automatically moves focus to the next editable field in sequence.
+   */
   private moveToNextField() {
     const fields: ('operand1' | 'operator' | 'operand2' | 'result')[] = ['operand1', 'operator', 'operand2', 'result'];
-    const currentIndex = fields.indexOf(this.focusedField()!);
+    const currentField = this.selectedField();
+    if (!currentField) return;
+
+    const currentIndex = fields.indexOf(currentField);
     for (let i = currentIndex + 1; i < fields.length; i++) {
-      if (this.isFieldEditable(fields[i])) {
-        this.focusedField.set(fields[i]);
+      const field = fields[i];
+      if (this.isFieldEditable(field)) {
+        if (this.selectedField() !== field) this.selectedField.set(field);
         break;
       }
     }
   }
 
+  /**
+   * Emits the current component state as a response to the parent module.
+   * @param status The status of the response (e.g., 'DISPLAYED' or 'VALUE_CHANGED').
+   */
   private emitResponse(status: 'DISPLAYED' | 'VALUE_CHANGED') {
-    const responseValue = `${this.currentOperand1()}_${this.currentOperator()}_${this.currentOperand2()}_${this.currentResult()}`;
+    const responseValue = this.constructResponseValue();
     const response: StarsResponse = {
       id: this.localParameters.variableId || 'EQUATION',
       status: status,
@@ -199,11 +395,14 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
     };
     this.responses.emit([response]);
   }
-
+  
   // eslint-disable-next-line class-methods-use-this
   private createDefaultParameters(): InteractionEquationParams {
     return {
       variableId: 'EQUATION',
+      fixOperand1: undefined,
+      fixOperand2: undefined,
+      fixResult: undefined,
       imageSource: '',
       operators: ['+']
     };

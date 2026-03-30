@@ -155,10 +155,10 @@ export interface InteractionPyramidParams {
 export interface InteractionEquationParams {
   variableId?: string;
   imageSource?: string;
-  fixOperand1?: number;
+  fixOperand1?: number | undefined;
   operators: string[];
-  fixOperand2?: number;
-  fixResult?: number;
+  fixOperand2?: number | undefined;
+  fixResult?: number | undefined;
   formerState?: Response[] | undefined;
 }
 

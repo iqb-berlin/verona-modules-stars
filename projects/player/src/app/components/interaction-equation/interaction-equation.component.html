@@ -1,5 +1,5 @@
 @if (localParameters; as params) {
-  <div class="equation-container" data-cy="interaction-equation">
+  <div class="equation-container" [class.no-image]="!params.imageSource" data-cy="interaction-equation">
 
     @if (params.imageSource) {
       <div class="stimulus-wrapper">
@@ -12,86 +12,91 @@
       </div>
     }
 
-  <div class="equation-wrapper">
-    <div class="field-container"
-         [class.editable]="isFieldEditable('operand1')"
-         [class.focused]="focusedField() === 'operand1'"
-         (click)="setFocus('operand1')"
-         data-cy="operand1">
-      {{ currentOperand1() }}
+    <div class="equation-wrapper">
+      <div class="field-container"
+           [class.editable]="isFieldEditable('operand1')"
+           [class.selected]="selectedField() === 'operand1'"
+           [class.hint]="hintedFields().has('operand1')"
+           (click)="setSelectedField('operand1')"
+           data-cy="operand1">
+        <span class="field-value">{{ currentOperand1() }}</span>
+      </div>
+
+      <div class="field-container operator"
+           [class.editable]="isFieldEditable('operator')"
+           [class.selected]="selectedField() === 'operator'"
+           [class.hint]="hintedFields().has('operator')"
+           (click)="setSelectedField('operator')"
+           data-cy="operator">
+        <span class="field-value">{{ currentOperator() }}</span>
+      </div>
+
+      <div class="field-container"
+           [class.editable]="isFieldEditable('operand2')"
+           [class.selected]="selectedField() === 'operand2'"
+           [class.hint]="hintedFields().has('operand2')"
+           (click)="setSelectedField('operand2')"
+           data-cy="operand2">
+        <span class="field-value">{{ currentOperand2() }}</span>
+      </div>
+
+      <div class="field-container equals">
+        <span class="field-value">=</span>
+      </div>
+
+      <div class="field-container"
+           [class.editable]="isFieldEditable('result')"
+           [class.selected]="selectedField() === 'result'"
+           [class.hint]="hintedFields().has('result')"
+           (click)="setSelectedField('result')"
+           data-cy="result">
+        <span class="field-value">{{ currentResult() }}</span>
+      </div>
     </div>
 
-    <div class="field-container operator"
-         [class.editable]="isFieldEditable('operator')"
-         [class.focused]="focusedField() === 'operator'"
-         (click)="setFocus('operator')"
-         data-cy="operator">
-      {{ currentOperator() }}
-    </div>
+    <div class="keyboard-wrapper" data-cy="keyboard-wrapper">
+      @if (selectedField() === 'operator') {
+        <div class="operator-keyboard">
+          @for (operator of params.operators; track $index) {
+            <button type="button"
+                    class="keyboard-button"
+                    (click)="handleKeyboardClick(operator)"
+                    [attr.data-cy]="'operator-button-' + operator"
+            >
+              {{ operator }}
+            </button>
+          }
+        </div>
+      }
 
-    <div class="field-container"
-         [class.editable]="isFieldEditable('operand2')"
-         [class.focused]="focusedField() === 'operand2'"
-         (click)="setFocus('operand2')"
-         data-cy="operand2">
-      {{ currentOperand2() }}
-    </div>
-
-    <div class="field-container equals">
-      =
-    </div>
-
-    <div class="field-container"
-         [class.editable]="isFieldEditable('result')"
-         [class.focused]="focusedField() === 'result'"
-         (click)="setFocus('result')"
-         data-cy="result">
-      {{ currentResult() }}
+      @if (selectedField() !== 'operator') {
+        <div class="number-keyboard">
+          @for (button of numbersList; track $index) {
+            <button type="button"
+                    class="keyboard-button"
+                    [attr.aria-label]="button"
+                    (click)="handleKeyboardClick(button)"
+                    [disabled]="keyboardDisabled()"
+                    [attr.data-cy]="'keyboard-button-' + button"
+            >
+              {{ button }}
+            </button>
+          }
+          <button type="button"
+                  class="keyboard-button backspace-button"
+                  [attr.aria-label]="'Backspace'"
+                  (click)="handleBackButtonClick()"
+                  [disabled]="(!selectedField() || (getFieldSignal(selectedField()) ? !getFieldSignal(selectedField())!() : true))"
+                  [attr.data-cy]="'backspace-button'"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" height="32" viewBox="0 -960 960 960" width="32"
+                 fill="currentColor">
+              <path
+                d="m456-320 104-104 104 104 56-56-104-104 104-104-56-56-104 104-104-104-56 56 104 104-104 104 56 56Zm-96 160q-19 0-36-8.5T296-192L80-480l216-288q11-15 28-23.5t36-8.5h440q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H360ZM180-480l180 240h440v-480H360L180-480Zm400 0Z"/>
+            </svg>
+          </button>
+        </div>
+      }
     </div>
   </div>
-
-  <div class="keyboard-wrapper" data-cy="keyboard-wrapper">
-    @if (focusedField() === 'operator') {
-      <div class="operator-keyboard">
-        @for (operator of params.operators; track $index) {
-          <button type="button"
-                  class="keyboard-button"
-                  (click)="handleKeyboardClick(operator)"
-                  [attr.data-cy]="'operator-button-' + operator"
-          >
-            {{ operator }}
-          </button>
-        }
-      </div>
-    }
-
-    @if (focusedField() !== 'operator') {
-      <div class="number-keyboard">
-        @for (button of numbersList; track $index) {
-          <button type="button"
-                  class="keyboard-button"
-                  [attr.aria-label]="button"
-                  (click)="handleKeyboardClick(button)"
-                  [disabled]="keyboardDisabled()"
-                  [attr.data-cy]="'keyboard-button-' + button"
-          >
-            {{ button }}
-          </button>
-        }
-        <button type="button"
-                class="keyboard-button backspace-button"
-                [attr.aria-label]="'Backspace'"
-                (click)="handleBackButtonClick()"
-                [disabled]="(focusedField() === 'operator' ? !currentOperator() : (focusedField() ? !getFieldSignal(focusedField()!)() : true))"
-                [attr.data-cy]="'backspace-button'"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" height="32" viewBox="0 -960 960 960" width="32"
-               fill="currentColor">
-            <path d="m456-320 104-104 104 104 56-56-104-104 104-104-56-56-104 104-104-104-56 56 104 104-104 104 56 56Zm-96 160q-19 0-36-8.5T296-192L80-480l216-288q11-15 28-23.5t36-8.5h440q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H360ZM180-480l180 240h440v-480H360L180-480Zm400 0Z"/>
-          </svg>
-        </button>
-      </div>
-    }
-  </div>
-</div>
 }

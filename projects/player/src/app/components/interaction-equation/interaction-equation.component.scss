@@ -7,11 +7,22 @@
   align-items: center;
   justify-content: center;
   gap: 60px;
+
+  .field-value {
+    font-size: 64px;
+  }
+
+  &.no-image {
+    .field-value {
+      font-size: 82px;
+    }
+  }
 }
 
 .stimulus-wrapper {
   flex: 0 1 auto;
   margin-bottom: 20px;
+
   .image-wrapper img {
     max-width: 100%;
     max-height: 200px;
@@ -36,14 +47,22 @@
   padding: 0 10px;
   font-family: inherit;
 
+  &.hint {
+    color: colors.$hint !important;
+
+    .field-value {
+      color: colors.$hint !important;
+    }
+  }
+
   &.editable {
     background-color: white;
     border: 2px solid transparent;
     border-radius: 8px;
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
-    &.focused {
+    &.selected {
       border-color: #3b82f6;
       box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
     }
