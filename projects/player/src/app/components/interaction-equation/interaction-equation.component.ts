@@ -44,8 +44,7 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
 
   /** Derives whether the keyboard should be disabled based on the focused field's length */
   keyboardDisabled = computed<boolean>(() => {
-    const field = this.selectedField
-    ();
+    const field = this.selectedField();
     if (!field || field === 'operator') {
       return false;
     }
@@ -216,7 +215,7 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
     });
 
     this.emptyFieldsCount.set(emptyFields.length);
-    if (emptyFields.length === 1 && emptyFields[0]) {
+    if (emptyFields.length === 1 && emptyFields[0] && this.localParameters.operators.length <= 1) {
       this.selectedField.set(emptyFields[0]);
     } else {
       this.selectedField.set(null);
@@ -264,7 +263,7 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
       });
 
       this.emptyFieldsCount.set(emptyFields.length);
-      if (emptyFields.length === 1 && emptyFields[0]) {
+      if (emptyFields.length === 1 && emptyFields[0] && this.localParameters.operators.length <= 1) {
         this.selectedField.set(emptyFields[0]);
       } else {
         this.selectedField.set(null);
@@ -371,11 +370,16 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
     const currentField = this.selectedField();
     if (!currentField) return;
 
+    const isNumberField = (f: string) => f !== 'operator';
+    const currentIsNumber = isNumberField(currentField);
+
     const currentIndex = fields.indexOf(currentField);
     for (let i = currentIndex + 1; i < fields.length; i++) {
       const field = fields[i];
       if (this.isFieldEditable(field)) {
-        if (this.selectedField() !== field) this.selectedField.set(field);
+        if (isNumberField(field) === currentIsNumber) {
+          if (this.selectedField() !== field) this.selectedField.set(field);
+        }
         break;
       }
     }
@@ -395,7 +399,7 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
     };
     this.responses.emit([response]);
   }
-  
+
   // eslint-disable-next-line class-methods-use-this
   private createDefaultParameters(): InteractionEquationParams {
     return {

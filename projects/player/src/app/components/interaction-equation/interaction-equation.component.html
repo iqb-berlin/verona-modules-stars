@@ -69,7 +69,7 @@
         </div>
       }
 
-      @if (selectedField() !== 'operator') {
+      @if (selectedField() && selectedField() !== 'operator') {
         <div class="number-keyboard">
           @for (button of numbersList; track $index) {
             <button type="button"

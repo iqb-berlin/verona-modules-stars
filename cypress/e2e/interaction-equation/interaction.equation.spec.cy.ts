@@ -127,6 +127,58 @@ describe('EQUATION Interaction E2E Tests', () => {
     cy.get('[data-cy="operand2"]').should('have.class', 'selected');
   });
 
+  it('hides number keyboard initially and toggles correctly between keyboards if operators length > 1', () => {
+    setupAndAssert('equation_without_operator_without_fixOperand2_test.json');
+
+    // none initially selected
+    cy.get('[data-cy="operand1"]').should('not.have.class', 'selected');
+    cy.get('[data-cy="operator"]').should('not.have.class', 'selected');
+    cy.get('[data-cy="operand2"]').should('not.have.class', 'selected');
+
+    // number keyboard should not be visible
+    cy.get('[data-cy="keyboard-button-1"]').should('not.exist');
+
+    // click on operand2 to open number keyboard
+    cy.get('[data-cy="operand2"]').click();
+    cy.get('[data-cy="operand2"]').should('have.class', 'selected');
+    cy.get('[data-cy="keyboard-button-1"]').should('exist');
+    cy.get('[data-cy="operator-button-+"]').should('not.exist');
+
+    // click on operator to open operator keyboard
+    cy.get('[data-cy="operator"]').click();
+    cy.get('[data-cy="operator"]').should('have.class', 'selected');
+    cy.get('[data-cy="keyboard-button-1"]').should('not.exist');
+    cy.get('[data-cy="operator-button-+"]').should('exist');
+    cy.get('[data-cy="operator-button--"]').should('exist');
+
+    // select an operator and verify it doesn't move to operand2
+    cy.get('[data-cy="operator-button-+"]').click();
+    cy.get('[data-cy="operator"]').invoke('text').then(text => expect(text.trim()).to.equal('+'));
+    cy.get('[data-cy="operator"]').should('have.class', 'selected');
+    cy.get('[data-cy="operand2"]').should('not.have.class', 'selected');
+  });
+
+  it('equation wrapper position should remain stable when opening keyboard', () => {
+    setupAndAssert('equation_without_fixOperand1_without_fixOperand2_test.json');
+
+    // Initially no field is selected, no keyboard visible.
+    cy.get('[data-cy="keyboard-button-1"]').should('not.exist');
+
+    // Get position of equation-wrapper
+    cy.get('.equation-wrapper').then($wrapper => {
+      const initialTop = $wrapper.offset()!.top;
+
+      // Select a field to open the keyboard
+      cy.get('[data-cy="operand1"]').click();
+      cy.get('[data-cy="keyboard-button-1"]').should('exist');
+
+      // Check position again
+      cy.get('.equation-wrapper').should($wrapperAfter => {
+        expect($wrapperAfter.offset()!.top).to.be.closeTo(initialTop, 1);
+      });
+    });
+  });
+
   // Test base features for the EQUATION interaction type
   testBaseFeatures(interactionType, defaultTestFile);
   // Test former state features for the EQUATION interaction type
