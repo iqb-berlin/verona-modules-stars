@@ -54,8 +54,6 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
     return currentValue.length >= 2;
   });
 
-
-  private currentUnitIdentity: string = '';
   private lastParametersRef: unknown | null = null;
 
   constructor() {
@@ -66,24 +64,13 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
       if (!parameters) return;
 
       const isNewParametersObject = this.lastParametersRef !== parameters;
-      const newVariableId = parameters.variableId || 'EQUATION';
-      const newIdentity = [
-        newVariableId,
-        parameters.fixOperand1,
-        parameters.fixOperand2,
-        parameters.fixResult,
-        (parameters.operators || []).join(','),
-        parameters.imageSource || ''
-      ].join('|');
 
-      if (isNewParametersObject || this.currentUnitIdentity !== newIdentity) {
+      if (isNewParametersObject) {
         this.lastParametersRef = parameters;
-        this.currentUnitIdentity = newIdentity;
 
         this.localParameters = {
           ...this.createDefaultParameters(),
-          ...parameters,
-          variableId: newVariableId
+          ...parameters
         };
 
         // Reset selection before restore or initialize to avoid state leakage
@@ -395,7 +382,7 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
     };
     this.responses.emit([response]);
   }
-  
+
   // eslint-disable-next-line class-methods-use-this
   private createDefaultParameters(): InteractionEquationParams {
     return {
