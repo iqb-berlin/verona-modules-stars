@@ -106,6 +106,11 @@ declare global {
       clearPyramidInput(): Chainable<void>
 
       /**
+       * Custom command to clear equation input by clicking backspace until all editable fields are empty
+       */
+      clearEquationInput(): Chainable<void>
+
+      /**
        * Move specified number of tens and ones in place_value interaction
        * @param targetTens - Number of tens to move
        * @param targetOnes - Number of ones to move
@@ -131,7 +136,7 @@ declare global {
        * Useful for waiting for a unit to load.
        * @param interactionType - the type of interaction.
        */
-      assertInteractionComponentVisible(interactionType:string): Chainable<void>;
+      assertInteractionComponentVisible(interactionType: string): Chainable<void>;
 
       /**
        * Asserts that the interaction's visual state has been restored correctly from a former unit state
@@ -139,7 +144,7 @@ declare global {
        * @param interactionType - the type of interaction
        * @param expected - Optional expected state descriptor (e.g., for place_value: 'tens,ones' like '1,2' or a number 12)
        */
-      assertRestoredState(interactionType:string, expected?: unknown): Chainable<void>;
+      assertRestoredState(interactionType: string, expected?: unknown): Chainable<void>;
 
       /**
        * Click multiselect buttons based on coding scheme

@@ -1,0 +1,93 @@
+@use '_variables.scss';
+@use '_colors.scss';
+
+.equation-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 60px;
+
+  .field-value {
+    font-size: 64px;
+  }
+
+  &.no-image {
+    .field-value {
+      font-size: 82px;
+    }
+  }
+}
+
+.stimulus-wrapper {
+  flex: 0 1 auto;
+  margin-bottom: 20px;
+
+  .image-wrapper img {
+    max-width: 100%;
+    max-height: 200px;
+  }
+}
+
+.equation-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  flex: 1;
+  font-size: 3rem;
+}
+
+.field-container {
+  min-width: 60px;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  font-family: inherit;
+
+  &.hint {
+    color: colors.$hint !important;
+
+    .field-value {
+      color: colors.$hint !important;
+    }
+  }
+
+  &.editable {
+    background-color: white;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    &.selected {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+  }
+
+  &.operator, &.equals {
+    min-width: auto;
+    padding: 0 5px;
+    box-shadow: none;
+    background-color: transparent;
+  }
+}
+
+.keyboard-wrapper {
+  @include variables.keyboard-numbers-button-wrapper;
+  left: -45px;
+}
+
+.keyboard-button {
+  @include variables.keyboard-numbers-button;
+  @include variables.keyboard-numbers-button-extra-styles;
+}
+
+
+.backspace-button {
+  @include variables.backspace-button;
+  @include variables.backspace-button-extra-styles;
+}

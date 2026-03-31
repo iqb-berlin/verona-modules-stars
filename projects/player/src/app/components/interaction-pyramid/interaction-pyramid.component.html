@@ -1,25 +1,25 @@
 <div class="pyramid-container" data-cy="interaction-pyramid">
   <div class="pyramids-wrapper">
-    @if (localParameters?.example) {
+    @if (localParameters?.example; as example) {
       <div class="pyramid-box example-pyramid" data-cy="example-pyramid">
         <div class="pyramid-top">
-          <div class="number-box" data-cy="example-pyramid-top-value">{{ localParameters.example.topNumber }}</div>
+          <div class="number-box" data-cy="example-pyramid-top-value">{{ example.topNumber }}</div>
         </div>
         <div class="pyramid-lines">
           <div class="line left-line"></div>
           <div class="line right-line"></div>
         </div>
         <div class="pyramid-bottom">
-          <div class="number-box" data-cy="example-pyramid-bottom-left-value">{{ localParameters.example.bottomLeftNumber }}</div>
-          <div class="number-box" data-cy="example-pyramid-bottom-right-value">{{ localParameters.example.bottomRightNumber }}</div>
+          <div class="number-box" data-cy="example-pyramid-bottom-left-value">{{ example.bottomLeftNumber }}</div>
+          <div class="number-box" data-cy="example-pyramid-bottom-right-value">{{ example.bottomRightNumber }}</div>
         </div>
       </div>
     }
 
-    @if (localParameters) {
+    @if (localParameters; as params) {
       <div class="pyramid-box interactive-pyramid" data-cy="interactive-pyramid">
         <div class="pyramid-top">
-          <div class="number-box" data-cy="interactive-pyramid-top-value">{{ localParameters.topNumber }}</div>
+          <div class="number-box" data-cy="interactive-pyramid-top-value">{{ params.topNumber }}</div>
         </div>
         <div class="pyramid-lines">
           <div class="line left-line"></div>

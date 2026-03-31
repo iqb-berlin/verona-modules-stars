@@ -1,6 +1,4 @@
-import {
-  UnitDefinition
-} from '../../../projects/player/src/app/models/unit-definition';
+import { UnitDefinition } from '../../../projects/player/src/app/models/unit-definition';
 
 export function testContinueButtonFeatures(interactionType: string) {
   describe(`Continue Button Features for interactionType - ${interactionType}`, () => {
@@ -37,10 +35,16 @@ export function testContinueButtonFeatures(interactionType: string) {
       { continueButtonShow: 'ON_ANY_RESPONSE', file: `${interactionType}_continueButtonShow_onAnyResponse_test.json` },
       { continueButtonShow: 'NO', file: `${interactionType}_continueButtonShow_no_test.json` },
       // eslint-disable-next-line max-len
-      { continueButtonShow: 'ON_RESPONSES_COMPLETE', file: `${interactionType}_continueButtonShow_onResponsesComplete_test.json` },
+      {
+        continueButtonShow: 'ON_RESPONSES_COMPLETE',
+        file: `${interactionType}_continueButtonShow_onResponsesComplete_test.json`
+      },
       { continueButtonShow: 'ALWAYS', file: `${interactionType}_continueButtonShow_always_test.json` },
       // eslint-disable-next-line max-len
-      { continueButtonShow: 'ON_MAIN_AUDIO_COMPLETE', file: `${interactionType}_continueButtonShow_onMainAudioComplete_test.json` }
+      {
+        continueButtonShow: 'ON_MAIN_AUDIO_COMPLETE',
+        file: `${interactionType}_continueButtonShow_onMainAudioComplete_test.json`
+      }
     ];
 
     continueButtonConfigs.forEach(({ continueButtonShow, file }) => {

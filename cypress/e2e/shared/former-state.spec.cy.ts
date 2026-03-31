@@ -18,7 +18,8 @@ export function testFormerStateFeatures(interactionType: string, defaultTestFile
         polygon_buttons: [0, 1, 2, 3],
         buttons: [0, 1, 2, 3],
         drop: [0, 1, 2, 3],
-        place_value: ['0,1', '1,1', '1,2', '2,1']
+        place_value: ['0,1', '1,1', '1,2', '2,1'],
+        equation: ['1', '2', '3', '4']
       };
 
       const getNav = (idx: number) => {

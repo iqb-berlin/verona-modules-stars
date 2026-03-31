@@ -15,6 +15,7 @@ export type InteractionEnum = 'BUTTONS' |
 'PLACE_VALUE' |
 'NUMBER_LINE' |
 'PYRAMID' |
+'EQUATION' |
 'NONE';
 export type IconButtonTypeEnum = 'CHECK_GREEN' | 'CLOSE_RED' | 'CLAP_HANDS' | 'SMILEY_1' | 'SMILEY_2' |
 'SMILEY_3' | 'SMILEY_4' | 'SMILEY_5' | 'ONES' | 'TENS';
@@ -25,7 +26,7 @@ export type TargetSizeEnum = 'MEDIUM' | 'LARGE' | 'SMALL';
 export type LayoutEnum = 'LEFT_CENTER' | 'TOP_CENTER' | 'LEFT_BOTTOM' | 'LEFT_CENTER_50';
 
 export type InteractionParameters = InteractionButtonParams | InteractionWriteParams | InteractionDropParams |
-InteractionVideoParams | InteractionFindOnImageParams | InteractionPolygonButtonsParams | InteractionPlaceValueParams | InteractionNumberLineParams | InteractionPyramidParams;
+InteractionVideoParams | InteractionFindOnImageParams | InteractionPolygonButtonsParams | InteractionPlaceValueParams | InteractionNumberLineParams | InteractionPyramidParams | InteractionEquationParams;
 export interface UnitDefinition {
   id: string;
   version?: string;
@@ -148,6 +149,16 @@ export interface InteractionPyramidParams {
     bottomRightNumber: number;
   } | undefined;
   topNumber: number;
+  formerState?: Response[] | undefined;
+}
+
+export interface InteractionEquationParams {
+  variableId?: string;
+  imageSource?: string;
+  fixOperand1?: number | undefined;
+  operators: string[];
+  fixOperand2?: number | undefined;
+  fixResult?: number | undefined;
   formerState?: Response[] | undefined;
 }
 
