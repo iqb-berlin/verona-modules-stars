@@ -53,6 +53,7 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
     return currentValue.length >= 2;
   });
 
+  /** Reference to the last processed parameters object to detect object-identity changes. */
   private lastParametersRef: unknown | null = null;
 
   constructor() {

@@ -19,6 +19,7 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
   /** Array of booleans for each option for hint values. */
   hintValues = signal<boolean[]>([]);
 
+  /** Reference to the last processed parameters object to detect object-identity changes. */
   private lastParametersRef: unknown | null = null;
 
   constructor() {

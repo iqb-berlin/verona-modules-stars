@@ -30,6 +30,7 @@ export class InteractionPyramidComponent extends InteractionComponentDirective {
   /** Whether the keyboard buttons should be disabled (max 2 digits per field) */
   keyboardDisabled = signal<boolean>(false);
 
+  /** Reference to the last processed parameters object to detect object-identity changes. */
   private lastParametersRef: unknown | null = null;
 
   constructor() {
@@ -42,15 +43,7 @@ export class InteractionPyramidComponent extends InteractionComponentDirective {
 
       const isNewParametersObject = this.lastParametersRef !== parameters;
 
-      // this.localParameters = this.createDefaultParameters();
       if (isNewParametersObject) {
-        // Build object without inserting optional properties as undefined
-        // this.localParameters = {
-        //   variableId: parameters.variableId || this.localParameters.variableId,
-        //   topNumber: parameters.topNumber ?? this.localParameters.topNumber,
-        //   ...(parameters.example ? { example: parameters.example } : {}),
-        //   ...(parameters.formerState ? { formerState: parameters.formerState } : {})
-        // } as InteractionPyramidParams;
 
         this.localParameters = {
           ...this.createDefaultParameters(),
