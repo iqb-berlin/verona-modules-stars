@@ -334,7 +334,7 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
   /**
    * Removes the last character from the currently focused field.
    */
-  handleBackButtonClick() {
+  handleNumberDelete() {
     const field = this.selectedField();
     if (!field) return;
 
@@ -348,6 +348,15 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
     }
   }
 
+  /**
+   * Handles the deletion of the selected operator.
+   */
+  handleOperatorDelete() {
+    const field = this.selectedField();
+    if (!field || field !== 'operator') return;
+    this.currentOperator.set('');
+    this.emitResponse('VALUE_CHANGED');
+  }
 
   /**
    * Automatically moves focus to the next editable field in sequence.

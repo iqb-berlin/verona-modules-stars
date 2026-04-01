@@ -129,7 +129,7 @@ export interface InteractionPolygonButtonsParams {
   variableId?: string;
   options: SelectionOption[];
   multiSelect?: boolean;
-  formerState?: Response[];
+  formerState?: Response[] | undefined;
 }
 
 export interface InteractionNumberLineParams {
@@ -138,7 +138,7 @@ export interface InteractionNumberLineParams {
   lastNumber?: number;
   numberInput: number;
   style?: string;
-  formerState?: Response[];
+  formerState?: Response[] | undefined;
 }
 
 export interface InteractionPyramidParams {

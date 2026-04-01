@@ -158,6 +158,24 @@ describe('EQUATION Interaction E2E Tests', () => {
     cy.get('[data-cy="operand2"]').should('not.have.class', 'selected');
   });
 
+  it('deletes the selected operator when operator-delete-button is clicked', () => {
+    setupAndAssert('equation_without_operator_without_fixOperand2_test.json');
+
+    // click on operator to open operator keyboard
+    cy.get('[data-cy="operator"]').click();
+    cy.get('[data-cy="operator"]').should('have.class', 'selected');
+
+    // select an operator
+    cy.get('[data-cy="operator-button-+"]').click();
+    cy.get('[data-cy="operator"]').invoke('text').then(text => expect(text.trim()).to.equal('+'));
+
+    // click on delete button
+    cy.get('[data-cy="operator-delete-button"]').first().click({ force: true });
+
+    // verify operator is deleted
+    cy.get('[data-cy="operator"]').invoke('text').then(text => expect(text.trim()).to.equal(''));
+  });
+
   it('equation wrapper position should remain stable when opening keyboard', () => {
     setupAndAssert('equation_without_fixOperand1_without_fixOperand2_test.json');
 

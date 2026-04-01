@@ -30,30 +30,44 @@ export class InteractionPyramidComponent extends InteractionComponentDirective {
   /** Whether the keyboard buttons should be disabled (max 2 digits per field) */
   keyboardDisabled = signal<boolean>(false);
 
+  private lastParametersRef: unknown | null = null;
+
   constructor() {
     super();
 
     effect(() => {
       const parameters = this.parameters() as InteractionPyramidParams;
-      this.localParameters = this.createDefaultParameters();
-      if (parameters) {
+
+      if (!parameters) return;
+
+      const isNewParametersObject = this.lastParametersRef !== parameters;
+
+      // this.localParameters = this.createDefaultParameters();
+      if (isNewParametersObject) {
         // Build object without inserting optional properties as undefined
+        // this.localParameters = {
+        //   variableId: parameters.variableId || this.localParameters.variableId,
+        //   topNumber: parameters.topNumber ?? this.localParameters.topNumber,
+        //   ...(parameters.example ? { example: parameters.example } : {}),
+        //   ...(parameters.formerState ? { formerState: parameters.formerState } : {})
+        // } as InteractionPyramidParams;
+
         this.localParameters = {
-          variableId: parameters.variableId || this.localParameters.variableId,
-          topNumber: parameters.topNumber ?? this.localParameters.topNumber,
-          ...(parameters.example ? { example: parameters.example } : {}),
-          ...(parameters.formerState ? { formerState: parameters.formerState } : {})
-        } as InteractionPyramidParams;
+          ...this.createDefaultParameters(),
+          ...parameters
+        };
 
         const formerStateResponses: Response[] = this.localParameters.formerState || [];
         const found = formerStateResponses.find(r => r.id === this.localParameters.variableId);
 
-        if (found && typeof found.value === 'string' && !this.bottomLeftValue() && !this.bottomRightValue()) {
+        if (found && typeof found.value === 'string') {
           this.restoreFromFormerState(found.value);
-        } else if (this.bottomLeftValue() === '' && this.bottomRightValue() === '') {
+        } else {
+          this.resetSelection();
           this.emitResponses('DISPLAYED');
         }
         this.updateButtonStates();
+        this.lastParametersRef = parameters;
       }
     });
 
@@ -83,6 +97,14 @@ export class InteractionPyramidComponent extends InteractionComponentDirective {
       }
       this.updateButtonStates();
     });
+  }
+
+  private resetSelection(): void {
+    this.bottomLeftValue.set('');
+    this.bottomRightValue.set('');
+    this.selectedInput.set('LEFT');
+    this.hasLeftHint.set(false);
+    this.hasRightHint.set(false);
   }
 
   selectInput(input: 'LEFT' | 'RIGHT') {
@@ -153,11 +175,6 @@ export class InteractionPyramidComponent extends InteractionComponentDirective {
   private createDefaultParameters(): InteractionPyramidParams {
     return {
       variableId: 'PYRAMID',
-      example: {
-        topNumber: 11,
-        bottomLeftNumber: 10,
-        bottomRightNumber: 1
-      },
       topNumber: 13
     };
   }
