@@ -1,3 +1,4 @@
 export const environment = {
-  production: true
+  production: true,
+  playerUrl: 'http://localhost:4200'
 };

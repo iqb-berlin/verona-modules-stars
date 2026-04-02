@@ -9,7 +9,7 @@ import {
   VopMessage,
   VopMetaData,
   VopStateChangedNotification
-} from '../models/verona';
+} from '../../../../shared/models/verona';
 
 @Injectable({
   providedIn: 'root'
@@ -56,7 +56,7 @@ export class VeronaPostService {
       type: 'vopRuntimeErrorNotification',
       sessionId: this.sessionID as string,
       code: error.code,
-      message: error.message
+      message: error.message || ''
     });
   }
 

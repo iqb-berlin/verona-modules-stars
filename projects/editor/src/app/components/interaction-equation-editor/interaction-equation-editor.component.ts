@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { EditorStateService } from '../../services/editor-state.service';
 import { InteractionEquationParams } from '@shared/models/unit-definition';
+import { EditorStateService } from '../../services/editor-state.service';
 
 @Component({
   selector: 'stars-interaction-equation-editor',

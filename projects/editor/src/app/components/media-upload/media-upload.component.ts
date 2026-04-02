@@ -52,7 +52,7 @@ export class MediaUploadComponent {
   label = '';
   mediaType: 'image' | 'audio' | 'video' = 'image';
   currentValue = '';
-  inputId = 'media-' + Math.random().toString(36).substring(7);
+  inputId = `media-${Math.random().toString(36).substring(7)}`;
 
   onValueChange: (value: string) => void = () => {};
 

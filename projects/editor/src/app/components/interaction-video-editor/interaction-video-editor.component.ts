@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { EditorStateService } from '../../services/editor-state.service';
 import { InteractionVideoParams } from '@shared/models/unit-definition';
+import { EditorStateService } from '../../services/editor-state.service';
 
 @Component({
   selector: 'stars-interaction-video-editor',
@@ -69,11 +69,11 @@ export class InteractionVideoEditorComponent {
   }
 
   onVideoSelected(event: Event): void {
-    this.readFile(event, (r) => this.updateField('videoSource', r));
+    this.readFile(event, r => this.updateField('videoSource', r));
   }
 
   onImageSelected(event: Event): void {
-    this.readFile(event, (r) => this.updateField('imageSource', r));
+    this.readFile(event, r => this.updateField('imageSource', r));
   }
 
   private readFile(event: Event, cb: (r: string) => void): void {

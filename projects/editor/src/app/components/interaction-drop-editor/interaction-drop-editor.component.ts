@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { EditorStateService } from '../../services/editor-state.service';
 import { InteractionDropParams, SelectionOption } from '@shared/models/unit-definition';
+import { EditorStateService } from '../../services/editor-state.service';
 
 @Component({
   selector: 'stars-interaction-drop-editor',
@@ -134,11 +134,11 @@ export class InteractionDropEditorComponent {
   }
 
   onImageSelected(event: Event): void {
-    this.readFile(event, (r) => this.updateField('imageSource', r));
+    this.readFile(event, r => this.updateField('imageSource', r));
   }
 
   onOptionImageSelected(event: Event, index: number): void {
-    this.readFile(event, (r) => this.updateOption(index, 'imageSource', r));
+    this.readFile(event, r => this.updateOption(index, 'imageSource', r));
   }
 
   private readFile(event: Event, cb: (r: string) => void): void {
