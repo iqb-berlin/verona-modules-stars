@@ -1,6 +1,10 @@
-import { Component, computed, effect, signal, WritableSignal } from '@angular/core';
+import {
+  Component, computed, effect, signal, WritableSignal
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
+
 import { Response } from '@iqbspecs/response/response.interface';
+
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
 import { InteractionEquationParams } from '../../models/unit-definition';
 import { StarsResponse } from '../../services/responses.service';
@@ -11,6 +15,7 @@ import { StarsResponse } from '../../services/responses.service';
   styleUrls: ['./interaction-equation.component.scss'],
   imports: [CommonModule]
 })
+
 export class InteractionEquationComponent extends InteractionComponentDirective {
   /** Local copy of the component parameters with defaults applied. */
   localParameters!: InteractionEquationParams;
@@ -37,15 +42,14 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
   hintedFields = signal<Set<'operand1' | 'operator' | 'operand2' | 'result'>>(new Set());
 
   /** Tracks the currently selected field to manage input and keyboard state */
-  selectedField = signal<'operand1' | 'operator' | 'operand2' | 'result' | null>(null);
+  selectedField = signal<'operand1' | 'operator' | 'operand2' | 'result' | undefined>(undefined);
 
   /** Tracks the number of empty editable fields in the equation */
   emptyFieldsCount = signal<number>(0);
 
   /** Derives whether the keyboard should be disabled based on the focused field's length */
   keyboardDisabled = computed<boolean>(() => {
-    const field = this.selectedField
-    ();
+    const field = this.selectedField();
     if (!field || field === 'operator') {
       return false;
     }
@@ -54,6 +58,7 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
     return currentValue.length >= 2;
   });
 
+  /** Reference to the last processed parameters object to detect object-identity changes. */
   private lastParametersRef: unknown | null = null;
 
   constructor() {
@@ -147,7 +152,7 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
     this.currentOperator.set('');
     this.currentOperand2.set('');
     this.currentResult.set('');
-    this.selectedField.set(null);
+    this.selectedField.set(undefined);
     this.hasHint.set(false);
     this.hintedFields.set(new Set());
   }
@@ -181,7 +186,7 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
    * @param value The saved response string.
    */
   private restoreFromFormerState(value: string) {
-    if (!value || typeof value !== 'string') return;
+    if (value === '') return;
 
     const parts = value.split('_');
     const editableFields = this.getEditableFields();
@@ -203,10 +208,10 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
     });
 
     this.emptyFieldsCount.set(emptyFields.length);
-    if (emptyFields.length === 1 && emptyFields[0]) {
+    if (emptyFields.length === 1 && emptyFields[0] && this.localParameters.operators.length <= 1) {
       this.selectedField.set(emptyFields[0]);
     } else {
-      this.selectedField.set(null);
+      this.selectedField.set(undefined);
     }
   }
 
@@ -234,7 +239,7 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
       }
 
       const key = paramKeys[field as keyof typeof paramKeys];
-      const fixValue = (this.localParameters as any)[key];
+      const fixValue = this.localParameters[key];
       if (fixValue !== undefined) {
         if (targetSignal) targetSignal.set(fixValue.toString());
       } else if (!onlyFixed) {
@@ -251,10 +256,10 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
       });
 
       this.emptyFieldsCount.set(emptyFields.length);
-      if (emptyFields.length === 1 && emptyFields[0]) {
+      if (emptyFields.length === 1 && emptyFields[0] && this.localParameters.operators.length <= 1) {
         this.selectedField.set(emptyFields[0]);
       } else {
-        this.selectedField.set(null);
+        this.selectedField.set(undefined);
       }
     }
   }
@@ -266,7 +271,7 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
   setSelectedField(field: 'operand1' | 'operator' | 'operand2' | 'result') {
     const editable = this.isFieldEditable(field);
     if (editable) {
-      if (this.hasHint() !== false) this.hasHint.set(false);
+      if (this.hasHint()) this.hasHint.set(false);
       if (this.hintedFields().size !== 0) this.hintedFields.set(new Set());
       if (this.selectedField() !== field) this.selectedField.set(field);
     }
@@ -293,7 +298,8 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
    * @param field The field name.
    * @returns The Signal for the field, or undefined if not found.
    */
-  getFieldSignal(field: 'operand1' | 'operator' | 'operand2' | 'result' | null | undefined): WritableSignal<string> | undefined {
+  // eslint-disable-next-line max-len
+  getFieldSignal(field: 'operand1' | 'operator' | 'operand2' | 'result' | undefined): WritableSignal<string> | undefined {
     if (!field) return undefined;
     const signalMap: Record<string, WritableSignal<string>> = {
       operand1: this.currentOperand1,
@@ -312,7 +318,7 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
     const field = this.selectedField();
     if (!field || this.keyboardDisabled()) return;
 
-    if (this.hasHint() !== false) this.hasHint.set(false);
+    if (this.hasHint()) this.hasHint.set(false);
     if (this.hintedFields().size !== 0) this.hintedFields.set(new Set());
 
     const targetSignal = this.getFieldSignal(field);
@@ -335,11 +341,11 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
   /**
    * Removes the last character from the currently focused field.
    */
-  handleBackButtonClick() {
+  handleNumberDelete() {
     const field = this.selectedField();
     if (!field) return;
 
-    if (this.hasHint() !== false) this.hasHint.set(false);
+    if (this.hasHint()) this.hasHint.set(false);
     if (this.hintedFields().size !== 0) this.hintedFields.set(new Set());
 
     const targetSignal = this.getFieldSignal(field);
@@ -349,6 +355,15 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
     }
   }
 
+  /**
+   * Handles the deletion of the selected operator.
+   */
+  handleOperatorDelete() {
+    const field = this.selectedField();
+    if (!field || field !== 'operator') return;
+    this.currentOperator.set('');
+    this.emitResponse('VALUE_CHANGED');
+  }
 
   /**
    * Automatically moves focus to the next editable field in sequence.
@@ -358,11 +373,16 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
     const currentField = this.selectedField();
     if (!currentField) return;
 
+    const isNumberField = (f: string) => f !== 'operator';
+    const currentIsNumber = isNumberField(currentField);
+
     const currentIndex = fields.indexOf(currentField);
     for (let i = currentIndex + 1; i < fields.length; i++) {
       const field = fields[i];
       if (this.isFieldEditable(field)) {
-        if (this.selectedField() !== field) this.selectedField.set(field);
+        if (field && isNumberField(field) === currentIsNumber) {
+          if (this.selectedField() !== field) this.selectedField.set(field);
+        }
         break;
       }
     }

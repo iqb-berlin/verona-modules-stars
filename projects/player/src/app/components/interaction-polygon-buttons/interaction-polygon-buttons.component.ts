@@ -19,7 +19,7 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
   /** Array of booleans for each option for hint values. */
   hintValues = signal<boolean[]>([]);
 
-  private currentUnitIdentity = '';
+  /** Reference to the last processed parameters object to detect object-identity changes. */
   private lastParametersRef: unknown | null = null;
 
   constructor() {
@@ -30,21 +30,13 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
       if (!parameters) return;
 
       const isNewParametersObject = this.lastParametersRef !== parameters;
-      const newVariableId = parameters.variableId || 'POLYGON_BUTTONS';
-      const newIdentity = [
-        newVariableId,
-        (parameters.options || []).map(o => o.svgPath).join(','),
-        parameters.multiSelect || false
-      ].join('|');
 
-      if (isNewParametersObject || this.currentUnitIdentity !== newIdentity) {
+      if (isNewParametersObject) {
         this.lastParametersRef = parameters;
-        this.currentUnitIdentity = newIdentity;
 
         this.localParameters = {
           ...this.createDefaultParameters(),
-          ...parameters,
-          variableId: newVariableId
+          ...parameters
         };
 
         const formerStateResponse: Response[] = parameters.formerState || [];
@@ -59,7 +51,7 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
           // No former state found - initialize as new
           this.resetSelection();
           this.responses.emit([{
-            id: this.localParameters.variableId || '',
+            id: this.localParameters.variableId || 'POLYGON_BUTTONS',
             status: 'DISPLAYED',
             value: 0,
             relevantForResponsesProgress: false
