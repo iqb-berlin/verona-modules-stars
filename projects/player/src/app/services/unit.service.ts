@@ -7,7 +7,9 @@ import {
   AudioOptions,
   ContinueButtonEnum,
   FirstAudioOptionsParams,
-  InteractionEnum, OpeningImageParams,
+  FirstClickLayerEnum,
+  InteractionEnum,
+  OpeningImageParams,
   UnitDefinition
 } from '../models/unit-definition';
 import { ResponsesService } from './responses.service';
@@ -58,7 +60,7 @@ export class UnitService {
   showFirstClickLayer = computed(() => {
     const options = this.firstAudioOptions();
     const mainAudio = this.mainAudio();
-    return !!options?.firstClickLayer &&
+    return (options?.firstClickLayer !== 'OFF') &&
       !!mainAudio?.audioSource &&
       !this.interactionDone();
   });
@@ -109,6 +111,7 @@ export class UnitService {
     const mainAudio: AudioOptions | undefined = def.mainAudio ?
       ({ ...def.mainAudio, audioId: 'mainAudio' } as AudioOptions) :
       undefined;
+
     // Backward compatibility for animateButton and firstClickLayer
     if (mainAudio?.animateButton) {
       if (!this.firstAudioOptions()?.animateButton) {
@@ -120,6 +123,13 @@ export class UnitService {
         this.firstAudioOptions.set({ ...this.firstAudioOptions(), firstClickLayer: mainAudio.firstClickLayer });
       }
     }
+
+    // Backward compatibility boolean firstClickLayer
+    if (typeof this.firstAudioOptions()?.firstClickLayer === 'boolean') {
+      const firstClickLayer: FirstClickLayerEnum = this.firstAudioOptions()?.firstClickLayer ? 'TRANSPARENT' : 'OFF';
+      this.firstAudioOptions.set({ ...this.firstAudioOptions(), firstClickLayer: firstClickLayer });
+    }
+
     const pattern = /^#([a-f0-9]{3}|[a-f0-9]{6})$/i;
     if (def.backgroundColor && pattern.test(def.backgroundColor)) {
       this.backgroundColor.set(def.backgroundColor);

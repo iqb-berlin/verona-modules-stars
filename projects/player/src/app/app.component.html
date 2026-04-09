@@ -6,7 +6,7 @@
   }
 
   @if (unitService.showFirstClickLayer()) {
-    <stars-click-layer></stars-click-layer>
+    <stars-click-layer [FirstAudioOptionsParams]="unitService.firstAudioOptions()"></stars-click-layer>
   }
 
   <!-- audio component (show if player is not hidden) -->
