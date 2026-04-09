@@ -67,7 +67,7 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
       const hints = this.showHint();
       if (!this.localParameters) return;
       if (!hints || hints.length === 0) {
-        this.hintValues.set(Array(this.selectedValues().length).fill(false));
+        this.hintValues.set(Array(this.localParameters.options.length).fill(false));
         return;
       }
 
@@ -81,12 +81,11 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
         // set single select: "2" => [false, true, false]
         const selectedIndex = parseInt(hints, 10) - 1;
         const selectedStates = Array.from(
-          { length: this.selectedValues().length },
+          { length: this.localParameters.options.length },
           (_, i) => i === selectedIndex
         );
         this.hintValues.set(selectedStates);
         this.selectedValues.set([]);
-        console.log('hints', this.hintValues());
       }
     });
   }
