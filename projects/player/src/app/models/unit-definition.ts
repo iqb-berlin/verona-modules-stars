@@ -133,11 +133,13 @@ export interface InteractionPolygonButtonsParams {
 }
 
 export interface InteractionNumberLineParams {
-  variableId?: string;
-  firstNumber?: number;
-  lastNumber?: number;
-  numberInput: number;
-  style?: string;
+  variableId?: string | undefined;
+  firstNumber?: number | undefined;
+  leadingNumbers?: number[] | undefined;
+  lastNumber?: number | undefined;
+  trailingNumbers?: number[] | undefined;
+  numberInput?: number | undefined;
+  style?: string | undefined;
   formerState?: Response[] | undefined;
 }
 
