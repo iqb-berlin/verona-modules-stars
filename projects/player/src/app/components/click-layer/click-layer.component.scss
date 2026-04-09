@@ -8,4 +8,13 @@
   cursor: pointer;
   z-index: 151;
   -webkit-tap-highlight-color: transparent;
+
+  &.blur {
+    backdrop-filter: blur(2px);
+  }
+
+  &.disabled {
+    background-color: rgba(0, 0, 0, 0.2);
+    backdrop-filter: grayscale(50%);
+  }
 }
