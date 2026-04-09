@@ -49,7 +49,7 @@
           }
         </g>
       } @else if (localParameters.style === 'BLOCK') {
-        @for (item of blockDisplayItems(); track item.index) {
+        @for (item of numberLineItems(); track item.index) {
           <g [attr.transform]="'translate(' + item.x + ',' + item.y + ')'" data-cy="number-line-item-block">
             @if (item.isEmpty) {
               <g class="empty-block-group" data-cy="number-input-box-block">

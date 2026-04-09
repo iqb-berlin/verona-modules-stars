@@ -34,15 +34,6 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
   numberInputValue: string = '';
   hasHint = signal(false);
 
-  /** List of items to display in the BLOCK style view. */
-  blockDisplayItems = signal<{
-    value: number,
-    index: number,
-    x: number,
-    y: number,
-    isEmpty: boolean
-  }[]>([]);
-
   /** Observer to detect when the number line SVG path's dimensions change. */
   private resizeObserver: ResizeObserver | undefined;
   /** Identifier for the scheduled animation frame used for coordinate retries. */
@@ -167,13 +158,9 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
     if (style === 'BLOCK' || (style === 'WAVE' && (leadingNumbers || trailingNumbers))) {
       const tempItems: { value: number, index: number, isEmpty: boolean }[] = [];
       let idx = 0;
-      for (const val of (leadingNumbers || [])) {
-        tempItems.push({ value: val, index: idx++, isEmpty: false });
-      }
+      (leadingNumbers || []).forEach((val) => tempItems.push({ value: val, index: idx++, isEmpty: false }));
       tempItems.push({ value: 0, index: idx++, isEmpty: true });
-      for (const val of (trailingNumbers || [])) {
-        tempItems.push({ value: val, index: idx++, isEmpty: false });
-      }
+      (trailingNumbers || []).forEach((val) => tempItems.push({ value: val, index: idx++, isEmpty: false }));
 
       if (style === 'BLOCK') {
         const blockWidth = 60;
@@ -191,7 +178,7 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
           y: centerY
         }));
 
-        this.blockDisplayItems.set(itemsWithCoords);
+        this.numberLineItems.set(itemsWithCoords);
         return;
       }
 
