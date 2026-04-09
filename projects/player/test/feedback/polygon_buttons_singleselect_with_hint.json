@@ -41,7 +41,7 @@
       "codes": [
         {
           "method": "EQUALS",
-          "parameter": "1000",
+          "parameter": "1",
           "code": 1,
           "score": 1
         }
@@ -66,7 +66,7 @@
         "parameter": "0",
         "showResponse": {
           "variableId": "POLYGON_BUTTONS",
-          "value": "1000",
+          "value": "1",
           "delayMS": 1000
         }
       }
