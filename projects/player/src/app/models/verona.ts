@@ -2,7 +2,7 @@ export type NavigationTarget = 'first' | 'last' | 'previous' | 'next' | 'end';
 export type Progress = 'none' | 'some' | 'complete';
 export type PagingMode = 'separate' | 'buttons' | 'concat-scroll' | 'concat-scroll-snap';
 
-export const UnitStateDataType = 'iqb-standard@1.1';
+export const UnitStateDataType = 'iqb-standard@2.0';
 
 export interface PlayerConfig {
   printMode?: 'off' | 'on' | 'on-with-ids';

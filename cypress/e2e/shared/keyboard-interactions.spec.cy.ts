@@ -2,16 +2,37 @@ export function testKeyboardInteractions(interactionType: string, defaultTestFil
   describe(`Keyboard Interactions for interactionType - ${interactionType}`, () => {
     const setupAndAssert = (file: string) => {
       cy.setupTestData(file, interactionType);
-      const containerSelector = interactionType === 'number_line' ? '[data-cy="interaction-number-line"]' : '[data-cy="write-container"]';
+      let containerSelector = '';
+      if (interactionType === 'number_line') {
+        containerSelector = '[data-cy="interaction-number-line"]';
+      } else if (interactionType === 'pyramid') {
+        containerSelector = '[data-cy="interaction-pyramid"]';
+      } else if (interactionType === 'equation') {
+        containerSelector = '[data-cy="interaction-equation"]';
+      } else {
+        containerSelector = '[data-cy="write-container"]';
+      }
       cy.get(containerSelector).should('exist');
+      if (interactionType === 'pyramid') {
+        cy.get('.pyramid-container').should('exist');
+      }
     };
 
     const getDisplayTextSelector = () => {
-      return interactionType === 'number_line' ? '[data-cy="number-input-text"]' : '[data-cy="text-span"]';
+      if (interactionType === 'number_line') {
+        return '[data-cy="number-input-text"]';
+      }
+      if (interactionType === 'pyramid') {
+        return '[data-cy="interactive-pyramid-input-left"]';
+      }
+      if (interactionType === 'equation') {
+        return '[data-cy="operand1"]';
+      }
+      return '[data-cy="text-span"]';
     };
 
     const getKeyboardButtonSelector = (button: string) => {
-      if (interactionType === 'number_line') {
+      if (interactionType === 'number_line' || interactionType === 'pyramid' || interactionType === 'equation') {
         return `[data-cy="keyboard-button-${button}"]`;
       }
       return `[data-cy="numbers-button-${button}"]`;
@@ -45,7 +66,7 @@ export function testKeyboardInteractions(interactionType: string, defaultTestFil
 
       // Backspace again
       cy.get('[data-cy="backspace-button"]').click();
-      if (interactionType === 'number_line') {
+      if (interactionType === 'number_line' || interactionType === 'pyramid' || interactionType === 'equation') {
         cy.get(displayTextSelector).invoke('text').then((text) => {
           expect(text.trim()).to.equal('');
         });

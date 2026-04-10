@@ -75,6 +75,7 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
     effect(() => {
       const hints = this.showHint();
       if (!hints || hints.length === 0) {
+        this.hasHint.set(false);
         return;
       }
       this.currentText = hints;

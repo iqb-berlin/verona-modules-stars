@@ -36,10 +36,7 @@
 //   }
 // }
 
-import {
-  InteractionParameters,
-  UnitDefinition
-} from '../../projects/player/src/app/models/unit-definition';
+import { InteractionParameters, UnitDefinition } from '../../projects/player/src/app/models/unit-definition';
 import { getButtonOptions, getCorrectAnswerParam, getIndexByOneBasedInput } from './utils';
 
 Cypress.Commands.add('loadUnit', (filename: string) => {
@@ -385,6 +382,81 @@ Cypress.Commands.add('clearNumberLineInput', () => {
   performBackspace();
 });
 
+Cypress.Commands.add('clearPyramidInput', () => {
+  const maxLimit = 10;
+
+  const performBackspaceForInput = (inputSelector: string) => {
+    let safetyCounter = 0;
+
+    const performBackspace = () => {
+      if (safetyCounter >= maxLimit) {
+        cy.log(`Safety limit reached while clearing pyramid input: ${inputSelector}`);
+        return;
+      }
+
+      // eslint-disable-next-line no-plusplus
+      safetyCounter++;
+
+      cy.document().then(doc => {
+        const inputElement = doc.querySelector(inputSelector);
+
+        if (!inputElement) {
+          cy.log(`Pyramid input fully cleared - ${inputSelector} element no longer exists`);
+          return;
+        }
+
+        const currentText = inputElement.textContent?.trim() || '';
+
+        if (!currentText) {
+          cy.log(`Pyramid input ${inputSelector} exists but is empty - clearing complete`);
+          return;
+        }
+
+        cy.log(`Clearing character from pyramid input ${inputSelector}: "${currentText}"`);
+        cy.get(inputSelector).click();
+        cy.get('[data-cy=backspace-button]').click();
+
+        // Continue clearing
+        performBackspace();
+      });
+    };
+
+    performBackspace();
+  };
+
+  performBackspaceForInput('[data-cy="interactive-pyramid-input-left"]');
+  performBackspaceForInput('[data-cy="interactive-pyramid-input-right"]');
+});
+
+Cypress.Commands.add('clearEquationInput', () => {
+  const fields = ['operand1', 'operator', 'operand2', 'result'];
+  fields.forEach(field => {
+    const selector = `[data-cy="${field}"]`;
+    cy.get('body').then($body => {
+      const $el = $body.find(`${selector}.editable`);
+      if ($el.length > 0) {
+        cy.wrap($el).click();
+        // Clear digits
+        if (field !== 'operator') {
+          const backspaceUntilEmpty = () => {
+            cy.get(selector).then($field => {
+              if ($field.text().trim() !== '') {
+                cy.get('[data-cy="backspace-button"]').then($btn => {
+                  if (!$btn.is(':disabled')) {
+                    cy.wrap($btn).click();
+                    backspaceUntilEmpty();
+                  }
+                });
+              }
+            });
+          };
+          backspaceUntilEmpty();
+        }
+      }
+    });
+  });
+});
+
 Cypress.Commands.add('movePlaceValueIcons', (targetTens: number, targetOnes: number) => {
   // Check how many are already moved
   cy.get('body').then($body => {
@@ -407,6 +479,10 @@ Cypress.Commands.add('movePlaceValueIcons', (targetTens: number, targetOnes: num
   });
 });
 
+/** Function to apply standard scenarios for each interaction type
+ * @param interactionType shows which interactionType
+ * @param navigator currently used for former state
+ * */
 Cypress.Commands.add('applyStandardScenarios', (interactionType: string, navigator?: unknown) => {
   const isCoordString = (val: string) => /^\s*\d+\s*,\s*\d+\s*$/.test(val);
   const parseCoords = (val: string): [number, number] => {
@@ -536,6 +612,71 @@ Cypress.Commands.add('applyStandardScenarios', (interactionType: string, navigat
     return;
   }
 
+  if (interactionType === 'pyramid') {
+    if (navigator !== undefined) {
+      if (typeof navigator === 'string') {
+        const parts = navigator.split('_');
+        if (parts.length === 2) {
+          const left = parts[0] || '';
+          const right = parts[1] || '';
+          cy.get('[data-cy="interactive-pyramid-input-left"]').click();
+          left.split('').forEach(char => {
+            cy.get(`[data-cy="keyboard-button-${char}"]`).click();
+          });
+          cy.get('[data-cy="interactive-pyramid-input-right"]').click();
+          right.split('').forEach(char => {
+            cy.get(`[data-cy="keyboard-button-${char}"]`).click();
+          });
+          cy.wait(500);
+          return;
+        }
+      }
+    }
+    // Default behavior
+    cy.get('[data-cy="interactive-pyramid-input-left"]').click();
+    cy.get('[data-cy="keyboard-button-1"]').click();
+    cy.get('[data-cy="keyboard-button-2"]').click();
+
+    cy.get('[data-cy="interactive-pyramid-input-right"]').click();
+    cy.get('[data-cy="keyboard-button-3"]').click();
+    cy.get('[data-cy="keyboard-button-4"]').click();
+    cy.wait(500);
+    return;
+  }
+
+  if (interactionType === 'equation') {
+    if (navigator !== undefined && typeof navigator === 'string') {
+      const parts = navigator.split('_');
+      cy.get('.field-container.editable').each(($el, index) => {
+        if (index < parts.length) {
+          const val = parts[index] || '';
+          if (val === '') return;
+          cy.wrap($el).click();
+          if ($el.hasClass('operator')) {
+            cy.get(`[data-cy="operator-button-${val}"]`).click();
+          } else {
+            val.split('').forEach(char => {
+              cy.get(`[data-cy="keyboard-button-${char}"]`).click();
+            });
+          }
+        }
+      });
+      cy.wait(500);
+      return;
+    }
+    // Default behavior
+    cy.get('.field-container.editable').first().click();
+    cy.get('.keyboard-wrapper').then($wrapper => {
+      if ($wrapper.find('.operator-keyboard').length > 0) {
+        cy.get('.operator-keyboard .keyboard-button').first().click();
+      } else if ($wrapper.find('.number-keyboard').length > 0) {
+        cy.get('[data-cy="keyboard-button-1"]').click();
+      }
+    });
+    cy.wait(500);
+    return;
+  }
+
   // Default for BUTTONS, DROP and others
   if (navigator !== undefined) {
     if (typeof navigator === 'number') {
@@ -582,6 +723,48 @@ Cypress.Commands.add('applyCorrectAnswerScenarios', (interactionType: string, da
     cy.clearNumberLineInput();
     const targetValue = Number.parseInt(correctAnswerParam, 10);
     cy.get(`[data-cy=keyboard-button-${targetValue}]`).click();
+  } else if (interactionType === 'pyramid') {
+    // For pyramid, clear the inputs first and then write the correct answer on the keyboard
+    cy.clearPyramidInput();
+    // For pyramid, the correctAnswerParam is in the format "left_right"
+    const parts = correctAnswerParam.split('_');
+
+    const left = parts[0] || '';
+    const right = parts[1] || '';
+
+    cy.get('[data-cy="interactive-pyramid-input-left"]').click();
+    left.split('').forEach(char => {
+      cy.get(`[data-cy="keyboard-button-${char}"]`).click();
+    });
+
+    cy.get('[data-cy="interactive-pyramid-input-right"]').click();
+    right.split('').forEach(char => {
+      cy.get(`[data-cy="keyboard-button-${char}"]`).click();
+    });
+  } else if (interactionType === 'equation') {
+    cy.clearEquationInput();
+    const interactionParams = dataToCheck.interactionParameters as InteractionEquationParams;
+    const editableFields: string[] = [];
+    if (interactionParams.fixOperand1 === undefined) editableFields.push('operand1');
+    if (interactionParams.operators.length > 1) editableFields.push('operator');
+    if (interactionParams.fixOperand2 === undefined) editableFields.push('operand2');
+    if (interactionParams.fixResult === undefined) editableFields.push('result');
+
+    const parts = correctAnswerParam.split('_');
+    if (parts.length === editableFields.length) {
+      editableFields.forEach((field, index) => {
+        const val = parts[index] || '';
+        if (val === '') return;
+        cy.get(`[data-cy="${field}"]`).click();
+        if (field === 'operator') {
+          cy.get(`[data-cy="operator-button-${val}"]`).click();
+        } else {
+          val.split('').forEach(char => {
+            cy.get(`[data-cy="keyboard-button-${char}"]`).click();
+          });
+        }
+      });
+    }
   } else {
     // For other interaction types (buttons, drop, polygon_buttons),
     // find the button containing the correct answer
@@ -680,6 +863,10 @@ Cypress.Commands.add('assertInteractionComponentVisible', (interactionType: stri
       .should('exist')
       .and('be.visible')
       .and('have.attr', 'src');
+  } else if (interactionType === 'pyramid') {
+    cy.get('[data-cy="interaction-pyramid"]', { timeout: 15000 }).should('be.visible');
+  } else if (interactionType === 'equation') {
+    cy.get('[data-cy="interaction-equation"]', { timeout: 15000 }).should('be.visible');
   } else {
     cy.get('[data-cy="buttons-container"]', { timeout: 15000 }).should('be.visible');
   }
@@ -688,6 +875,7 @@ Cypress.Commands.add('assertInteractionComponentVisible', (interactionType: stri
 Cypress.Commands.add('assertRestoredState', (interactionType: string, expected?: unknown) => {
   cy.log(`Verifying restored state for interaction type: ${interactionType}`);
   if (interactionType === 'polygon_buttons') {
+    cy.log('interaction type is polygon buttons, expected is', expected);
     let targetIndex = 0;
     if (expected !== undefined) {
       if (typeof expected === 'number') {
@@ -701,6 +889,7 @@ Cypress.Commands.add('assertRestoredState', (interactionType: string, expected?:
         }
       }
     }
+
     cy.get(`[data-cy="polygon-${targetIndex}"]`, { timeout: 15000 }).should('have.class', 'clicked');
     cy.log(`Approved: interactionType: ${interactionType} polygon-${targetIndex} has a clicked class`);
   } else if (interactionType === 'write') {
@@ -773,6 +962,40 @@ Cypress.Commands.add('assertRestoredState', (interactionType: string, expected?:
       expect(text.trim()).to.contain(expectedText);
     });
     cy.log(`Approved: interactionType: ${interactionType} number-input-text contains expectedText ${expectedText}`);
+  } else if (interactionType === 'pyramid') {
+    let expectedLeft = '1';
+    let expectedRight = '';
+    if (expected !== undefined) {
+      if (typeof expected === 'string') {
+        const parts = expected.split('_');
+        if (parts.length === 2) {
+          expectedLeft = parts[0] || '';
+          expectedRight = parts[1] || '';
+        }
+      }
+    }
+    if (expectedLeft) {
+      cy.get('[data-cy="interactive-pyramid-input-left"]', { timeout: 15000 }).should('contain', expectedLeft);
+    }
+    if (expectedRight) {
+      cy.get('[data-cy="interactive-pyramid-input-right"]', { timeout: 15000 }).should('contain', expectedRight);
+    }
+    cy.log(`Approved: interactionType: ${interactionType} inputs contain expected values ${expectedLeft}_${expectedRight}`);
+  } else if (interactionType === 'equation') {
+    let expectedValue = '1';
+    if (expected !== undefined && typeof expected === 'string') {
+      expectedValue = expected;
+    }
+    const parts = expectedValue.split('_');
+    cy.get('.field-container.editable', { timeout: 15000 }).each(($el, index) => {
+      if (index < parts.length) {
+        const val = parts[index] || '';
+        cy.wrap($el).find('.field-value').invoke('text').then(text => {
+          expect(text.trim()).to.equal(val);
+        });
+      }
+    });
+    cy.log(`Approved: interactionType: ${interactionType} editable fields contains expected values ${expectedValue}`);
   } else if (interactionType === 'drop') {
     // Verifies the button at index 0 has been moved
     cy.get('[data-cy="drop-animate-wrapper-0"]', { timeout: 15000 })

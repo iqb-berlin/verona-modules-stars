@@ -120,4 +120,6 @@
 
 .backspace-button {
  @include variables.backspace-button;
+  width: 100px;
+  right: -140px;
 }

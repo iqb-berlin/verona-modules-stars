@@ -1,0 +1,174 @@
+import { Component, effect, signal } from '@angular/core';
+import { Response } from '@iqbspecs/response/response.interface';
+import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
+import { InteractionPyramidParams } from '../../models/unit-definition';
+import { StarsResponse } from '../../services/responses.service';
+
+@Component({
+  selector: 'stars-interaction-pyramid',
+  templateUrl: './interaction-pyramid.component.html',
+  styleUrls: ['./interaction-pyramid.component.scss']
+})
+export class InteractionPyramidComponent extends InteractionComponentDirective {
+  /** Local copy of the component parameters with defaults applied. */
+  localParameters!: InteractionPyramidParams;
+
+  /** Numbers to be shown in the keyboard */
+  numbersList: string[] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
+  /** The current numbers entered by the user. Initialized as empty strings. */
+  bottomLeftValue = signal<string>('');
+  bottomRightValue = signal<string>('');
+
+  /** Currently selected input field ('LEFT' or 'RIGHT') */
+  selectedInput = signal<'LEFT' | 'RIGHT'>('LEFT');
+
+  /** Whether a hint is currently being shown for each input field */
+  hasLeftHint = signal<boolean>(false);
+  hasRightHint = signal<boolean>(false);
+
+  /** Whether the keyboard buttons should be disabled (max 2 digits per field) */
+  keyboardDisabled = signal<boolean>(false);
+
+  /** Reference to the last processed parameters object to detect object-identity changes. */
+  private lastParametersRef: unknown | null = null;
+
+  constructor() {
+    super();
+
+    effect(() => {
+      const parameters = this.parameters() as InteractionPyramidParams;
+
+      if (!parameters) return;
+
+      const isNewParametersObject = this.lastParametersRef !== parameters;
+
+      if (isNewParametersObject) {
+
+        this.localParameters = {
+          ...this.createDefaultParameters(),
+          ...parameters
+        };
+
+        const formerStateResponses: Response[] = this.localParameters.formerState || [];
+        const found = formerStateResponses.find(r => r.id === this.localParameters.variableId);
+
+        if (found && typeof found.value === 'string') {
+          this.restoreFromFormerState(found.value);
+        } else {
+          this.resetSelection();
+          this.emitResponses('DISPLAYED');
+        }
+        this.updateButtonStates();
+        this.lastParametersRef = parameters;
+      }
+    });
+
+    effect(() => {
+      const hints = this.showHint();
+      if (!hints || hints.length === 0) {
+        this.hasLeftHint.set(false);
+        this.hasRightHint.set(false);
+        return;
+      }
+      const parts = hints.split('_');
+      if (parts.length === 2) {
+        if (parts[0]) {
+          this.bottomLeftValue.set(parts[0]);
+          this.hasLeftHint.set(true);
+        } else {
+          this.bottomLeftValue.set('');
+          this.hasLeftHint.set(false);
+        }
+        if (parts[1]) {
+          this.bottomRightValue.set(parts[1]);
+          this.hasRightHint.set(true);
+        } else {
+          this.bottomRightValue.set('');
+          this.hasRightHint.set(false);
+        }
+      }
+      this.updateButtonStates();
+    });
+  }
+
+  private resetSelection(): void {
+    this.bottomLeftValue.set('');
+    this.bottomRightValue.set('');
+    this.selectedInput.set('LEFT');
+    this.hasLeftHint.set(false);
+    this.hasRightHint.set(false);
+  }
+
+  selectInput(input: 'LEFT' | 'RIGHT') {
+    this.selectedInput.set(input);
+    this.updateButtonStates();
+  }
+
+  handleKeyboardClick(button: string) {
+    if (this.keyboardDisabled()) return;
+    if (this.selectedInput() === 'LEFT') {
+      const newValue = this.bottomLeftValue() + button;
+      this.bottomLeftValue.set(newValue);
+    } else {
+      const newValue = this.bottomRightValue() + button;
+      this.bottomRightValue.set(newValue);
+    }
+    this.updateButtonStates();
+    this.emitResponses('VALUE_CHANGED');
+  }
+
+  handleBackButtonClick() {
+    if (this.selectedInput() === 'LEFT') {
+      const current = this.bottomLeftValue();
+      if (current.length > 0) {
+        this.bottomLeftValue.set(current.slice(0, -1));
+      }
+    } else {
+      const current = this.bottomRightValue();
+      if (current.length > 0) {
+        this.bottomRightValue.set(current.slice(0, -1));
+      }
+    }
+    this.updateButtonStates();
+    this.emitResponses('VALUE_CHANGED');
+  }
+
+  private updateButtonStates() {
+    const currentVal = this.selectedInput() === 'LEFT' ? this.bottomLeftValue() : this.bottomRightValue();
+    this.keyboardDisabled.set(currentVal.length >= 2);
+  }
+
+  private emitResponses(status: 'DISPLAYED' | 'VALUE_CHANGED') {
+    const value = `${this.bottomLeftValue()}_${this.bottomRightValue()}`;
+    const response: StarsResponse = {
+      id: this.localParameters?.variableId || 'PYRAMID',
+      status: status,
+      value: value,
+      relevantForResponsesProgress: status === 'VALUE_CHANGED'
+    };
+
+    this.responses.emit([response]);
+  }
+
+  private restoreFromFormerState(value: string): void {
+    if (!value || typeof value !== 'string') return;
+    const parts = value.split('_');
+    if (parts.length === 2) {
+      if (parts[0] !== this.bottomLeftValue()) {
+        this.bottomLeftValue.set(parts[0] || '');
+      }
+      if (parts[1] !== this.bottomRightValue()) {
+        this.bottomRightValue.set(parts[1] || '');
+      }
+    }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private createDefaultParameters(): InteractionPyramidParams {
+    return {
+      variableId: 'PYRAMID',
+      topNumber: 13
+    };
+  }
+}

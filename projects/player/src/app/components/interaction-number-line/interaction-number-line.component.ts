@@ -47,9 +47,11 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
       this.localParameters = this.createDefaultParameters();
 
       if (parameters) {
-        this.localParameters.firstNumber = parameters.firstNumber ?? 0;
-        this.localParameters.lastNumber = parameters.lastNumber ?? 20;
+        this.localParameters.firstNumber = parameters.firstNumber;
+        this.localParameters.lastNumber = parameters.lastNumber;
         this.localParameters.numberInput = parameters.numberInput;
+        this.localParameters.leadingNumbers = parameters.leadingNumbers;
+        this.localParameters.trailingNumbers = parameters.trailingNumbers;
         this.localParameters.style = parameters.style || 'WAVE';
         this.localParameters.variableId = parameters.variableId || 'NUMBER_LINE';
 
@@ -120,16 +122,8 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
   }
 
   /**
-   * Generates the positions (x, y coordinates) for each number in the number line.
-   *
-   * This method uses the SVG path defined in the template to calculate equidistant points
-   * along the curve. It adds 10% padding at both the beginning and the end of the path
-   * to ensure that the numbers are centered and not cramped at the edges.
-   *
-   * For each number from `firstNumber` to `lastNumber`:
-   * 1. Calculates its relative distance along the path's length (considering padding).
-   * 2. Uses `getPointAtLength` on the SVG path to get the exact (x, y) coordinates.
-   * 3. Marks the item as `isEmpty` if its value matches `emptyNumber`.
+   * Calculates the SVG coordinates for number line items based on the selected style.
+   * Supports range-based (first to last) or list-based (leading/trailing) layouts.
    */
   calculateNumberPositions() {
     if (this.animationFrameId) {
@@ -137,49 +131,122 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
       this.animationFrameId = undefined;
     }
 
-    const pathElement = this.localParameters?.style === 'WAVE' ?
-      this.numberLinePathWave : this.numberLinePathRuler;
+    const firstNumber = this.localParameters.firstNumber;
+    const lastNumber = this.localParameters.lastNumber;
+    const leadingNumbers = this.localParameters.leadingNumbers;
+    const trailingNumbers = this.localParameters.trailingNumbers;
+    const numberInput = this.localParameters.numberInput;
+    const style = this.localParameters.style;
 
-    if (!pathElement?.nativeElement) {
-      // If the path is not yet available, wait for next cycle
+    const pathElement = style === 'WAVE' ? this.numberLinePathWave : this.numberLinePathRuler;
+
+    if (style !== 'BLOCK' && !pathElement?.nativeElement) {
       this.scheduleCalculation();
       return;
     }
 
-    const firstNumber = this.localParameters.firstNumber ?? 0;
-    const lastNumber = this.localParameters.lastNumber ?? 20;
-    const numberInput = this.localParameters.numberInput;
-    const style = this.localParameters.style;
-    const count = lastNumber - firstNumber + 1;
-    const items = [];
+    // Store and manage the data for each number or input box that needs to be rendered on the number line
+    const items = [] as {
+      value: number,
+      index: number,
+      x: number,
+      y: number,
+      isEmpty: boolean
+    }[];
 
-    const path = pathElement.nativeElement;
-    const totalLength = path.getTotalLength();
+    // It is possible to use BLOCK and WAVE with leading/trailing numbers
+    if (style === 'BLOCK' || (style === 'WAVE' && (leadingNumbers || trailingNumbers))) {
+      const tempItems: { value: number, index: number, isEmpty: boolean }[] = [];
+      let idx = 0;
+      (leadingNumbers || []).forEach((val) => tempItems.push({ value: val, index: idx++, isEmpty: false }));
+      tempItems.push({ value: 0, index: idx++, isEmpty: true });
+      (trailingNumbers || []).forEach((val) => tempItems.push({ value: val, index: idx++, isEmpty: false }));
 
-    if (totalLength === 0) {
-      // If the path is not yet measured, retry shortly
-      this.animationFrameId = requestAnimationFrame(() => this.calculateNumberPositions());
-      return;
-    }
+      if (style === 'BLOCK') {
+        const blockWidth = 60;
+        const gap = 10;
+        const count = tempItems.length;
+        const totalWidth = count * blockWidth + (count - 1) * gap;
+        const svgViewBoxWidth = 600;
+        const svgViewBoxHeight = 240;
+        const startX = (svgViewBoxWidth - totalWidth) / 2;
+        const centerY = svgViewBoxHeight / 2;
 
-    // Leave 7% padding at the start and end of the spline
-    const startPadding = style === 'RULER' ? 0 : 0.07 * totalLength;
-    const endPadding = 0.07 * totalLength;
-    const availableLength = totalLength - startPadding - endPadding;
+        const itemsWithCoords = tempItems.map((item, idx) => ({
+          ...item,
+          x: startX + idx * (blockWidth + gap) + blockWidth / 2,
+          y: centerY
+        }));
 
-    for (let i = 0; i < count; i++) {
-      const value = firstNumber + i;
-      const distance = startPadding + (i / (count - 1)) * availableLength;
-      const point = path.getPointAtLength(distance);
-      const isEmpty = value === numberInput;
+        this.numberLineItems.set(itemsWithCoords);
+        return;
+      }
 
-      items.push({
-        value,
-        index: i,
-        x: point.x,
-        y: point.y,
-        isEmpty
-      });
+      const path = pathElement!.nativeElement;
+      const totalLength = path.getTotalLength();
+      if (totalLength === 0) {
+        this.animationFrameId = requestAnimationFrame(() => this.calculateNumberPositions());
+        return;
+      }
+
+      const startPadding = 0.07 * totalLength;
+      const endPadding = 0.07 * totalLength;
+      const availableLength = totalLength - startPadding - endPadding;
+      const count = tempItems.length;
+
+      for (let i = 0; i < count; i++) {
+        const item = tempItems[i]!;
+        // The fraction determines the item's position (0 to 1) along the path, with a 0.5 default for single items to prevent division by zero
+        const fraction = count === 1 ? 0.5 : (i / (count - 1));
+        const distance = startPadding + fraction * availableLength;
+        const point = path.getPointAtLength(distance);
+        items.push({
+          value: item.value,
+          index: item.index,
+          isEmpty: item.isEmpty,
+          x: point.x,
+          y: point.y
+        });
+      }
+    } else {
+      if (firstNumber === undefined || lastNumber === undefined) {
+        return;
+      }
+
+      // Support both ascending and descending ranges
+      // If step is 1, count goes up, if it is -1 it goes down
+      const step = (lastNumber! >= firstNumber!) ? 1 : -1;
+      const count = Math.abs(lastNumber! - firstNumber!) + 1;
+
+      const path = pathElement!.nativeElement;
+      const totalLength = path.getTotalLength();
+
+      if (totalLength === 0) {
+        // If the path is not yet measured, retry shortly
+        this.animationFrameId = requestAnimationFrame(() => this.calculateNumberPositions());
+        return;
+      }
+
+      // Leave 7% padding at the start and end of the spline
+      const startPadding = 0.07 * totalLength;
+      const endPadding = 0.07 * totalLength;
+      const availableLength = totalLength - startPadding - endPadding;
+
+      for (let i = 0; i < count; i++) {
+        const value = firstNumber! + i * step;
+        const fraction = count === 1 ? 0.5 : (i / (count - 1));
+        const distance = startPadding + fraction * availableLength;
+        const point = path.getPointAtLength(distance);
+        const isEmpty = value === numberInput;
+
+        items.push({
+          value,
+          index: i,
+          x: point.x,
+          y: point.y,
+          isEmpty
+        });
+      }
     }
     this.numberLineItems.set(items);
   }
@@ -212,7 +279,18 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
 
   private updateButtonStates(value?: string) {
     const currentVal = value ?? this.numberInputValue;
-    this.isDisabled = currentVal.length >= 2;
+    const maxInputLength = 2;
+
+    const numberInput = this.localParameters?.numberInput;
+    const style = this.localParameters?.style;
+    const leadingNumbers = this.localParameters?.leadingNumbers;
+    const trailingNumbers = this.localParameters?.trailingNumbers;
+
+    // If no numberInput is defined for WAVE and RULER styles and if there are no leading/trailing numbers, disable the keyboard buttons
+    const noNumberInput = ((style === 'WAVE' || style === 'RULER') && numberInput === undefined && !leadingNumbers && !trailingNumbers) ||
+      (style === 'RULER' && (leadingNumbers !== undefined || trailingNumbers !== undefined) && numberInput === undefined);
+
+    this.isDisabled = currentVal.length >= maxInputLength || noNumberInput;
   }
 
   private emitResponse() {
@@ -239,9 +317,6 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
   private createDefaultParameters(): InteractionNumberLineParams {
     return {
       variableId: 'NUMBER_LINE',
-      firstNumber: 0,
-      lastNumber: 20,
-      numberInput: 9,
       style: 'WAVE'
     };
   }

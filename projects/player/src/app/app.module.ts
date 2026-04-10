@@ -26,7 +26,9 @@ import { InteractionPolygonButtonsComponent }
 import { OpeningImageComponent } from './components/opening-image/opening-image.component';
 import { AudioButtonComponent } from './shared/audio-button/audio-button.component';
 import { InteractionPlaceValueComponent } from './components/interaction-place-value/interaction-place-value.component';
-import { InteractionNumberLineComponent } from "./components/interaction-number-line/interaction-number-line.component";
+import { InteractionNumberLineComponent } from './components/interaction-number-line/interaction-number-line.component';
+import { InteractionPyramidComponent } from './components/interaction-pyramid/interaction-pyramid.component';
+import { InteractionEquationComponent } from './components/interaction-equation/interaction-equation.component';
 
 @NgModule({
   declarations: [
@@ -36,15 +38,14 @@ import { InteractionNumberLineComponent } from "./components/interaction-number-
         BrowserModule,
         CommonModule,
         NgOptimizedImage,
-        ContinueButtonComponent,
-        StandaloneMenuComponent,
         SafeResourceUrlPipe,
         LinebreaksHtmlPipe,
+        ContinueButtonComponent,
+        StandaloneMenuComponent,
         AudioComponent,
         AudioButtonComponent,
         ClickLayerComponent,
         InteractionButtonsComponent,
-        ContinueButtonComponent,
         StandardButtonComponent,
         InteractionDropComponent,
         InteractionWriteComponent,
@@ -54,7 +55,9 @@ import { InteractionNumberLineComponent } from "./components/interaction-number-
         InteractionPolygonButtonsComponent,
         OpeningImageComponent,
         InteractionPlaceValueComponent,
-        InteractionNumberLineComponent
+        InteractionNumberLineComponent,
+        InteractionPyramidComponent,
+        InteractionEquationComponent
     ],
   providers: [
     provideZonelessChangeDetection(),

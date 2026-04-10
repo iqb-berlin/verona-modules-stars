@@ -6,7 +6,7 @@
   }
 
   @if (unitService.showFirstClickLayer()) {
-    <stars-click-layer></stars-click-layer>
+    <stars-click-layer [FirstAudioOptionsParams]="unitService.firstAudioOptions()"></stars-click-layer>
   }
 
   <!-- audio component (show if player is not hidden) -->
@@ -86,6 +86,16 @@
       [parameters]="getParametersWithFormerState()"
       [showHint]="responsesService.feedbackHint()"
       (responses)="responsesService.newResponses($event)"></stars-interaction-number-line>
+  } @else if (!unitService.openingFlowActive() && unitService.interaction() === 'PYRAMID') {
+    <stars-interaction-pyramid class="interaction"
+      [parameters]="getParametersWithFormerState()"
+      [showHint]="responsesService.feedbackHint()"
+      (responses)="responsesService.newResponses($event)"></stars-interaction-pyramid>
+  } @else if (!unitService.openingFlowActive() && unitService.interaction() === 'EQUATION') {
+    <stars-interaction-equation class="interaction"
+       [parameters]="getParametersWithFormerState()"
+       [showHint]="responsesService.feedbackHint()"
+       (responses)="responsesService.newResponses($event)"></stars-interaction-equation>
   }
 
   <!-- lower ribbons -->

@@ -10,7 +10,6 @@ import { InteractionFindOnImageParams } from '../../models/unit-definition';
 @Component({
   selector: 'stars-interaction-find-on-image',
   templateUrl: './find-on-image.component.html',
-  standalone: true,
   styleUrls: ['./find-on-image.component.scss']
 })
 

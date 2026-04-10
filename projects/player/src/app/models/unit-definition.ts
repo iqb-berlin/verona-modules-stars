@@ -14,6 +14,8 @@ export type InteractionEnum = 'BUTTONS' |
 'IMAGE_ONLY' |
 'PLACE_VALUE' |
 'NUMBER_LINE' |
+'PYRAMID' |
+'EQUATION' |
 'NONE';
 export type IconButtonTypeEnum = 'CHECK_GREEN' | 'CLOSE_RED' | 'CLAP_HANDS' | 'SMILEY_1' | 'SMILEY_2' |
 'SMILEY_3' | 'SMILEY_4' | 'SMILEY_5' | 'ONES' | 'TENS';
@@ -22,9 +24,12 @@ export type ButtonTypeEnum = 'MEDIUM_SQUARE' | 'BIG_SQUARE' | 'SMALL_SQUARE' | '
 export type ImagePositionEnum = 'TOP' | 'LEFT' | 'BOTTOM';
 export type TargetSizeEnum = 'MEDIUM' | 'LARGE' | 'SMALL';
 export type LayoutEnum = 'LEFT_CENTER' | 'TOP_CENTER' | 'LEFT_BOTTOM' | 'LEFT_CENTER_50';
+export type FirstClickLayerEnum = 'OFF' | 'TRANSPARENT' | 'BLUR' | 'DISABLED';
 
 export type InteractionParameters = InteractionButtonParams | InteractionWriteParams | InteractionDropParams |
-InteractionVideoParams | InteractionFindOnImageParams | InteractionPolygonButtonsParams | InteractionPlaceValueParams | InteractionNumberLineParams;
+InteractionVideoParams | InteractionFindOnImageParams | InteractionPolygonButtonsParams | InteractionPlaceValueParams |
+InteractionNumberLineParams | InteractionPyramidParams | InteractionEquationParams;
+
 export interface UnitDefinition {
   id: string;
   version?: string;
@@ -127,16 +132,39 @@ export interface InteractionPolygonButtonsParams {
   variableId?: string;
   options: SelectionOption[];
   multiSelect?: boolean;
-  formerState?: Response[];
+  formerState?: Response[] | undefined;
 }
 
 export interface InteractionNumberLineParams {
+  variableId?: string | undefined;
+  firstNumber?: number | undefined;
+  leadingNumbers?: number[] | undefined;
+  lastNumber?: number | undefined;
+  trailingNumbers?: number[] | undefined;
+  numberInput?: number | undefined;
+  style?: string | undefined;
+  formerState?: Response[] | undefined;
+}
+
+export interface InteractionPyramidParams {
   variableId?: string;
-  firstNumber?: number;
-  lastNumber?: number;
-  numberInput: number;
-  style?: string;
-  formerState?: Response[];
+  example?: {
+    topNumber: number;
+    bottomLeftNumber: number;
+    bottomRightNumber: number;
+  } | undefined;
+  topNumber: number;
+  formerState?: Response[] | undefined;
+}
+
+export interface InteractionEquationParams {
+  variableId?: string;
+  imageSource?: string;
+  fixOperand1?: number | undefined;
+  operators: string[];
+  fixOperand2?: number | undefined;
+  fixResult?: number | undefined;
+  formerState?: Response[] | undefined;
 }
 
 export interface MainAudio {
@@ -148,7 +176,7 @@ export interface MainAudio {
 }
 
 export interface FirstAudioOptionsParams {
-  firstClickLayer?: boolean;
+  firstClickLayer?: FirstClickLayerEnum | boolean;
   animateButton?: boolean;
 }
 

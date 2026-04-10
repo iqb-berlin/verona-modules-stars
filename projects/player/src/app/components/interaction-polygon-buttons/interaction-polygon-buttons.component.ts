@@ -1,6 +1,4 @@
-import {
-  Component, effect, signal
-} from '@angular/core';
+import { Component, effect, signal } from '@angular/core';
 import { Response } from '@iqbspecs/response/response.interface';
 
 import { StarsResponse } from '../../services/responses.service';
@@ -21,45 +19,55 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
   /** Array of booleans for each option for hint values. */
   hintValues = signal<boolean[]>([]);
 
+  /** Reference to the last processed parameters object to detect object-identity changes. */
+  private lastParametersRef: unknown | null = null;
+
   constructor() {
     super();
 
     effect(() => {
       const parameters = this.parameters() as InteractionPolygonButtonsParams;
-      this.localParameters = this.createDefaultParameters();
-      if (parameters) {
-        this.localParameters.options = parameters.options || [];
-        this.localParameters.variableId = parameters.variableId || 'POLYGON_BUTTONS';
-        this.localParameters.multiSelect = parameters.multiSelect || false;
-      }
+      if (!parameters) return;
 
-      const formerStateResponse: Response[] = parameters.formerState || [];
+      const isNewParametersObject = this.lastParametersRef !== parameters;
 
-      if (Array.isArray(formerStateResponse) && formerStateResponse.length > 0) {
+      if (isNewParametersObject) {
+        this.lastParametersRef = parameters;
+
+        this.localParameters = {
+          ...this.createDefaultParameters(),
+          ...parameters
+        };
+
+        const formerStateResponse: Response[] = parameters.formerState || [];
         const foundResponse = formerStateResponse.find(
           response => response.id === this.localParameters.variableId
         );
 
         if (foundResponse && foundResponse.value) {
+          this.resetSelection();
           this.restoreFromFormerState(foundResponse);
-          return;
+        } else {
+          // No former state found - initialize as new
+          this.resetSelection();
+          this.responses.emit([{
+            id: this.localParameters.variableId || 'POLYGON_BUTTONS',
+            status: 'DISPLAYED',
+            value: 0,
+            relevantForResponsesProgress: false
+          }]);
         }
+      } else {
+        // Same unit, just keep localParameters' formerState in sync if needed
+        this.localParameters.formerState = parameters.formerState;
       }
-
-      // No former state found - initialize as new
-      this.resetSelection();
-      this.responses.emit([{
-        id: this.localParameters.variableId || '',
-        status: 'DISPLAYED',
-        value: 0,
-        relevantForResponsesProgress: false
-      }]);
     });
 
     effect(() => {
-      this.resetSelection()
       const hints = this.showHint();
+      if (!this.localParameters) return;
       if (!hints || hints.length === 0) {
+        this.hintValues.set(Array(this.localParameters.options.length).fill(false));
         return;
       }
 
@@ -73,12 +81,11 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
         // set single select: "2" => [false, true, false]
         const selectedIndex = parseInt(hints, 10) - 1;
         const selectedStates = Array.from(
-          { length: this.selectedValues().length },
+          { length: this.localParameters.options.length },
           (_, i) => i === selectedIndex
         );
         this.hintValues.set(selectedStates);
         this.selectedValues.set([]);
-        console.log('hints', this.hintValues());
       }
     });
   }

@@ -1,0 +1,38 @@
+{
+  "id": "stars-unit-definition",
+  "version": "2.8",
+  "backgroundColor": "#E1E9FF",
+  "continueButtonShow": "ALWAYS",
+  "ribbonBars": false,
+  "firstAudioOptions": {
+    "firstClickLayer": false,
+    "animateButton": true
+  },
+  "mainAudio": {
+    "audioSource": "data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwOAAAAAAAAAAAAAAA//uQZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZzoAAAAPAAAAAAAAAAAAAA==",
+    "maxPlay": 3,
+    "disableInteractionUntilComplete": false
+  },
+  "interactionType": "NUMBER_LINE",
+  "interactionParameters": {
+    "variableId": "NUMBER_LINE",
+    "leadingNumbers": [1, 2, 5, 6, 9],
+    "trailingNumbers": [13, 14],
+    "style": "RULER"
+  },
+  "variableInfo": [
+    {
+      "variableId": "NUMBER_LINE",
+      "responseComplete": "ON_ANY_RESPONSE",
+      "codingSource": "VALUE",
+      "codes": [
+        {
+          "method": "EQUALS",
+          "parameter": "9",
+          "code": 1,
+          "score": 1
+        }
+      ]
+    }
+  ]
+}
