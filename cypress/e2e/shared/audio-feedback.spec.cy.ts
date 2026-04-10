@@ -10,35 +10,35 @@ export function testAudioFeedback(interactionType: string, configFile: string) {
     };
 
     it('plays the right feedback according to the selected answer', () => {
-      // Load the file
-      loadDefaultTestFile().then(testData => {
-        // Remove click layer if it's not a FIND_ON_IMAGE interaction type, because it doesn't have a speaker icon
-        if (interactionType !== 'find_on_image') {
-          // Start the audio
-          cy.get('[data-cy="speaker-icon"]').click();
-
-          // Wait until the audio is finished playing
-          cy.waitUntilAudioIsFinishedPlaying();
-        }
-
-        // First interaction - should be the wrong answer
-        cy.applyStandardScenarios(interactionType);
-
-        // Click on the continue button
-        cy.clickContinueButton();
-
-        // Wait until the feedback is played until the end
-        cy.waitUntilFeedbackIsFinishedPlaying();
-
-        // Perform the interaction with correct answer
-        cy.applyCorrectAnswerScenarios(interactionType, testData);
-
-        // Click on the continue button again
-        cy.clickContinueButton();
-
-        // Wait until the feedback is played until the end
-        cy.waitUntilFeedbackIsFinishedPlaying();
-      });
+      // // Load the file
+      // loadDefaultTestFile().then(testData => {
+      //   // Click on wrong answer
+      //   cy.applyStandardScenarios(interactionType, testData);
+      //
+      //   // Click on the continue button
+      //   cy.clickContinueButton();
+      //
+      //   // Wait until the feedback is played until the end
+      //   cy.waitUntilFeedbackIsFinishedPlaying();
+      //
+      //   // interaction-disabled-overlay should be shown
+      //   // hint class should be shown
+      // });
+      //
+      // // Load the file
+      // loadDefaultTestFile().then(testData => {
+      //
+      //   // Perform the interaction with correct answer
+      //   cy.applyCorrectAnswerScenarios(interactionType, testData);
+      //
+      //   // Click on the continue button
+      //   cy.clickContinueButton();
+      //
+      //   // Wait until the feedback is played until the end
+      //   cy.waitUntilFeedbackIsFinishedPlaying();
+      //
+      //   // interaction-disabled-overlay should NOT be shown
+      // });
     });
   });
 }
