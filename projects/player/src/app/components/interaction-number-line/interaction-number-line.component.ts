@@ -228,7 +228,7 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
       }
 
       // Leave 7% padding at the start and end of the spline
-      const startPadding = style === 'RULER' ? 0 : 0.07 * totalLength;
+      const startPadding = 0.07 * totalLength;
       const endPadding = 0.07 * totalLength;
       const availableLength = totalLength - startPadding - endPadding;
 

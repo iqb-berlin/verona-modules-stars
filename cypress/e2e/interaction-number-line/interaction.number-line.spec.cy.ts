@@ -81,17 +81,36 @@ describe('NUMBER_LINE Interaction E2E Tests', () => {
   });
 
   it('renders descending ranges correctly', () => {
-    setupAndAssert('number_line_descending_test');
+    const testFiles = [
+      'number_line_wave_descending_test',
+      'number_line_block_descending_test',
+      'number_line_ruler_descending_test'
+    ];
 
-    cy.get('@testData').then(data => {
-      const testData = data as unknown as UnitDefinition;
-      const params = testData.interactionParameters as InteractionNumberLineParams;
-      const firstNumber = params.firstNumber!;
-      const lastNumber = params.lastNumber!;
-      const expectedCount = Math.abs(lastNumber - firstNumber) + 1;
+    testFiles.forEach((file) => {
+      cy.log('Setting up the test data for', file);
+      setupAndAssert(file);
 
-      cy.get('[data-cy="interaction-number-line"]').within(() => {
-        cy.get('[data-cy="number-line-item"]').should('have.length', expectedCount);
+      cy.get('@testData').then(data => {
+        const testData = data as unknown as UnitDefinition;
+        const params = testData.interactionParameters as InteractionNumberLineParams;
+
+        if (params.style === 'BLOCK') {
+          const leadingCount = params.leadingNumbers?.length || 0;
+          const trailingCount = params.trailingNumbers?.length || 0;
+          const inputCount = 1;
+          cy.get('[data-cy="interaction-number-line"]').within(() => {
+            cy.get('[data-cy="number-line-item-block"]').should('have.length', leadingCount + trailingCount + inputCount);
+          });
+        } else {
+          const firstNumber = params.firstNumber!;
+          const lastNumber = params.lastNumber!;
+          const expectedCount = Math.abs(lastNumber - firstNumber) + 1;
+
+          cy.get('[data-cy="interaction-number-line"]').within(() => {
+            cy.get('[data-cy="number-line-item"]').should('have.length', expectedCount);
+          });
+        }
       });
     });
   });
