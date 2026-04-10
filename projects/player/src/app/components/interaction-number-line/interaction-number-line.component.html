@@ -9,35 +9,7 @@
         </marker>
       </defs>
 
-      @if (localParameters.style === 'WAVE') {
-        <path
-          #numberLinePathWave
-          id="numberLinePathWave"
-          d="M 10 150 C 200 60, 320 60, 360 120 S 500 180, 590 120"
-          stroke="black"
-          fill="transparent" />
-
-        @for (item of numberLineItems(); track item.value) {
-          <g [attr.transform]="'translate(' + item.x + ',' + item.y + ')'" data-cy="number-line-item">
-            @if (item.isEmpty) {
-              <rect x="-20" y="-24" width="42" height="46" rx="2" ry="2"
-                    class="number-input-field-wave"
-                    fill="white" stroke="black" data-cy="number-input-box-wave" />
-              <text x="0" y="0" text-anchor="middle" dominant-baseline="central"
-                    class="number-input-text-wave" [class.hint]="hasHint()" data-cy="number-input-text">
-                {{ numberInputValue }}
-              </text>
-            } @else {
-              <rect x="-20" y="-24" width="42" height="46" rx="2" ry="2"
-                    fill="white" stroke="black" data-cy="number-box" />
-              <text x="0" y="0" text-anchor="middle" dominant-baseline="central"
-                    class="number-text-wave" data-cy="number-label">
-                {{ item.value }}
-              </text>
-            }
-          </g>
-        }
-      } @else {
+      @if (localParameters.style === 'RULER') {
         <path
           #numberLinePathRuler
           id="numberLinePathRuler"
@@ -76,6 +48,55 @@
             </g>
           }
         </g>
+      } @else if (localParameters.style === 'BLOCK') {
+        @for (item of numberLineItems(); track item.index) {
+          <g [attr.transform]="'translate(' + item.x + ',' + item.y + ')'" data-cy="number-line-item-block">
+            @if (item.isEmpty) {
+              <g class="empty-block-group" data-cy="number-input-box-block">
+                <rect x="-30" y="-30" width="60" height="60" rx="2" ry="2" fill="white" />
+                <text x="0" y="0" text-anchor="middle" dominant-baseline="central"
+                      class="number-input-text-block" [class.hint]="hasHint()" data-cy="number-input-text">
+                  {{ numberInputValue }}
+                </text>
+              </g>
+            } @else {
+              <g class="number-block-group" data-cy="number-block">
+                <rect x="-30" y="-30" width="60" height="60" class="block-rect" />
+                <text x="0" y="0" text-anchor="middle" dominant-baseline="central"
+                      class="number-text-block">
+                  {{ item.value }}
+                </text>
+              </g>
+            }
+          </g>
+        }
+      } @else {
+        <path
+          #numberLinePathWave
+          id="numberLinePathWave"
+          d="M 10 150 C 200 60, 320 60, 360 120 S 500 180, 590 120"
+          stroke="black"
+          fill="transparent" />
+        @for (item of numberLineItems(); track item.value) {
+          <g [attr.transform]="'translate(' + item.x + ',' + item.y + ')'" data-cy="number-line-item">
+            @if (item.isEmpty) {
+              <rect x="-20" y="-24" width="42" height="46" rx="2" ry="2"
+                    class="number-input-field-wave"
+                    fill="white" stroke="black" data-cy="number-input-box-wave" />
+              <text x="0" y="0" text-anchor="middle" dominant-baseline="central"
+                    class="number-input-text-wave" [class.hint]="hasHint()" data-cy="number-input-text">
+                {{ numberInputValue }}
+              </text>
+            } @else {
+              <rect x="-20" y="-24" width="42" height="46" rx="2" ry="2"
+                    fill="white" stroke="black" data-cy="number-box" />
+              <text x="0" y="0" text-anchor="middle" dominant-baseline="central"
+                    class="number-text-wave" data-cy="number-label">
+                {{ item.value }}
+              </text>
+            }
+          </g>
+        }
       }
     </svg>
   </div>
