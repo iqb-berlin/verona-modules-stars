@@ -5,6 +5,8 @@
   @include variables.flex-center;
   flex-direction: column;
   padding: 1rem;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .input-wrapper {
