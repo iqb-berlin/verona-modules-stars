@@ -1,7 +1,9 @@
-<div class="write-container" data-cy="write-container" [class]="localParameters.keyboardMode.toLowerCase() + '-type'">
-  <div class="stimulus-wrapper" data-cy="stimulus-wrapper">
-    <img [src]="localParameters.imageSource" [alt]="localParameters.text || ''" data-cy="stimulus-image">
-  </div>
+<div class="write-container" data-cy="write-container" [class]="(localParameters.keyboardMode?.toLowerCase() || 'characters') + '-type'">
+  @if (localParameters.imageSource) {
+    <div class="stimulus-wrapper" data-cy="stimulus-wrapper">
+      <img [src]="localParameters.imageSource" [alt]="localParameters.text || ''" data-cy="stimulus-image">
+    </div>
+  }
 
   <div class="input-wrapper">
     <div class="text-wrapper" data-cy="text-wrapper">
