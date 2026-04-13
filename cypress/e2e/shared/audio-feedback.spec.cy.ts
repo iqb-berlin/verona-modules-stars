@@ -4,41 +4,87 @@ import {
 
 export function testAudioFeedback(interactionType: string, configFile: string) {
   describe(`Audio Feedback Features for interactionType - ${interactionType}`, () => {
+
+    beforeEach(() => {
+      cy.clearUnitStates();
+    });
+
     const loadDefaultTestFile = () => {
       cy.setupTestData(configFile, interactionType);
       return cy.get('@testData') as unknown as Cypress.Chainable<UnitDefinition>;
     };
 
-    it('plays the right feedback according to the selected answer', () => {
-      // // Load the file
-      // loadDefaultTestFile().then(testData => {
-      //   // Click on wrong answer
-      //   cy.applyStandardScenarios(interactionType, testData);
-      //
-      //   // Click on the continue button
-      //   cy.clickContinueButton();
-      //
-      //   // Wait until the feedback is played until the end
-      //   cy.waitUntilFeedbackIsFinishedPlaying();
-      //
-      //   // interaction-disabled-overlay should be shown
-      //   // hint class should be shown
-      // });
-      //
-      // // Load the file
-      // loadDefaultTestFile().then(testData => {
-      //
-      //   // Perform the interaction with correct answer
-      //   cy.applyCorrectAnswerScenarios(interactionType, testData);
-      //
-      //   // Click on the continue button
-      //   cy.clickContinueButton();
-      //
-      //   // Wait until the feedback is played until the end
-      //   cy.waitUntilFeedbackIsFinishedPlaying();
-      //
-      //   // interaction-disabled-overlay should NOT be shown
-      // });
+    const getHintElementSelector = (intType: string) => {
+      switch (intType.toUpperCase()) {
+        case 'WRITE':
+        case 'EQUATION':
+        case 'PYRAMID':
+        case 'FIND_ON_IMAGE':
+        case 'PLACE_VALUE':
+          return 'div.hint';
+        case 'BUTTON':
+        case 'DROP':
+          return 'input.hint';
+        case 'NUMBER_LINE':
+          return 'text.hint';
+        case 'POLYGON_BUTTONS':
+          return 'path.hint';
+        default:
+          return '.hint';
+      }
+    };
+
+    it('shows the hint class after feedback, if answer is wrong', () => {
+
+      cy.log('Checking wrong answer scenario');
+
+      // Load the file
+      loadDefaultTestFile().then(testData => {
+        // Perform interaction with wrong answer
+        cy.applyStandardScenarios(interactionType, testData);
+
+        // Click on the continue button
+        cy.clickContinueButton();
+
+        // Wait until the feedback is played until the end
+        cy.waitUntilFeedbackIsFinishedPlaying();
+
+        // interaction-disabled-overlay should be shown
+        cy.get('[data-cy=interaction-disabled-overlay]').should('be.visible');
+
+        // Check for hint class
+        // First check if it appears then permanently delete it to find the element that has hint class
+        cy.get('[data-cy=interaction-disabled-overlay]').then($el => {
+          $el.remove();
+        });
+
+        const hintSelector = getHintElementSelector(interactionType);
+        cy.get(hintSelector).should('exist');
+      });
+    });
+
+    it('does not show the hint class after feedback, if the answer is correct', () => {
+
+      cy.log('Checking correct answer scenario');
+
+      // Load the file again for correct answer scenario
+      loadDefaultTestFile().then(testData => {
+
+        // Perform the interaction with correct answer
+        cy.applyCorrectAnswerScenarios(interactionType, testData);
+
+        // Click on the continue button
+        cy.clickContinueButton();
+
+        // Wait until the feedback is played until the end
+        cy.waitUntilFeedbackIsFinishedPlaying();
+
+        // interaction-disabled-overlay should NOT be shown
+        cy.get('[data-cy=interaction-disabled-overlay]').should('not.exist');
+
+        const hintSelector = getHintElementSelector(interactionType);
+        cy.get(hintSelector).should('not.exist');
+      });
     });
   });
 }
