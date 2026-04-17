@@ -1,11 +1,11 @@
 {
   "id": "stars-unit-definition",
-  "version": "2.5",
+  "version": "3.0",
   "backgroundColor": "#E1E9FF",
   "continueButtonShow": "ALWAYS",
   "ribbonBars": false,
   "firstAudioOptions": {
-    "firstClickLayer": true,
+    "firstClickLayer": "TRANSPARENT",
     "animateButton": true
   },
   "mainAudio": {
@@ -13,25 +13,24 @@
     "maxPlay": 3,
     "disableInteractionUntilComplete": false
   },
-  "interactionType": "PYRAMID",
+  "interactionType": "EQUATION",
   "interactionParameters": {
-    "variableId": "PYRAMID",
-    "example": {
-      "topNumber": 11,
-      "bottomLeftNumber": 10,
-      "bottomRightNumber": 1
-    },
-    "topNumber": 13
+    "variableId": "EQUATION",
+    "fixOperand2": 9,
+    "operators": [
+      "+"
+    ],
+    "fixResult": 22
   },
   "variableInfo": [
     {
-      "variableId": "PYRAMID",
+      "variableId": "EQUATION",
       "responseComplete": "ON_ANY_RESPONSE",
       "codingSource": "VALUE",
       "codes": [
         {
           "method": "EQUALS",
-          "parameter": "10_3",
+          "parameter": "13",
           "code": 1,
           "score": 1
         }

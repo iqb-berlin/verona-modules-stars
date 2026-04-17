@@ -14,6 +14,6 @@ export function testBaseFeatures(interactionType: string, defaultTestFile: strin
     testRibbonBars(interactionType, `${interactionType}_ribbonBars_true_test`);
     testOpeningImageFeatures(interactionType, `${interactionType}_with_openingImage_test`);
     testAudioFeedback(interactionType, `${interactionType}_feedback_test`);
-    firstAudioOptionsFeatures(interactionType, `${interactionType}_firstClickLayer_true_test`);
+    firstAudioOptionsFeatures(interactionType, `${interactionType}_firstClickLayer_transparent_test`);
   });
 }

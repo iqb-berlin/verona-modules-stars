@@ -47,8 +47,8 @@ export function testFormerStateFeatures(interactionType: string, defaultTestFile
     });
 
     it('preserves the click-layer state when navigating between multiple units', () => {
-      const firstTestFile = `${interactionType}_firstClickLayer_true_test`;
-      const secondTestFile = `${interactionType}_firstClickLayer_true_second_test`;
+      const firstTestFile = `${interactionType}_firstClickLayer_transparent_test`;
+      const secondTestFile = `${interactionType}_firstClickLayer_transparent_second_test`;
 
       if (interactionType === 'find_on_image') {
         cy.log('Skipping test for find_on_image as it does not support firstClickLayer');

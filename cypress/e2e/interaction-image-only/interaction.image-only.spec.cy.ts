@@ -38,7 +38,7 @@ describe('Interaction IMAGE_ONLY Component', () => {
 
   // Test base features for the IMAGE_ONLY interaction type
   describe('Shared behaviors', () => {
-    firstAudioOptionsFeatures(interactionType, `${interactionType}_firstClickLayer_true_test`);
+    firstAudioOptionsFeatures(interactionType, `${interactionType}_firstClickLayer_transparent_test`);
     testMainAudioFeatures(interactionType, defaultTestFile);
     testRibbonBars(interactionType, `${interactionType}_ribbonBars_true_test`);
   });

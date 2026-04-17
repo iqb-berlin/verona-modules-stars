@@ -1,11 +1,11 @@
 {
   "id": "stars-unit-definition",
-  "version": "2.5",
+  "version": "3.0",
   "backgroundColor": "#E1E9FF",
   "continueButtonShow": "ALWAYS",
   "ribbonBars": false,
   "firstAudioOptions": {
-    "firstClickLayer": true,
+    "firstClickLayer": "TRANSPARENT",
     "animateButton": true
   },
   "mainAudio": {
@@ -13,28 +13,12 @@
     "maxPlay": 3,
     "disableInteractionUntilComplete": false
   },
-  "interactionType": "EQUATION",
+  "interactionType": "NUMBER_LINE",
   "interactionParameters": {
-    "variableId": "EQUATION",
-    "fixOperand2": 9,
-    "operators": [
-      "+"
-    ],
-    "fixResult": 22
-  },
-  "variableInfo": [
-    {
-      "variableId": "EQUATION",
-      "responseComplete": "ON_ANY_RESPONSE",
-      "codingSource": "VALUE",
-      "codes": [
-        {
-          "method": "EQUALS",
-          "parameter": "13",
-          "code": 1,
-          "score": 1
-        }
-      ]
-    }
-  ]
+    "variableId": "NUMBER_LINE",
+    "firstNumber": 5,
+    "lastNumber": 15,
+    "numberInput": 9,
+    "style": "WAVE"
+  }
 }
