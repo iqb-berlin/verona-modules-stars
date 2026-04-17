@@ -134,9 +134,11 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
     effect(() => {
       const hints = this.showHint();
       if (!hints || hints.length === 0) {
+        this.hasHint.set(false);
         return;
       }
 
+      this.hasHint.set(true);
       // Parse numeric value from response
       const numeric = parseInt(hints, 10);
       const total = Number.isFinite(numeric) ? Math.max(0, numeric) : 0;

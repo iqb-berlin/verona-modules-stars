@@ -167,8 +167,14 @@
 
 .icon-item.tens.moved:not(.animating):not(.dragging) {
   @include variables.default-box-shadow;
+  &.hint {
+    box-shadow: 4px 4px 0 3.2px colors.$hint;
+  }
 }
 
 .icon-item.ones.moved:not(.animating):not(.dragging) {
   box-shadow: 3.91px 3.91px 0 0.2px rgba(0, 0, 0, 0.2);
+  &.hint {
+    box-shadow: 3.91px 3.91px 0 0.2px colors.$hint;
+  }
 }

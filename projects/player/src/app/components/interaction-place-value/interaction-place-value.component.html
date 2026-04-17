@@ -30,6 +30,7 @@
              [class.dragging]="draggingIndex() === ones.id"
              [class.moved]="inUpperPanel(ones.id)"
              [class.no-transition]="shouldDisableTransition(ones.id)"
+             [class.hint]="hasHint() && inUpperPanel(ones.id)"
              cdkDrag
              [cdkDragDisabled]="onesWrapperDisabled() && !inUpperPanel(ones.id)"
              [cdkDragFreeDragPosition]="freeDragPositionFor(ones.id)"
@@ -66,6 +67,7 @@
              [class.dragging]="draggingIndex() === tens.id"
              [class.moved]="inUpperPanel(tens.id)"
              [class.no-transition]="shouldDisableTransition(tens.id)"
+             [class.hint]="hasHint() && inUpperPanel(tens.id)"
              cdkDrag
              [cdkDragDisabled]="tensWrapperDisabled() && !inUpperPanel(tens.id)"
              [cdkDragFreeDragPosition]="freeDragPositionFor(tens.id)"
