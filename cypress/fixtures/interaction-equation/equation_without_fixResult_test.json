@@ -21,20 +21,5 @@
     "operators": [
       "+"
     ]
-  },
-  "variableInfo": [
-    {
-      "variableId": "EQUATION",
-      "responseComplete": "ON_ANY_RESPONSE",
-      "codingSource": "VALUE",
-      "codes": [
-        {
-          "method": "EQUALS",
-          "parameter": "10",
-          "code": 1,
-          "score": 1
-        }
-      ]
-    }
-  ]
+  }
 }

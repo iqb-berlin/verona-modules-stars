@@ -21,20 +21,5 @@
       "+"
     ],
     "fixResult": 10
-  },
-  "variableInfo": [
-    {
-      "variableId": "EQUATION",
-      "responseComplete": "ON_ANY_RESPONSE",
-      "codingSource": "VALUE",
-      "codes": [
-        {
-          "method": "EQUALS",
-          "parameter": "1",
-          "code": 1,
-          "score": 1
-        }
-      ]
-    }
-  ]
+  }
 }

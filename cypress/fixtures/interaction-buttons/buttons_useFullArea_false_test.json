@@ -37,20 +37,5 @@
         }
       ]
     }
-  },
-  "variableInfo": [
-    {
-      "variableId": "interact",
-      "responseComplete": "ON_ANY_RESPONSE",
-      "codingSource": "VALUE",
-      "codes": [
-        {
-          "method": "EQUALS",
-          "parameter": "2",
-          "code": 1,
-          "score": 1
-        }
-      ]
-    }
-  ]
+  }
 }

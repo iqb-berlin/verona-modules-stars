@@ -30,19 +30,5 @@
       "ng"
     ],
     "maxInputLength": 10
-  },
-  "variableInfo": [
-    {
-      "variableId": "WRITE",
-      "responseComplete": "ON_FULL_CREDIT",
-      "codes": [
-        {
-          "method": "EQUALS",
-          "parameter": "Kopf",
-          "code": 1,
-          "score": 1
-        }
-      ]
-    }
-  ]
+  }
 }

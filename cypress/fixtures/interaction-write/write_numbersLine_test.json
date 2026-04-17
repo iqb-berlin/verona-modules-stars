@@ -19,19 +19,5 @@
     "addBackspaceKey": true,
     "keyboardMode": "NUMBERS_LINE",
     "maxInputLength": 2
-  },
-  "variableInfo": [
-    {
-      "variableId": "WRITE",
-      "responseComplete": "ON_FULL_CREDIT",
-      "codes": [
-        {
-          "method": "EQUALS",
-          "parameter": "23",
-          "code": 1,
-          "score": 1
-        }
-      ]
-    }
-  ]
+  }
 }

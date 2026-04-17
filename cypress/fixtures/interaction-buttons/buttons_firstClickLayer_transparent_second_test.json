@@ -39,20 +39,5 @@
         }
       ]
     }
-  },
-  "variableInfo": [
-    {
-      "variableId": "BUTTONS",
-      "responseComplete": "ON_ANY_RESPONSE",
-      "codingSource": "VALUE",
-      "codes": [
-        {
-          "method": "EQUALS",
-          "parameter": "3",
-          "code": 1,
-          "score": 1
-        }
-      ]
-    }
-  ]
+  }
 }

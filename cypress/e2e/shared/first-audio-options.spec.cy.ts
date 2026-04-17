@@ -11,6 +11,9 @@ export function firstAudioOptionsFeatures(interactionType: string) {
       // Click layer should exists
       cy.get('[data-cy="click-layer"]').should('exist');
 
+      // Check that there is no backdrop-filter style in the .layer class
+      cy.get('[data-cy="click-layer"]').should('have.css', 'backdrop-filter', 'none').and('not.have.class', 'blur').and('not.have.class', 'disabled');
+
       // Remove click layer to enable interactions
       cy.get('[data-cy="click-layer"]').click();
 
@@ -18,6 +21,57 @@ export function firstAudioOptionsFeatures(interactionType: string) {
       cy.get('[data-cy="click-layer"]').should('not.exist');
 
       // Interactions should be possible now
+      cy.applyStandardScenarios(interactionType);
+    });
+
+    it('should show and hide first click layer correctly when firstClickLayer: "BLUR"', () => {
+      // Setup test data
+      cy.setupTestData(`${interactionType}_firstClickLayer_blur_test.json`, interactionType);
+
+      // Click layer should exists
+      cy.get('[data-cy="click-layer"]').should('exist');
+
+      // in .layer.blur class has a backdrop-filter style
+      cy.get('[data-cy="click-layer"]').should('have.class', 'blur').and('have.css', 'backdrop-filter');
+
+      // Remove click layer to enable interactions
+      cy.get('[data-cy="click-layer"]').click();
+
+      // Click layer cannot be seen
+      cy.get('[data-cy="click-layer"]').should('not.exist');
+
+      // Interactions should be possible now
+      cy.applyStandardScenarios(interactionType);
+    });
+
+    it('should show and hide first click layer correctly when firstClickLayer: "DISABLED"', () => {
+      // Setup test data
+      cy.setupTestData(`${interactionType}_firstClickLayer_disabled_test.json`, interactionType);
+
+      // Click layer should exists
+      cy.get('[data-cy="click-layer"]').should('exist');
+
+      // .layer.disabled class has a backdrop-filter style
+      cy.get('[data-cy="click-layer"]').should('have.class', 'disabled').and('have.css', 'backdrop-filter');
+
+      // Remove click layer to enable interactions
+      cy.get('[data-cy="click-layer"]').click();
+
+      // Click layer cannot be seen
+      cy.get('[data-cy="click-layer"]').should('not.exist');
+
+      // Interactions should be possible now
+      cy.applyStandardScenarios(interactionType);
+    });
+
+    it('should show and hide first click layer correctly when firstClickLayer: "OFF"', () => {
+      // Setup test data
+      cy.setupTestData(`${interactionType}_firstClickLayer_off_test.json`, interactionType);
+
+      // Click layer should not exists
+      cy.get('[data-cy="click-layer"]').should('not.exist');
+
+      // Interactions should be possible
       cy.applyStandardScenarios(interactionType);
     });
 
@@ -42,7 +96,6 @@ export function firstAudioOptionsFeatures(interactionType: string) {
       // Interactions should be possible now
       cy.applyStandardScenarios(interactionType);
     });
-
 
     it('animates audio button when animateButton is true', () => {
       // Set up test data
