@@ -23,6 +23,12 @@ export function testMainAudioFeatures(interactionType: string, configFile: strin
       // Initially, the interaction should be disabled with overlay visible
       cy.get('[data-cy="interaction-disabled-overlay"]').should('exist');
 
+      // Click on the interaction-disabled-overlay
+      cy.get('[data-cy="interaction-disabled-overlay"]').click();
+
+      // The interaction should still be disabled
+      cy.get('[data-cy="interaction-disabled-overlay"]').should('exist');
+
       // Click the audio button to start playing
       cy.get('[data-cy="speaker-icon"]').click();
 

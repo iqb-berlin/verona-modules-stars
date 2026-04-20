@@ -1,6 +1,6 @@
 {
   "id": "stars-unit-definition",
-  "version": "2.0",
+  "version": "3.0",
   "backgroundColor": "#FFFFF",
   "ribbonBars": true,
   "continueButtonShow": "ON_MAIN_AUDIO_COMPLETE",

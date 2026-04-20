@@ -1,11 +1,11 @@
 {
   "id": "stars-unit-definition",
-  "version": "2.5",
+  "version": "3.0",
   "backgroundColor": "#E1E9FF",
   "continueButtonShow": "ALWAYS",
   "ribbonBars": false,
   "firstAudioOptions": {
-    "firstClickLayer": true,
+    "firstClickLayer": "TRANSPARENT",
     "animateButton": false
   },
   "mainAudio": {
@@ -26,20 +26,5 @@
       "+"
     ],
     "fixResult": 22
-  },
-  "variableInfo": [
-    {
-      "variableId": "EQUATION",
-      "responseComplete": "ON_ANY_RESPONSE",
-      "codingSource": "VALUE",
-      "codes": [
-        {
-          "method": "EQUALS",
-          "parameter": "13",
-          "code": 1,
-          "score": 1
-        }
-      ]
-    }
-  ]
+  }
 }

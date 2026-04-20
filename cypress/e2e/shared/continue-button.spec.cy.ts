@@ -6,7 +6,8 @@ export function testContinueButtonFeatures(interactionType: string) {
       cy.setupTestData(file, interactionType);
       cy.get('@testData').then(data => {
         const dataToCheck = data as unknown as UnitDefinition;
-        if (dataToCheck.firstAudioOptions?.firstClickLayer) {
+        // Remove click layer if it exists
+        if (dataToCheck.firstAudioOptions?.firstClickLayer && dataToCheck.firstAudioOptions.firstClickLayer !== 'OFF') {
           cy.removeClickLayer();
         }
       });

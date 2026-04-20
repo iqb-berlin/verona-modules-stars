@@ -1,11 +1,11 @@
 {
   "id": "stars-unit-definition",
-  "version": "1.9",
+  "version": "3.0",
   "backgroundColor": "#E1E9FF",
-  "ribbonBars": false,
   "continueButtonShow": "ALWAYS",
+  "ribbonBars": false,
   "firstAudioOptions": {
-    "firstClickLayer": true,
+    "firstClickLayer": "OFF",
     "animateButton": false
   },
   "mainAudio": {
@@ -13,12 +13,14 @@
     "maxPlay": 3,
     "disableInteractionUntilComplete": false
   },
-  "interactionType": "PLACE_VALUE",
+  "interactionType": "PYRAMID",
   "interactionParameters": {
-    "variableId": "PLACE_VALUE",
-    "value": 22,
-    "numberOfRows": 5,
-    "maxNumberOfTens": 3,
-    "maxNumberOfOnes": 20
+    "variableId": "PYRAMID",
+    "example": {
+      "topNumber": 11,
+      "bottomLeftNumber": 10,
+      "bottomRightNumber": 1
+    },
+    "topNumber": 13
   }
 }
