@@ -43,6 +43,22 @@
             @case ('NUMBER_LINE') { <stars-interaction-number-line-editor></stars-interaction-number-line-editor> }
             @case ('PYRAMID') { <stars-interaction-pyramid-editor></stars-interaction-pyramid-editor> }
             @case ('EQUATION') { <stars-interaction-equation-editor></stars-interaction-equation-editor> }
+            @case ('META_BUTTONS') {
+              <div class="interaction-editor">
+                <div class="field">
+                  <label>Variablen-ID</label>
+                  <input
+                    type="text"
+                    [value]="$any(state.interactionParams()).variableId || ''"
+                    (input)="updateMetaButtonsVariableId($any($event.target).value)"
+                  />
+                </div>
+                <div class="no-interaction">
+                  Der Player rendert <code>META_BUTTONS</code> aktuell noch nicht.
+                  Die Definition kann hier aber erstellt und als JSON exportiert werden.
+                </div>
+              </div>
+            }
             @default { <div class="no-interaction">Wähle einen Interaktionstyp</div> }
           }
         </div>

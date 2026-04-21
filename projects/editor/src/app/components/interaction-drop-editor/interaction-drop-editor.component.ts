@@ -20,7 +20,6 @@ import { EditorStateService } from '../../services/editor-state.service';
       <div class="field">
         <label>Bildposition</label>
         <select [value]="params.imagePosition" (change)="updateField('imagePosition', $any($event.target).value)">
-          <option value="LEFT">Links</option>
           <option value="TOP">Oben</option>
           <option value="BOTTOM">Unten</option>
         </select>

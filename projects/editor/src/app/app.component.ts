@@ -90,4 +90,12 @@ export class AppComponent implements OnInit {
   togglePreview() {
     this.showPreview = !this.showPreview;
   }
+
+  updateMetaButtonsVariableId(value: string): void {
+    this.state.interactionParams.set({
+      ...(this.state.interactionParams() as any),
+      variableId: value
+    });
+    this.state.notifyChange();
+  }
 }

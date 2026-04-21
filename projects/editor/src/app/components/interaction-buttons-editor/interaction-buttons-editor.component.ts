@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import {
   InteractionButtonParams,
   IconButtonTypeEnum,
+  RepeatButtonConfig,
   SelectionOption
 } from '@shared/models/unit-definition';
 import { EditorStateService } from '../../services/editor-state.service';
@@ -51,7 +52,6 @@ import { EditorStateService } from '../../services/editor-state.service';
           >
             <option value="LEFT">Links</option>
             <option value="TOP">Oben</option>
-            <option value="BOTTOM">Unten</option>
           </select>
         </div>
       </div>
@@ -137,7 +137,86 @@ import { EditorStateService } from '../../services/editor-state.service';
         </div>
       </div>
 
-      <!-- Button Options -->
+      <div class="field">
+        <label>Options-Modus</label>
+        <select
+          [value]="usesRepeatButton ? 'REPEAT' : 'BUTTONS'"
+          (change)="setButtonMode($any($event.target).value)"
+        >
+          <option value="BUTTONS">Individuelle Optionen</option>
+          <option value="REPEAT">Wiederholte Vorlage</option>
+        </select>
+      </div>
+
+      @if (usesRepeatButton) {
+        <div class="sub-section">
+          <div class="sub-header">
+            <span>Wiederholte Vorlage</span>
+          </div>
+
+          <div class="field">
+            <label>Anzahl der Optionen</label>
+            <input
+              type="number"
+              [value]="repeatButton.numberOfOptions"
+              (input)="updateRepeatButton('numberOfOptions', +$any($event.target).value)"
+              min="1"
+              max="20"
+            />
+          </div>
+
+          <div class="field-row-group">
+            <div class="field">
+              <label>Vorlagen-Text</label>
+              <input
+                type="text"
+                [value]="repeatButton.option.text || ''"
+                (input)="updateRepeatButtonOption('text', $any($event.target).value)"
+              />
+            </div>
+            <div class="field">
+              <label>Vorlagen-Icon</label>
+              <select
+                [value]="repeatButton.option.icon || ''"
+                (change)="updateRepeatButtonOption('icon', $any($event.target).value || undefined)"
+              >
+                <option value="">Kein Icon</option>
+                @for (icon of iconTypes; track icon) {
+                  <option [value]="icon">{{ icon }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Vorlagen-Bild</label>
+            <div class="upload-row">
+              @if (repeatButton.option.imageSource) {
+                <img
+                  [src]="repeatButton.option.imageSource"
+                  class="preview-thumb-sm"
+                  alt="Repeat"
+                />
+                <button
+                  class="btn-icon"
+                  (click)="updateRepeatButtonOption('imageSource', '')"
+                >
+                  ✕
+                </button>
+              }
+              <label class="btn-upload btn-upload-sm">
+                <span>Bild</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  (change)="onRepeatButtonImageSelected($event)"
+                  hidden
+                />
+              </label>
+            </div>
+          </div>
+        </div>
+      } @else {
       <div class="sub-section">
         <div class="sub-header">
           <span>Optionen ({{ buttons.length }})</span>
@@ -237,6 +316,7 @@ import { EditorStateService } from '../../services/editor-state.service';
           </div>
         }
       </div>
+      }
     </div>
   `,
   styles: [
@@ -354,9 +434,40 @@ export class InteractionButtonsEditorComponent {
     return this.params.options?.buttons || [];
   }
 
+  get usesRepeatButton(): boolean {
+    return !!this.params.options?.repeatButton;
+  }
+
+  get repeatButton(): RepeatButtonConfig {
+    return this.params.options?.repeatButton || {
+      option: {},
+      numberOfOptions: 1
+    };
+  }
+
   updateField(field: string, value: any): void {
     const current = { ...this.params };
     (current as any)[field] = value;
+    this.state.interactionParams.set(current);
+    this.state.notifyChange();
+  }
+
+  setButtonMode(mode: 'BUTTONS' | 'REPEAT'): void {
+    const current = { ...this.params };
+    if (mode === 'REPEAT') {
+      current.options = {
+        repeatButton: current.options?.repeatButton || {
+          option: {},
+          numberOfOptions: Math.max(this.buttons.length, 1)
+        }
+      };
+    } else {
+      current.options = {
+        buttons: current.options?.buttons?.length
+          ? [...current.options.buttons]
+          : [{ text: 'Option 1' }]
+      };
+    }
     this.state.interactionParams.set(current);
     this.state.notifyChange();
   }
@@ -388,6 +499,33 @@ export class InteractionButtonsEditorComponent {
     this.state.notifyChange();
   }
 
+  updateRepeatButton(field: keyof RepeatButtonConfig, value: any): void {
+    const current = { ...this.params };
+    current.options = {
+      repeatButton: {
+        ...this.repeatButton,
+        [field]: value
+      }
+    };
+    this.state.interactionParams.set(current);
+    this.state.notifyChange();
+  }
+
+  updateRepeatButtonOption(field: keyof SelectionOption, value: any): void {
+    const current = { ...this.params };
+    current.options = {
+      repeatButton: {
+        ...this.repeatButton,
+        option: {
+          ...this.repeatButton.option,
+          [field]: value
+        }
+      }
+    };
+    this.state.interactionParams.set(current);
+    this.state.notifyChange();
+  }
+
   onImageSelected(event: Event): void {
     this.readFile(event, r => this.updateField('imageSource', r));
   }
@@ -398,6 +536,10 @@ export class InteractionButtonsEditorComponent {
 
   onOptionAudioSelected(event: Event, index: number): void {
     this.readFile(event, r => this.updateButton(index, 'audioSource', r));
+  }
+
+  onRepeatButtonImageSelected(event: Event): void {
+    this.readFile(event, r => this.updateRepeatButtonOption('imageSource', r));
   }
 
   private readFile(event: Event, cb: (r: string) => void): void {

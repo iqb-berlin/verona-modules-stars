@@ -30,9 +30,31 @@ import { EditorStateService } from '../../services/editor-state.service';
       <div class="field">
         <label>Stil</label>
         <select [value]="params.style || ''" (change)="updateField('style', $any($event.target).value)">
-          <option value="">Standard</option>
           <option value="WAVE">Welle</option>
+          <option value="RULER">Lineal</option>
+          <option value="BLOCK">Block</option>
         </select>
+      </div>
+
+      <div class="field-row-group">
+        <div class="field">
+          <label>Vorlauf-Zahlen</label>
+          <input
+            type="text"
+            [value]="numberListToString(params.leadingNumbers)"
+            (input)="updateNumberList('leadingNumbers', $any($event.target).value)"
+            placeholder="z.B. -2,-1"
+          >
+        </div>
+        <div class="field">
+          <label>Nachlauf-Zahlen</label>
+          <input
+            type="text"
+            [value]="numberListToString(params.trailingNumbers)"
+            (input)="updateNumberList('trailingNumbers', $any($event.target).value)"
+            placeholder="z.B. 21,22"
+          >
+        </div>
       </div>
     </div>
   `,
@@ -52,5 +74,19 @@ export class InteractionNumberLineEditorComponent {
     (current as any)[field] = value;
     this.state.interactionParams.set(current);
     this.state.notifyChange();
+  }
+
+  updateNumberList(field: 'leadingNumbers' | 'trailingNumbers', value: string): void {
+    const numbers = value
+      .split(',')
+      .map(item => item.trim())
+      .filter(item => item.length > 0)
+      .map(item => Number(item))
+      .filter(item => !Number.isNaN(item));
+    this.updateField(field, numbers.length > 0 ? numbers : undefined);
+  }
+
+  numberListToString(values?: number[]): string {
+    return values?.join(', ') || '';
   }
 }

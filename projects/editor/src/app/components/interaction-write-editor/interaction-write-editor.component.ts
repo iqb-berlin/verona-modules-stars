@@ -22,6 +22,7 @@ import { EditorStateService } from '../../services/editor-state.service';
         <select [value]="params.keyboardMode" (change)="updateField('keyboardMode', $any($event.target).value)">
           <option value="CHARACTERS">Buchstaben</option>
           <option value="NUMBERS_LINE">Zahlen (Zeile)</option>
+          <option value="NUMBERS_BLOCK">Zahlenblock</option>
         </select>
       </div>
       <div class="field">
