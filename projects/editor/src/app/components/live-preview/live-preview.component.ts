@@ -19,18 +19,18 @@ import { environment } from '../../../environments/environment';
   imports: [CommonModule],
   template: `
     <div class="live-preview-container">
-      @if (blobUrl) {
+      @if (playerSrcdoc) {
         <iframe
           #playerIframe
-          [src]="blobUrl"
+          [attr.srcdoc]="playerSrcdoc"
           (load)="onPlayerLoad()"
           frameborder="0"
           allow="autoplay; camera; microphone"
         ></iframe>
-      } @else if (playerHtmlBase64) {
+      } @else if (blobUrl) {
         <iframe
           #playerIframe
-          [attr.srcdoc]="playerSrcdoc"
+          [src]="blobUrl"
           (load)="onPlayerLoad()"
           frameborder="0"
           allow="autoplay; camera; microphone"
@@ -83,7 +83,6 @@ export class LivePreviewComponent implements OnInit, OnDestroy {
   @ViewChild('playerIframe') playerIframe!: ElementRef<HTMLIFrameElement>;
 
   playerUrl = environment.playerUrl;
-  playerHtmlBase64 = (environment as any).playerHtmlBase64;
   playerSafeUrl: SafeResourceUrl;
   playerSrcdoc: string = '';
   blobUrl: string | null = null;
@@ -93,12 +92,13 @@ export class LivePreviewComponent implements OnInit, OnDestroy {
     this.playerSafeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
       this.playerUrl,
     );
-    if (this.playerHtmlBase64) {
-      const decoded = atob(this.playerHtmlBase64);
-      // Create a blob URL to avoid srcdoc size limits
-      const blob = new Blob([decoded], { type: 'text/html' });
-      this.blobUrl = URL.createObjectURL(blob);
-      this.playerSrcdoc = decoded; // fallback
+
+    const playerHtmlBase64 = (environment as any).playerHtmlBase64;
+    if (playerHtmlBase64) {
+      const decoded = atob(playerHtmlBase64);
+      // Always use srcdoc for embedded players to avoid blob URL opaque origin issues
+      // This is especially important when the packed editor is opened from file:// URLs
+      this.playerSrcdoc = decoded;
     }
 
     // Watch for state changes and update the player
@@ -121,7 +121,7 @@ export class LivePreviewComponent implements OnInit, OnDestroy {
 
   // eslint-disable-next-line class-methods-use-this
   onPlayerLoad(): void {
-    // Player iframe loaded, no action needed
+    // Player iframe loaded
   }
 
   private handlePlayerMessage = (event: MessageEvent): void => {

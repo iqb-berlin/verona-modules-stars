@@ -2,8 +2,8 @@
  * Builds the editor with embedded player as a single HTML file.
  * This script:
  * 1. Builds the player and packs it into a single HTML file.
- * 2. Encodes the player HTML as a data URL.
- * 3. Updates the editor's environment.prod.ts with the data URL.
+ * 2. Encodes the player HTML as base64.
+ * 3. Updates the editor's environment.prod.ts with the base64.
  * 4. Builds the editor and packs it.
  * 5. Restores the original environment.prod.ts.
  *
@@ -23,7 +23,6 @@ const editorEnvProdFile = path.join(
 );
 const editorEnvProdBackup = editorEnvProdFile + ".bak";
 
-// Helper to log
 function log(message) {
   console.log(`[build-editor-bundled] ${message}`);
 }
@@ -47,12 +46,19 @@ if (!fs.existsSync(playerPackedFile)) {
   process.exit(1);
 }
 
-// Step 3: Read player HTML, clean it, and create base64
+// Step 3: Read player HTML, fix base href, and create base64
 log("Reading player HTML...");
 let playerHtml = fs.readFileSync(playerPackedFile, "utf8");
-// Remove the base href replacement script that causes issues in srcdoc
+
+// Replace the dynamic base href script with a static one
+// The dynamic script uses document.location which breaks in srcdoc/blob contexts
 // The script looks like: <script>document.write('<base href="' + document.location + '" />');</script>
-// We replace it with a simple base href
+playerHtml = playerHtml.replace(
+  /<script>document\.write\('<base href="' \+ document\.location \+ '" \/>'\);<\/script>/,
+  '<base href="./">',
+);
+
+// Also handle any line-based matches as fallback
 const lines = playerHtml.split("\n");
 for (let i = 0; i < lines.length; i++) {
   if (lines[i].includes("document.write") && lines[i].includes("base href")) {
@@ -60,14 +66,9 @@ for (let i = 0; i < lines.length; i++) {
   }
 }
 playerHtml = lines.join("\n");
-// Also try a more flexible regex
-playerHtml = playerHtml.replace(
-  /<script>\s*document\.write\('<base href="\+" \+ document\.location \+ "\*" \/>'\);\s*<\/script>/,
-  '<base href="./">',
-);
+
 const playerBase64 = Buffer.from(playerHtml).toString("base64");
 log(`Player base64 length: ${playerBase64.length}`);
-log(`First 100 chars of base64: ${playerBase64.substring(0, 100)}...`);
 
 // Step 4: Backup original environment.prod.ts
 log("Backing up environment.prod.ts...");
@@ -82,6 +83,7 @@ const newEnvContent = `export const environment = {
 };
 `;
 fs.writeFileSync(editorEnvProdFile, newEnvContent, "utf8");
+
 // Verify written content
 const writtenContent = fs.readFileSync(editorEnvProdFile, "utf8");
 const match = writtenContent.match(/playerHtmlBase64: '([^']*)'/);
@@ -91,7 +93,7 @@ if (match) {
   log("ERROR: playerHtmlBase64 not found in written environment.prod.ts");
 }
 
-// Step 6: Build editor
+// Step 6: Build editor (this also triggers postbuild:editor which packs the editor)
 log("Building editor...");
 try {
   execSync("npm run build:editor", { cwd: rootDir, stdio: "inherit" });
