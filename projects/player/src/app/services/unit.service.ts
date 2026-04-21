@@ -7,7 +7,7 @@ import {
   AudioOptions, ClosingMetaButtonsParams,
   ContinueButtonEnum,
   FirstAudioOptionsParams,
-  FirstClickLayerEnum,
+  FirstClickLayerMode,
   AnimateButtonEnum,
   InteractionEnum, InteractionParameters,
   OpeningImageParams,
@@ -166,7 +166,7 @@ export class UnitService {
 
     // Backward compatibility boolean firstClickLayer
     if (typeof this.firstAudioOptions()?.firstClickLayer === 'boolean') {
-      const firstClickLayer: FirstClickLayerEnum = this.firstAudioOptions()?.firstClickLayer ? 'TRANSPARENT' : 'OFF';
+      const firstClickLayer: FirstClickLayerMode = this.firstAudioOptions()?.firstClickLayer ? 'TRANSPARENT' : 'OFF';
       this.firstAudioOptions.set({ ...this.firstAudioOptions(), firstClickLayer: firstClickLayer });
     }
 
