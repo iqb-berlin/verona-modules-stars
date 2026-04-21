@@ -16,7 +16,9 @@ export type InteractionEnum = 'BUTTONS' |
 'NUMBER_LINE' |
 'PYRAMID' |
 'EQUATION' |
+'META_BUTTONS' |
 'NONE';
+export type FirstClickLayerMode = 'OFF' | 'TRANSPARENT' | 'BLUR' | 'DISABLED';
 export type IconButtonTypeEnum = 'CHECK_GREEN' | 'CLOSE_RED' | 'CLAP_HANDS' | 'SMILEY_1' | 'SMILEY_2' |
 'SMILEY_3' | 'SMILEY_4' | 'SMILEY_5' | 'ONES' | 'TENS';
 export type ButtonTypeEnum = 'MEDIUM_SQUARE' | 'BIG_SQUARE' | 'SMALL_SQUARE' | 'TEXT' | 'CIRCLE' |
@@ -37,10 +39,10 @@ export interface UnitDefinition {
   openingImage?: OpeningImageParams;
   mainAudio?: MainAudio;
   interactionType: InteractionEnum;
-  interactionMaxTimeMS: number
-  interactionParameters: InteractionParameters;
-  variableInfo: VariableInfo[] | undefined;
-  audioFeedback: AudioFeedback | undefined;
+  interactionParameters?: InteractionParameters;
+  variableInfo?: VariableInfo[];
+  audioFeedback?: AudioFeedback;
+  closingMetaButtons?: ClosingMetaButtonsParams;
 }
 
 export interface SelectionOption {
@@ -102,7 +104,7 @@ export interface InteractionWriteParams {
   text?: string;
   addBackspaceKey?: boolean;
   addUmlautKeys?: boolean;
-  keyboardMode?: 'CHARACTERS' | 'NUMBERS_LINE';
+  keyboardMode?: 'CHARACTERS' | 'NUMBERS_LINE' | 'NUMBERS_BLOCK';
   keysToAdd?: string[];
   maxInputLength?: number;
   formerState?: Response[];
@@ -135,9 +137,11 @@ export interface InteractionPolygonButtonsParams {
 export interface InteractionNumberLineParams {
   variableId?: string;
   firstNumber?: number;
+  leadingNumbers?: number[];
   lastNumber?: number;
   numberInput: number;
-  style?: string;
+  trailingNumbers?: number[];
+  style?: 'WAVE' | 'RULER' | 'BLOCK' | string;
   formerState?: Response[];
 }
 
@@ -165,13 +169,13 @@ export interface InteractionEquationParams {
 export interface MainAudio {
   audioSource: string;
   maxPlay?: number;
-  firstClickLayer?: boolean; // deprecated, use firstAudioOptions.firstClickLayer
+  firstClickLayer?: boolean | FirstClickLayerMode; // deprecated, use firstAudioOptions.firstClickLayer
   animateButton?: boolean; // deprecated, use firstAudioOptions.animateButton
   disableInteractionUntilComplete?: boolean;
 }
 
 export interface FirstAudioOptionsParams {
-  firstClickLayer?: boolean;
+  firstClickLayer?: boolean | FirstClickLayerMode;
   animateButton?: boolean;
 }
 
@@ -185,4 +189,10 @@ export interface AudioOptions extends MainAudio {
   audioId: string;
   value?: string;
   maxPlay?: number;
+}
+
+export interface ClosingMetaButtonsParams {
+  variableIdMetaSelection?: string;
+  variableIdReference: string;
+  variableIdMetaOutcome?: string;
 }

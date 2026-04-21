@@ -1,6 +1,7 @@
-import { Component, inject } from '@angular/core';
+import {
+  Component, input, output
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { EditorStateService } from '../../services/editor-state.service';
 
 @Component({
   selector: 'stars-media-upload',
@@ -8,12 +9,12 @@ import { EditorStateService } from '../../services/editor-state.service';
   imports: [CommonModule],
   template: `
     <div class="media-upload">
-      <label class="upload-label">{{ label }}</label>
+      <label class="upload-label">{{ label() }}</label>
       <div class="upload-controls">
-        @if (currentValue) {
+        @if (source()) {
           <div class="preview-container">
-            @if (mediaType === 'image') {
-              <img [src]="currentValue" class="preview-image" alt="Preview">
+            @if (mediaType() === 'image') {
+              <img [src]="source()" class="preview-image" alt="Preview">
             } @else {
               <div class="audio-indicator">
                 <span class="audio-icon">🔊</span>
@@ -24,7 +25,7 @@ import { EditorStateService } from '../../services/editor-state.service';
           </div>
         }
         <label class="btn-upload" [for]="inputId">
-          <span>{{ currentValue ? 'Ersetzen' : 'Datei wählen' }}</span>
+          <span>{{ source() ? 'Ersetzen' : 'Datei wählen' }}</span>
           <input [id]="inputId" type="file" [accept]="acceptType" (change)="onFileSelected($event)" hidden>
         </label>
       </div>
@@ -49,15 +50,14 @@ import { EditorStateService } from '../../services/editor-state.service';
   `]
 })
 export class MediaUploadComponent {
-  label = '';
-  mediaType: 'image' | 'audio' | 'video' = 'image';
-  currentValue = '';
+  label = input('');
+  mediaType = input<'image' | 'audio' | 'video'>('image', { alias: 'type' });
+  source = input('', { alias: 'source' });
+  sourceChange = output<string>();
   inputId = `media-${Math.random().toString(36).substring(7)}`;
 
-  onValueChange: (value: string) => void = () => {};
-
   get acceptType(): string {
-    switch (this.mediaType) {
+    switch (this.mediaType()) {
       case 'image': return 'image/*';
       case 'audio': return 'audio/*';
       case 'video': return 'video/*';
@@ -73,14 +73,12 @@ export class MediaUploadComponent {
     const reader = new FileReader();
     reader.onload = () => {
       const base64 = reader.result as string;
-      this.currentValue = base64;
-      this.onValueChange(base64);
+      this.sourceChange.emit(base64);
     };
     reader.readAsDataURL(file);
   }
 
   removeMedia(): void {
-    this.currentValue = '';
-    this.onValueChange('');
+    this.sourceChange.emit('');
   }
 }

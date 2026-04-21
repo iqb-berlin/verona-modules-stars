@@ -6,7 +6,7 @@ export interface FeedbackDefinition {
   method?: 'EQUALS' | 'GREATER_THAN' | 'LESS_THAN';
   parameter: string;
   audioSource: string;
-  showResponse?: ShowResponse;
+  showResponse?: ShowResponse | ShowResponse[];
 }
 
 export interface AudioFeedback {

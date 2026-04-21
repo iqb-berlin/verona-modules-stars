@@ -19,13 +19,13 @@ import { MediaUploadComponent } from '../media-upload/media-upload.component';
             <label>
               <input
                 type="checkbox"
-                [checked]="mainAudioEnabled()"
+                [checked]="state.mainAudioEnabled()"
                 (change)="toggleMainAudio($any($event.target).checked)"
               />
               Haupt-Audio aktivieren
             </label>
           </div>
-          @if (mainAudioEnabled()) {
+          @if (state.mainAudioEnabled()) {
             <stars-media-upload
               label="Audio-Datei"
               type="audio"
@@ -61,34 +61,71 @@ import { MediaUploadComponent } from '../media-upload/media-upload.component';
                     state.mainAudioMaxPlay.set(+$any($event.target).value);
                     state.notifyChange()
                   "
-                  min="1"
-                  max="10"
+                  min="0"
+                  max="99"
                 />
               </div>
             </div>
           }
+
+          <div class="sub-section">
+            <div class="sub-header">Optionen für den ersten Audiostart</div>
+            <div class="field">
+              <label>First Click Layer</label>
+              <select
+                [value]="state.firstClickLayerSelection()"
+                (change)="updateFirstClickLayer($any($event.target).value)"
+              >
+                <option value="OFF">Aus</option>
+                <option value="TRANSPARENT">Transparent</option>
+                <option value="BLUR">Blur</option>
+                <option value="DISABLED">Disabled</option>
+                <option value="true">Legacy: Ein</option>
+              </select>
+            </div>
+            <div class="field field-row">
+              <label>
+                <input
+                  type="checkbox"
+                  [checked]="state.animateButton()"
+                  (change)="
+                    state.animateButton.set($any($event.target).checked);
+                    state.notifyChange()
+                  "
+                />
+                Audio-Button animieren
+              </label>
+            </div>
+          </div>
         </div>
       }
     </section>
   `,
+  styles: [`
+    .sub-section {
+      margin-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 8px;
+    }
+    .sub-header {
+      font-size: 13px;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-bottom: 8px;
+    }
+  `]
 })
 export class MainAudioSettingsComponent {
   state = inject(EditorStateService);
   collapsed = true;
 
-  mainAudioEnabled(): boolean {
-    return this.state.mainAudioSource() !== '';
+  toggleMainAudio(enabled: boolean): void {
+    this.state.setMainAudioEnabled(enabled);
+    this.state.notifyChange();
   }
 
-  toggleMainAudio(enabled: boolean): void {
-    if (enabled) {
-      // If enabling, set a default audio source? Maybe leave empty and let user upload.
-      // We'll keep the current source, which might be empty.
-      // If source is empty, the user will need to upload.
-    } else {
-      // If disabling, clear the audio source.
-      this.state.mainAudioSource.set('');
-    }
+  updateFirstClickLayer(value: string): void {
+    this.state.setFirstClickLayerFromSelection(value);
     this.state.notifyChange();
   }
 }

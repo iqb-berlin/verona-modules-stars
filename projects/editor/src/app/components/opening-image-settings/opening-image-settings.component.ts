@@ -17,7 +17,11 @@ import { MediaUploadComponent } from '../media-upload/media-upload.component';
         <div class="section-body">
           <div class="field field-row">
             <label>
-              <input type="checkbox" [checked]="state.openingImageEnabled()" (change)="state.openingImageEnabled.set($any($event.target).checked); state.notifyChange()">
+              <input
+                type="checkbox"
+                [checked]="state.openingImageEnabled()"
+                (change)="toggleOpeningImage($any($event.target).checked)"
+              >
               Einführungs-Bild aktivieren
             </label>
           </div>
@@ -28,6 +32,27 @@ import { MediaUploadComponent } from '../media-upload/media-upload.component';
               [source]="state.openingImageSource()"
               (sourceChange)="state.openingImageSource.set($event); state.notifyChange()">
             </stars-media-upload>
+
+            <stars-media-upload
+              label="Begleit-Audio"
+              type="audio"
+              [source]="state.openingAudioSource()"
+              (sourceChange)="state.openingAudioSource.set($event); state.notifyChange()">
+            </stars-media-upload>
+
+            <div class="field">
+              <label>Präsentationsdauer (ms)</label>
+              <input
+                type="number"
+                [value]="state.openingPresentationDurationMS()"
+                (input)="
+                  state.openingPresentationDurationMS.set(+$any($event.target).value);
+                  state.notifyChange()
+                "
+                min="0"
+                step="100"
+              />
+            </div>
           }
         </div>
       }
@@ -37,4 +62,9 @@ import { MediaUploadComponent } from '../media-upload/media-upload.component';
 export class OpeningImageSettingsComponent {
   state = inject(EditorStateService);
   collapsed = true;
+
+  toggleOpeningImage(enabled: boolean): void {
+    this.state.setOpeningImageEnabled(enabled);
+    this.state.notifyChange();
+  }
 }

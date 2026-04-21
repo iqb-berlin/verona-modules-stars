@@ -15,14 +15,11 @@ import { EditorStateService } from '../../services/editor-state.service';
       @if (!collapsed) {
         <div class="section-body">
           <div class="field">
-            <label>Unit-ID</label>
+            <label>Definition-ID</label>
             <input
               type="text"
               [value]="state.unitId()"
-              (input)="
-                state.unitId.set($any($event.target).value);
-                state.notifyChange()
-              "
+              readonly
             />
           </div>
           <div class="field">
@@ -93,24 +90,92 @@ import { EditorStateService } from '../../services/editor-state.service';
               Übungsleiste anzeigen
             </label>
           </div>
-          <div class="field">
-            <label>Max. Interaktionszeit (ms)</label>
-            <input
-              type="number"
-              [value]="state.interactionMaxTimeMS()"
-              (input)="
-                state.interactionMaxTimeMS.set(+$any($event.target).value);
-                state.notifyChange()
-              "
-              min="0"
-            />
+
+          <div class="sub-section">
+            <div class="field field-row">
+              <label>
+                <input
+                  type="checkbox"
+                  [checked]="!!state.closingMetaButtons()"
+                  (change)="toggleClosingMetaButtons($any($event.target).checked)"
+                />
+                Closing Meta Buttons konfigurieren
+              </label>
+            </div>
+
+            @if (state.closingMetaButtons(); as closingMetaButtons) {
+              <div class="field">
+                <label>Referenz-Variable</label>
+                <input
+                  type="text"
+                  [value]="closingMetaButtons.variableIdReference"
+                  (input)="updateClosingMetaButtons('variableIdReference', $any($event.target).value)"
+                />
+              </div>
+              <div class="field-row-group">
+                <div class="field">
+                  <label>Meta Selection ID</label>
+                  <input
+                    type="text"
+                    [value]="closingMetaButtons.variableIdMetaSelection || ''"
+                    (input)="updateClosingMetaButtons('variableIdMetaSelection', $any($event.target).value)"
+                  />
+                </div>
+                <div class="field">
+                  <label>Meta Outcome ID</label>
+                  <input
+                    type="text"
+                    [value]="closingMetaButtons.variableIdMetaOutcome || ''"
+                    (input)="updateClosingMetaButtons('variableIdMetaOutcome', $any($event.target).value)"
+                  />
+                </div>
+              </div>
+            }
           </div>
         </div>
       }
     </section>
-  `
+  `,
+  styles: [`
+    .sub-section {
+      margin-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 8px;
+    }
+    .field-row-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+  `]
 })
 export class GeneralSettingsComponent {
   state = inject(EditorStateService);
   collapsed = false;
+
+  toggleClosingMetaButtons(enabled: boolean): void {
+    if (enabled) {
+      const currentVariableId = (this.state.interactionParams() as any)?.variableId || 'BUTTONS';
+      this.state.closingMetaButtons.set({
+        variableIdReference: currentVariableId,
+        variableIdMetaSelection: 'META_SELECTION',
+        variableIdMetaOutcome: 'META_OUTCOME'
+      });
+    } else {
+      this.state.closingMetaButtons.set(undefined);
+    }
+    this.state.notifyChange();
+  }
+
+  updateClosingMetaButtons(field: 'variableIdReference' | 'variableIdMetaSelection' | 'variableIdMetaOutcome', value: string): void {
+    const current = this.state.closingMetaButtons();
+    if (!current) {
+      return;
+    }
+    this.state.closingMetaButtons.set({
+      ...current,
+      [field]: value
+    });
+    this.state.notifyChange();
+  }
 }

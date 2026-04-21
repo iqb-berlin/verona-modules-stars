@@ -6,7 +6,7 @@ import {
   InteractionButtonParams, InteractionWriteParams, InteractionDropParams,
   InteractionVideoParams, InteractionFindOnImageParams, InteractionPolygonButtonsParams,
   InteractionPlaceValueParams, InteractionNumberLineParams, InteractionPyramidParams,
-  InteractionEquationParams
+  InteractionEquationParams, ClosingMetaButtonsParams, FirstClickLayerMode
 } from '@shared/models/unit-definition';
 import { VariableInfo } from '@shared/models/responses';
 import { AudioFeedback } from '@shared/models/feedback';
@@ -19,27 +19,28 @@ export class EditorStateService {
   private changeSubject = new Subject<void>();
 
   // Unit definition fields
-  unitId = signal('unit1');
+  unitId = signal('stars-unit-definition');
   unitVersion = signal('');
   backgroundColor = signal('#EEE');
   ribbonBars = signal(false);
   continueButtonShow = signal<ContinueButtonEnum>('ALWAYS');
   interactionType = signal<InteractionEnum>('BUTTONS');
-  interactionMaxTimeMS = signal(0);
 
   // MainAudio
+  mainAudioEnabled = signal(false);
   mainAudioSource = signal('');
-  mainAudioMaxPlay = signal(3);
+  mainAudioMaxPlay = signal(0);
   mainAudioDisableInteractionUntilComplete = signal(false);
 
   // FirstAudioOptions
-  firstClickLayer = signal(false);
+  firstClickLayer = signal<boolean | FirstClickLayerMode>('OFF');
   animateButton = signal(false);
 
   // Opening Image
+  openingImageEnabled = signal(false);
   openingImageSource = signal('');
   openingAudioSource = signal('');
-  openingPresentationDurationMS = signal(3000);
+  openingPresentationDurationMS = signal(1500);
 
   // Interaction parameters (stored as signals per type)
   interactionParams = signal<InteractionParameters>({
@@ -55,8 +56,10 @@ export class EditorStateService {
 
   // Audio feedback
   audioFeedback = signal<AudioFeedback | undefined>(undefined);
+  closingMetaButtons = signal<ClosingMetaButtonsParams | undefined>(undefined);
 
   constructor() {
+    this.resetState();
     this.changeSubject.pipe(debounceTime(500)).subscribe(() => {
       this.emitDefinitionChanged();
     });
@@ -66,35 +69,64 @@ export class EditorStateService {
     this.changeSubject.next();
   }
 
+  resetState(): void {
+    this.unitId.set('stars-unit-definition');
+    this.unitVersion.set('');
+    this.backgroundColor.set('#EEE');
+    this.ribbonBars.set(false);
+    this.continueButtonShow.set('ALWAYS');
+    this.interactionType.set('BUTTONS');
+
+    this.mainAudioEnabled.set(false);
+    this.mainAudioSource.set('');
+    this.mainAudioMaxPlay.set(0);
+    this.mainAudioDisableInteractionUntilComplete.set(false);
+
+    this.firstClickLayer.set('OFF');
+    this.animateButton.set(false);
+
+    this.openingImageEnabled.set(false);
+    this.openingImageSource.set('');
+    this.openingAudioSource.set('');
+    this.openingPresentationDurationMS.set(1500);
+
+    this.resetInteractionParams('BUTTONS');
+    this.variableInfo.set([]);
+    this.audioFeedback.set(undefined);
+    this.closingMetaButtons.set(undefined);
+  }
+
   loadFromDefinition(json: string): void {
     try {
+      this.resetState();
       const def = JSON.parse(json) as UnitDefinition;
       if (def.id) this.unitId.set(def.id);
       if (def.version) this.unitVersion.set(def.version);
-      if (def.backgroundColor) this.backgroundColor.set(def.backgroundColor);
+      if (def.backgroundColor !== undefined) this.backgroundColor.set(def.backgroundColor);
       if (def.ribbonBars !== undefined) this.ribbonBars.set(def.ribbonBars);
       if (def.continueButtonShow) this.continueButtonShow.set(def.continueButtonShow);
       if (def.interactionType) this.interactionType.set(def.interactionType);
-      if (def.interactionMaxTimeMS) this.interactionMaxTimeMS.set(def.interactionMaxTimeMS);
 
       // MainAudio
       if (def.mainAudio) {
+        this.mainAudioEnabled.set(true);
         this.mainAudioSource.set(def.mainAudio.audioSource || '');
-        this.mainAudioMaxPlay.set(def.mainAudio.maxPlay ?? 3);
+        this.mainAudioMaxPlay.set(def.mainAudio.maxPlay ?? 0);
         this.mainAudioDisableInteractionUntilComplete.set(def.mainAudio.disableInteractionUntilComplete || false);
       }
 
       // FirstAudioOptions
       if (def.firstAudioOptions) {
-        this.firstClickLayer.set(def.firstAudioOptions.firstClickLayer || false);
+        this.firstClickLayer.set(def.firstAudioOptions.firstClickLayer ?? 'OFF');
         this.animateButton.set(def.firstAudioOptions.animateButton || false);
       }
 
       // Opening image
       if (def.openingImage) {
+        this.openingImageEnabled.set(true);
         this.openingImageSource.set(def.openingImage.imageSource || '');
         this.openingAudioSource.set(def.openingImage.audioSource || '');
-        this.openingPresentationDurationMS.set(def.openingImage.presentationDurationMS || 3000);
+        this.openingPresentationDurationMS.set(def.openingImage.presentationDurationMS ?? 1500);
       }
 
       // Interaction parameters
@@ -113,9 +145,50 @@ export class EditorStateService {
       if (def.audioFeedback) {
         this.audioFeedback.set(def.audioFeedback);
       }
+
+      if (def.closingMetaButtons) {
+        this.closingMetaButtons.set(def.closingMetaButtons);
+      }
     } catch (e) {
       console.warn('Editor: failed to parse unit definition', e);
     }
+  }
+
+  setMainAudioEnabled(enabled: boolean): void {
+    this.mainAudioEnabled.set(enabled);
+    if (!enabled) {
+      this.mainAudioSource.set('');
+      this.mainAudioMaxPlay.set(0);
+      this.mainAudioDisableInteractionUntilComplete.set(false);
+    }
+  }
+
+  setOpeningImageEnabled(enabled: boolean): void {
+    this.openingImageEnabled.set(enabled);
+    if (!enabled) {
+      this.openingImageSource.set('');
+      this.openingAudioSource.set('');
+      this.openingPresentationDurationMS.set(1500);
+    }
+  }
+
+  setFirstClickLayerFromSelection(value: string): void {
+    if (value === 'true') {
+      this.firstClickLayer.set(true);
+      return;
+    }
+    this.firstClickLayer.set(value as FirstClickLayerMode);
+  }
+
+  firstClickLayerSelection(): string {
+    const value = this.firstClickLayer();
+    if (value === true) {
+      return 'true';
+    }
+    if (value === false || value === undefined) {
+      return 'OFF';
+    }
+    return value;
   }
 
   resetInteractionParams(type: InteractionEnum): void {
@@ -145,7 +218,7 @@ export class EditorStateService {
         this.interactionParams.set({
           variableId: 'DROP',
           options: [],
-          imagePosition: 'LEFT'
+          imagePosition: 'BOTTOM'
         } as InteractionDropParams);
         break;
       case 'FIND_ON_IMAGE':
@@ -182,7 +255,8 @@ export class EditorStateService {
           variableId: 'NUMBER_LINE',
           firstNumber: 0,
           lastNumber: 20,
-          numberInput: 10
+          numberInput: 10,
+          style: 'WAVE'
         } as InteractionNumberLineParams);
         break;
       case 'PYRAMID':
@@ -197,6 +271,11 @@ export class EditorStateService {
           operators: ['+']
         } as InteractionEquationParams);
         break;
+      case 'META_BUTTONS':
+        this.interactionParams.set({
+          variableId: 'META_SELECTION'
+        } as any);
+        break;
       default:
         this.interactionParams.set({
           variableId: 'NONE'
@@ -206,9 +285,8 @@ export class EditorStateService {
 
   buildUnitDefinition(): UnitDefinition {
     const def: UnitDefinition = {
-      id: this.unitId(),
+      id: this.unitId() || 'stars-unit-definition',
       interactionType: this.interactionType(),
-      interactionMaxTimeMS: this.interactionMaxTimeMS(),
       interactionParameters: this.interactionParams(),
       variableInfo: this.variableInfo().length > 0 ? this.variableInfo() : undefined,
       audioFeedback: this.audioFeedback()
@@ -220,7 +298,7 @@ export class EditorStateService {
     if (this.continueButtonShow() !== 'ALWAYS') def.continueButtonShow = this.continueButtonShow();
 
     // MainAudio
-    if (this.mainAudioSource()) {
+    if (this.mainAudioEnabled() && this.mainAudioSource()) {
       const mainAudio: MainAudio = {
         audioSource: this.mainAudioSource(),
         maxPlay: this.mainAudioMaxPlay(),
@@ -230,23 +308,32 @@ export class EditorStateService {
     }
 
     // FirstAudioOptions
-    if (this.firstClickLayer() || this.animateButton()) {
-      def.firstAudioOptions = {
-        firstClickLayer: this.firstClickLayer(),
+    const firstClickLayer = this.firstClickLayer();
+    if (this.animateButton() || firstClickLayer === true ||
+      (typeof firstClickLayer === 'string' && firstClickLayer !== 'OFF')) {
+      const firstAudioOptions: FirstAudioOptionsParams = {
         animateButton: this.animateButton()
       };
+      if (firstClickLayer !== false) {
+        firstAudioOptions.firstClickLayer = firstClickLayer;
+      }
+      def.firstAudioOptions = firstAudioOptions;
     }
 
     // Opening Image
-    if (this.openingImageSource()) {
+    if (this.openingImageEnabled() && this.openingImageSource()) {
       const params: OpeningImageParams = {
         imageSource: this.openingImageSource()
       };
       if (this.openingAudioSource()) params.audioSource = this.openingAudioSource();
-      if (this.openingPresentationDurationMS() !== 3000) {
+      if (this.openingPresentationDurationMS() !== 1500) {
         params.presentationDurationMS = this.openingPresentationDurationMS();
       }
       def.openingImage = params;
+    }
+
+    if (this.closingMetaButtons()) {
+      def.closingMetaButtons = this.closingMetaButtons();
     }
 
     return def;
@@ -255,35 +342,41 @@ export class EditorStateService {
   buildVariables(): VeronaVariableInfo[] {
     const variables: VeronaVariableInfo[] = [];
     const params = this.interactionParams() as any;
-    if (params?.variableId) {
-      const variableType = this.getVariableType();
-      const variable: VeronaVariableInfo = {
-        id: params.variableId,
-        type: variableType,
-        multiple: false,
-        nullable: false,
-        page: '1'
-      };
+    const declaredVariables = this.variableInfo();
+    const variableIds = declaredVariables.length > 0
+      ? declaredVariables.map(variable => variable.variableId)
+      : (params?.variableId ? [params.variableId] : []);
 
-      // For button interactions with defined options, add values
-      if ((this.interactionType() === 'BUTTONS' || this.interactionType() === 'POLYGON_BUTTONS') && params.options) {
-        const buttons = params.options.buttons || params.options;
-        if (Array.isArray(buttons) && buttons.length > 0) {
-          variable.valuesComplete = true;
-          variable.values = buttons.map((_: any, i: number) => ({
-            value: i.toString(),
-            label: buttons[i]?.text || buttons[i]?.label || `Option ${i}`
-          }));
+    variableIds
+      .filter((value, index, values) => !!value && values.indexOf(value) === index)
+      .forEach(variableId => {
+        const currentVariableInfo = declaredVariables.find(variable => variable.variableId === variableId);
+        const variable: VeronaVariableInfo = {
+          id: variableId,
+          type: this.getVariableType(currentVariableInfo),
+          multiple: false,
+          nullable: false,
+          page: '1'
+        };
+
+        if ((this.interactionType() === 'BUTTONS' || this.interactionType() === 'POLYGON_BUTTONS') &&
+          variableId === params?.variableId && params.options) {
+          const buttons = params.options.buttons || params.options;
+          if (Array.isArray(buttons) && buttons.length > 0) {
+            variable.valuesComplete = true;
+            variable.values = buttons.map((_: any, i: number) => ({
+              value: i.toString(),
+              label: buttons[i]?.text || buttons[i]?.label || `Option ${i + 1}`
+            }));
+          }
         }
-      }
-      variables.push(variable);
-    }
+        variables.push(variable);
+      });
     return variables;
   }
 
-  private getVariableType(): 'string' | 'integer' | 'number' | 'boolean' | 'coded' {
-    const vInfo = this.variableInfo();
-    if (vInfo.length > 0 && vInfo[0].codes?.length > 0) {
+  private getVariableType(variableInfo?: VariableInfo): 'string' | 'integer' | 'number' | 'boolean' | 'coded' {
+    if (variableInfo?.codes?.length) {
       return 'coded';
     }
     switch (this.interactionType()) {
