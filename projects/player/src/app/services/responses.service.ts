@@ -1,11 +1,11 @@
 import { inject, Injectable, signal } from '@angular/core';
 
 import { Response } from '@iqbspecs/response/response.interface';
-import { Progress, UnitState, UnitStateDataType } from '../models/verona';
+import { Progress, UnitState, UnitStateDataType } from '../../../../shared/models/verona';
+import { UnitDefinition } from '../../../../shared/models/unit-definition';
+import { Code, VariableInfo } from '../../../../shared/models/responses';
+import { FeedbackDefinition, ShowResponse } from '../../../../shared/models/feedback';
 import { VeronaPostService } from './verona-post.service';
-import { ClosingMetaButtonsParams, UnitDefinition } from '../models/unit-definition';
-import { Code, VariableInfo } from '../models/responses';
-import { FeedbackDefinition, ShowResponse } from '../models/feedback';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +16,7 @@ export class ResponsesService {
   responseProgress = signal<Progress>('none');
   mainAudioComplete = signal(false);
   videoComplete = signal(false);
-  closingMetaRunning = signal(false);
+
   allResponses: Response[] = [];
   variableInfo: VariableInfo[] = [];
   veronaPostService = inject(VeronaPostService);
@@ -32,8 +32,6 @@ export class ResponsesService {
   feedbackDefinitions: FeedbackDefinition[] = [];
   formerStateResponses = signal<Response[]>([]);
   presentationProgress = signal<Progress>('some');
-  closingMetaButtons = signal<ClosingMetaButtonsParams>({} as ClosingMetaButtonsParams);
-  metaInteractionDone = signal(false);
 
   /**
   * Interpret mixed input as a number
@@ -50,6 +48,13 @@ export class ResponsesService {
     }
     if (Array.isArray(value)) return value.length > 0 ? this.asNumberOrZero(value[0]) : 0;
     return 0;
+  }
+
+  private normalizeShowResponse(showResponse: ShowResponse | ShowResponse[] | undefined): ShowResponse {
+    if (Array.isArray(showResponse)) {
+      return showResponse[0] || { variableId: '', value: '', delayMS: 0 };
+    }
+    return showResponse || { variableId: '', value: '', delayMS: 0 };
   }
 
   /**
@@ -74,9 +79,6 @@ export class ResponsesService {
     this.presentationProgress.set('some');
     this.mainAudioComplete.set(false);
     this.formerStateResponses.set([]);
-    this.closingMetaButtons.set({} as ClosingMetaButtonsParams);
-    this.closingMetaRunning.set(false);
-    this.metaInteractionDone.set(false);
   }
 
   /**
@@ -86,12 +88,9 @@ export class ResponsesService {
   setNewData(unitDefinition: UnitDefinition | null = null) {
     this.reset();
     if (unitDefinition) {
-      if (unitDefinition.closingMetaButtons) {
-        this.closingMetaButtons.set(unitDefinition.closingMetaButtons);
-      }
       const problems: string[] = [];
       if (unitDefinition.variableInfo && unitDefinition.variableInfo.length > 0) {
-        unitDefinition.variableInfo.forEach(vInfo => {
+        unitDefinition.variableInfo.forEach((vInfo: VariableInfo) => {
           if (vInfo.variableId && vInfo.variableId.length > 0 && vInfo.codes && vInfo.codes.length > 0) {
             const newVInfo: VariableInfo = {
               variableId: vInfo.variableId,
@@ -100,7 +99,7 @@ export class ResponsesService {
               codes: []
             };
             if (vInfo.codingSource) newVInfo.codingSource = vInfo.codingSource;
-            vInfo.codes.forEach(c => {
+            vInfo.codes.forEach((c: Code) => {
               const newCode: Code = {
                 method: 'EQUALS',
                 parameter: '',
@@ -122,13 +121,9 @@ export class ResponsesService {
       if (unitDefinition.audioFeedback && unitDefinition.audioFeedback.feedback &&
         unitDefinition.audioFeedback.feedback.length > 0) {
         this.triggerNavigationOnEnd.set(unitDefinition.audioFeedback.triggerNavigationOnEnd ?? false);
-        unitDefinition.audioFeedback.feedback.forEach(f => {
+        unitDefinition.audioFeedback.feedback.forEach((f: FeedbackDefinition) => {
           if (f.variableId && f.variableId.length > 0 && f.parameter && f.audioSource) {
-            let showResponse: ShowResponse = {
-              variableId: f.showResponse?.variableId || '',
-              value: f.showResponse?.value || '',
-              delayMS: f.showResponse?.delayMS || 0
-            };
+            const showResponse = this.normalizeShowResponse(f.showResponse);
             this.feedbackDefinitions.push({
               variableId: f.variableId,
               source: f.source || 'CODE',
@@ -158,8 +153,8 @@ export class ResponsesService {
           // keep maximum to avoid regressions from brief seeks/back jumps
           responseInStore.value = Math.max(prevN, incomingN);
           responseInStore.status = codedResponse.status;
-          responseInStore.code = codedResponse.code;
-          responseInStore.score = codedResponse.score;
+          responseInStore.code = codedResponse.code ?? 0;
+          responseInStore.score = codedResponse.score ?? 0;
         } else {
           codedResponse.value = incomingN;
           this.allResponses.push(codedResponse);
@@ -169,140 +164,45 @@ export class ResponsesService {
           this.presentationProgress.set('complete');
         }
       } else {
-        // Default behavior for all other responses (including closing meta selection)
-        this.upsertCodedResponseInStore(response, codedResponse);
-
-        if (this.closingMetaRunning()) {
-          const metaId = this.closingMetaButtons().variableIdMetaSelection;
-          const metaTouched = responses.some(r =>
-            r.id === metaId && r.status === 'VALUE_CHANGED' && r.relevantForResponsesProgress);
-          if (metaTouched) {
-            this.metaInteractionDone.set(true);
-          }
+        // Default behavior for all other responses
+        if (responseInStore) {
+          responseInStore.value = response.value;
+          responseInStore.status = codedResponse.status;
+          responseInStore.code = codedResponse.code ?? 0;
+          responseInStore.score = codedResponse.score ?? 0;
+        } else {
+          this.allResponses.push(codedResponse);
         }
-        if (response.id === 'VIDEO') {
-          const videoValue = response.value as number;
-          this.videoComplete.set(videoValue >= 1);
-          if (videoValue >= 1) {
-            this.presentationProgress.set('complete');
-          }
+        if (response.id === 'videoPlayer') {
+          this.videoComplete.set((this.asNumberOrZero(response.value)) >= 1);
         }
       }
     });
 
-    if (this.closingMetaRunning()) {
-      this.updateClosingMetaOutcome();
-    }
-
-    this.notifyUnitStateChangedIfResponsesChanged(responses);
-  }
-
-  /** Persists coded response fields (status, code, score) like other interaction types. */
-  private upsertCodedResponseInStore(givenResponse: Response, codedResponse: Response): void {
-    const responseInStore = this.allResponses.find(r => r.id === givenResponse.id);
-    if (responseInStore) {
-      responseInStore.value = codedResponse.value ?? givenResponse.value;
-      responseInStore.status = codedResponse.status;
-      responseInStore.code = codedResponse.code ?? 0;
-      responseInStore.score = codedResponse.score ?? 0;
-    } else {
-      this.allResponses.push(codedResponse);
-    }
-  }
-
-  private notifyUnitStateChangedIfResponsesChanged(triggerResponses: StarsResponse[] = []): void {
     const responsesAsString = JSON.stringify(this.allResponses);
-    if (responsesAsString === this.lastResponsesString) return;
-
-    this.lastResponsesString = responsesAsString;
-    if (triggerResponses.some(r => r.relevantForResponsesProgress && r.status === 'VALUE_CHANGED')) {
-      this.responseProgress.set(this.getResponsesComplete());
-    }
-    const unitState: UnitState = {
-      unitStateDataType: UnitStateDataType,
-      dataParts: {
-        responses: responsesAsString
-      },
-      responseProgress: this.responseProgress(),
-      presentationProgress: this.getPresentationStatus()
-    };
-
-    if (this.hasParentWindow) {
-      // tslint:disable-next-line:no-console
-      console.log('unit state changed: ', unitState);
-    }
-    if (this.veronaPostService) {
-      this.veronaPostService.sendVopStateChangedNotification({ unitState });
-      console.log('unit state changed: ', unitState);
-    }
-    const trigger = triggerResponses[0];
-    if (this.feedbackDefinitions.length > 0 && trigger) {
-      this.provideFeedback(trigger.id);
-    }
-  }
-
-  /**
-   * Derives variableIdMetaOutcome from the source interaction score and meta-button selection.
-   * Requires variableIdReference (main interaction) to be CODING_COMPLETE; otherwise DERIVE_ERROR.
-   * Meta selection may stay VALUE_CHANGED; only its value is used in the outcome string.
-   */
-  private updateClosingMetaOutcome(): void {
-    const {
-      variableIdMetaSelection,
-      variableIdReference,
-      variableIdMetaOutcome
-    } = this.closingMetaButtons();
-    if (!variableIdMetaOutcome) return;
-
-    const referenceResponse = this.getResponseByVariableId(variableIdReference);
-    let outcomeResponse: Response;
-
-    if (!referenceResponse?.id || referenceResponse.status !== 'CODING_COMPLETE') {
-      outcomeResponse = {
-        id: variableIdMetaOutcome,
-        status: 'DERIVE_ERROR',
-        value: 0,
-        code: 0,
-        score: 0
+    if (responsesAsString !== this.lastResponsesString) {
+      this.lastResponsesString = responsesAsString;
+      // only set response progress if it is relevant for the progress and the status is VALUE_CHANGED
+      if (responses.some(r => r.relevantForResponsesProgress && r.status === 'VALUE_CHANGED')) {
+        const getResponsesCompleteOutput = this.getResponsesComplete();
+        this.responseProgress.set(getResponsesCompleteOutput);
+      }
+      const unitState: UnitState = {
+        unitStateDataType: UnitStateDataType,
+        dataParts: {
+          responses: responsesAsString
+        },
+        responseProgress: this.responseProgress(),
+        presentationProgress: this.getPresentationStatus()
       };
-    } else {
-      const metaSelectionId = variableIdMetaSelection ?? '';
-      const metaSelectionResponse = this.getResponseByVariableId(metaSelectionId);
-      const metaSelectionValue = metaSelectionResponse?.value?.toString() ?? '0';
-      const referenceScore = referenceResponse.score ?? 0;
-      const outcomeValue = `${referenceScore}_${metaSelectionValue}`;
-      outcomeResponse = this.getCodedResponse({
-        id: variableIdMetaOutcome,
-        status: 'VALUE_CHANGED',
-        value: outcomeValue
-      });
-      // No meta selection yet (default meta part is '0') → show outcome as DISPLAYED, not coded
-      if (metaSelectionValue === '0') {
-        outcomeResponse.status = 'DISPLAYED';
+
+      if (this.veronaPostService) {
+        this.veronaPostService.sendVopStateChangedNotification({ unitState });
+      }
+      if (this.feedbackDefinitions.length > 0 && responses.length > 0 && responses[0]?.id) {
+        this.provideFeedback(responses[0].id);
       }
     }
-
-    const outcomeInStore = this.allResponses.find(r => r.id === variableIdMetaOutcome);
-    if (outcomeInStore) {
-      outcomeInStore.value = outcomeResponse.value;
-      outcomeInStore.status = outcomeResponse.status;
-      outcomeInStore.code = outcomeResponse.code ?? 0;
-      outcomeInStore.score = outcomeResponse.score ?? 0;
-    } else {
-      this.allResponses.push(outcomeResponse);
-    }
-  }
-
-  startClosingMeta() {
-    this.closingMetaRunning.set(true);
-    this.metaInteractionDone.set(false);
-    this.updateClosingMetaOutcome();
-    this.notifyUnitStateChangedIfResponsesChanged();
-  }
-
-  /** True when underscore-separated sub-values have gaps (leading/trailing/double underscore). */
-  private static hasIncompleteSubValues(value: string): boolean {
-    return value.startsWith('_') || value.endsWith('_') || value.includes('__');
   }
 
   private static isPositionInRange(responseValue: string, range: string): boolean {
@@ -310,13 +210,13 @@ export class ResponsesService {
       const responseMatches = responseValue.match(/\d+/g);
       if (responseMatches && responseMatches.length > 1) {
         const responseX = Number.parseInt(responseMatches[0], 10);
-        const responseY = Number.parseInt(responseMatches[1], 10);
+        const responseY = Number.parseInt(responseMatches[1] ?? '0', 10);
         const rangeMatches = range.match(/\d+/g);
         if (rangeMatches && rangeMatches.length > 3) {
-          const rangeX1 = Number.parseInt(rangeMatches[0], 10);
-          const rangeY1 = Number.parseInt(rangeMatches[1], 10);
-          const rangeX2 = Number.parseInt(rangeMatches[2], 10);
-          const rangeY2 = Number.parseInt(rangeMatches[3], 10);
+          const rangeX1 = Number.parseInt(rangeMatches[0] ?? '0', 10);
+          const rangeY1 = Number.parseInt(rangeMatches[1] ?? '0', 10);
+          const rangeX2 = Number.parseInt(rangeMatches[2] ?? '0', 10);
+          const rangeY2 = Number.parseInt(rangeMatches[3] ?? '0', 10);
           let compareXOk: boolean;
           if (rangeX1 < rangeX2) {
             compareXOk = responseX >= rangeX1 && responseX <= rangeX2;
@@ -358,7 +258,8 @@ export class ResponsesService {
           valueAsString = valueAsString.toUpperCase();
         } else if (codingScheme.codingSource === 'SUM_CHAR_MATCHES') {
           // 'bitwise' AND of strings with ones and zeros - for multiselect items
-          if (codingScheme.codingSourceParameter && codingScheme.codingSourceParameter.length === valueAsString.length) {
+          if (codingScheme.codingSourceParameter &&
+              codingScheme.codingSourceParameter.length === valueAsString.length) {
             let count = 0;
             for (let i = 0; i < valueAsString.length; i++) {
               count += (valueAsString.charCodeAt(i) === codingScheme.codingSourceParameter.charCodeAt(i)) ?
@@ -393,11 +294,7 @@ export class ResponsesService {
             }
           }
         });
-        const allSubValuesPresent = codingScheme.responseComplete !== 'ON_ALL_SUB_VALUES'
-          || !ResponsesService.hasIncompleteSubValues(valueAsString);
-        if (allSubValuesPresent) {
-          newResponse.status = 'CODING_COMPLETE';
-        }
+        newResponse.status = 'CODING_COMPLETE';
         if (newCode > Number.MIN_VALUE) {
           newResponse.code = newCode;
           newResponse.score = newScore;
@@ -420,16 +317,6 @@ export class ResponsesService {
     return this.allResponses.find(r => r.id === id) || {} as Response;
   }
 
-  /** Completed play count for an audio response (integer part of stored value). */
-  getAudioPlayCount(id: string): number {
-    return Math.floor(this.asNumberOrZero(this.getResponseByVariableId(id).value));
-  }
-
-  /** Whether the audio has reached its maxPlay limit for the current unit. */
-  isAudioMaxPlayReached(id: string, maxPlay: number): boolean {
-    return maxPlay !== 0 && this.getAudioPlayCount(id) >= maxPlay;
-  }
-
   private getResponsesComplete(): Progress {
     if (this.allResponses.length === 0) return 'none';
     if (!this.variableInfo || this.variableInfo.length === 0) return 'complete';
@@ -437,18 +324,11 @@ export class ResponsesService {
       .map(coding => coding.variableId);
     const onFullCredit = this.variableInfo
       .filter(coding => coding.responseComplete === 'ON_FULL_CREDIT');
-    const onAllSubValues = this.variableInfo
-      .filter(coding => coding.responseComplete === 'ON_ALL_SUB_VALUES');
-    if (onAny.length + onFullCredit.length + onAllSubValues.length === 0) return 'complete';
+    if (onAny.length + onFullCredit.length === 0) return 'complete';
     let isComplete = true;
     onAny.forEach(id => {
       const myResponse = this.allResponses
         .find(r => r.id === id && r.status === 'CODING_COMPLETE');
-      if (!myResponse) isComplete = false;
-    });
-    onAllSubValues.forEach(vi => {
-      const myResponse = this.allResponses
-        .find(r => r.id === vi.variableId && r.status === 'CODING_COMPLETE');
       if (!myResponse) isComplete = false;
     });
     if (isComplete) {
@@ -501,15 +381,15 @@ export class ResponsesService {
   }
 
   startFeedback() {
-    this.feedbackActive.set(true);
     if (this.pendingFeedbackHint === '') return;
-    if (this.pendingHintDelay > 0) {
+    if (this.pendingHintDelay !== 0) {
       setTimeout(() => {
         this.feedbackHint.set(this.pendingFeedbackHint);
       }, this.pendingHintDelay);
     } else {
       this.feedbackHint.set(this.pendingFeedbackHint);
     }
+    this.feedbackActive.set(true);
   }
 
   private provideFeedback(startVariable: string): void {
@@ -526,12 +406,13 @@ export class ResponsesService {
           let valueToCompare: string | number | boolean | null | undefined;
           if (f.source === 'VALUE') {
             if (Array.isArray(responseToCheck.value)) {
-              valueToCompare = responseToCheck.value.length > 0 ? responseToCheck.value[0] : '';
+              valueToCompare = responseToCheck.value.length > 0 ?
+                (responseToCheck.value[0] as string | number | boolean) : '';
             } else {
-              valueToCompare = responseToCheck.value;
+              valueToCompare = responseToCheck.value as string | number | boolean;
             }
           } else {
-            valueToCompare = f.source === 'SCORE' ? responseToCheck.score : responseToCheck.code;
+            valueToCompare = f.source === 'SCORE' ? (responseToCheck.score ?? 0) : (responseToCheck.code ?? 0);
           }
           if (f.method === 'EQUALS') {
             const valueToCompareAsString = typeof valueToCompare === 'string' ?
@@ -559,8 +440,9 @@ export class ResponsesService {
     if (audioToPlay) {
       this.pendingAudioFeedback.set(true);
       this.pendingAudioFeedbackSource = audioToPlay.audioSource;
-      this.pendingFeedbackHint = audioToPlay.showResponse?.value || '';
-      this.pendingHintDelay = audioToPlay.showResponse?.delayMS || 0;
+      const showResponse = this.normalizeShowResponse(audioToPlay.showResponse);
+      this.pendingFeedbackHint = showResponse.value || '';
+      this.pendingHintDelay = showResponse.delayMS || 0;
     }
   }
 
@@ -598,22 +480,15 @@ export class ResponsesService {
               const n = this.asNumberOrZero(mainAudioResp.value);
               this.mainAudioComplete.set(n >= 1);
             }
-
-            // Restore VIDEO completion from saved responses
-            const videoResp = parsedResponses.find(r => r.id === 'VIDEO');
-            if (videoResp) {
-              const videoValue = this.asNumberOrZero(videoResp.value);
-              this.videoComplete.set(videoValue >= 1);
-            }
-
-            if (this.mainAudioComplete() || this.videoComplete()) {
+            if (this.mainAudioComplete()) {
               this.presentationProgress.set('complete');
             }
 
             // Restore responseProgress: if any interaction response has VALUE_CHANGED (or CODING_COMPLETE), mark complete
             const hasInteractionValueChanged =
-              parsedResponses.some(r => (r.status === 'VALUE_CHANGED' || r.status === 'CODING_COMPLETE') &&
-                r.id !== 'mainAudio' && r.id !== 'VIDEO');
+              parsedResponses.some(r => (r.status === 'VALUE_CHANGED' ||
+                r.status === 'CODING_COMPLETE') &&
+                r.id !== 'mainAudio' && r.id !== 'videoPlayer');
             if (hasInteractionValueChanged) {
               this.responseProgress.set('complete');
             } else if (unitState.responseProgress) {
@@ -621,7 +496,7 @@ export class ResponsesService {
               this.responseProgress.set(unitState.responseProgress);
             }
           } catch (error) {
-            console.warn('RESPONSE SERVICE Failed to parse former state responses:', error);
+            // ignore parse errors for former state
           }
         }
       }

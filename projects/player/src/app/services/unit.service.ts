@@ -44,6 +44,18 @@ export class UnitService {
   private _firstClickLayerClicked = signal<boolean>(false);
   firstClickLayerClicked = this._firstClickLayerClicked.asReadonly();
 
+  private isFirstClickLayerEnabled(
+    value: FirstAudioOptionsParams['firstClickLayer'] | AudioOptions['firstClickLayer']
+  ): boolean {
+    if (value === true) {
+      return true;
+    }
+    if (value === false || value === undefined) {
+      return false;
+    }
+    return value === 'TRANSPARENT' || value === 'BLUR';
+  }
+
   /** Any interaction done: click layer clicked, audio heard, or response given */
   interactionDone = computed(() => this._firstClickLayerClicked() ||
       this.responsesService.mainAudioComplete() ||
@@ -54,7 +66,7 @@ export class UnitService {
   showFirstClickLayer = computed(() => {
     const options = this.firstAudioOptions();
     const mainAudio = this.mainAudio();
-    return (options?.firstClickLayer !== 'OFF') &&
+    return this.isFirstClickLayerEnabled(options?.firstClickLayer) &&
       !!mainAudio?.audioSource &&
       !this.interactionDone();
   });
@@ -146,7 +158,7 @@ export class UnitService {
         this.firstAudioOptions.set({ ...this.firstAudioOptions(), animateButton: mainAudio.animateButton });
       }
     }
-    if (mainAudio?.firstClickLayer) {
+    if (mainAudio?.firstClickLayer !== undefined) {
       if (!this.firstAudioOptions()?.firstClickLayer) {
         this.firstAudioOptions.set({ ...this.firstAudioOptions(), firstClickLayer: mainAudio.firstClickLayer });
       }

@@ -93,10 +93,7 @@ export class OpeningImageComponent extends InteractionComponentDirective {
     // After opening flow, disable the first click layer for the main audio
     const currentOpts = this.unitService.firstAudioOptions() || {};
     if (currentOpts.firstClickLayer) {
-      this.unitService.firstAudioOptions.set({
-        ...currentOpts,
-        firstClickLayer: false,
-      });
+      this.unitService.firstAudioOptions.set({ ...currentOpts, firstClickLayer: 'OFF' });
     }
     // Now that the opening image has disappeared, switch to main audio and auto-play once
     const main = this.unitService.mainAudio();
