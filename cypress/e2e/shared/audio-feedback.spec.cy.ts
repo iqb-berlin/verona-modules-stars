@@ -49,14 +49,8 @@ export function testAudioFeedback(interactionType: string, configFile: string) {
         // Wait until the feedback is played until the end
         cy.waitUntilFeedbackIsFinishedPlaying();
 
-        // interaction-disabled-overlay should be shown
-        cy.get('[data-cy=interaction-disabled-overlay]').should('be.visible');
-
-        // Check for hint class
-        // First check if it appears then permanently delete it to find the element that has hint class
-        cy.get('[data-cy=interaction-disabled-overlay]').then($el => {
-          $el.remove();
-        });
+        // First check that the overlay is visible and then remove it to inspect hint class
+        cy.get('[data-cy=interaction-disabled-overlay]').should('be.visible').invoke('remove');
 
         const hintSelector = getHintElementSelector(interactionType);
         cy.get(hintSelector).should('exist');
@@ -79,8 +73,9 @@ export function testAudioFeedback(interactionType: string, configFile: string) {
         // Wait until the feedback is played until the end
         cy.waitUntilFeedbackIsFinishedPlaying();
 
-        // interaction-disabled-overlay should NOT be shown
-        cy.get('[data-cy=interaction-disabled-overlay]').should('not.exist');
+        // The overlay should still be there to make the interaction not possible
+        // First check that the overlay is visible and then remove it to inspect hint class
+        cy.get('[data-cy=interaction-disabled-overlay]').should('be.visible').invoke('remove');
 
         const hintSelector = getHintElementSelector(interactionType);
         cy.get(hintSelector).should('not.exist');
