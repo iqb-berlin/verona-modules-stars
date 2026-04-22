@@ -13,12 +13,15 @@ describe('Interaction VIDEO Component', () => {
   });
 
   const clickVideoPlay = () => {
-    cy.get('[data-cy="video-play-button"]').click();
+    cy.get('[data-cy="video-play-button"]').click({ force: true });
   };
 
   const assertCheckIfVideoElementVisible = () => {
     // Click on the play button to remove it on top of the video element
     clickVideoPlay();
+
+    // The video wrapper should have the playing class (which hides the effects)
+    cy.get('[data-cy~="video-wrapper"]').should('have.class', 'playing');
 
     // Check if a video element is visible
     cy.get('[data-cy="video-player"]').should('exist').and('be.visible');
@@ -45,7 +48,29 @@ describe('Interaction VIDEO Component', () => {
     clickVideoPlay();
 
     // There should be a playing class on the video wrapper
-    cy.get('[data-cy="video-wrapper"]').should($el => {
+    cy.get('[data-cy~="video-wrapper"]').should($el => {
+      expect($el).to.have.class('playing');
+    });
+  });
+
+  it('shows the effects again after the video ends', () => {
+    // Start the video
+    clickVideoPlay();
+
+    // The video wrapper should have the playing class
+    cy.get('[data-cy~="video-wrapper"]').should('have.class', 'playing');
+
+    playVideoFaster();
+
+    // The video wrapper should NOT have the playing class
+    cy.get('[data-cy~="video-wrapper"]').should('not.have.class', 'playing');
+  });
+
+  it('starts playing when clicked on the video wrapper', () => {
+    cy.get('[data-cy~="video-wrapper"]').click({ force: true });
+
+    // There should be a playing class on the video wrapper
+    cy.get('[data-cy~="video-wrapper"]').should($el => {
       expect($el).to.have.class('playing');
     });
   });
@@ -60,9 +85,9 @@ describe('Interaction VIDEO Component', () => {
 
     playVideoFaster();
 
-    // Check if the ended class exists on the video wrapper
-    cy.get('[data-cy="video-wrapper"]').should($el => {
-      expect($el).to.have.class('ended');
+    // Check if the not-playing class exists on the video wrapper
+    cy.get('[data-cy~="video-wrapper"]').should($el => {
+      expect($el).to.have.class('not-playing');
     });
 
     // Check if the poster is visible again because when the video ends,
