@@ -7,35 +7,34 @@
   width: 95%;
   height: 80%;
 
-  .video-wrapper {
+  .video-player-wrapper {
     @include variables.flex-center;
     position: relative;
     width: 100%;
     height: 100%;
 
-    .video {
+    .video-player {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
+      pointer-events: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
 
-      &.playing {
-        z-index: 100;
+      video {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+
+        opacity: 50%;
+        filter: grayscale(50%);
+        transition: opacity 0.3s, filter 0.3s;
+        outline: none;
       }
-    }
-
-    video {
-      object-fit: contain;
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-
-      opacity: 50%;
-      filter: grayscale(50%);
-      transition: opacity 0.3s, filter 0.3s;
     }
 
     .play-button {
@@ -48,10 +47,12 @@
       border: none;
       padding: 0;
       cursor: pointer;
+      outline: none;
     }
 
-    &.playing {
-      video {
+    &.video-playing {
+      outline: none;
+      .video-player video {
         opacity: 100%;
         filter: grayscale(0%);
       }
@@ -61,8 +62,10 @@
       }
     }
 
-    &:not(.playing) {
+    &:not(.video-playing) {
       cursor: pointer;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
     }
   }
 

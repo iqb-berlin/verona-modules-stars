@@ -1,6 +1,6 @@
 <div class="video-container" data-cy="video-container">
-  <div class="video-wrapper" [class.playing]="isPlaying()" [class.not-playing]="!isPlaying()" (click)="!isPlaying() && play()" data-cy="video-wrapper">
-    <div class="video" [class.playing]="isPlaying()">
+  <div class="video-player-wrapper" [class.video-playing]="isPlaying()" (click)="!isPlaying() && play()" data-cy="video-player-wrapper">
+    <div class="video-player">
       <video #videoPlayer [poster]="localParameters.imageSource" (ended)="ended()" data-cy="video-player">
         <source [src]="localParameters.videoSource" data-cy="video-player-source">
       </video>

@@ -21,7 +21,7 @@ describe('Interaction VIDEO Component', () => {
     clickVideoPlay();
 
     // The video wrapper should have the playing class (which hides the effects)
-    cy.get('[data-cy~="video-wrapper"]').should('have.class', 'playing');
+    cy.get('[data-cy="video-player-wrapper"]').should('have.class', 'video-playing');
 
     // Check if a video element is visible
     cy.get('[data-cy="video-player"]').should('exist').and('be.visible');
@@ -47,9 +47,9 @@ describe('Interaction VIDEO Component', () => {
     // Start the video
     clickVideoPlay();
 
-    // There should be a playing class on the video wrapper
-    cy.get('[data-cy~="video-wrapper"]').should($el => {
-      expect($el).to.have.class('playing');
+    // There should be a playing class on the video player wrapper
+    cy.get('[data-cy="video-player-wrapper"]').should($el => {
+      expect($el).to.have.class('video-playing');
     });
   });
 
@@ -58,20 +58,20 @@ describe('Interaction VIDEO Component', () => {
     clickVideoPlay();
 
     // The video wrapper should have the playing class
-    cy.get('[data-cy~="video-wrapper"]').should('have.class', 'playing');
+    cy.get('[data-cy="video-player-wrapper"]').should('have.class', 'video-playing');
 
     playVideoFaster();
 
     // The video wrapper should NOT have the playing class
-    cy.get('[data-cy~="video-wrapper"]').should('not.have.class', 'playing');
+    cy.get('[data-cy="video-player-wrapper"]').should('not.have.class', 'video-playing');
   });
 
   it('starts playing when clicked on the video wrapper', () => {
-    cy.get('[data-cy~="video-wrapper"]').click({ force: true });
+    cy.get('[data-cy="video-player-wrapper"]').click({ force: true });
 
     // There should be a playing class on the video wrapper
-    cy.get('[data-cy~="video-wrapper"]').should($el => {
-      expect($el).to.have.class('playing');
+    cy.get('[data-cy="video-player-wrapper"]').should($el => {
+      expect($el).to.have.class('video-playing');
     });
   });
 
@@ -85,9 +85,9 @@ describe('Interaction VIDEO Component', () => {
 
     playVideoFaster();
 
-    // Check if the not-playing class exists on the video wrapper
-    cy.get('[data-cy~="video-wrapper"]').should($el => {
-      expect($el).to.have.class('not-playing');
+    // Check if the playing class does not exist on the video player wrapper
+    cy.get('[data-cy="video-player-wrapper"]').should($el => {
+      expect($el).to.not.have.class('video-playing');
     });
 
     // Check if the poster is visible again because when the video ends,
