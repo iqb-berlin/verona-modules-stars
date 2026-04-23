@@ -3,6 +3,7 @@ import {
   UnitDefinition
 } from '../../../projects/player/src/app/models/unit-definition';
 import { testRibbonBars } from '../shared/ribbon-bar.spec.cy';
+import { testContinueButtonFeatures } from "../shared/continue-button.spec.cy";
 
 describe('Interaction VIDEO Component', () => {
   const interactionType = 'video';
@@ -13,12 +14,15 @@ describe('Interaction VIDEO Component', () => {
   });
 
   const clickVideoPlay = () => {
-    cy.get('[data-cy="video-play-button"]').click();
+    cy.get('[data-cy="video-play-button"]').click({ force: true });
   };
 
   const assertCheckIfVideoElementVisible = () => {
     // Click on the play button to remove it on top of the video element
     clickVideoPlay();
+
+    // The video wrapper should have the playing class (which hides the effects)
+    cy.get('[data-cy="video-player-wrapper"]').should('have.class', 'video-playing');
 
     // Check if a video element is visible
     cy.get('[data-cy="video-player"]').should('exist').and('be.visible');
@@ -44,9 +48,31 @@ describe('Interaction VIDEO Component', () => {
     // Start the video
     clickVideoPlay();
 
+    // There should be a playing class on the video player wrapper
+    cy.get('[data-cy="video-player-wrapper"]').should($el => {
+      expect($el).to.have.class('video-playing');
+    });
+  });
+
+  it('shows the effects again after the video ends', () => {
+    // Start the video
+    clickVideoPlay();
+
+    // The video wrapper should have the playing class
+    cy.get('[data-cy="video-player-wrapper"]').should('have.class', 'video-playing');
+
+    playVideoFaster();
+
+    // The video wrapper should NOT have the playing class
+    cy.get('[data-cy="video-player-wrapper"]').should('not.have.class', 'video-playing');
+  });
+
+  it('starts playing when clicked on the video wrapper', () => {
+    cy.get('[data-cy="video-player-wrapper"]').click({ force: true });
+
     // There should be a playing class on the video wrapper
-    cy.get('[data-cy="video-wrapper"]').should($el => {
-      expect($el).to.have.class('playing');
+    cy.get('[data-cy="video-player-wrapper"]').should($el => {
+      expect($el).to.have.class('video-playing');
     });
   });
 
@@ -60,9 +86,9 @@ describe('Interaction VIDEO Component', () => {
 
     playVideoFaster();
 
-    // Check if the ended class exists on the video wrapper
-    cy.get('[data-cy="video-wrapper"]').should($el => {
-      expect($el).to.have.class('ended');
+    // Check if the playing class does not exist on the video player wrapper
+    cy.get('[data-cy="video-player-wrapper"]').should($el => {
+      expect($el).to.not.have.class('video-playing');
     });
 
     // Check if the poster is visible again because when the video ends,
@@ -118,22 +144,6 @@ describe('Interaction VIDEO Component', () => {
     });
   });
 
-  it('shows the continue button after the video is complete', () => {
-    // Continue button should NOT exist initially
-    cy.get('[data-cy="continue-button"]').should('not.exist');
-
-    // Start the video
-    clickVideoPlay();
-
-    // Continue button should NOT exist after clicking the video button
-    cy.assertContinueButtonNotExists();
-
-    playVideoFaster();
-
-    // Continue button should appear
-    cy.assertContinueButtonExistsAndVisible();
-  });
-
   describe('Navigation on triggerNavigationOnEnd', () => {
     it('requests navigation to next unit when triggerNavigationOnEnd is true and video ends', () => {
       cy.setupTestData(
@@ -166,5 +176,6 @@ describe('Interaction VIDEO Component', () => {
   // Test base features for the VIDEO interaction type
   describe('Shared Features', () => {
     testRibbonBars(interactionType, `${interactionType}_ribbonBars_true_test`);
+    testContinueButtonFeatures(interactionType);
   });
 });
