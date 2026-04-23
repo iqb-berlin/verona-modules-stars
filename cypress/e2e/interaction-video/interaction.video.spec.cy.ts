@@ -3,6 +3,7 @@ import {
   UnitDefinition
 } from '../../../projects/player/src/app/models/unit-definition';
 import { testRibbonBars } from '../shared/ribbon-bar.spec.cy';
+import { testContinueButtonFeatures } from "../shared/continue-button.spec.cy";
 
 describe('Interaction VIDEO Component', () => {
   const interactionType = 'video';
@@ -143,22 +144,6 @@ describe('Interaction VIDEO Component', () => {
     });
   });
 
-  it('shows the continue button after the video is complete', () => {
-    // Continue button should NOT exist initially
-    cy.get('[data-cy="continue-button"]').should('not.exist');
-
-    // Start the video
-    clickVideoPlay();
-
-    // Continue button should NOT exist after clicking the video button
-    cy.assertContinueButtonNotExists();
-
-    playVideoFaster();
-
-    // Continue button should appear
-    cy.assertContinueButtonExistsAndVisible();
-  });
-
   describe('Navigation on triggerNavigationOnEnd', () => {
     it('requests navigation to next unit when triggerNavigationOnEnd is true and video ends', () => {
       cy.setupTestData(
@@ -191,5 +176,6 @@ describe('Interaction VIDEO Component', () => {
   // Test base features for the VIDEO interaction type
   describe('Shared Features', () => {
     testRibbonBars(interactionType, `${interactionType}_ribbonBars_true_test`);
+    testContinueButtonFeatures(interactionType);
   });
 });

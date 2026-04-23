@@ -494,6 +494,10 @@ Cypress.Commands.add('applyStandardScenarios', (interactionType: string, navigat
     return [coords[0] || 0, coords[1] || 0];
   };
 
+  if (interactionType === 'video') {
+    return;
+  }
+
   if (interactionType === 'image_only') {
     cy.get('[data-cy="stimulus-image"]').should('exist').and('be.visible');
     cy.log('For interactionType: ', interactionType, 'stimulus-image exists and visible.');
@@ -617,23 +621,21 @@ Cypress.Commands.add('applyStandardScenarios', (interactionType: string, navigat
   }
 
   if (interactionType === 'pyramid') {
-    if (navigator !== undefined) {
-      if (typeof navigator === 'string') {
-        const parts = navigator.split('_');
-        if (parts.length === 2) {
-          const left = parts[0] || '';
-          const right = parts[1] || '';
-          cy.get('[data-cy="interactive-pyramid-input-left"]').click();
-          left.split('').forEach(char => {
-            cy.get(`[data-cy="keyboard-button-${char}"]`).click();
-          });
-          cy.get('[data-cy="interactive-pyramid-input-right"]').click();
-          right.split('').forEach(char => {
-            cy.get(`[data-cy="keyboard-button-${char}"]`).click();
-          });
-          cy.wait(500);
-          return;
-        }
+    if (navigator !== undefined && typeof navigator === 'string') {
+      const parts = navigator.split('_');
+      if (parts.length === 2) {
+        const left = parts[0] || '';
+        const right = parts[1] || '';
+        cy.get('[data-cy="interactive-pyramid-input-left"]').click();
+        left.split('').forEach(char => {
+          cy.get(`[data-cy="keyboard-button-${char}"]`).click();
+        });
+        cy.get('[data-cy="interactive-pyramid-input-right"]').click();
+        right.split('').forEach(char => {
+          cy.get(`[data-cy="keyboard-button-${char}"]`).click();
+        });
+        cy.wait(500);
+        return;
       }
     }
     // Default behavior

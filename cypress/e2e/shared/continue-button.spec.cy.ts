@@ -33,20 +33,30 @@ export function testContinueButtonFeatures(interactionType: string) {
     };
 
     const continueButtonConfigs = [
-      { continueButtonShow: 'ON_ANY_RESPONSE', file: `${interactionType}_continueButtonShow_onAnyResponse_test.json` },
       { continueButtonShow: 'NO', file: `${interactionType}_continueButtonShow_no_test.json` },
-      // eslint-disable-next-line max-len
-      {
-        continueButtonShow: 'ON_RESPONSES_COMPLETE',
-        file: `${interactionType}_continueButtonShow_onResponsesComplete_test.json`
-      },
-      { continueButtonShow: 'ALWAYS', file: `${interactionType}_continueButtonShow_always_test.json` },
-      // eslint-disable-next-line max-len
-      {
-        continueButtonShow: 'ON_MAIN_AUDIO_COMPLETE',
-        file: `${interactionType}_continueButtonShow_onMainAudioComplete_test.json`
-      }
+      { continueButtonShow: 'ALWAYS', file: `${interactionType}_continueButtonShow_always_test.json` }
     ];
+
+    if (interactionType === 'video') {
+      continueButtonConfigs.push({
+        continueButtonShow: 'ON_VIDEO_COMPLETE',
+        file: `${interactionType}_continueButtonShow_onVideoComplete_test.json`
+      });
+    }
+
+    if (interactionType !== 'video') {
+      continueButtonConfigs.push(
+        { continueButtonShow: 'ON_ANY_RESPONSE', file: `${interactionType}_continueButtonShow_onAnyResponse_test.json` },
+        {
+          continueButtonShow: 'ON_RESPONSES_COMPLETE',
+          file: `${interactionType}_continueButtonShow_onResponsesComplete_test.json`
+        },
+        {
+          continueButtonShow: 'ON_MAIN_AUDIO_COMPLETE',
+          file: `${interactionType}_continueButtonShow_onMainAudioComplete_test.json`
+        }
+      );
+    }
 
     continueButtonConfigs.forEach(({ continueButtonShow, file }) => {
       if (continueButtonShow === 'ON_ANY_RESPONSE') {
@@ -144,6 +154,32 @@ export function testContinueButtonFeatures(interactionType: string) {
 
           // Wait for audio to complete
           cy.waitUntilAudioIsFinishedPlaying();
+
+          // Continue button should appear
+          cy.assertContinueButtonExistsAndVisible();
+
+          assertContinueButtonClickTriggersNavigation();
+        });
+      }
+      if (continueButtonShow === 'ON_VIDEO_COMPLETE') {
+        // eslint-disable-next-line max-len
+        it('shows continue button after video is complete when continueButtonShow === ON_VIDEO_COMPLETE', () => {
+          testSetup(continueButtonShow, file);
+          // Continue button should not exist initially
+          cy.assertContinueButtonNotExists();
+
+          // Start the video
+          cy.get('[data-cy="video-play-button"]').click({ force: true });
+
+          // Continue button should not exist after clicking the video button
+          cy.assertContinueButtonNotExists();
+
+          // Play it faster for the test purposes
+          cy.get('[data-cy="video-player"]').then($video => {
+            const videoElement = $video[0] as HTMLVideoElement;
+            // Skip to 0.1 seconds before the end
+            videoElement.currentTime = videoElement.duration - 0.1;
+          });
 
           // Continue button should appear
           cy.assertContinueButtonExistsAndVisible();
