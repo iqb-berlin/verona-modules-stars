@@ -29,6 +29,7 @@ import { InteractionPlaceValueComponent } from './components/interaction-place-v
 import { InteractionNumberLineComponent } from './components/interaction-number-line/interaction-number-line.component';
 import { InteractionPyramidComponent } from './components/interaction-pyramid/interaction-pyramid.component';
 import { InteractionEquationComponent } from './components/interaction-equation/interaction-equation.component';
+import { InteractionMetaComponent } from './components/interaction-meta/interaction-meta.component';
 
 @NgModule({
   declarations: [
@@ -57,7 +58,8 @@ import { InteractionEquationComponent } from './components/interaction-equation/
         InteractionPlaceValueComponent,
         InteractionNumberLineComponent,
         InteractionPyramidComponent,
-        InteractionEquationComponent
+        InteractionEquationComponent,
+        InteractionMetaComponent
     ],
   providers: [
     provideZonelessChangeDetection(),

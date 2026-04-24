@@ -96,6 +96,11 @@
        [parameters]="getParametersWithFormerState()"
        [showHint]="responsesService.feedbackHint()"
        (responses)="responsesService.newResponses($event)"></stars-interaction-equation>
+  } @else if (!unitService.openingFlowActive() && unitService.interaction() === 'META') {
+    <stars-interaction-meta class="interaction"
+       [parameters]="getParametersWithFormerState()"
+       [showHint]="responsesService.feedbackHint()"
+       (responses)="responsesService.newResponses($event)"></stars-interaction-meta>
   }
 
   <!-- lower ribbons -->

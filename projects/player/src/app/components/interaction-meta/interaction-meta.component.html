@@ -1,0 +1,28 @@
+<div class="meta-container" data-cy="interaction-meta">
+  @if (buttons().length > 0) {
+    <div class="buttons-wrapper"
+         data-cy="buttons-wrapper"
+         [class.has-hint]="hasHint()"
+    >
+      <div class="row" data-cy="button-row-0">
+        @for (button of buttons(); track $index) {
+          <div class="inner-button-wrapper" [attr.data-cy]="'button-wrapper-' + $index">
+            <stars-standard-button
+              [id]="localParameters.variableId || 'META'"
+              [value]="$index"
+              inputType="radio"
+              [text]="''"
+              [image]="button.imageSource"
+              [icon]="''"
+              [selected]="selectedValues()[$index]"
+              [hintSelect]="hintValues()[$index] || false"
+              type="MEDIUM_SQUARE"
+              [attr.data-cy]="'button-' + $index"
+              (buttonClick)="onButtonClick($index)">
+            </stars-standard-button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

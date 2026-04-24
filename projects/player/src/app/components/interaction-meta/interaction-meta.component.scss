@@ -1,0 +1,37 @@
+@use '_variables.scss';
+@use '_colors.scss';
+
+.meta-container {
+  @include variables.interaction-wrapper;
+}
+
+.buttons-wrapper {
+  box-sizing: border-box;
+  flex-grow: 0;
+  flex-shrink: 0;
+
+  @include variables.flex-center;
+  flex-direction: column;
+  gap: variables.$small-gap-margin;
+
+  .row {
+    @include variables.flex-center;
+    flex-direction: row;
+    width: 100%;
+    column-gap: variables.$small-gap-margin;
+  }
+}
+
+.inner-button-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 10px;
+
+  stars-standard-button {
+    @include variables.medium-button-size;
+    display: block;
+  }
+}
