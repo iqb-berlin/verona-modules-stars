@@ -1,11 +1,11 @@
 {
   "id": "stars-unit-definition",
-  "version": "1.10",
+  "version": "3.0",
   "backgroundColor": "#3cf",
   "ribbonBars": false,
   "continueButtonShow": "NO",
   "firstAudioOptions": {
-    "firstClickLayer": true,
+    "firstClickLayer": "TRANSPARENT",
     "animateButton": true
   },
   "mainAudio": {

@@ -257,9 +257,9 @@ export class ResponsesService {
           valueAsString = valueAsString.toUpperCase();
         } else if (codingScheme.codingSource === 'SUM_CHAR_MATCHES') {
           // 'bitwise' AND of strings with ones and zeros - for multiselect items
-          if (codingScheme.codingSourceParameter && codingScheme.codingSourceParameter.length == valueAsString.length) {
+          if (codingScheme.codingSourceParameter && codingScheme.codingSourceParameter.length === valueAsString.length) {
             let count = 0;
-            for(let i = 0; i < valueAsString.length; i++) {
+            for (let i = 0; i < valueAsString.length; i++) {
               count += (valueAsString.charCodeAt(i) === codingScheme.codingSourceParameter.charCodeAt(i)) ?
                 1 : 0;
             }
@@ -379,15 +379,15 @@ export class ResponsesService {
   }
 
   startFeedback() {
+    this.feedbackActive.set(true);
     if (this.pendingFeedbackHint === '') return;
-    if (this.pendingHintDelay != 0) {
+    if (this.pendingHintDelay > 0) {
       setTimeout(() => {
         this.feedbackHint.set(this.pendingFeedbackHint);
       }, this.pendingHintDelay);
     } else {
       this.feedbackHint.set(this.pendingFeedbackHint);
     }
-    this.feedbackActive.set(true);
   }
 
   private provideFeedback(startVariable: string): void {
@@ -460,7 +460,7 @@ export class ResponsesService {
       }
       if (unitState.dataParts) {
         const dataParts = unitState.dataParts || {};
-        const responsesJson = dataParts['responses'];
+        const responsesJson = dataParts.responses;
 
         if (responsesJson) {
           try {

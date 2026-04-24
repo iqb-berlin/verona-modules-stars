@@ -1,5 +1,5 @@
 import {
-  AfterViewInit, Component, effect, ElementRef, signal, ViewChild, inject
+  AfterViewInit, Component, effect, ElementRef, signal, ViewChild, inject, OnDestroy
 } from '@angular/core';
 import {
   fromEvent, Subject, tap, throttleTime
@@ -17,7 +17,7 @@ import { VeronaPostService } from '../../services/verona-post.service';
   styleUrls: ['./interaction-video.component.scss']
 })
 
-export class InteractionVideoComponent extends InteractionComponentDirective implements AfterViewInit {
+export class InteractionVideoComponent extends InteractionComponentDirective implements AfterViewInit, OnDestroy {
   localParameters!: InteractionVideoParams;
   private _isPlaying = signal(false);
   isPlaying = this._isPlaying.asReadonly();
@@ -39,6 +39,12 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
       this.localParameters = this.createDefaultParameters();
 
       if (parameters) {
+        // Stop any currently playing video
+        if (this.videoPlayerRef) {
+          this.videoPlayerRef.nativeElement.pause();
+          this.videoPlayerRef.nativeElement.currentTime = 0;
+        }
+
         // Reset internal playback state for new unit
         this.playCount = 0;
         this.currentTime = 0;
@@ -57,6 +63,10 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
         }]);
 
         this._isPlaying.set(false);
+
+        if (this.videoPlayerRef) {
+          this.videoPlayerRef.nativeElement.load();
+        }
       }
     });
   }
@@ -73,6 +83,14 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
         )
         .subscribe(() => this.sendPlaybackTimeChanged());
     }
+  }
+
+  ngOnDestroy() {
+    if (this.videoPlayerRef) {
+      this.videoPlayerRef.nativeElement.pause();
+    }
+    this.ngUnsubscribe.next(true);
+    this.ngUnsubscribe.complete();
   }
 
   private calculateTime() {

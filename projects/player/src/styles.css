@@ -33,6 +33,23 @@ button {
   font-family: 'IQBprimar', sans-serif;
 }
 
+/* Disable selection/touch callouts only when restricted */
+.disable-user-interaction,
+.disable-user-interaction *,
+.disable-user-interaction *::before,
+.disable-user-interaction *::after {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.disable-user-interaction img {
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+}
+
 player-sub-form {
   display: block;
   padding-bottom: 1em;

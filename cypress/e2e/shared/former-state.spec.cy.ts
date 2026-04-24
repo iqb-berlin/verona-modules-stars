@@ -19,7 +19,9 @@ export function testFormerStateFeatures(interactionType: string, defaultTestFile
         buttons: [0, 1, 2, 3],
         drop: [0, 1, 2, 3],
         place_value: ['0,1', '1,1', '1,2', '2,1'],
-        equation: ['1', '2', '3', '4']
+        equation: ['1', '2', '3', '4'],
+        number_line: ['1', '2', '3', '4'],
+        pyramid: ['1_2', '3_4', '5_6', '7_8'],
       };
 
       const getNav = (idx: number) => {
@@ -47,8 +49,8 @@ export function testFormerStateFeatures(interactionType: string, defaultTestFile
     });
 
     it('preserves the click-layer state when navigating between multiple units', () => {
-      const firstTestFile = `${interactionType}_firstClickLayer_true_test`;
-      const secondTestFile = `${interactionType}_firstClickLayer_true_second_test`;
+      const firstTestFile = `${interactionType}_firstClickLayer_transparent_test`;
+      const secondTestFile = `${interactionType}_firstClickLayer_transparent_second_test`;
 
       if (interactionType === 'find_on_image') {
         cy.log('Skipping test for find_on_image as it does not support firstClickLayer');

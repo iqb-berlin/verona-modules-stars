@@ -11,11 +11,16 @@ describe('Interaction WRITE Component', () => {
     cy.clearUnitStates();
   });
 
-  it('has stimulus wrapper with an image inside', () => {
+  it('shows the stimulus wrapper only if an imageSource is provided', () => {
+    // 1. With image
     cy.setupTestData(defaultTestFile, interactionType);
     cy.get('[data-cy=stimulus-wrapper]')
       .find('[data-cy=stimulus-image]')
       .should('exist');
+
+    // 2. Without image
+    cy.setupTestData('write_numbersLine_without_imageSource_test', interactionType);
+    cy.get('[data-cy=stimulus-wrapper]').should('not.exist');
   });
 
   it('has text-wrapper and text-display elements', () => {
@@ -129,7 +134,7 @@ describe('Interaction WRITE Component', () => {
     cy.get('[data-cy=write-container]').should('have.class', 'characters-type');
     cy.get('[data-cy=character-button-a]').should('exist');
 
-    // 2. Check keyboardMode: NUMBERS_LINE
+    // 3. Check keyboardMode: NUMBERS_LINE
     cy.setupTestData('write_numbersLine_test', interactionType);
     cy.get('[data-cy=write-container]').should('have.class', 'numbers_line-type');
     cy.get('[data-cy=numbers-button-1]').should('exist');

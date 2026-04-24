@@ -104,6 +104,10 @@
       box-shadow: none;
     }
 
+    input.hint + label {
+      border-radius: 50%;
+    }
+
     &:has(input:checked) {
       box-shadow: none;
     }

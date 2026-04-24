@@ -1,11 +1,11 @@
 <div class="video-container" data-cy="video-container">
-  <div class="video-wrapper" [class.playing]="isPlaying()" [class.ended]="!isPlaying()" data-cy="video-wrapper">
-    <div class="video">
+  <div class="video-player-wrapper" [class.video-playing]="isPlaying()" (click)="!isPlaying() && play()" data-cy="video-player-wrapper">
+    <div class="video-player">
       <video #videoPlayer [poster]="localParameters.imageSource" (ended)="ended()" data-cy="video-player">
         <source [src]="localParameters.videoSource" data-cy="video-player-source">
       </video>
     </div>
-    <button class="play-button" (click)="play()" data-cy="video-play-button">
+    <button class="play-button" data-cy="video-play-button">
       <svg width="100px" height="100px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
         <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>

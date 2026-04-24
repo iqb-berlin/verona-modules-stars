@@ -1,10 +1,10 @@
 {
   "id": "stars-unit-definition",
-  "version": "1.10",
+  "version": "3.0",
   "backgroundColor": "#FFD4AC",
   "continueButtonShow": "ON_ANY_RESPONSE",
   "firstAudioOptions": {
-    "firstClickLayer": true,
+    "firstClickLayer": "TRANSPARENT",
     "animateButton": true
   },
   "mainAudio": {

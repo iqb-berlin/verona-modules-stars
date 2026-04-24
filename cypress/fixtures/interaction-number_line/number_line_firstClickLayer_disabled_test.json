@@ -1,0 +1,24 @@
+{
+  "id": "stars-unit-definition",
+  "version": "2.4",
+  "backgroundColor": "#E1E9FF",
+  "continueButtonShow": "ALWAYS",
+  "ribbonBars": false,
+  "firstAudioOptions": {
+    "firstClickLayer": "DISABLED",
+    "animateButton": true
+  },
+  "mainAudio": {
+    "audioSource": "data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//OEAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAEAAABIADAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwP////////////////////////////////8AAAAATGF2YzU4LjkxAAAAAAAAAAAAAAAAJAAAAAAAAAAAASADAwMAsS6ZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//OEAAAAAAAAAAAAAAAAAAAAAAAABYaW5nAAAADwAAAAYAAAEsAIAAgICAgICAgICAgICAgICAgICAgICAgP////////////////////////////////8AAAAATGF2YzU4LjkxAAAAAAAAAAAAAAAAJAAAAAAAAAAAASADAwMAsS6ZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "maxPlay": 3,
+    "disableInteractionUntilComplete": false
+  },
+  "interactionType": "NUMBER_LINE",
+  "interactionParameters": {
+    "variableId": "NUMBER_LINE",
+    "firstNumber": 5,
+    "lastNumber": 15,
+    "numberInput": 9,
+    "style": "WAVE"
+  }
+}

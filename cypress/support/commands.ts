@@ -36,7 +36,11 @@
 //   }
 // }
 
-import { InteractionParameters, UnitDefinition } from '../../projects/player/src/app/models/unit-definition';
+import {
+  InteractionEquationParams,
+  InteractionParameters,
+  UnitDefinition
+} from '../../projects/player/src/app/models/unit-definition';
 import { getButtonOptions, getCorrectAnswerParam, getIndexByOneBasedInput } from './utils';
 
 Cypress.Commands.add('loadUnit', (filename: string) => {
@@ -490,6 +494,10 @@ Cypress.Commands.add('applyStandardScenarios', (interactionType: string, navigat
     return [coords[0] || 0, coords[1] || 0];
   };
 
+  if (interactionType === 'video') {
+    return;
+  }
+
   if (interactionType === 'image_only') {
     cy.get('[data-cy="stimulus-image"]').should('exist').and('be.visible');
     cy.log('For interactionType: ', interactionType, 'stimulus-image exists and visible.');
@@ -613,23 +621,21 @@ Cypress.Commands.add('applyStandardScenarios', (interactionType: string, navigat
   }
 
   if (interactionType === 'pyramid') {
-    if (navigator !== undefined) {
-      if (typeof navigator === 'string') {
-        const parts = navigator.split('_');
-        if (parts.length === 2) {
-          const left = parts[0] || '';
-          const right = parts[1] || '';
-          cy.get('[data-cy="interactive-pyramid-input-left"]').click();
-          left.split('').forEach(char => {
-            cy.get(`[data-cy="keyboard-button-${char}"]`).click();
-          });
-          cy.get('[data-cy="interactive-pyramid-input-right"]').click();
-          right.split('').forEach(char => {
-            cy.get(`[data-cy="keyboard-button-${char}"]`).click();
-          });
-          cy.wait(500);
-          return;
-        }
+    if (navigator !== undefined && typeof navigator === 'string') {
+      const parts = navigator.split('_');
+      if (parts.length === 2) {
+        const left = parts[0] || '';
+        const right = parts[1] || '';
+        cy.get('[data-cy="interactive-pyramid-input-left"]').click();
+        left.split('').forEach(char => {
+          cy.get(`[data-cy="keyboard-button-${char}"]`).click();
+        });
+        cy.get('[data-cy="interactive-pyramid-input-right"]').click();
+        right.split('').forEach(char => {
+          cy.get(`[data-cy="keyboard-button-${char}"]`).click();
+        });
+        cy.wait(500);
+        return;
       }
     }
     // Default behavior
@@ -742,7 +748,6 @@ Cypress.Commands.add('applyCorrectAnswerScenarios', (interactionType: string, da
       cy.get(`[data-cy="keyboard-button-${char}"]`).click();
     });
   } else if (interactionType === 'equation') {
-    cy.clearEquationInput();
     const interactionParams = dataToCheck.interactionParameters as InteractionEquationParams;
     const editableFields: string[] = [];
     if (interactionParams.fixOperand1 === undefined) editableFields.push('operand1');
@@ -751,11 +756,15 @@ Cypress.Commands.add('applyCorrectAnswerScenarios', (interactionType: string, da
     if (interactionParams.fixResult === undefined) editableFields.push('result');
 
     const parts = correctAnswerParam.split('_');
+
     if (parts.length === editableFields.length) {
       editableFields.forEach((field, index) => {
         const val = parts[index] || '';
         if (val === '') return;
         cy.get(`[data-cy="${field}"]`).click();
+        // Delete the current input if it exists
+        cy.clearEquationInput();
+        cy.wait(500);
         if (field === 'operator') {
           cy.get(`[data-cy="operator-button-${val}"]`).click();
         } else {

@@ -8,6 +8,7 @@ import { UnitService } from './services/unit.service';
 import { MetadataService } from './services/metadata.service';
 import { ResponsesService } from './services/responses.service';
 import { VopStartCommand } from './models/verona';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'stars-player',
@@ -50,6 +51,11 @@ export class AppComponent implements OnInit {
       });
     this.isStandalone = window === window.parent;
     this.veronaPostService.sendReadyNotification(this.metadataService.playerMetadata);
+
+    if (environment.production) {
+      window.addEventListener('contextmenu', e => e.preventDefault());
+      document.body.classList.add('disable-user-interaction');
+    }
   }
 
   // eslint-disable-next-line class-methods-use-this

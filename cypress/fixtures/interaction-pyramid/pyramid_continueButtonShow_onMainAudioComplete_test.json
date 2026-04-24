@@ -1,11 +1,11 @@
 {
   "id": "stars-unit-definition",
-  "version": "2.5",
+  "version": "3.0",
   "backgroundColor": "#E1E9FF",
   "continueButtonShow": "ON_MAIN_AUDIO_COMPLETE",
   "ribbonBars": false,
   "firstAudioOptions": {
-    "firstClickLayer": false,
+    "firstClickLayer": "OFF",
     "animateButton": true
   },
   "mainAudio": {
@@ -22,20 +22,5 @@
       "bottomRightNumber": 1
     },
     "topNumber": 13
-  },
-  "variableInfo": [
-    {
-      "variableId": "PYRAMID",
-      "responseComplete": "ON_FULL_CREDIT",
-      "codingSource": "VALUE",
-      "codes": [
-        {
-          "method": "EQUALS",
-          "parameter": "10_3",
-          "code": 1,
-          "score": 1
-        }
-      ]
-    }
-  ]
+  }
 }
