@@ -1,15 +1,14 @@
-# Release Note 0.6.32 #
+# Release Note 0.6.33 #
 
 ## Neu
 
-+ interactionType: PYRAMID wurde hinzugefügt.
-+ interactionType: EQUATION wurde hinzugefügt.
-+ Neue Parameter für firstClickLayer wurden hinzugefügt, die es ermöglichen, BLUR, DISABLED und TRANSPARENT Hintergrund zu verwenden.
-+ BLOCK-Stil wurde für interactionType: NUMBER_LINE hinzugefügt.
-+ interactionType: NUMBER_LINE, style: WAVE, BLOCK, RULER: Die Funktionalität wurde aktualisiert, sodass es nun möglich ist, absteigende Zahlen zu verwenden.
-+ interactionType: NUMBER_LINE, style: WAVE: Die Funktionalität wurde aktualisiert, sodass es nun möglich ist, leadingNumbers und trailingNumbers auch für diesen Stil zu verwenden (dies ist bereits mit dem BLOCK-Stil möglich).
++ Greyscale-Filter wurde zu interactionType: VIDEO hinzugefügt
++ Das Öffnen des Kontextmenüs per Rechtsklick wird verhindert
++ Tests wurden für firstClickLayer und die neue Feedback-Logik aktualisiert
++ interactionType: Write, keyboardMode: NUMBERS_LINE: Es ist möglich, es ohne Bild zu verwenden und die Elemente werden in der Mitte angezeigt
 
 ## Bugfixes
 
-+ Ein Fehler wurde behoben, der bei interactionType: POLYGON_BUTTONS und singleselect eine Endlosschleife verursacht hat.
++ Fehlerbehebungen für die neue Feedback-Logik
++ Fehlerbehebungen für den vorherigen Zustand
 
