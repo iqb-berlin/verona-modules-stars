@@ -36,19 +36,19 @@ export class StandardIconComponent {
     switch (iconKey) {
       case 'CHECK_GREEN': {
         return `
-          <svg class="accept-icon" width="92" height="78" viewBox="0 0 92 78" fill="none" xmlns="http://www.w3.org/2000/svg" data-cy="button-with-icon" style="${baseStyle}">
+          <svg class="accept-icon" width="92" height="78" viewBox="0 0 92 78" fill="none" xmlns="http://www.w3.org/2000/svg" data-cy="button-with-icon"">
             <path d="M8 45.2L30.2007 69.1756C30.6071 69.6146 31.3055 69.6008 31.6943 69.1462L84 8" stroke="#4A7611" stroke-width="16" stroke-linecap="round"/>
           </svg>`;
       }
       case 'CLOSE_RED': {
         return `
-          <svg class="reject-icon" width="84" height="85" viewBox="0 0 84 85" fill="none" xmlns="http://www.w3.org/2000/svg" data-cy="button-with-icon" style="${baseStyle}">
+          <svg class="reject-icon" width="84" height="85" viewBox="0 0 84 85" fill="none" xmlns="http://www.w3.org/2000/svg" data-cy="button-with-icon"">
             <path d="M8 10.1006L76 75.8713" stroke="#B83A1E" stroke-width="16" stroke-linecap="round"/>
             <path d="M74.8853 8.98535L9.11451 76.9854" stroke="#B83A1E" stroke-width="16" stroke-linecap="round"/>
           </svg>`;
       }
       case 'CLAP_HANDS': {
-        return `<img src="assets/images/hands/clapping-hand.png" alt="Clapping hands" class="clap-hands" style="width:100px;height:100px;max-width:100%;object-fit:contain;${baseStyle}" data-cy="button-with-icon" />`;
+        return `<img src="assets/images/hands/clapping-hand.png" alt="Clapping hands" class="clap-hands" style="width:100px;height:100px;max-width:100%;object-fit:contain;" data-cy="button-with-icon" />`;
       }
       case 'SMILEY_1': {
         if (selected) {
