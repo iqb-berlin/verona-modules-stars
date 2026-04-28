@@ -49,7 +49,8 @@
     <stars-interaction-buttons class="interaction"
       [parameters]="getParametersWithFormerState()"
       [showHint]="responsesService.feedbackHint()"
-      (responses)="responsesService.newResponses($event)">
+      (responses)="responsesService.newResponses($event)"
+      (navigationNextRequest)="sendNavigationRequest($event)">
     </stars-interaction-buttons>
   } @else if (!unitService.openingFlowActive() && unitService.interaction() === 'DROP') {
     <stars-interaction-drop class="interaction"

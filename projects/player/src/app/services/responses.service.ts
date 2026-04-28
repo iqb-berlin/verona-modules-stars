@@ -16,6 +16,7 @@ export class ResponsesService {
   responseProgress = signal<Progress>('none');
   mainAudioComplete = signal(false);
   videoComplete = signal(false);
+  closingMetaRunning = signal(false);
 
   allResponses: Response[] = [];
   variableInfo: VariableInfo[] = [];
@@ -202,6 +203,14 @@ export class ResponsesService {
         this.provideFeedback(responses[0].id);
       }
     }
+
+    if (this.closingMetaRunning()) {
+      // TODO calculate closing meta
+    }
+  }
+
+  startClosingMeta() {
+    this.closingMetaRunning.set(true);
   }
 
   private static isPositionInRange(responseValue: string, range: string): boolean {

@@ -13,13 +13,24 @@
     "maxPlay": 3,
     "disableInteractionUntilComplete": false
   },
-  "interactionType": "META",
+  "interactionType": "POLYGON_BUTTONS",
   "interactionParameters": {
-    "variableId": "META"
+    "variableId": "POLYGON_BUTTONS",
+    "multiSelect": true,
+    "options": [
+      {
+        "svgPath": "M 70,340 l 75,-100 l 140,0 l -65,100 z",
+        "label": "Parallelogram"
+      },
+      {
+        "svgPath": "M 200,400 l 0,150 l 150,0 l 0,-150 z",
+        "label": "Rectangle"
+      }
+    ]
   },
   "closingMetaButtons" : {
     "variableIdMetaSelection": "META_SELECTION",
-    "variableIdReference" : "META",
+    "variableIdReference" : "POLYGON_BUTTONS",
     "variableIdMetaOutcome": "META_OUTCOME",
     "triggerNavigationOnSelect" : false
   }

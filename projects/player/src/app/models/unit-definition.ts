@@ -45,6 +45,7 @@ export interface UnitDefinition {
   interactionParameters: InteractionParameters;
   variableInfo: VariableInfo[] | undefined;
   audioFeedback: AudioFeedback | undefined;
+  closingMetaButtons: ClosingMetaButtonsParams;
 }
 
 export interface SelectionOption {

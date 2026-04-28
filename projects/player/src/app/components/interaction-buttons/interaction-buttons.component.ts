@@ -1,5 +1,5 @@
 import {
-  Component, signal, effect, inject, ViewChild, ElementRef
+  Component, signal, effect, inject, ViewChild, ElementRef, output
 } from '@angular/core';
 
 import { Response } from '@iqbspecs/response/response.interface';
@@ -26,6 +26,8 @@ import { StarsResponse } from "../../services/responses.service";
 })
 
 export class InteractionButtonsComponent extends InteractionComponentDirective {
+  navigationNextRequest = output<string>();
+
   /** Local copy of the component parameters with defaults applied. */
   localParameters!: InteractionButtonParams;
   /** Array of booleans for each option for selected values. */
@@ -323,7 +325,8 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
     // Check if triggerNavigationOnSelect is enabled
     if (this.localParameters.triggerNavigationOnSelect === true) {
       setTimeout(() => {
-        this.veronaPostService.sendVopUnitNavigationRequestedNotification('next');
+        this.navigationNextRequest.emit('next');
+        // this.veronaPostService.sendVopUnitNavigationRequestedNotification('next');
       }, 500);
     }
   }
