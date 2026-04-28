@@ -1,0 +1,29 @@
+@use 'variables';
+
+:host {
+  display: contents;
+}
+
+:host ::ng-deep {
+  .smiley-icon {
+    display: block;
+    margin: auto;
+    overflow: visible;
+    filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, 0.2));
+
+    &.has-hint {
+      filter: none;
+      background: #EE00FF;
+      border-radius: 50%;
+      outline: 5px solid #EE00FF;
+      box-shadow: none;
+    }
+  }
+
+  .clap-hands {
+    width: 100px;
+    height: 100px;
+    max-width: 100%;
+    object-fit: contain;
+  }
+}

@@ -92,6 +92,10 @@
     width: 100%;
     column-gap: variables.$small-gap-margin; /* default spacing between buttons */
 
+    &:has(.has-smiley-icon) {
+      column-gap: 50px;
+    }
+
     &.two-buttons {
       column-gap: variables.$gap-between-two-buttons-in-a-row; /* 106px special case for 1 Row 2 buttons */
     }
