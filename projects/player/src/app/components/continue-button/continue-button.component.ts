@@ -49,6 +49,9 @@ export class ContinueButtonComponent {
           this.navigate.emit();
         }, 200);
       }
+    } else if (this.unitService.closingMetaButtons()?.variableIdReference &&
+      !this.responseService.closingMetaRunning()) {
+      this.unitService.startClosingMeta();
     } else {
       setTimeout(() => {
         this.navigate.emit();

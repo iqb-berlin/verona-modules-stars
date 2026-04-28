@@ -3,7 +3,7 @@
   "version": "3.1",
   "backgroundColor": "#eee",
   "ribbonBars": false,
-  "continueButtonShow": "NO",
+  "continueButtonShow": "ALWAYS",
   "firstAudioOptions": {
     "firstClickLayer": "OFF",
     "animateButton": true
@@ -19,7 +19,7 @@
   },
   "closingMetaButtons" : {
     "variableIdMetaSelection": "META_SELECTION",
-    "variableIdReference" : "BUTTONS",
+    "variableIdReference" : "META",
     "variableIdMetaOutcome": "META_OUTCOME",
     "triggerNavigationOnSelect" : false
   }

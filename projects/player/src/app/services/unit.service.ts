@@ -4,11 +4,11 @@ import {
 } from '@angular/core';
 
 import {
-  AudioOptions,
+  AudioOptions, ClosingMetaButtonsParams,
   ContinueButtonEnum,
   FirstAudioOptionsParams,
   FirstClickLayerEnum,
-  InteractionEnum,
+  InteractionEnum, InteractionParameters,
   OpeningImageParams,
   UnitDefinition
 } from '../models/unit-definition';
@@ -36,10 +36,11 @@ export class UnitService {
   backgroundColor = signal('#EEE');
   continueButton = signal<ContinueButtonEnum>('NO');
   interaction = signal<InteractionEnum | undefined>(undefined);
-  parameters = signal<unknown>({});
+  parameters = signal<InteractionParameters>({} as InteractionParameters);
   hasInteraction = signal(false);
   ribbonBars = signal<boolean>(false);
   disableInteractionUntilComplete = signal(false);
+  closingMetaButtons = signal({} as ClosingMetaButtonsParams);
   openingImageParams = signal<OpeningImageParams>({} as OpeningImageParams);
 
   /** To hide the speaker icon when imageSource inside openingImage is being shown */
@@ -84,6 +85,15 @@ export class UnitService {
     if (this.mainAudio().audioSource) this._currentAudioSrc.set(this.mainAudio());
   }
 
+  startClosingMeta() {
+    console.log('closingMeta');
+    const parameters: InteractionParameters = {} as InteractionParameters;
+    parameters.variableId = this.closingMetaButtons().variableIdMetaSelection;
+    this.parameters.set(parameters);
+    this.interaction.set('META');
+    this.responsesService.startClosingMeta();
+  }
+
   reset() {
     this.audioService.reset();
     this.mainAudio.set({} as AudioOptions);
@@ -91,10 +101,11 @@ export class UnitService {
     this.backgroundColor.set('#EEE');
     this.continueButton.set('NO');
     this.interaction.set(undefined);
-    this.parameters.set({});
+    this.parameters.set({} as InteractionParameters);
     this.hasInteraction.set(false);
     this.ribbonBars.set(false);
     this.disableInteractionUntilComplete.set(false);
+    this.closingMetaButtons.set({} as ClosingMetaButtonsParams);
     this.openingImageParams.set({} as OpeningImageParams);
     this.showingOpeningImage.set(false);
     this._openingFlowActive.set(false);
@@ -142,6 +153,7 @@ export class UnitService {
     if (def.interactionType) this.interaction.set(def.interactionType);
     if (def.interactionParameters) this.parameters.set(def.interactionParameters);
     if (def.ribbonBars) this.ribbonBars.set(def.ribbonBars);
+    if (def.closingMetaButtons) this.closingMetaButtons.set(def.closingMetaButtons);
     if (def.mainAudio?.disableInteractionUntilComplete) {
       this.disableInteractionUntilComplete.set(def.mainAudio.disableInteractionUntilComplete);
     }
@@ -165,5 +177,7 @@ export class UnitService {
     } else if (mainAudio?.audioSource) {
       this._currentAudioSrc.set(mainAudio);
     }
+
+    console.log(this.closingMetaButtons());
   }
 }
