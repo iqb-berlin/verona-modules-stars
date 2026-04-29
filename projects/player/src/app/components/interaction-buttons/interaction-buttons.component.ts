@@ -326,7 +326,6 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
     if (this.localParameters.triggerNavigationOnSelect === true) {
       setTimeout(() => {
         this.navigationNextRequest.emit('next');
-        // this.veronaPostService.sendVopUnitNavigationRequestedNotification('next');
       }, 500);
     }
   }

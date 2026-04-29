@@ -14,8 +14,10 @@
     <stars-audio [audio]="unitService.currentAudioSrc()" [firstAudioOptions]="unitService.firstAudioOptions()"></stars-audio>
   }
 
-  <!-- Continue Button (hidden during opening flow) -->
-  @if (!unitService.openingFlowActive() && (unitService.continueButton() === "ALWAYS" ||
+  <!-- Continue Button (hidden during opening flow and when closing meta buttons are active) -->
+  @if (!unitService.openingFlowActive() &&
+      !(unitService.interaction() === 'META' && unitService.closingMetaButtons().triggerNavigationOnSelect) &&
+      (unitService.continueButton() === "ALWAYS" ||
       (unitService.continueButton() === "ON_MAIN_AUDIO_COMPLETE" && responsesService.mainAudioComplete()) ||
       (unitService.continueButton() === "ON_AUDIO_AND_RESPONSE" && responsesService.mainAudioComplete() &&
       (responsesService.responseProgress() === "complete" || responsesService.responseProgress() === "some")) ||
@@ -101,7 +103,8 @@
     <stars-interaction-meta class="interaction"
        [parameters]="getParametersWithFormerState()"
        [showHint]="responsesService.feedbackHint()"
-       (responses)="responsesService.newResponses($event)"></stars-interaction-meta>
+       (responses)="responsesService.newResponses($event)"
+       (navigationNextRequest)="sendNavigationRequest($event)"></stars-interaction-meta>
   }
 
   <!-- lower ribbons -->

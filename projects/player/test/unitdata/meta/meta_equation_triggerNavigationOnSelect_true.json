@@ -1,9 +1,9 @@
 {
   "id": "stars-unit-definition",
-  "version": "3.1",
-  "backgroundColor": "#eee",
+  "version": "3.0",
+  "backgroundColor": "#E1E9FF",
+  "continueButtonShow": "ALWAYS",
   "ribbonBars": false,
-  "continueButtonShow": "NO",
   "firstAudioOptions": {
     "firstClickLayer": "OFF",
     "animateButton": true
@@ -13,8 +13,35 @@
     "maxPlay": 3,
     "disableInteractionUntilComplete": false
   },
-  "interactionType": "META",
+  "interactionType": "EQUATION",
   "interactionParameters": {
-    "variableId": "META"
-  }
+    "variableId": "EQUATION",
+    "imageSource": "",
+    "fixOperand1": 6,
+    "operators": [
+      "+"
+    ],
+    "fixResult": 16
+  },
+  "closingMetaButtons" : {
+    "variableIdMetaSelection": "META_SELECTION",
+    "variableIdReference" : "EQUATION",
+    "variableIdMetaOutcome": "META_OUTCOME",
+    "triggerNavigationOnSelect" : true
+  },
+  "variableInfo": [
+    {
+      "variableId": "EQUATION",
+      "responseComplete": "ON_ANY_RESPONSE",
+      "codingSource": "VALUE",
+      "codes": [
+        {
+          "method": "EQUALS",
+          "parameter": "10",
+          "code": 1,
+          "score": 1
+        }
+      ]
+    }
+  ]
 }

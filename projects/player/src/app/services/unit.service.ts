@@ -86,7 +86,6 @@ export class UnitService {
   }
 
   startClosingMeta() {
-    console.log('closingMeta');
     const parameters: InteractionParameters = {} as InteractionParameters;
     parameters.variableId = this.closingMetaButtons().variableIdMetaSelection;
     this.parameters.set(parameters);

@@ -41,8 +41,9 @@ export function getCorrectAnswerParam(testData: UnitDefinition): string {
 }
 
 /**
- * Function that returns InteractionOptions for BUTTONS or SelectionOption[] for DROP interactionType.
- * @param interactionParameters - InteractionButtonParams or InteractionDropParams
+ * Function that extracts and returns an array of selection options from the given interaction parameters.
+ * Supports BUTTONS, DROP, and POLYGON_BUTTONS interaction types.
+ * @param interactionParameters - The interaction parameters containing options
  * @returns SelectionOption[]
  */
 export const getButtonOptions =

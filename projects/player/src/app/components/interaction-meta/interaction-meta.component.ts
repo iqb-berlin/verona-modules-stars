@@ -1,5 +1,5 @@
 import {
-  Component, effect, signal, untracked
+  Component, effect, signal, untracked, inject, output
 } from '@angular/core';
 
 import { Response } from '@iqbspecs/response/response.interface';
@@ -10,6 +10,7 @@ import { InteractionComponentDirective } from '../../directives/interaction-comp
 
 import { StandardButtonComponent } from '../../shared/standard-button/standard-button.component';
 import { StarsResponse } from '../../services/responses.service';
+import { UnitService } from '../../services/unit.service';
 
 @Component({
   selector: 'stars-interaction-meta',
@@ -21,10 +22,14 @@ import { StarsResponse } from '../../services/responses.service';
 })
 
 export class InteractionMetaComponent extends InteractionComponentDirective {
+  navigationNextRequest = output<string>();
+  unitService = inject(UnitService);
+
   /** Local copy of the component parameters with defaults applied. */
   localParameters!: InteractionMetaParams;
 
-  private initialized = false;
+  /** Reference to the last processed parameters object to detect object-identity changes. */
+  private lastParametersRef: unknown | null = null;
 
   /** If there is a hint to be shown */
   hasHint = signal(false);
@@ -50,21 +55,21 @@ export class InteractionMetaComponent extends InteractionComponentDirective {
 
     effect(() => {
       const parameters = this.parameters() as InteractionMetaParams;
-      this.localParameters = this.createDefaultParameters();
+      if (!parameters) return;
 
-      if (parameters) {
-        if (parameters === this.localParameters) return;
+      const isNewParametersObject = this.lastParametersRef !== parameters;
 
-        this.localParameters = parameters;
-        this.localParameters.variableId = parameters.variableId || 'META';
+      if (isNewParametersObject) {
+        this.lastParametersRef = parameters;
 
-        // TODO better to check if parameters object is new, this way parameter changes are never used
-        /* if (this.initialized) {
-          return;
-         } */
+        this.localParameters = {
+          ...this.createDefaultParameters(),
+          ...parameters
+        };
+        this.localParameters.variableId = this.localParameters.variableId || 'META';
 
         // Only restore from former state once, on initial load
-        const formerStateResponse: Response[] = parameters.formerState || [];
+        const formerStateResponse: Response[] = this.localParameters.formerState || [];
 
         if (Array.isArray(formerStateResponse) && formerStateResponse.length > 0) {
           const foundResponse = formerStateResponse.find(
@@ -73,7 +78,6 @@ export class InteractionMetaComponent extends InteractionComponentDirective {
 
           if (foundResponse && foundResponse.value) {
             this.restoreFromFormerState(foundResponse);
-            this.initialized = true;
             return;
           }
         }
@@ -86,8 +90,9 @@ export class InteractionMetaComponent extends InteractionComponentDirective {
           value: untracked(() => this.getSelectedValue()),
           relevantForResponsesProgress: true
         } as StarsResponse]);
-
-        // this.initialized = true;
+      } else {
+        // Same unit, just keep localParameters' formerState in sync if needed
+        this.localParameters.formerState = parameters.formerState;
       }
     });
 
@@ -116,7 +121,6 @@ export class InteractionMetaComponent extends InteractionComponentDirective {
   }
 
   private resetSelection(): void {
-    console.log('reset');
     const numberOfOptions = this.buttons().length;
     this.selectedValues.set(Array.from(
       { length: numberOfOptions },
@@ -169,6 +173,12 @@ export class InteractionMetaComponent extends InteractionComponentDirective {
     };
 
     this.responses.emit([response]);
+
+    if (this.unitService.closingMetaButtons().triggerNavigationOnSelect) {
+      setTimeout(() => {
+        this.navigationNextRequest.emit('next');
+      }, 500);
+    }
   }
 
   // eslint-disable-next-line class-methods-use-this
