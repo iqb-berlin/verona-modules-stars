@@ -2,6 +2,7 @@ import { InteractionWriteParams, UnitDefinition } from '../../../projects/player
 import { testBaseFeatures } from '../shared/base-features.spec.cy';
 import { testFormerStateFeatures } from '../shared/former-state.spec.cy';
 import { testKeyboardInteractions } from '../shared/keyboard-interactions.spec.cy';
+import { testClosingMetaButtons } from "../shared/closing-meta-buttons.spec.cy";
 
 describe('Interaction WRITE Component', () => {
   const interactionType = 'write';
@@ -144,6 +145,8 @@ describe('Interaction WRITE Component', () => {
   testBaseFeatures(interactionType, defaultTestFile);
   // Test former state features for the WRITE interaction type
   testFormerStateFeatures(interactionType, defaultTestFile);
-  // Test keyboard interactions for NUMBERS_LINE mode
+  // Test keyboard interactions for WRITE mode
   testKeyboardInteractions(interactionType, 'write_numbersLine_test');
+  // Test closing meta buttons for the WRITE interaction type
+  testClosingMetaButtons(interactionType);
 });
