@@ -34,9 +34,7 @@
 }
 
 .number-input-field-wave {
-  stroke-dasharray: 2, 2;
-  stroke: colors.$highlight;
-  stroke-width: 1px;
+  @include variables.empty-input-box-stroke;
 }
 
 // --- RULER Style ---
@@ -103,6 +101,10 @@
   fill: white;
   stroke: black;
   stroke-width: 1px;
+}
+
+.empty-block-group rect {
+  @include variables.empty-input-box-stroke;
 }
 
 // --- Keyboard ---
