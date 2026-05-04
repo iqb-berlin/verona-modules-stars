@@ -80,7 +80,7 @@
         @for (item of numberLineItems(); track item.value) {
           <g [attr.transform]="'translate(' + item.x + ',' + item.y + ')'" data-cy="number-line-item">
             @if (item.isEmpty) {
-              <rect x="-20" y="-24" width="42" height="46" rx="2" ry="2"
+              <rect x="-20" y="-23" width="40" height="45" rx="2" ry="2"
                     class="number-input-field-wave"
                     fill="white" stroke="black" data-cy="number-input-box-wave" />
               <text x="0" y="0" text-anchor="middle" dominant-baseline="central"
@@ -88,7 +88,7 @@
                 {{ numberInputValue }}
               </text>
             } @else {
-              <rect x="-20" y="-24" width="42" height="46" rx="2" ry="2"
+              <rect x="-20" y="-23" width="40" height="45" rx="2" ry="2"
                     fill="white" stroke="black" data-cy="number-box" />
               <text x="0" y="0" text-anchor="middle" dominant-baseline="central"
                     class="number-text-wave" data-cy="number-label">
