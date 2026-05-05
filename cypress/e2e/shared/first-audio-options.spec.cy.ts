@@ -106,13 +106,33 @@ export function firstAudioOptionsFeatures(interactionType: string) {
 
         if (testData.firstAudioOptions?.animateButton) {
           // The button should NOT be moving initially
-          cy.get('[data-cy="custom-audio-button"]').should('exist').and('not.have.class', 'moving-button');
+          cy.get('[data-cy="custom-audio-button"]').should('exist').and('not.have.class', 'moving-button-kind');
 
           // Do not interact with the page; wait slightly over 10 seconds
           cy.wait(11000);
 
           // After 10s of inactivity (and before first interaction), it should start moving
-          cy.get('[data-cy="custom-audio-button"]').should('have.class', 'moving-button');
+          cy.get('[data-cy="custom-audio-button"]').should('have.class', 'moving-button-kind');
+        }
+      });
+    });
+
+    it('animates audio button when animateButton is BOLD', () => {
+      // Set up test data
+      cy.setupTestData(`${interactionType}_animateButton_bold_test.json`, interactionType);
+
+      cy.get('@testData').then(data => {
+        testData = data as unknown as UnitDefinition;
+
+        if (testData.firstAudioOptions?.animateButton) {
+          // The button should NOT be moving initially
+          cy.get('[data-cy="custom-audio-button"]').should('exist').and('not.have.class', 'moving-button-bold');
+
+          // Do not interact with the page; wait slightly over 10 seconds
+          cy.wait(11000);
+
+          // After 10s of inactivity (and before first interaction), it should start moving
+          cy.get('[data-cy="custom-audio-button"]').should('have.class', 'moving-button-bold');
         }
       });
     });
