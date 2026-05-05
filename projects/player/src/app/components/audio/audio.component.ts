@@ -67,7 +67,7 @@ export class AudioComponent {
           if (!this.unitService.interactionDone()) {
             this.movingButton.set(animateButton as 'KIND' | 'BOLD');
           }
-        }, 10000);
+        }, 5000);
       } else {
         // Ensure animation is off when not needed
         this.movingButton.set('OFF');
