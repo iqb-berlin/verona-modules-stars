@@ -97,9 +97,9 @@ export function firstAudioOptionsFeatures(interactionType: string) {
       cy.applyStandardScenarios(interactionType);
     });
 
-    it('animates audio button when animateButton is true', () => {
+    it('animates audio button when animateButton is KIND', () => {
       // Set up test data
-      cy.setupTestData(`${interactionType}_animateButton_true_test.json`, interactionType);
+      cy.setupTestData(`${interactionType}_animateButton_kind_test.json`, interactionType);
 
       cy.get('@testData').then(data => {
         testData = data as unknown as UnitDefinition;

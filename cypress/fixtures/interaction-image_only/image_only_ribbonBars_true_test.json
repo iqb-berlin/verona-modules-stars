@@ -5,7 +5,7 @@
   "continueButtonShow": "ON_MAIN_AUDIO_COMPLETE",
   "firstAudioOptions": {
     "firstClickLayer": "OFF",
-    "animateButton": false
+    "animateButton": "OFF"
   },
   "ribbonBars": true,
   "mainAudio": {
