@@ -3,7 +3,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Response } from '@iqbspecs/response/response.interface';
 import { Progress, UnitState, UnitStateDataType } from '../models/verona';
 import { VeronaPostService } from './verona-post.service';
-import { UnitDefinition } from '../models/unit-definition';
+import { ClosingMetaButtonsParams, UnitDefinition } from '../models/unit-definition';
 import { Code, VariableInfo } from '../models/responses';
 import { FeedbackDefinition, ShowResponse } from '../models/feedback';
 
@@ -16,6 +16,7 @@ export class ResponsesService {
   responseProgress = signal<Progress>('none');
   mainAudioComplete = signal(false);
   videoComplete = signal(false);
+  closingMetaRunning = signal(false);
 
   allResponses: Response[] = [];
   variableInfo: VariableInfo[] = [];
@@ -31,6 +32,7 @@ export class ResponsesService {
   feedbackDefinitions: FeedbackDefinition[] = [];
   formerStateResponses = signal<Response[]>([]);
   presentationProgress = signal<Progress>('some');
+  closingMetaButtons = signal<ClosingMetaButtonsParams>({} as ClosingMetaButtonsParams);
 
   /**
   * Interpret mixed input as a number
@@ -70,6 +72,8 @@ export class ResponsesService {
     this.presentationProgress.set('some');
     this.mainAudioComplete.set(false);
     this.formerStateResponses.set([]);
+    this.closingMetaButtons.set({} as ClosingMetaButtonsParams);
+    this.closingMetaRunning.set(false);
   }
 
   /**
@@ -79,6 +83,9 @@ export class ResponsesService {
   setNewData(unitDefinition: UnitDefinition = null) {
     this.reset();
     if (unitDefinition) {
+      if (unitDefinition.closingMetaButtons) {
+        this.closingMetaButtons.set(unitDefinition.closingMetaButtons);
+      }
       const problems: string[] = [];
       if (unitDefinition.variableInfo && unitDefinition.variableInfo.length > 0) {
         unitDefinition.variableInfo.forEach(vInfo => {
@@ -202,6 +209,14 @@ export class ResponsesService {
         this.provideFeedback(responses[0].id);
       }
     }
+
+    if (this.closingMetaRunning()) {
+      // TODO calculate closing meta
+    }
+  }
+
+  startClosingMeta() {
+    this.closingMetaRunning.set(true);
   }
 
   private static isPositionInRange(responseValue: string, range: string): boolean {

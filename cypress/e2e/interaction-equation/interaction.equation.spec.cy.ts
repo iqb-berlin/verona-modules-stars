@@ -1,6 +1,7 @@
 import { testBaseFeatures } from "../shared/base-features.spec.cy";
 import { testFormerStateFeatures } from "../shared/former-state.spec.cy";
 import { testKeyboardInteractions } from "../shared/keyboard-interactions.spec.cy";
+import { testClosingMetaButtons } from "../shared/closing-meta-buttons.spec.cy";
 
 describe('EQUATION Interaction E2E Tests', () => {
   const interactionType = 'equation';
@@ -203,4 +204,6 @@ describe('EQUATION Interaction E2E Tests', () => {
   testFormerStateFeatures(interactionType, defaultTestFile);
   // Test keyboard interactions
   testKeyboardInteractions(interactionType, defaultTestFile);
+  // Test closing meta buttons for the EQUATION interaction type
+  testClosingMetaButtons(interactionType);
 });

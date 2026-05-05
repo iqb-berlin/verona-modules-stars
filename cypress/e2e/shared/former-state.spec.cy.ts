@@ -22,6 +22,7 @@ export function testFormerStateFeatures(interactionType: string, defaultTestFile
         equation: ['1', '2', '3', '4'],
         number_line: ['1', '2', '3', '4'],
         pyramid: ['1_2', '3_4', '5_6', '7_8'],
+        meta: [0, 1, 2, 3],
       };
 
       const getNav = (idx: number) => {

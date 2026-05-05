@@ -58,6 +58,12 @@ export class AppComponent implements OnInit {
     }
   }
 
+  sendNavigationRequest($event) {
+    if ($event === 'next') {
+      this.veronaPostService.sendVopUnitNavigationRequestedNotification('next');
+    }
+  }
+
   // eslint-disable-next-line class-methods-use-this
   disabledOverlay(event: Event): void {
     event.preventDefault();
