@@ -5,6 +5,7 @@ import {
   InteractionNumberLineParams,
   UnitDefinition
 } from '../../../projects/player/src/app/models/unit-definition';
+import { testClosingMetaButtons } from "../shared/closing-meta-buttons.spec.cy";
 
 describe('NUMBER_LINE Interaction E2E Tests', () => {
   const interactionType = 'number_line';
@@ -167,4 +168,6 @@ describe('NUMBER_LINE Interaction E2E Tests', () => {
   testFormerStateFeatures(interactionType, defaultTestFile);
   // Test keyboard interactions
   testKeyboardInteractions(interactionType, defaultTestFile);
+  // Test closing meta buttons for the NUMBER_LINE interaction type
+  testClosingMetaButtons(interactionType);
 });

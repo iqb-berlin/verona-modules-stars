@@ -10,6 +10,7 @@ import {
   getDropLandingArgs,
   getDropLandingTranslate
 } from '../../../projects/player/src/app/shared/utils/interaction-drop.util';
+import { testClosingMetaButtons } from "../shared/closing-meta-buttons.spec.cy";
 
 describe('Interaction DROP Component', () => {
   const interactionType = 'drop';
@@ -268,4 +269,6 @@ describe('Interaction DROP Component', () => {
   testFormerStateFeatures(interactionType, defaultTestFile);
   // Test responsive image features for the DROP interaction type
   testResponsiveImageFeatures(interactionType, `${interactionType}_imagePosition_top_test`, '[data-cy="drop-image"]');
+  // Test closing meta buttons for the DROP interaction type
+  testClosingMetaButtons(interactionType);
 });

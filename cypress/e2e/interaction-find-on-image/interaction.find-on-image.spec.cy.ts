@@ -7,6 +7,7 @@ import { testRibbonBars } from '../shared/ribbon-bar.spec.cy';
 import { testAudioFeedback } from '../shared/audio-feedback.spec.cy';
 import { testFormerStateFeatures } from '../shared/former-state.spec.cy';
 import { veronaInterfaceFeatures } from '../shared/verona-interface.spec.cy';
+import { testClosingMetaButtons } from "../shared/closing-meta-buttons.spec.cy";
 
 describe('Interaction FIND_ON_IMAGE Component', () => {
   const interactionType = 'find_on_image';
@@ -107,5 +108,6 @@ describe('Interaction FIND_ON_IMAGE Component', () => {
     testRibbonBars(interactionType, `${interactionType}_ribbonBars_true_test`);
     testAudioFeedback(interactionType, `${interactionType}_feedback_test`);
     testFormerStateFeatures(interactionType, defaultTestFile);
+    testClosingMetaButtons(interactionType);
   });
 });
