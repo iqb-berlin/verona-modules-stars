@@ -26,6 +26,7 @@ export type ImagePositionEnum = 'TOP' | 'LEFT' | 'BOTTOM';
 export type TargetSizeEnum = 'MEDIUM' | 'LARGE' | 'SMALL';
 export type LayoutEnum = 'LEFT_CENTER' | 'TOP_CENTER' | 'LEFT_BOTTOM' | 'LEFT_CENTER_50';
 export type FirstClickLayerEnum = 'OFF' | 'TRANSPARENT' | 'BLUR' | 'DISABLED';
+export type AnimateButtonEnum = 'OFF' | 'KIND' | 'BOLD';
 
 export type InteractionParameters = InteractionButtonParams | InteractionWriteParams | InteractionDropParams |
 InteractionVideoParams | InteractionFindOnImageParams | InteractionPolygonButtonsParams | InteractionPlaceValueParams |
@@ -178,13 +179,13 @@ export interface MainAudio {
   audioSource: string;
   maxPlay?: number;
   firstClickLayer?: boolean; // deprecated, use firstAudioOptions.firstClickLayer
-  animateButton?: boolean; // deprecated, use firstAudioOptions.animateButton
+  animateButton?: AnimateButtonEnum; // deprecated, use firstAudioOptions.animateButton
   disableInteractionUntilComplete?: boolean;
 }
 
 export interface FirstAudioOptionsParams {
   firstClickLayer?: FirstClickLayerEnum | boolean;
-  animateButton?: boolean;
+  animateButton?: AnimateButtonEnum;
 }
 
 export interface OpeningImageParams {

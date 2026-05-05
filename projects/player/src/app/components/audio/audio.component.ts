@@ -22,7 +22,7 @@ export class AudioComponent {
   responsesService = inject(ResponsesService);
   unitService = inject(UnitService);
 
-  movingButton = signal(false);
+  movingButton = signal<'OFF' | 'KIND' | 'BOLD'>('OFF');
   isPlaying = signal(false);
   isDisabled = signal(false);
 
@@ -61,15 +61,16 @@ export class AudioComponent {
         clearTimeout(this.animateTimer);
       }
 
-      if (this.firstAudioOptions()?.animateButton && !this.unitService.interactionDone()) {
+      const animateButton = this.firstAudioOptions()?.animateButton;
+      if (animateButton && animateButton !== 'OFF' && !this.unitService.interactionDone()) {
         this.animateTimer = setTimeout(() => {
           if (!this.unitService.interactionDone()) {
-            this.movingButton.set(true);
+            this.movingButton.set(animateButton as 'KIND' | 'BOLD');
           }
-        }, 10000);
+        }, 5000);
       } else {
         // Ensure animation is off when not needed
-        this.movingButton.set(false);
+        this.movingButton.set('OFF');
       }
     });
   }
@@ -94,7 +95,7 @@ export class AudioComponent {
       });
     }
 
-    this.movingButton.set(false);
+    this.movingButton.set('OFF');
   }
 
   disabled() {
