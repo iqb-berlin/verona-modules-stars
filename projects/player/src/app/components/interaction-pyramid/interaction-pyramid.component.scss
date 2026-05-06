@@ -26,7 +26,8 @@
 
   &.example-pyramid {
     .number-box {
-      background-color: #d3d7d8;
+      background-color: transparent;
+      box-shadow: 0 4px 15px 4px rgba(0, 0, 0, 0.1);
     }
   }
 }
