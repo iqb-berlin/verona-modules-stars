@@ -4,6 +4,7 @@ import {
 import { testBaseFeatures } from '../shared/base-features.spec.cy';
 import { testFormerStateFeatures } from '../shared/former-state.spec.cy';
 import { testCodingSumCharMatches } from '../shared/coding-sum-char-matches.spec.cy';
+import { testClosingMetaButtons } from "../shared/closing-meta-buttons.spec.cy";
 
 describe('Interaction POLYGON BUTTONS Component', () => {
   const interactionType = 'polygon_buttons';
@@ -78,4 +79,6 @@ describe('Interaction POLYGON BUTTONS Component', () => {
   testFormerStateFeatures(interactionType, defaultTestFile);
   // Test coding sum char matches for the POLYGON_BUTTONS interaction type
   testCodingSumCharMatches('polygon_buttons_multiselect_test.json', 'polygon_buttons');
+  // Test closing meta buttons for the POLYGON_BUTTONS interaction type
+  testClosingMetaButtons(interactionType);
 });

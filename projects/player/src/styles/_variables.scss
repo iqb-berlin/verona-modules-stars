@@ -204,3 +204,9 @@ $layoutPadding: 90px;
   margin: 3px;
   font-size: 40px;
 }
+
+@mixin empty-input-box-stroke {
+  stroke-dasharray: 2, 2;
+  stroke: colors.$highlight;
+  stroke-width: 1px;
+}

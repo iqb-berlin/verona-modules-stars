@@ -24,6 +24,7 @@ export function testAudioFeedback(interactionType: string, configFile: string) {
           return 'div.hint';
         case 'BUTTON':
         case 'DROP':
+        case 'META':
           return 'input.hint';
         case 'NUMBER_LINE':
           return 'text.hint';

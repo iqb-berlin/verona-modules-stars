@@ -16,6 +16,7 @@ export type InteractionEnum = 'BUTTONS' |
 'NUMBER_LINE' |
 'PYRAMID' |
 'EQUATION' |
+'META' |
 'NONE';
 export type IconButtonTypeEnum = 'CHECK_GREEN' | 'CLOSE_RED' | 'CLAP_HANDS' | 'SMILEY_1' | 'SMILEY_2' |
 'SMILEY_3' | 'SMILEY_4' | 'SMILEY_5' | 'ONES' | 'TENS';
@@ -25,10 +26,11 @@ export type ImagePositionEnum = 'TOP' | 'LEFT' | 'BOTTOM';
 export type TargetSizeEnum = 'MEDIUM' | 'LARGE' | 'SMALL';
 export type LayoutEnum = 'LEFT_CENTER' | 'TOP_CENTER' | 'LEFT_BOTTOM' | 'LEFT_CENTER_50';
 export type FirstClickLayerEnum = 'OFF' | 'TRANSPARENT' | 'BLUR' | 'DISABLED';
+export type AnimateButtonEnum = 'OFF' | 'KIND' | 'BOLD';
 
 export type InteractionParameters = InteractionButtonParams | InteractionWriteParams | InteractionDropParams |
 InteractionVideoParams | InteractionFindOnImageParams | InteractionPolygonButtonsParams | InteractionPlaceValueParams |
-InteractionNumberLineParams | InteractionPyramidParams | InteractionEquationParams;
+InteractionNumberLineParams | InteractionPyramidParams | InteractionEquationParams | InteractionMetaParams;
 
 export interface UnitDefinition {
   id: string;
@@ -44,6 +46,7 @@ export interface UnitDefinition {
   interactionParameters: InteractionParameters;
   variableInfo: VariableInfo[] | undefined;
   audioFeedback: AudioFeedback | undefined;
+  closingMetaButtons: ClosingMetaButtonsParams;
 }
 
 export interface SelectionOption {
@@ -67,7 +70,7 @@ export interface InteractionOptions {
 
 export interface InteractionButtonParams {
   variableId?: string;
-  options: InteractionOptions;
+  options?: InteractionOptions;
   imageSource?: string;
   imagePosition?: ImagePositionEnum;
   layout?: LayoutEnum;
@@ -167,17 +170,22 @@ export interface InteractionEquationParams {
   formerState?: Response[] | undefined;
 }
 
+export interface InteractionMetaParams {
+  variableId?: string;
+  formerState?: Response[] | undefined;
+}
+
 export interface MainAudio {
   audioSource: string;
   maxPlay?: number;
   firstClickLayer?: boolean; // deprecated, use firstAudioOptions.firstClickLayer
-  animateButton?: boolean; // deprecated, use firstAudioOptions.animateButton
+  animateButton?: AnimateButtonEnum; // deprecated, use firstAudioOptions.animateButton
   disableInteractionUntilComplete?: boolean;
 }
 
 export interface FirstAudioOptionsParams {
   firstClickLayer?: FirstClickLayerEnum | boolean;
-  animateButton?: boolean;
+  animateButton?: AnimateButtonEnum;
 }
 
 export interface OpeningImageParams {
@@ -190,4 +198,11 @@ export interface AudioOptions extends MainAudio {
   audioId: string;
   value?: string;
   maxPlay?: number;
+}
+
+export interface ClosingMetaButtonsParams {
+  variableIdMetaSelection?: string;
+  variableIdReference: string;
+  variableIdMetaOutcome?: string;
+  triggerNavigationOnSelect?: boolean;
 }

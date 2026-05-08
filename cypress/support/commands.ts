@@ -774,6 +774,12 @@ Cypress.Commands.add('applyCorrectAnswerScenarios', (interactionType: string, da
         }
       });
     }
+  } else if (interactionType === 'meta') {
+    // For meta, we always have 4 stars (buttons), so we use a dummy array of length 4
+    const buttonIndex = getIndexByOneBasedInput([{}, {}, {}, {}], correctAnswerParam);
+    if (buttonIndex !== undefined) {
+      cy.get(`[data-cy="button-${buttonIndex}"]`).click();
+    }
   } else {
     // For other interaction types (buttons, drop, polygon_buttons),
     // find the button containing the correct answer
@@ -781,6 +787,9 @@ Cypress.Commands.add('applyCorrectAnswerScenarios', (interactionType: string, da
       dataToCheck.interactionParameters as unknown as InteractionParameters
     );
     const buttonIndex = getIndexByOneBasedInput(buttonOptions, correctAnswerParam);
+
+    cy.log('INTERACTION TYPE IS', interactionType, 'BUTTON OPTIONS', buttonOptions, 'BUTTON INDEX', buttonIndex);
+
 
     if (buttonIndex !== undefined) {
       const buttonSelector = interactionType === 'polygon_buttons' ?
@@ -876,6 +885,8 @@ Cypress.Commands.add('assertInteractionComponentVisible', (interactionType: stri
     cy.get('[data-cy="interaction-pyramid"]', { timeout: 15000 }).should('be.visible');
   } else if (interactionType === 'equation') {
     cy.get('[data-cy="interaction-equation"]', { timeout: 15000 }).should('be.visible');
+  } else if (interactionType === 'meta') {
+      cy.get('[data-cy="interaction-meta"]', { timeout: 15000 }).should('be.visible');
   } else {
     cy.get('[data-cy="buttons-container"]', { timeout: 15000 }).should('be.visible');
   }
@@ -1014,7 +1025,7 @@ Cypress.Commands.add('assertRestoredState', (interactionType: string, expected?:
     cy.get('[data-cy="click-target"]')
       .should('exist');
     cy.log(`Approved: interactionType: ${interactionType} click-target exists`);
-  } else if (interactionType === 'buttons') {
+  } else if (interactionType === 'buttons' || interactionType === 'meta') {
     let targetIndex = 1;
     if (expected !== undefined) {
       if (typeof expected === 'number') {

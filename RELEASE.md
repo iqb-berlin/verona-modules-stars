@@ -1,14 +1,12 @@
-# Release Note 0.6.33 #
+# Release Note 0.6.35 #
 
 ## Neu
++ interactionType: META wurde hinzugefügt
++ Die Eigenschaft „closingMetaButtons“ wurde hinzugefügt
++ Neue Varianten für „animateButton“ wurden hinzugefügt: KIND, BOLD, OFF
++ interactionType: PYRAMID: Der Hintergrund der Beispielpyramide wurde transparent gestaltet
++ interactionType: EQUATION: Das Layout wurde aktualisiert
++ interactionType: NUMBER_LINE: Minor stilistische Änderungen
++ buttonType: CIRCLE: Minor stilistische Aktualisierungen
 
-+ Greyscale-Filter wurde zu interactionType: VIDEO hinzugefügt
-+ Das Öffnen des Kontextmenüs per Rechtsklick wird verhindert
-+ Tests wurden für firstClickLayer und die neue Feedback-Logik aktualisiert
-+ interactionType: Write, keyboardMode: NUMBERS_LINE: Es ist möglich, es ohne Bild zu verwenden und die Elemente werden in der Mitte angezeigt
-
-## Bugfixes
-
-+ Fehlerbehebungen für die neue Feedback-Logik
-+ Fehlerbehebungen für den vorherigen Zustand
 

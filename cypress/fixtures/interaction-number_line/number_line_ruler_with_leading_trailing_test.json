@@ -6,7 +6,7 @@
   "ribbonBars": false,
   "firstAudioOptions": {
     "firstClickLayer": "OFF",
-    "animateButton": true
+    "animateButton": "KIND"
   },
   "mainAudio": {
     "audioSource": "data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwOAAAAAAAAAAAAAAA//uQZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZzoAAAAPAAAAAAAAAAAAAA==",

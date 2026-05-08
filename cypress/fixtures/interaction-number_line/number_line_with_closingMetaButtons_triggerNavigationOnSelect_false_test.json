@@ -1,8 +1,8 @@
 {
   "id": "stars-unit-definition",
-  "version": "3.0",
+  "version": "3.1",
   "backgroundColor": "#E1E9FF",
-  "continueButtonShow": "ALWAYS",
+  "continueButtonShow": "ON_ANY_RESPONSE",
   "ribbonBars": false,
   "firstAudioOptions": {
     "firstClickLayer": "OFF",
@@ -13,14 +13,18 @@
     "maxPlay": 3,
     "disableInteractionUntilComplete": false
   },
-  "interactionType": "PYRAMID",
+  "interactionType": "NUMBER_LINE",
   "interactionParameters": {
-    "variableId": "PYRAMID",
-    "example": {
-      "topNumber": 11,
-      "bottomLeftNumber": 10,
-      "bottomRightNumber": 1
-    },
-    "topNumber": 13
+    "variableId": "NUMBER_LINE",
+    "firstNumber": 7,
+    "lastNumber": 18,
+    "numberInput": 9,
+    "style": "WAVE"
+  },
+  "closingMetaButtons" : {
+    "variableIdMetaSelection": "META_SELECTION",
+    "variableIdReference" : "NUMBER_LINE",
+    "variableIdMetaOutcome": "META_OUTCOME",
+    "triggerNavigationOnSelect" : false
   }
 }

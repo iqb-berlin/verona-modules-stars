@@ -4,6 +4,7 @@ import {
   InteractionPlaceValueParams,
   UnitDefinition
 } from '../../../projects/player/src/app/models/unit-definition';
+import { testClosingMetaButtons } from "../shared/closing-meta-buttons.spec.cy";
 
 describe('PLACE_VALUE Interaction E2E Tests', () => {
   const interactionType = 'place_value';
@@ -201,4 +202,6 @@ describe('PLACE_VALUE Interaction E2E Tests', () => {
   testBaseFeatures(interactionType, defaultTestFile);
   // Test former state features for the PLACE_VALUE interaction type
   testFormerStateFeatures(interactionType, defaultTestFile);
+  // Test closing meta buttons for the PLACE_VALUE interaction type
+  testClosingMetaButtons(interactionType);
 });

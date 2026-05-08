@@ -6,6 +6,7 @@ import { testBaseFeatures } from '../shared/base-features.spec.cy';
 import { testResponsiveImageFeatures } from '../shared/responsive-image.spec.cy';
 import { testFormerStateFeatures } from '../shared/former-state.spec.cy';
 import { testCodingSumCharMatches } from '../shared/coding-sum-char-matches.spec.cy';
+import { testClosingMetaButtons } from '../shared/closing-meta-buttons.spec.cy';
 
 describe('Interaction BUTTONS Component', () => {
   const interactionType = 'buttons';
@@ -294,5 +295,7 @@ describe('Interaction BUTTONS Component', () => {
   // eslint-disable-next-line max-len
   testResponsiveImageFeatures(interactionType, `${interactionType}_imagePosition_top_test`, '[data-cy="stimulus-image"]');
   // Test coding sum char matches for the BUTTONS interaction type
-  testCodingSumCharMatches('buttons_multiselect_test.json', 'buttons');
+  testCodingSumCharMatches('buttons_multiselect_test.json', interactionType);
+  // Test closing meta buttons for the BUTTONS interaction type
+  testClosingMetaButtons(interactionType);
 });

@@ -16,10 +16,32 @@
   "interactionType": "EQUATION",
   "interactionParameters": {
     "variableId": "EQUATION",
-    "fixOperand2": 9,
+    "imageSource": "",
+    "fixOperand1": 6,
     "operators": [
       "+"
     ],
-    "fixResult": 22
-  }
+    "fixResult": 16
+  },
+  "closingMetaButtons" : {
+    "variableIdMetaSelection": "META_SELECTION",
+    "variableIdReference" : "EQUATION",
+    "variableIdMetaOutcome": "META_OUTCOME",
+    "triggerNavigationOnSelect" : true
+  },
+  "variableInfo": [
+    {
+      "variableId": "EQUATION",
+      "responseComplete": "ON_ANY_RESPONSE",
+      "codingSource": "VALUE",
+      "codes": [
+        {
+          "method": "EQUALS",
+          "parameter": "10",
+          "code": 1,
+          "score": 1
+        }
+      ]
+    }
+  ]
 }

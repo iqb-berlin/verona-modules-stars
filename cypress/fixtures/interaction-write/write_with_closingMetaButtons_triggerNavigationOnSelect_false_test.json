@@ -1,11 +1,11 @@
 {
   "id": "stars-unit-definition",
-  "version": "3.0",
+  "version": "3.1",
   "backgroundColor": "#3cf",
   "continueButtonShow": "ON_ANY_RESPONSE",
   "firstAudioOptions": {
     "firstClickLayer": "OFF",
-    "animateButton": true
+    "animateButton": false
   },
   "ribbonBars": false,
   "mainAudio": {
@@ -31,18 +31,10 @@
     ],
     "maxInputLength": 10
   },
-  "variableInfo": [
-    {
-      "variableId": "WRITE",
-      "responseComplete": "ON_FULL_CREDIT",
-      "codes": [
-        {
-          "method": "EQUALS",
-          "parameter": "Kopf",
-          "code": 1,
-          "score": 1
-        }
-      ]
-    }
-  ]
+  "closingMetaButtons" : {
+    "variableIdMetaSelection": "META_SELECTION",
+    "variableIdReference" : "WRITE",
+    "variableIdMetaOutcome": "META_OUTCOME",
+    "triggerNavigationOnSelect" : false
+  }
 }
