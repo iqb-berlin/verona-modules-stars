@@ -17,7 +17,6 @@ export class ResponsesService {
   mainAudioComplete = signal(false);
   videoComplete = signal(false);
   closingMetaRunning = signal(false);
-
   allResponses: Response[] = [];
   variableInfo: VariableInfo[] = [];
   veronaPostService = inject(VeronaPostService);
@@ -33,6 +32,7 @@ export class ResponsesService {
   formerStateResponses = signal<Response[]>([]);
   presentationProgress = signal<Progress>('some');
   closingMetaButtons = signal<ClosingMetaButtonsParams>({} as ClosingMetaButtonsParams);
+  metaInteractionDone = signal(false);
 
   /**
   * Interpret mixed input as a number
@@ -74,6 +74,7 @@ export class ResponsesService {
     this.formerStateResponses.set([]);
     this.closingMetaButtons.set({} as ClosingMetaButtonsParams);
     this.closingMetaRunning.set(false);
+    this.metaInteractionDone.set(false);
   }
 
   /**
@@ -176,6 +177,16 @@ export class ResponsesService {
         }
         if (response.id === 'videoPlayer') {
           this.videoComplete.set((response.value as number) >= 1);
+        }
+        if (this.closingMetaRunning() && response.status === 'VALUE_CHANGED') {
+          const metaIdFromSelection = this.closingMetaButtons().variableIdMetaSelection;
+          const isMetaResponse = metaIdFromSelection ?
+            response.id === metaIdFromSelection :
+            response.id.startsWith('META');
+          if (isMetaResponse) {
+            console.log('META RESPONSE TRUE, NOW I WILL MAKE META INTERACTION DONE SET TO TRUE');
+            this.metaInteractionDone.set(true);
+          }
         }
       }
     });
@@ -330,7 +341,7 @@ export class ResponsesService {
     return this.allResponses.find(r => r.id === id) || {} as Response;
   }
 
-  private getResponsesComplete(): Progress {
+  getResponsesComplete(): Progress {
     if (this.allResponses.length === 0) return 'none';
     if (!this.variableInfo || this.variableInfo.length === 0) return 'complete';
     const onAny = this.variableInfo.filter(coding => coding.responseComplete === 'ON_ANY_RESPONSE')

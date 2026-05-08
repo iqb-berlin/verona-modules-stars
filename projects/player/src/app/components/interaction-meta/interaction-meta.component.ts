@@ -88,7 +88,7 @@ export class InteractionMetaComponent extends InteractionComponentDirective {
           id: this.localParameters.variableId,
           status: 'DISPLAYED',
           value: untracked(() => this.getSelectedValue()),
-          relevantForResponsesProgress: true
+          relevantForResponsesProgress: false
         } as StarsResponse]);
       } else {
         // Same unit, just keep localParameters' formerState in sync if needed

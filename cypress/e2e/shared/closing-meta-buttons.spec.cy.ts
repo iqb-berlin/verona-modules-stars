@@ -30,7 +30,7 @@ export function testClosingMetaButtons(interactionType: string) {
       });
     });
 
-    it('shows the continue button when triggerNavigationOnSelect is false', () => {
+    it('shows the continue button after a meta button is selected when triggerNavigationOnSelect is false', () => {
       const configFile = `${interactionType}_with_closingMetaButtons_triggerNavigationOnSelect_false_test.json`;
       cy.setupTestDataWithPostMessageMock(configFile, interactionType);
       cy.loadUnit(`interaction-${interactionType}/${configFile}`);
@@ -39,6 +39,13 @@ export function testClosingMetaButtons(interactionType: string) {
       cy.get('[data-cy="continue-button"]').should('exist').and('be.visible');
       cy.get('[data-cy="continue-button"]').click();
       cy.get('[data-cy="interaction-meta"]').should('exist');
+      // Continue button should be hidden initially
+      cy.get('[data-cy="continue-button"]').should('not.exist');
+
+      // Click on a meta button
+      cy.get('[data-cy="button-2"]').click();
+
+      // Now continue button should be visible
       cy.get('[data-cy="continue-button"]').should('exist').and('be.visible');
     });
   });
