@@ -8,6 +8,7 @@ import {
   ContinueButtonEnum,
   FirstAudioOptionsParams,
   FirstClickLayerEnum,
+  AnimateButtonEnum,
   InteractionEnum, InteractionParameters,
   OpeningImageParams,
   UnitDefinition
@@ -122,7 +123,7 @@ export class UnitService {
       ({ ...def.mainAudio, audioId: 'mainAudio' } as AudioOptions) :
       undefined;
 
-    // Backward compatibility for animateButton and firstClickLayer
+    // Backward compatibility for animateButton and firstClickLayer (which were previously inside mainAudio)
     if (mainAudio?.animateButton) {
       if (!this.firstAudioOptions()?.animateButton) {
         this.firstAudioOptions.set({ ...this.firstAudioOptions(), animateButton: mainAudio.animateButton });
@@ -138,6 +139,12 @@ export class UnitService {
     if (typeof this.firstAudioOptions()?.firstClickLayer === 'boolean') {
       const firstClickLayer: FirstClickLayerEnum = this.firstAudioOptions()?.firstClickLayer ? 'TRANSPARENT' : 'OFF';
       this.firstAudioOptions.set({ ...this.firstAudioOptions(), firstClickLayer: firstClickLayer });
+    }
+
+    // Backward compatibility boolean animateButton
+    if (typeof this.firstAudioOptions()?.animateButton === 'boolean') {
+      const animateButton: AnimateButtonEnum = this.firstAudioOptions()?.animateButton ? 'KIND' : 'OFF';
+      this.firstAudioOptions.set({ ...this.firstAudioOptions(), animateButton: animateButton });
     }
 
     const pattern = /^#([a-f0-9]{3}|[a-f0-9]{6})$/i;

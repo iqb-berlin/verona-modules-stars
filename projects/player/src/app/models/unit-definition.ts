@@ -185,7 +185,7 @@ export interface MainAudio {
 
 export interface FirstAudioOptionsParams {
   firstClickLayer?: FirstClickLayerEnum | boolean;
-  animateButton?: AnimateButtonEnum;
+  animateButton?: AnimateButtonEnum | boolean;
 }
 
 export interface OpeningImageParams {
