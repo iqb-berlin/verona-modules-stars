@@ -72,19 +72,15 @@ export class UnitService {
     this.responsesService.updatePresentationProgress('some');
   }
 
-  finishOpeningFlow() {
-    this._openingFlowActive.set(false);
+  finishOpeningFlow() {    this._openingFlowActive.set(false);
     if (this.mainAudio().audioSource) this._currentAudioSrc.set(this.mainAudio());
   }
 
   startClosingMeta() {
-    this.continueButton.set('NO');
-    // Reset progress carried over from the main interaction so the continue
-    // button doesn't appear until the user actually picks a meta option.
-    this.responsesService.responseProgress.set('none');
-
     if (this.closingMetaButtons()?.triggerNavigationOnSelect === false) {
       this.continueButton.set('ON_ANY_RESPONSE');
+    } else {
+      this.continueButton.set('NO');
     }
 
     const parameters: InteractionParameters = {} as InteractionParameters;

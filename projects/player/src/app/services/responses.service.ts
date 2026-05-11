@@ -32,6 +32,7 @@ export class ResponsesService {
   formerStateResponses = signal<Response[]>([]);
   presentationProgress = signal<Progress>('some');
   closingMetaButtons = signal<ClosingMetaButtonsParams>({} as ClosingMetaButtonsParams);
+  metaInteractionDone = signal(false);
 
   /**
   * Interpret mixed input as a number
@@ -73,6 +74,7 @@ export class ResponsesService {
     this.formerStateResponses.set([]);
     this.closingMetaButtons.set({} as ClosingMetaButtonsParams);
     this.closingMetaRunning.set(false);
+    this.metaInteractionDone.set(false);
   }
 
   /**
@@ -173,6 +175,14 @@ export class ResponsesService {
         } else {
           this.allResponses.push(codedResponse);
         }
+
+        // Mark meta as "done" the first time the meta variable changes value
+        if (this.closingMetaRunning()) {
+          const metaId = this.closingMetaButtons().variableIdMetaSelection;
+          const metaTouched = responses.some(r =>
+            r.id === metaId && r.status === 'VALUE_CHANGED' && r.relevantForResponsesProgress);
+          if (metaTouched) this.metaInteractionDone.set(true);
+        }
         if (response.id === 'videoPlayer') {
           this.videoComplete.set((response.value as number) >= 1);
         }
@@ -216,6 +226,7 @@ export class ResponsesService {
 
   startClosingMeta() {
     this.closingMetaRunning.set(true);
+    this.metaInteractionDone.set(false);
   }
 
   private static isPositionInRange(responseValue: string, range: string): boolean {
