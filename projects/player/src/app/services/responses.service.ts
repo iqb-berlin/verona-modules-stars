@@ -178,16 +178,6 @@ export class ResponsesService {
         if (response.id === 'videoPlayer') {
           this.videoComplete.set((response.value as number) >= 1);
         }
-        if (this.closingMetaRunning() && response.status === 'VALUE_CHANGED') {
-          const metaIdFromSelection = this.closingMetaButtons().variableIdMetaSelection;
-          const isMetaResponse = metaIdFromSelection ?
-            response.id === metaIdFromSelection :
-            response.id.startsWith('META');
-          if (isMetaResponse) {
-            console.log('META RESPONSE TRUE, NOW I WILL MAKE META INTERACTION DONE SET TO TRUE');
-            this.metaInteractionDone.set(true);
-          }
-        }
       }
     });
 

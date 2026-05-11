@@ -32,7 +32,7 @@ export class UnitService {
   hasInteraction = signal(false);
   ribbonBars = signal<boolean>(false);
   disableInteractionUntilComplete = signal(false);
-  closingMetaButtons = this.responsesService.closingMetaButtons;
+  closingMetaButtons = signal<ClosingMetaButtonsParams>({} as ClosingMetaButtonsParams);
   openingImageParams = signal<OpeningImageParams>({} as OpeningImageParams);
 
   /** To hide the speaker icon when imageSource inside openingImage is being shown */
@@ -78,6 +78,15 @@ export class UnitService {
   }
 
   startClosingMeta() {
+    this.continueButton.set('NO');
+    // Reset progress carried over from the main interaction so the continue
+    // button doesn't appear until the user actually picks a meta option.
+    this.responsesService.responseProgress.set('none');
+
+    if (this.closingMetaButtons()?.triggerNavigationOnSelect === false) {
+      this.continueButton.set('ON_ANY_RESPONSE');
+    }
+
     const parameters: InteractionParameters = {} as InteractionParameters;
     parameters.variableId = this.closingMetaButtons().variableIdMetaSelection;
     this.parameters.set(parameters);
@@ -144,7 +153,7 @@ export class UnitService {
     if (def.interactionType) this.interaction.set(def.interactionType);
     if (def.interactionParameters) this.parameters.set(def.interactionParameters);
     if (def.ribbonBars) this.ribbonBars.set(def.ribbonBars);
-    if (def.closingMetaButtons) this.responsesService.closingMetaButtons.set(def.closingMetaButtons);
+    if (def.closingMetaButtons) this.closingMetaButtons.set(def.closingMetaButtons);
     if (def.mainAudio?.disableInteractionUntilComplete) {
       this.disableInteractionUntilComplete.set(def.mainAudio.disableInteractionUntilComplete);
     }
