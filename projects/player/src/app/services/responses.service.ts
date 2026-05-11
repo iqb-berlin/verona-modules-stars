@@ -32,7 +32,6 @@ export class ResponsesService {
   formerStateResponses = signal<Response[]>([]);
   presentationProgress = signal<Progress>('some');
   closingMetaButtons = signal<ClosingMetaButtonsParams>({} as ClosingMetaButtonsParams);
-  metaInteractionDone = signal(false);
 
   /**
   * Interpret mixed input as a number
@@ -74,7 +73,6 @@ export class ResponsesService {
     this.formerStateResponses.set([]);
     this.closingMetaButtons.set({} as ClosingMetaButtonsParams);
     this.closingMetaRunning.set(false);
-    this.metaInteractionDone.set(false);
   }
 
   /**
@@ -331,7 +329,7 @@ export class ResponsesService {
     return this.allResponses.find(r => r.id === id) || {} as Response;
   }
 
-  getResponsesComplete(): Progress {
+  private getResponsesComplete(): Progress {
     if (this.allResponses.length === 0) return 'none';
     if (!this.variableInfo || this.variableInfo.length === 0) return 'complete';
     const onAny = this.variableInfo.filter(coding => coding.responseComplete === 'ON_ANY_RESPONSE')
