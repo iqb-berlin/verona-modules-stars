@@ -16,14 +16,6 @@ import {
 import { ResponsesService } from './responses.service';
 import { AudioService } from './audio.service';
 
-export enum MainPlayerStatus {
-  PAUSED = 'PAUSED',
-  PLAYING = 'PLAYING', // audio waves can be shown
-  ENDED = 'ENDED',
-  READY = 'READY',
-  HIDE = 'HIDE'
-}
-
 @Injectable({
   providedIn: 'root'
 })
@@ -41,7 +33,7 @@ export class UnitService {
   hasInteraction = signal(false);
   ribbonBars = signal<boolean>(false);
   disableInteractionUntilComplete = signal(false);
-  closingMetaButtons = signal({} as ClosingMetaButtonsParams);
+  closingMetaButtons = signal<ClosingMetaButtonsParams>({} as ClosingMetaButtonsParams);
   openingImageParams = signal<OpeningImageParams>({} as OpeningImageParams);
 
   /** To hide the speaker icon when imageSource inside openingImage is being shown */
@@ -81,12 +73,18 @@ export class UnitService {
     this.responsesService.updatePresentationProgress('some');
   }
 
-  finishOpeningFlow() {
-    this._openingFlowActive.set(false);
+  finishOpeningFlow() {    this._openingFlowActive.set(false);
     if (this.mainAudio().audioSource) this._currentAudioSrc.set(this.mainAudio());
   }
 
   startClosingMeta() {
+    // TODO: Change this logic
+    if (this.closingMetaButtons()?.triggerNavigationOnSelect === false) {
+      this.continueButton.set('ON_ANY_RESPONSE');
+    } else {
+      this.continueButton.set('NO');
+    }
+
     const parameters: InteractionParameters = {} as InteractionParameters;
     parameters.variableId = this.closingMetaButtons().variableIdMetaSelection;
     this.parameters.set(parameters);
@@ -183,7 +181,5 @@ export class UnitService {
     } else if (mainAudio?.audioSource) {
       this._currentAudioSrc.set(mainAudio);
     }
-
-    console.log(this.closingMetaButtons());
   }
 }

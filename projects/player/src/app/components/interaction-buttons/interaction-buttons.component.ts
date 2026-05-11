@@ -106,7 +106,7 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
           id: this.localParameters.variableId,
           status: 'DISPLAYED',
           value: 0,
-          relevantForResponsesProgress: true
+          relevantForResponsesProgress: false
         }]);
       }
     });
