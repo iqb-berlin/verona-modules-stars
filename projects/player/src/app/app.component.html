@@ -17,7 +17,9 @@
   <!-- Continue Button (hidden during opening flow and when closing meta buttons are active).
   In ON_ANY_RESPONSE mode, while closing-meta is running we check
   metaInteractionDone, so the button doesn't appear before the user actually selects a meta option (responseProgress
-  may still be "some"/"complete" from the previous main interaction). -->
+  may still be "some"/"complete" from the previous main interaction).
+  TODO: change the logic for ON_ANY_RESPONSE
+  -->
   @if (!unitService.openingFlowActive() &&
       !(unitService.interaction() === 'META' && unitService.closingMetaButtons().triggerNavigationOnSelect) &&
       (unitService.continueButton() === "ALWAYS" ||

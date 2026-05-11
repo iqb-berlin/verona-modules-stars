@@ -177,6 +177,7 @@ export class ResponsesService {
         }
 
         // Mark meta as "done" the first time the meta variable changes value
+        // TODO change it
         if (this.closingMetaRunning()) {
           const metaId = this.closingMetaButtons().variableIdMetaSelection;
           const metaTouched = responses.some(r =>

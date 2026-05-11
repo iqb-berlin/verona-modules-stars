@@ -77,6 +77,7 @@ export class UnitService {
   }
 
   startClosingMeta() {
+    // TODO: Change this logic
     if (this.closingMetaButtons()?.triggerNavigationOnSelect === false) {
       this.continueButton.set('ON_ANY_RESPONSE');
     } else {
