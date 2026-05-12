@@ -1,5 +1,5 @@
 <div class="audio-instruction-container"
-     [class.disabled]="disabled() && !isPlaying()"
+     [class.disabled]="isDisabled() && !isPlaying()"
      [class.has-ribbons]="unitService.ribbonBars()"
      [attr.data-cy]="disabled() ? 'audio-button-container-disabled' : 'audio-button-container'"
 >
