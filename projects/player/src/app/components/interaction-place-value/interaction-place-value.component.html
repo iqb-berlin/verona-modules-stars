@@ -41,13 +41,6 @@
              (click)="onItemClick('ones', ones, $event)"
              [attr.data-cy]="inUpperPanel(ones.id) ? 'icon-item-ones-moved' : 'icon-item-ones'"
          >
-<!--          <svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">-->
-<!--            <rect class="bg-rect" width="50" height="50" rx="16" [attr.fill]="(isSelected(ones.id) || draggingIndex() === ones.id) ? '#DCDCDC' : 'white'"/>-->
-<!--            @if (!(isSelected(ones.id) || draggingIndex() === ones.id)) {-->
-<!--              <rect x="0.5" y="0.5" width="50" height="50" rx="16" stroke="#DBDDE7"/>-->
-<!--            }-->
-<!--            <circle cx="25" cy="25" r="15" fill="#0050E5"/>-->
-<!--          </svg>-->
           <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="15" cy="15" r="15" fill="#0050E5"/>
           </svg>
