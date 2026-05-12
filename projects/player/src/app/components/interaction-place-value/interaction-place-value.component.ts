@@ -33,8 +33,6 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
   @ViewChild('onesWrapper', { static: false }) onesWrapper?: ElementRef<HTMLElement>;
 
   localParameters!: InteractionPlaceValueParams;
-  /** Maximum number of rows to display in the upper panel (tens and ones) */
-  numberOfRows: number = 5;
   /** Maximum number of tens and ones  */
   maxNumberOfTens: number = 3;
   maxNumberOfOnes: number = 20;
@@ -71,13 +69,9 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
   private readonly onesSlotIndex = new Map<number, number>();
   // Ones icon and Tens icon dimensions
   private readonly tensItemHeight = 50;
-  // private readonly onesItemHeight = 50;
-  // private readonly onesItemWidth = 50;
   private readonly onesItemHeight = 30;
   private readonly onesItemWidth = 30;
   private readonly marginBetweenElements = 8;
-  // private readonly panelPadding = 2 * this.marginBetweenElements;
-  // private readonly panelWidth = 680 + this.marginBetweenElements;
   /** Transient selection: ids currently in the middle of a user-triggered move/animation */
   private readonly selectionAnimatingIds: Set<number> = new Set<number>();
   /** Animation control for click/drag animations: reactive map of animating item ids */
@@ -93,8 +87,6 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
       if (parameters) {
         this.localParameters.variableId = parameters.variableId || 'PLACE_VALUE';
         this.localParameters.value = parameters.value || 0;
-        this.localParameters.numberOfRows = parameters.numberOfRows || 5;
-        this.numberOfRows = this.localParameters.numberOfRows;
         this.localParameters.maxNumberOfTens = parameters.maxNumberOfTens || 3;
         this.maxNumberOfTens = this.localParameters.maxNumberOfTens;
         this.localParameters.maxNumberOfOnes = parameters.maxNumberOfOnes || 20;
@@ -703,7 +695,6 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
     return {
       variableId: 'PLACE_VALUE',
       value: 0,
-      numberOfRows: 5,
       maxNumberOfTens: 3,
       maxNumberOfOnes: 20
     };

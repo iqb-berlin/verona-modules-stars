@@ -96,7 +96,6 @@ export interface InteractionDropParams {
 export interface InteractionPlaceValueParams {
   variableId?: string;
   value: number;
-  numberOfRows?: number;
   maxNumberOfTens?: number;
   maxNumberOfOnes?: number;
   formerState?: Response[];
