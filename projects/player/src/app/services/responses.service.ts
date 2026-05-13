@@ -184,8 +184,12 @@ export class ResponsesService {
             r.id === metaId && r.status === 'VALUE_CHANGED' && r.relevantForResponsesProgress);
           if (metaTouched) this.metaInteractionDone.set(true);
         }
-        if (response.id === 'videoPlayer') {
-          this.videoComplete.set((response.value as number) >= 1);
+        if (response.id === 'VIDEO') {
+          const videoValue = response.value as number;
+          this.videoComplete.set(videoValue >= 1);
+          if (videoValue >= 1) {
+            this.presentationProgress.set('complete');
+          }
         }
       }
     });
@@ -502,14 +506,22 @@ export class ResponsesService {
               const n = this.asNumberOrZero(mainAudioResp.value);
               this.mainAudioComplete.set(n >= 1);
             }
-            if (this.mainAudioComplete()) {
+
+            // Restore VIDEO completion from saved responses
+            const videoResp = parsedResponses.find(r => r.id === 'VIDEO');
+            if (videoResp) {
+              const videoValue = this.asNumberOrZero(videoResp.value);
+              this.videoComplete.set(videoValue >= 1);
+            }
+
+            if (this.mainAudioComplete() || this.videoComplete()) {
               this.presentationProgress.set('complete');
             }
 
             // Restore responseProgress: if any interaction response has VALUE_CHANGED (or CODING_COMPLETE), mark complete
             const hasInteractionValueChanged =
               parsedResponses.some(r => (r.status === 'VALUE_CHANGED' || r.status === 'CODING_COMPLETE') &&
-                r.id !== 'mainAudio' && r.id !== 'videoPlayer');
+                r.id !== 'mainAudio' && r.id !== 'VIDEO');
             if (hasInteractionValueChanged) {
               this.responseProgress.set('complete');
             } else if (unitState.responseProgress) {
