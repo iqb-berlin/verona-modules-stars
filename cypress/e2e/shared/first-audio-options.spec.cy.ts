@@ -109,7 +109,7 @@ export function firstAudioOptionsFeatures(interactionType: string) {
           cy.get('[data-cy="custom-audio-button"]').should('exist').and('not.have.class', 'moving-button-kind');
 
           // Do not interact with the page; wait slightly over 5 seconds
-          cy.wait(5500);
+          cy.wait(6000);
 
           // After 10s of inactivity (and before first interaction), it should start moving
           cy.get('[data-cy="custom-audio-button"]').should('have.class', 'moving-button-kind');
@@ -129,7 +129,7 @@ export function firstAudioOptionsFeatures(interactionType: string) {
           cy.get('[data-cy="custom-audio-button"]').should('exist').and('not.have.class', 'moving-button-bold');
 
           // Do not interact with the page; wait slightly over 5 seconds
-          cy.wait(5500);
+          cy.wait(6000);
 
           // After 10s of inactivity (and before first interaction), it should start moving
           cy.get('[data-cy="custom-audio-button"]').should('have.class', 'moving-button-bold');

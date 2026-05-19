@@ -22,7 +22,7 @@ export class AudioComponent {
   responsesService = inject(ResponsesService);
   unitService = inject(UnitService);
 
-  movingButton = signal<'OFF' | 'KIND' | 'BOLD'>('BOLD');
+  movingButton = signal<'OFF' | 'KIND' | 'BOLD'>('OFF');
   isPlaying = signal(false);
   isDisabled = signal(false);
 
