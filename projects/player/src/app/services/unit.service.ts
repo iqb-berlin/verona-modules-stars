@@ -141,7 +141,7 @@ export class UnitService {
 
     // Backward compatibility boolean animateButton
     if (typeof this.firstAudioOptions()?.animateButton === 'boolean') {
-      const animateButton: AnimateButtonEnum = this.firstAudioOptions()?.animateButton ? 'KIND' : 'OFF';
+      const animateButton: AnimateButtonEnum = this.firstAudioOptions()?.animateButton ? 'BOLD' : 'OFF';
       this.firstAudioOptions.set({ ...this.firstAudioOptions(), animateButton: animateButton });
     }
 
