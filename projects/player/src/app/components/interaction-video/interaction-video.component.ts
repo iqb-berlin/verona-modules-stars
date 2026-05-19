@@ -6,6 +6,7 @@ import {
 } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
+import { Response } from '@iqbspecs/response/response.interface';
 import { StarsResponse } from '../../services/responses.service';
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
 import { InteractionVideoParams } from '../../models/unit-definition';
@@ -54,7 +55,24 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
         this.localParameters.videoSource = parameters.videoSource || '';
         this.localParameters.text = parameters.text || '';
         this.localParameters.triggerNavigationOnEnd = parameters.triggerNavigationOnEnd || false;
-        this.localParameters.variableId = parameters.variableId || 'videoPlayer';
+        this.localParameters.variableId = parameters.variableId || 'VIDEO';
+
+        const formerStateResponses: Response[] = (parameters as any).formerState || [];
+
+        if (Array.isArray(formerStateResponses) && formerStateResponses.length > 0) {
+          const found = formerStateResponses.find(r => r.id === this.localParameters.variableId);
+
+          if (found && typeof found.value === 'number') {
+            this.restoreFromFormerState(found);
+            this._isPlaying.set(false);
+            if (this.videoPlayerRef) {
+              this.videoPlayerRef.nativeElement.load();
+            }
+            return;
+          }
+        }
+
+        // No valid former state - initialize with DISPLAYED
         this.responses.emit([{
           id: this.localParameters.variableId,
           status: 'DISPLAYED',
@@ -139,20 +157,44 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
     let videoValue = this.percentElapsed || 0;
     videoValue += this.playCount;
 
-    const response: StarsResponse = {
-      id: 'videoPlayer',
-      value: videoValue,
+    // Only send VALUE_CHANGED if there's actual progress (not initial 0)
+    if (videoValue > 0) {
+      const response: StarsResponse = {
+        id: 'VIDEO',
+        value: videoValue,
+        status: 'VALUE_CHANGED',
+        relevantForResponsesProgress: false
+      };
+
+      this.responses.emit([response]);
+    }
+  }
+
+  /**
+   * Restores the video playback state from former state.
+   * @param {Response} response - The response object containing the video progress value
+   */
+  private restoreFromFormerState(response: Response): void {
+    if (typeof response.value !== 'number') return;
+
+    const videoValue = response.value;
+    this.playCount = Math.floor(videoValue);
+    this.percentElapsed = videoValue - this.playCount;
+
+    const restoreResponse: StarsResponse = {
+      id: this.localParameters.variableId || 'VIDEO',
       status: 'VALUE_CHANGED',
+      value: videoValue,
       relevantForResponsesProgress: false
     };
 
-    this.responses.emit([response]);
+    this.responses.emit([restoreResponse]);
   }
 
   // eslint-disable-next-line class-methods-use-this
   private createDefaultParameters(): InteractionVideoParams {
     return {
-      variableId: 'videoPlayer',
+      variableId: 'VIDEO',
       imageSource: '',
       videoSource: '',
       text: '',

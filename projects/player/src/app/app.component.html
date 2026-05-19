@@ -73,7 +73,7 @@
       (responses)="responsesService.newResponses($event)"></stars-interaction-write>
   } @else if (unitService.interaction() === 'VIDEO') {
     <stars-interaction-video class="interaction"
-      [parameters]="unitService.parameters()"
+      [parameters]="getParametersWithFormerState()"
       [showHint]="responsesService.feedbackHint()"
       (responses)="responsesService.newResponses($event)"></stars-interaction-video>
   } @else if (unitService.interaction() === 'FIND_ON_IMAGE') {

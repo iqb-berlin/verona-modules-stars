@@ -1,8 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnDestroy } from '@angular/core';
 import {
   CdkMenu, CdkMenuBar, CdkMenuItem, CdkMenuTrigger
 } from '@angular/cdk/menu';
 import { Dialog } from '@angular/cdk/dialog';
+import { Subject, takeUntil } from 'rxjs';
 import { FileService } from '../../services/file.service';
 import { UnitService } from '../../services/unit.service';
 import { ResponsesService } from '../../services/responses.service';
@@ -35,9 +36,11 @@ import {EditUnitDialog} from "../edit-unit-dialog/edit-unit.dialog";
   styleUrl: 'standalone-menu.component.css'
 })
 
-export class StandaloneMenuComponent {
+export class StandaloneMenuComponent implements OnDestroy {
   dialog = inject(Dialog);
   unitDefinitionAsString = '';
+
+  private ngUnsubscribe = new Subject<void>();
 
   constructor(
     public unitService: UnitService,
@@ -63,12 +66,14 @@ export class StandaloneMenuComponent {
       height: '600px',
       data: this.unitDefinitionAsString
     });
-    dialogRef.closed.subscribe(result => {
-      if (result) {
-        this.unitDefinitionAsString = result as string;
-        this.setNewUnitDefinition();
-      }
-    });
+    dialogRef.closed
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(result => {
+        if (result) {
+          this.unitDefinitionAsString = result as string;
+          this.setNewUnitDefinition();
+        }
+      });
   }
 
   showResponses() {
@@ -76,5 +81,10 @@ export class StandaloneMenuComponent {
       width: '800px',
       data: this.responsesService.allResponses
     });
+  }
+
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }
