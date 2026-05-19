@@ -8,20 +8,13 @@ import {
   ContinueButtonEnum,
   FirstAudioOptionsParams,
   FirstClickLayerEnum,
+  AnimateButtonEnum,
   InteractionEnum, InteractionParameters,
   OpeningImageParams,
   UnitDefinition
 } from '../models/unit-definition';
 import { ResponsesService } from './responses.service';
 import { AudioService } from './audio.service';
-
-export enum MainPlayerStatus {
-  PAUSED = 'PAUSED',
-  PLAYING = 'PLAYING', // audio waves can be shown
-  ENDED = 'ENDED',
-  READY = 'READY',
-  HIDE = 'HIDE'
-}
 
 @Injectable({
   providedIn: 'root'
@@ -40,7 +33,7 @@ export class UnitService {
   hasInteraction = signal(false);
   ribbonBars = signal<boolean>(false);
   disableInteractionUntilComplete = signal(false);
-  closingMetaButtons = signal({} as ClosingMetaButtonsParams);
+  closingMetaButtons = signal<ClosingMetaButtonsParams>({} as ClosingMetaButtonsParams);
   openingImageParams = signal<OpeningImageParams>({} as OpeningImageParams);
 
   /** To hide the speaker icon when imageSource inside openingImage is being shown */
@@ -80,12 +73,18 @@ export class UnitService {
     this.responsesService.updatePresentationProgress('some');
   }
 
-  finishOpeningFlow() {
-    this._openingFlowActive.set(false);
+  finishOpeningFlow() {    this._openingFlowActive.set(false);
     if (this.mainAudio().audioSource) this._currentAudioSrc.set(this.mainAudio());
   }
 
   startClosingMeta() {
+    // TODO: Change this logic
+    if (this.closingMetaButtons()?.triggerNavigationOnSelect === false) {
+      this.continueButton.set('ON_ANY_RESPONSE');
+    } else {
+      this.continueButton.set('NO');
+    }
+
     const parameters: InteractionParameters = {} as InteractionParameters;
     parameters.variableId = this.closingMetaButtons().variableIdMetaSelection;
     this.parameters.set(parameters);
@@ -122,7 +121,7 @@ export class UnitService {
       ({ ...def.mainAudio, audioId: 'mainAudio' } as AudioOptions) :
       undefined;
 
-    // Backward compatibility for animateButton and firstClickLayer
+    // Backward compatibility for animateButton and firstClickLayer (which were previously inside mainAudio)
     if (mainAudio?.animateButton) {
       if (!this.firstAudioOptions()?.animateButton) {
         this.firstAudioOptions.set({ ...this.firstAudioOptions(), animateButton: mainAudio.animateButton });
@@ -138,6 +137,12 @@ export class UnitService {
     if (typeof this.firstAudioOptions()?.firstClickLayer === 'boolean') {
       const firstClickLayer: FirstClickLayerEnum = this.firstAudioOptions()?.firstClickLayer ? 'TRANSPARENT' : 'OFF';
       this.firstAudioOptions.set({ ...this.firstAudioOptions(), firstClickLayer: firstClickLayer });
+    }
+
+    // Backward compatibility boolean animateButton
+    if (typeof this.firstAudioOptions()?.animateButton === 'boolean') {
+      const animateButton: AnimateButtonEnum = this.firstAudioOptions()?.animateButton ? 'BOLD' : 'OFF';
+      this.firstAudioOptions.set({ ...this.firstAudioOptions(), animateButton: animateButton });
     }
 
     const pattern = /^#([a-f0-9]{3}|[a-f0-9]{6})$/i;
@@ -176,7 +181,5 @@ export class UnitService {
     } else if (mainAudio?.audioSource) {
       this._currentAudioSrc.set(mainAudio);
     }
-
-    console.log(this.closingMetaButtons());
   }
 }

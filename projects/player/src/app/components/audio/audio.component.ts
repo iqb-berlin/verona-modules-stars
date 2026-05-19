@@ -22,7 +22,7 @@ export class AudioComponent {
   responsesService = inject(ResponsesService);
   unitService = inject(UnitService);
 
-  movingButton = signal<'OFF' | 'KIND' | 'BOLD'>('OFF');
+  movingButton = signal<'OFF' | 'KIND' | 'BOLD'>('BOLD');
   isPlaying = signal(false);
   isDisabled = signal(false);
 
@@ -63,6 +63,7 @@ export class AudioComponent {
 
       const animateButton = this.firstAudioOptions()?.animateButton;
       if (animateButton && animateButton !== 'OFF' && !this.unitService.interactionDone()) {
+        this.movingButton.set('OFF');
         this.animateTimer = setTimeout(() => {
           if (!this.unitService.interactionDone()) {
             this.movingButton.set(animateButton as 'KIND' | 'BOLD');

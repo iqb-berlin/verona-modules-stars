@@ -1,6 +1,6 @@
 {
   "id": "stars-unit-definition",
-  "version": "3.0",
+  "version": "4.0",
   "backgroundColor": "#E1E9FF",
   "ribbonBars": false,
   "continueButtonShow": "ALWAYS",
@@ -17,7 +17,6 @@
   "interactionParameters": {
     "variableId": "PLACE_VALUE",
     "value": 22,
-    "numberOfRows": 5,
     "maxNumberOfTens": 3,
     "maxNumberOfOnes": 5
   }

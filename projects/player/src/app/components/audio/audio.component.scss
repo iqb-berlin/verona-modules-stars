@@ -3,25 +3,12 @@
 
 .audio-button-container {
   .custom-audio-button {
-    width: 80px;
-    height: 80px;
-    padding: 0;
-    box-sizing: border-box;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent; /* removes focus ring on tap */
+    @include variables.circle-button-props;
     outline: none;
     -webkit-touch-callout: none; /* prevents callout on long press (iOS) */
-    filter: drop-shadow(5px 5px 0 rgba(0, 0, 0, 0.2));
-
-    &:focus, &:active {
-      outline: none;
-      background-color: transparent;
-    }
 
     svg {
       @include variables.svg-styles;
-      width: 80px;
-      height: 80px;
     }
 
     &.moving-button-kind {

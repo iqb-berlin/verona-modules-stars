@@ -155,7 +155,7 @@ $layoutPadding: 90px;
   width: 100%;
   height: 100%;
   display: block;
-  flex: 0 0 auto;
+  transform: translateZ(0); /* Safari and SEB fix for broken drop-shadow on filter */
 }
 
 @mixin keyboard-numbers-button {
@@ -210,3 +210,23 @@ $layoutPadding: 90px;
   stroke: colors.$highlight;
   stroke-width: 1px;
 }
+
+@mixin circle-button-props {
+  width: 80px;
+  height: 80px;
+  padding: 0;
+  box-sizing: border-box;
+  border: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent; /* Safari and SEB fix to remove focus ring on tap */
+  border-radius: 50%;
+  filter: drop-shadow(5px 5px 0 rgba(0, 0, 0, 0.2));
+  -webkit-filter: drop-shadow(5px 5px 0 rgba(0,0,0,0.2)); /* Safari and SEB fix for broken drop-shadow on filter */
+  transform: translateZ(0); /* Safari and SEB fix for broken drop-shadow on filter */
+
+  &:focus, &:active {
+    outline: none;
+    background-color: transparent;
+  }
+}
+

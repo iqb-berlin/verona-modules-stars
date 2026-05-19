@@ -96,7 +96,6 @@ export interface InteractionDropParams {
 export interface InteractionPlaceValueParams {
   variableId?: string;
   value: number;
-  numberOfRows?: number;
   maxNumberOfTens?: number;
   maxNumberOfOnes?: number;
   formerState?: Response[];
@@ -185,7 +184,7 @@ export interface MainAudio {
 
 export interface FirstAudioOptionsParams {
   firstClickLayer?: FirstClickLayerEnum | boolean;
-  animateButton?: AnimateButtonEnum;
+  animateButton?: AnimateButtonEnum | boolean;
 }
 
 export interface OpeningImageParams {
