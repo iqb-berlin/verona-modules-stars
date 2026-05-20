@@ -89,6 +89,24 @@ export class UnitService {
     parameters.variableId = this.closingMetaButtons().variableIdMetaSelection;
     this.parameters.set(parameters);
     this.interaction.set('META');
+    if (this.closingMetaButtons()?.audioSource?.trim()) {
+      const audioOptions: AudioOptions = {
+        audioSource: this.closingMetaButtons().audioSource as string,
+        audioId: 'closingMetaButtonsAudio'
+      };
+      this._currentAudioSrc.set(audioOptions);
+      if (this.closingMetaButtons().autoPlay) {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        this.audioService.setAudioSrc(audioOptions).then(ready => {
+          if (ready) {
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+            this.audioService.getPlayFinished('closingMetaButtonsAudio');
+          }
+        });
+      }
+    } else {
+      this._currentAudioSrc.set({} as AudioOptions);
+    }
     this.responsesService.startClosingMeta();
   }
 

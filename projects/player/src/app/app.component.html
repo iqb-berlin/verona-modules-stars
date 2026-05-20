@@ -10,7 +10,7 @@
   }
 
   <!-- audio component (show if player is not hidden) -->
-  @if ((unitService.mainAudio().audioSource || unitService.openingImageParams().audioSource) && !unitService.showingOpeningImage()) {
+  @if (unitService.currentAudioSrc().audioSource && !unitService.showingOpeningImage()) {
     <stars-audio [audio]="unitService.currentAudioSrc()" [firstAudioOptions]="unitService.firstAudioOptions()"></stars-audio>
   }
 
