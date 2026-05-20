@@ -200,6 +200,8 @@ export interface AudioOptions extends MainAudio {
 }
 
 export interface ClosingMetaButtonsParams {
+  audioSource?: string;
+  autoPlay?: boolean;
   variableIdMetaSelection?: string;
   variableIdReference: string;
   variableIdMetaOutcome?: string;
