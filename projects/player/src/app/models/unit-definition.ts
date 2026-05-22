@@ -106,10 +106,13 @@ export interface InteractionWriteParams {
   imageSource?: string;
   text?: string;
   addBackspaceKey?: boolean;
-  addUmlautKeys?: boolean;
   keyboardMode?: 'CHARACTERS' | 'NUMBERS_LINE';
-  keysToAdd?: string[];
+  keysLine1?: string[];
+  keysLine2?: string[];
+  keysLine3?: string[];
+  keysLine4?: string[];
   maxInputLength?: number;
+  keysToAdd?: string[];
   formerState?: Response[];
 }
 

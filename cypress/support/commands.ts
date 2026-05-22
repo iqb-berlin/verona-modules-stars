@@ -191,7 +191,7 @@ Cypress.Commands.add('waitUntilAudioIsFinishedPlaying', () => {
 });
 
 Cypress.Commands.add('writeTextOnKeyboard', (text: string) => {
-  const letters = text.toLowerCase().split('');
+  const letters = text.toUpperCase().split('');
 
   letters.forEach(char => {
     cy.get(`[data-cy=character-button-${char}]`).click();
@@ -510,13 +510,13 @@ Cypress.Commands.add('applyStandardScenarios', (interactionType: string, navigat
         // allow 'a' | 'A' or 'character-button-a'
         const letterMatch = navigator.match(/^[a-z]$/i);
         if (letterMatch && letterMatch[0]) {
-          const letter = letterMatch[0].toLowerCase();
+          const letter = letterMatch[0].toUpperCase();
           cy.get(`[data-cy=character-button-${letter}]`).click();
           return;
         }
         const btnMatch = navigator.match(/^character-button-([a-z])$/i);
         if (btnMatch && btnMatch[1]) {
-          const letter = btnMatch[1].toLowerCase();
+          const letter = btnMatch[1].toUpperCase();
           cy.get(`[data-cy=character-button-${letter}]`).click();
           return;
         }
@@ -528,7 +528,7 @@ Cypress.Commands.add('applyStandardScenarios', (interactionType: string, navigat
       }
     }
     // Default behavior
-    cy.get('[data-cy=character-button-a]').click();
+    cy.get('[data-cy=character-button-A]').click();
     return;
   }
 

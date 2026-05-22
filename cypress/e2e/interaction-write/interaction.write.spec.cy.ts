@@ -60,7 +60,7 @@ describe('Interaction WRITE Component', () => {
       });
 
       letters.forEach(letter => {
-        cy.get(`[data-cy=character-button-${letter}]`).click();
+        cy.get(`[data-cy=character-button-${letter.toUpperCase()}]`).click();
       });
 
       // Check if the text is displayed correctly
@@ -71,7 +71,7 @@ describe('Interaction WRITE Component', () => {
         });
 
       // Check if I can type more characters
-      cy.get('[data-cy=character-button-k]').should('be.disabled');
+      cy.get('[data-cy=character-button-K]').should('be.disabled');
     });
   });
 
@@ -91,41 +91,23 @@ describe('Interaction WRITE Component', () => {
     });
   });
 
-  it('shows äöü if addUmlautKeys param is true', () => {
+  it('shows keys in keysLine1-4', () => {
     cy.setupTestData(defaultTestFile, interactionType);
     let testData: UnitDefinition;
-    const umlautKeys = ['ä', 'ö', 'ü'];
     cy.get('@testData').then(data => {
       testData = data as unknown as UnitDefinition;
 
       const writeParams = testData.interactionParameters as InteractionWriteParams;
-      const addUmlautKeys = writeParams.addUmlautKeys;
+      const lines = [
+        writeParams.keysLine1 || ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'],
+        writeParams.keysLine2 || ['J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R'],
+        writeParams.keysLine3 || ['S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
+        writeParams.keysLine4 || []
+      ];
 
-      if (addUmlautKeys) {
-        umlautKeys.forEach(key => {
-          cy.get(`[data-cy=grapheme-button-${key}]`).should('exist');
-          cy.log(`${key} grapheme key exists`);
-        });
-      }
-    });
-  });
-
-  it('shows the buttons inside keysToAdd param', () => {
-    cy.setupTestData(defaultTestFile, interactionType);
-    let testData: UnitDefinition;
-
-    cy.get('@testData').then(data => {
-      testData = data as unknown as UnitDefinition;
-
-      const writeParams = testData.interactionParameters as InteractionWriteParams;
-      const extraKeyboardKeys: string[] = writeParams.keysToAdd ?? [];
-
-      if (extraKeyboardKeys.length > 0) {
-        extraKeyboardKeys.forEach((key: string) => {
-          cy.get(`[data-cy=keyboard-button-${key}]`).should('exist');
-          cy.log(`${key} extra keyboard key exists`);
-        });
-      }
+      lines.flat().forEach(key => {
+        cy.get(`[data-cy=character-button-${key}]`).should('exist');
+      });
     });
   });
 
@@ -133,7 +115,7 @@ describe('Interaction WRITE Component', () => {
     // 1. Check default keyboardMode: CHARACTERS
     cy.setupTestData(defaultTestFile, interactionType);
     cy.get('[data-cy=write-container]').should('have.class', 'characters-type');
-    cy.get('[data-cy=character-button-a]').should('exist');
+    cy.get('[data-cy=character-button-A]').should('exist');
 
     // 3. Check keyboardMode: NUMBERS_LINE
     cy.setupTestData('write_numbersLine_test', interactionType);
