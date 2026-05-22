@@ -17,9 +17,6 @@
     "addBackspaceKey": true,
     "addUmlautKeys": true,
     "keysToAdd": [
-      "ä",
-      "ö",
-      "ü",
       "eu",
       "au",
       "ei",

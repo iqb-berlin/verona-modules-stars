@@ -106,6 +106,7 @@ export interface InteractionWriteParams {
   imageSource?: string;
   text?: string;
   addBackspaceKey?: boolean;
+  addUmlautKeys?: boolean;
   keyboardMode?: 'CHARACTERS' | 'NUMBERS_LINE';
   keysLine1?: string[];
   keysLine2?: string[];

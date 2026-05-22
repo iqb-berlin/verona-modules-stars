@@ -25,12 +25,12 @@
                 @for (button of line; track $index) {
                   <button type="button"
                           class="keyboard-button"
-                          [attr.aria-label]="currentText.length === 0 ? button.toUpperCase() : button.toLowerCase()"
+                          [attr.aria-label]="currentText.length === 0 ? button.toUpperCase() : button"
                           (click)="addChar(button)"
                           [disabled]="isDisabled"
                           [attr.data-cy]="'character-button-' + button"
                   >
-                    {{ currentText.length === 0 ? (button.length === 1 ? button.toUpperCase() : capitalize(button)) : button.toLowerCase() }}
+                    {{ currentText.length === 0 ? (button.length === 1 ? button.toUpperCase() : capitalize(button)) : button }}
                   </button>
                 }
               </div>

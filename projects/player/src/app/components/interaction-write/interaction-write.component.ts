@@ -19,11 +19,6 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
   /** The current text entered by the user. Initialized as an empty string. */
   currentText: string = '';
   hasHint = signal(false);
-  /** An array of lowercase alphabet characters. */
-  keysLine1: string[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
-  keysLine2: string[] = ['J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R'];
-  keysLine3: string[] = ['S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
-  keysLine4: string[] = [];
 
   numbersList: string[] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
@@ -35,10 +30,10 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
       this.localParameters = this.createDefaultParameters();
       if (parameters) {
         this.localParameters.addBackspaceKey = parameters.addBackspaceKey ?? true;
-        this.localParameters.keysLine1 = parameters.keysLine1 || this.keysLine1;
-        this.localParameters.keysLine2 = parameters.keysLine2 || this.keysLine2;
-        this.localParameters.keysLine3 = parameters.keysLine3 || this.keysLine3;
-        this.localParameters.keysLine4 = parameters.keysLine4 || this.keysLine4;
+        this.localParameters.keysLine1 = parameters.keysLine1 || ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
+        this.localParameters.keysLine2 = parameters.keysLine2 || ['j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r'];
+        this.localParameters.keysLine3 = parameters.keysLine3 || ['s', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+        this.localParameters.keysLine4 = parameters.keysLine4 || [];
         this.localParameters.variableId = parameters.variableId || 'WRITE';
         this.localParameters.keyboardMode = parameters.keyboardMode || 'CHARACTERS';
         this.localParameters.maxInputLength = parameters.maxInputLength || 10;
@@ -99,7 +94,7 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
       return;
     }
 
-    const charToAdd = this.currentText.length === 0 ? button.toUpperCase() : button.toLowerCase();
+    const charToAdd = this.currentText.length === 0 ? this.capitalize(button) : button;;
     this.currentText += charToAdd;
 
     this.isDisabled = this.localParameters?.maxInputLength !== null &&
@@ -150,9 +145,9 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
       imageSource: '',
       text: '',
       addBackspaceKey: true,
-      keysLine1: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'],
-      keysLine2: ['J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R'],
-      keysLine3: ['S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
+      keysLine1: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'],
+      keysLine2: ['j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r'],
+      keysLine3: ['s', 't', 'u', 'v', 'w', 'x', 'y', 'z'],
       keysLine4: [],
       keyboardMode: 'CHARACTERS',
       maxInputLength: 10
