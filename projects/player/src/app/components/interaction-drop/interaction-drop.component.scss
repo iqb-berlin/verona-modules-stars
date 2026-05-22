@@ -13,6 +13,12 @@
   // Image at the top, buttons at the bottom
   &.image-position-top {
     flex-direction: column;
+    padding-top: 10px;
+
+    .image-wrapper {
+      min-height: 300px;
+      min-width: 300px;
+    }
   }
 
   .stimulus-wrapper {
