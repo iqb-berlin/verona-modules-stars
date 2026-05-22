@@ -1,12 +1,6 @@
-# Release Note 0.6.36 #
+# Release Note 0.6.37 #
 
 ## Neu
-+ animateButton:
-  - Rückwärtskompatibilität hinzufügen
-  - Default als "BOLD" setzen
-
-+ interactionType: PLACE_VALUE:
-  - min-Height zum oberen Symbol hinzufügen
-  - numberOfRows-Eigenschaft entfernen
++ Die Eigenschaften „audioSource“ und „autoPlay“ wurden zu „closingMetaButtons“ hinzugefügt.
 
 
