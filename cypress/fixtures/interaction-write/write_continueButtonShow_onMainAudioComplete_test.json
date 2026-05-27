@@ -33,7 +33,7 @@
       "codes": [
         {
           "method": "EQUALS",
-          "parameter": "Kopf",
+          "parameter": "KOPF",
           "code": 1,
           "score": 1
         }

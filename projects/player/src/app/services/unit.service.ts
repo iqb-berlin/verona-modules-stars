@@ -179,10 +179,8 @@ export class UnitService {
         // Backward compatibility for old WRITE Property keysToAdd
         if (!writeParams.keysLine4) {
           if (writeParams.addUmlautKeys) {
-            console.log('Adding umlaut keys to WRITE interaction', writeParams);
             const umlautKeys = ['ä', 'ö', 'ü'];
             writeParams.keysLine4 = [...umlautKeys];
-            console.log('Updated keysLine4 with umlaut keys', writeParams.keysLine4);
           }
           if (writeParams.keysToAdd) {
             writeParams.keysLine4 = [...writeParams.keysLine4, ...writeParams.keysToAdd];

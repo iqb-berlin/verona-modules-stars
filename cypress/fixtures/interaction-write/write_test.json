@@ -20,9 +20,9 @@
     "text": "Tastatur",
     "addBackspaceKey": true,
     "keyboardMode": "CHARACTERS",
-    "keysLine1": ["A", "B", "C", "D", "E", "F", "G", "H", "I"],
-    "keysLine2": ["J", "K", "L", "M", "N", "O", "P", "Q", "R"],
-    "keysLine3": ["S", "T", "U", "V", "W", "X", "Y", "Z"],
+    "keysLine1": ["a", "b", "c", "d", "e", "f", "g", "h", "i"],
+    "keysLine2": ["j", "k", "l", "m", "n", "o", "p", "q", "r"],
+    "keysLine3": ["s", "t", "u", "v", "w", "x", "y", "z"],
     "keysLine4": ["ä", "ö", "ü", "eu", "au", "ei", "ch", "sch", "ng"],
     "maxInputLength": 10
   },
