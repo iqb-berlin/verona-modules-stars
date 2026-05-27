@@ -173,7 +173,22 @@ export class UnitService {
       this.continueButton.set('ALWAYS');
     }
     if (def.interactionType) this.interaction.set(def.interactionType);
-    if (def.interactionParameters) this.parameters.set(def.interactionParameters);
+    if (def.interactionParameters) {
+      if (def.interactionType === 'WRITE') {
+        const writeParams = def.interactionParameters as any;
+        // Backward compatibility for old WRITE Property keysToAdd
+        if (!writeParams.keysLine4) {
+          if (writeParams.addUmlautKeys) {
+            const umlautKeys = ['ä', 'ö', 'ü'];
+            writeParams.keysLine4 = [...umlautKeys];
+          }
+          if (writeParams.keysToAdd) {
+            writeParams.keysLine4 = [...writeParams.keysLine4, ...writeParams.keysToAdd];
+          }
+        }
+      }
+      this.parameters.set(def.interactionParameters);
+    }
     if (def.ribbonBars) this.ribbonBars.set(def.ribbonBars);
     if (def.closingMetaButtons) this.closingMetaButtons.set(def.closingMetaButtons);
     if (def.mainAudio?.disableInteractionUntilComplete) {
