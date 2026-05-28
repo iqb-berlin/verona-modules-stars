@@ -263,6 +263,24 @@ describe('Interaction DROP Component', () => {
     });
   });
 
+  describe('Styling & Types', () => {
+    it('handles different button types (SMALL_SQUARE, EXTRA_SMALL_SQUARE)', () => {
+      const buttonTypeConfigs = [
+        { buttonType: 'SMALL_SQUARE', file: 'drop_test.json' },
+        { buttonType: 'EXTRA_SMALL_SQUARE', file: 'drop_buttonType_extraSmallSquare_test.json' }
+      ];
+
+      cy.wrap(buttonTypeConfigs).each(({ buttonType, file }: any) => {
+        cy.log(`Testing buttonType: ${buttonType}`);
+        cy.setupTestData(file, interactionType);
+        cy.get('[data-cy="button-0"]').should('exist');
+
+        const expectedClass = `${(buttonType as string).toLowerCase()}-type`;
+        cy.get('[data-cy="button-0"]').find('[data-cy="input-wrapper"]').should('have.class', expectedClass);
+      });
+    });
+  });
+
   // Test base features for the DROP interaction type
   testBaseFeatures(interactionType, defaultTestFile);
   // Test former state features for the DROP interaction type
