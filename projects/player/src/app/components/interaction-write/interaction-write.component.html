@@ -19,44 +19,21 @@
     <div class="keyboard-wrapper" data-cy="keyboard-wrapper">
       <div>
         @if (localParameters.keyboardMode === 'CHARACTERS') {
-          <div class="character-list">
-            @for (button of characterList; track $index) {
-              <button type="button"
-                      class="keyboard-button"
-                      [attr.aria-label]="currentText.length === 0 ? button.toUpperCase() : button"
-                      (click)="addChar(button)"
-                      [disabled]="isDisabled"
-                      [attr.data-cy]="'character-button-' + button"
-              >
-                {{ currentText.length === 0 ? button.toUpperCase() : button }}
-              </button>
-            }
-          </div>
-
-          <div class="grapheme-list">
-            @if (localParameters.addUmlautKeys) {
-              @for (button of umlautListChars; track $index) {
-                <button type="button"
-                        class="keyboard-button"
-                        [attr.aria-label]="currentText.length === 0 ? button.toUpperCase() : button"
-                        (click)="addChar(button)"
-                        [disabled]="isDisabled"
-                        [attr.data-cy]="'grapheme-button-' + button"
-                >
-                  {{ currentText.length === 0  ? button.toUpperCase() : button }}
-                </button>
-              }
-            }
-            @for (button of localParameters.keysToAdd; track $index) {
-              <button type="button"
-                      class="keyboard-button"
-                      [attr.aria-label]="currentText.length === 0 ? capitalize(button) : button"
-                      (click)="addChar(button)"
-                      [disabled]="isDisabled"
-                      [attr.data-cy]="'keyboard-button-' + button"
-              >
-                {{ currentText.length === 0  ? capitalize(button) : button }}
-              </button>
+          <div class="character-lines">
+            @for (line of [localParameters.keysLine1, localParameters.keysLine2, localParameters.keysLine3, localParameters.keysLine4]; track $index) {
+              <div class="character-line">
+                @for (button of line; track $index) {
+                  <button type="button"
+                          class="keyboard-button"
+                          [attr.aria-label]="currentText.length === 0 ? button.toUpperCase() : button"
+                          (click)="addChar(button)"
+                          [disabled]="isDisabled"
+                          [attr.data-cy]="'character-button-' + button"
+                  >
+                    {{ currentText.length === 0 ? (button.length === 1 ? button.toUpperCase() : capitalize(button)) : button }}
+                  </button>
+                }
+              </div>
             }
           </div>
         } @else if (localParameters.keyboardMode === 'NUMBERS_LINE') {

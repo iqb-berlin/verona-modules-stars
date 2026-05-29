@@ -96,6 +96,7 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
         this.localParameters.text = parameters.text || '';
         this.localParameters.imagePosition = parameters.imagePosition || 'BOTTOM'; // Default to BOTTOM
         this.localParameters.imageLandingXY = parameters.imageLandingXY || '50, 50';
+        this.localParameters.buttonType = parameters.buttonType || 'SMALL_SQUARE';
 
         if (this.viewInited) {
           this.scheduleRecalcAfterLayout();
@@ -491,7 +492,8 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
       imageSource: '',
       imagePosition: 'BOTTOM',
       imageLandingXY: '50, 50',
-      text: ''
+      text: '',
+      buttonType: 'SMALL_SQUARE'
     };
   }
 }

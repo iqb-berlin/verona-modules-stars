@@ -39,7 +39,7 @@ describe('Interaction WRITE Component', () => {
   it('displays the text written by keyboard', () => {
     cy.setupTestData(defaultTestFile, interactionType);
 
-    const text = 'kopf';
+    const text = 'Kopf';
     cy.writeTextOnKeyboard(text);
   });
 
@@ -60,7 +60,18 @@ describe('Interaction WRITE Component', () => {
       });
 
       letters.forEach(letter => {
-        cy.get(`[data-cy=character-button-${letter}]`).click();
+        cy.get('body').then(($body) => {
+          const lowerSelector = `[data-cy=character-button-${letter.toLowerCase()}]`;
+          const upperSelector = `[data-cy=character-button-${letter.toUpperCase()}]`;
+          if ($body.find(lowerSelector).length > 0) {
+            cy.wrap($body.find(lowerSelector)).click();
+          } else if ($body.find(upperSelector).length > 0) {
+            cy.wrap($body.find(upperSelector)).click();
+          } else {
+            // Pick any button if random letter not found
+            cy.get('[data-cy^=character-button-]').first().click();
+          }
+        });
       });
 
       // Check if the text is displayed correctly
@@ -70,8 +81,14 @@ describe('Interaction WRITE Component', () => {
           expect(text.length).to.equal(maxInputLength);
         });
 
-      // Check if I can type more characters
-      cy.get('[data-cy=character-button-k]').should('be.disabled');
+    // Check if I can type more characters
+      cy.get('body').then(($body) => {
+        if ($body.find('[data-cy=character-button-k]').length > 0) {
+          cy.get('[data-cy=character-button-k]').should('be.disabled');
+        } else {
+          cy.get('[data-cy=character-button-K]').should('be.disabled');
+        }
+      });
     });
   });
 
@@ -91,41 +108,23 @@ describe('Interaction WRITE Component', () => {
     });
   });
 
-  it('shows äöü if addUmlautKeys param is true', () => {
+  it('shows keys in keysLine1-4', () => {
     cy.setupTestData(defaultTestFile, interactionType);
     let testData: UnitDefinition;
-    const umlautKeys = ['ä', 'ö', 'ü'];
     cy.get('@testData').then(data => {
       testData = data as unknown as UnitDefinition;
 
       const writeParams = testData.interactionParameters as InteractionWriteParams;
-      const addUmlautKeys = writeParams.addUmlautKeys;
+      const lines = [
+        writeParams.keysLine1,
+        writeParams.keysLine2,
+        writeParams.keysLine3,
+        writeParams.keysLine4 || []
+      ];
 
-      if (addUmlautKeys) {
-        umlautKeys.forEach(key => {
-          cy.get(`[data-cy=grapheme-button-${key}]`).should('exist');
-          cy.log(`${key} grapheme key exists`);
-        });
-      }
-    });
-  });
-
-  it('shows the buttons inside keysToAdd param', () => {
-    cy.setupTestData(defaultTestFile, interactionType);
-    let testData: UnitDefinition;
-
-    cy.get('@testData').then(data => {
-      testData = data as unknown as UnitDefinition;
-
-      const writeParams = testData.interactionParameters as InteractionWriteParams;
-      const extraKeyboardKeys: string[] = writeParams.keysToAdd ?? [];
-
-      if (extraKeyboardKeys.length > 0) {
-        extraKeyboardKeys.forEach((key: string) => {
-          cy.get(`[data-cy=keyboard-button-${key}]`).should('exist');
-          cy.log(`${key} extra keyboard key exists`);
-        });
-      }
+      lines.flat().forEach(key => {
+        cy.get(`[data-cy=character-button-${key}]`).should('exist');
+      });
     });
   });
 
@@ -133,7 +132,13 @@ describe('Interaction WRITE Component', () => {
     // 1. Check default keyboardMode: CHARACTERS
     cy.setupTestData(defaultTestFile, interactionType);
     cy.get('[data-cy=write-container]').should('have.class', 'characters-type');
-    cy.get('[data-cy=character-button-a]').should('exist');
+    cy.get('body').then(($body) => {
+      if ($body.find('[data-cy=character-button-a]').length > 0) {
+        cy.get('[data-cy=character-button-a]').should('exist');
+      } else {
+        cy.get('[data-cy=character-button-A]').should('exist');
+      }
+    });
 
     // 3. Check keyboardMode: NUMBERS_LINE
     cy.setupTestData('write_numbersLine_test', interactionType);

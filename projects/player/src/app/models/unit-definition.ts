@@ -22,6 +22,7 @@ export type IconButtonTypeEnum = 'CHECK_GREEN' | 'CLOSE_RED' | 'CLAP_HANDS' | 'S
 'SMILEY_3' | 'SMILEY_4' | 'SMILEY_5' | 'ONES' | 'TENS';
 export type ButtonTypeEnum = 'MEDIUM_SQUARE' | 'BIG_SQUARE' | 'SMALL_SQUARE' | 'TEXT' | 'CIRCLE' |
 'EXTRA_LARGE_SQUARE' | 'LONG_RECTANGLE' | 'TALL_RECTANGLE';
+export type DropButtonTypeEnum = 'SMALL_SQUARE' | 'EXTRA_SMALL_SQUARE';
 export type ImagePositionEnum = 'TOP' | 'LEFT' | 'BOTTOM';
 export type TargetSizeEnum = 'MEDIUM' | 'LARGE' | 'SMALL';
 export type LayoutEnum = 'LEFT_CENTER' | 'TOP_CENTER' | 'LEFT_BOTTOM' | 'LEFT_CENTER_50';
@@ -87,6 +88,7 @@ export interface InteractionDropParams {
   variableId?: string;
   options: SelectionOption[];
   imageSource?: string;
+  buttonType?: DropButtonTypeEnum;
   imagePosition?: ImagePositionEnum;
   imageLandingXY?: string;
   text?: string;
@@ -108,8 +110,12 @@ export interface InteractionWriteParams {
   addBackspaceKey?: boolean;
   addUmlautKeys?: boolean;
   keyboardMode?: 'CHARACTERS' | 'NUMBERS_LINE';
-  keysToAdd?: string[];
+  keysLine1?: string[];
+  keysLine2?: string[];
+  keysLine3?: string[];
+  keysLine4?: string[];
   maxInputLength?: number;
+  keysToAdd?: string[];
   formerState?: Response[];
 }
 
