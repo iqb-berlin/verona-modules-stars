@@ -77,6 +77,7 @@ export class UnitService {
     if (this.mainAudio().audioSource) this._currentAudioSrc.set(this.mainAudio());
   }
 
+  /** Starts the closing meta phase */
   startClosingMeta() {
     // TODO: Change this logic
     if (this.closingMetaButtons()?.triggerNavigationOnSelect === false) {
