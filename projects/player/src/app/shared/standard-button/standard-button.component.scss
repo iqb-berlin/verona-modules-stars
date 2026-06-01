@@ -105,6 +105,7 @@
 
     input.hint + label {
       border-radius: 50%;
+      background-color: colors.$hint;
     }
 
     &:has(input:checked) {
