@@ -51,11 +51,6 @@ export class AudioComponent {
         this.isPlaying.set(true);
       } else {
         this.isPlaying.set(false);
-        // if (this.audioService.isPlaying()) {
-        //   this.isDisabled.set(true);
-        // } else {
-        //   this.isDisabled.set(false);
-        // }
       }
     });
 
@@ -84,7 +79,7 @@ export class AudioComponent {
   play() {
     const audio = this.unitService.currentAudioSrc();
 
-    // if (this.isPlaying()) return;
+    if (this.disabled()) return;
 
     if (audio && audio.audioId) {
       this.audioService.setAudioSrc(audio).then(() => {
