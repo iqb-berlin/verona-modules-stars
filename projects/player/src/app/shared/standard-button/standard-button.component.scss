@@ -218,6 +218,11 @@
     min-width: 170px;
     min-height: 170px;
   }
+  &.extra_small_square-type {
+    @include variables.extra-small-button-size;
+    min-width: 150px;
+    min-height: 150px;
+  }
 
   &.long_rectangle-type {
     @include variables.long-rectangle-button-size;

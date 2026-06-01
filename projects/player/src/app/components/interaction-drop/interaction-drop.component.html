@@ -36,7 +36,7 @@
           [image]="option.imageSource"
           [selected]="this.selectedValue() === $index"
           [hintSelect]="(this.selectedValue() === $index) && hasHint()"
-          [type]="'SMALL_SQUARE'"
+          [type]="localParameters.buttonType"
           [attr.data-cy]="'button-' + $index"
           (buttonClick)="onButtonClick($index)">
         </stars-standard-button>

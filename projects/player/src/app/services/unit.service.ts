@@ -8,20 +8,13 @@ import {
   ContinueButtonEnum,
   FirstAudioOptionsParams,
   FirstClickLayerEnum,
+  AnimateButtonEnum,
   InteractionEnum, InteractionParameters,
   OpeningImageParams,
   UnitDefinition
 } from '../models/unit-definition';
 import { ResponsesService } from './responses.service';
 import { AudioService } from './audio.service';
-
-export enum MainPlayerStatus {
-  PAUSED = 'PAUSED',
-  PLAYING = 'PLAYING', // audio waves can be shown
-  ENDED = 'ENDED',
-  READY = 'READY',
-  HIDE = 'HIDE'
-}
 
 @Injectable({
   providedIn: 'root'
@@ -40,7 +33,7 @@ export class UnitService {
   hasInteraction = signal(false);
   ribbonBars = signal<boolean>(false);
   disableInteractionUntilComplete = signal(false);
-  closingMetaButtons = signal({} as ClosingMetaButtonsParams);
+  closingMetaButtons = signal<ClosingMetaButtonsParams>({} as ClosingMetaButtonsParams);
   openingImageParams = signal<OpeningImageParams>({} as OpeningImageParams);
 
   /** To hide the speaker icon when imageSource inside openingImage is being shown */
@@ -80,16 +73,40 @@ export class UnitService {
     this.responsesService.updatePresentationProgress('some');
   }
 
-  finishOpeningFlow() {
-    this._openingFlowActive.set(false);
+  finishOpeningFlow() {    this._openingFlowActive.set(false);
     if (this.mainAudio().audioSource) this._currentAudioSrc.set(this.mainAudio());
   }
 
   startClosingMeta() {
+    // TODO: Change this logic
+    if (this.closingMetaButtons()?.triggerNavigationOnSelect === false) {
+      this.continueButton.set('ON_ANY_RESPONSE');
+    } else {
+      this.continueButton.set('NO');
+    }
+
     const parameters: InteractionParameters = {} as InteractionParameters;
     parameters.variableId = this.closingMetaButtons().variableIdMetaSelection;
     this.parameters.set(parameters);
     this.interaction.set('META');
+    if (this.closingMetaButtons()?.audioSource?.trim()) {
+      const audioOptions: AudioOptions = {
+        audioSource: this.closingMetaButtons().audioSource as string,
+        audioId: 'closingMetaButtonsAudio'
+      };
+      this._currentAudioSrc.set(audioOptions);
+      if (this.closingMetaButtons().autoPlay) {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        this.audioService.setAudioSrc(audioOptions).then(ready => {
+          if (ready) {
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+            this.audioService.getPlayFinished('closingMetaButtonsAudio');
+          }
+        });
+      }
+    } else {
+      this._currentAudioSrc.set({} as AudioOptions);
+    }
     this.responsesService.startClosingMeta();
   }
 
@@ -122,7 +139,7 @@ export class UnitService {
       ({ ...def.mainAudio, audioId: 'mainAudio' } as AudioOptions) :
       undefined;
 
-    // Backward compatibility for animateButton and firstClickLayer
+    // Backward compatibility for animateButton and firstClickLayer (which were previously inside mainAudio)
     if (mainAudio?.animateButton) {
       if (!this.firstAudioOptions()?.animateButton) {
         this.firstAudioOptions.set({ ...this.firstAudioOptions(), animateButton: mainAudio.animateButton });
@@ -140,6 +157,12 @@ export class UnitService {
       this.firstAudioOptions.set({ ...this.firstAudioOptions(), firstClickLayer: firstClickLayer });
     }
 
+    // Backward compatibility boolean animateButton
+    if (typeof this.firstAudioOptions()?.animateButton === 'boolean') {
+      const animateButton: AnimateButtonEnum = this.firstAudioOptions()?.animateButton ? 'BOLD' : 'OFF';
+      this.firstAudioOptions.set({ ...this.firstAudioOptions(), animateButton: animateButton });
+    }
+
     const pattern = /^#([a-f0-9]{3}|[a-f0-9]{6})$/i;
     if (def.backgroundColor && pattern.test(def.backgroundColor)) {
       this.backgroundColor.set(def.backgroundColor);
@@ -150,7 +173,22 @@ export class UnitService {
       this.continueButton.set('ALWAYS');
     }
     if (def.interactionType) this.interaction.set(def.interactionType);
-    if (def.interactionParameters) this.parameters.set(def.interactionParameters);
+    if (def.interactionParameters) {
+      if (def.interactionType === 'WRITE') {
+        const writeParams = def.interactionParameters as any;
+        // Backward compatibility for old WRITE Property keysToAdd
+        if (!writeParams.keysLine4) {
+          if (writeParams.addUmlautKeys) {
+            const umlautKeys = ['ä', 'ö', 'ü'];
+            writeParams.keysLine4 = [...umlautKeys];
+          }
+          if (writeParams.keysToAdd) {
+            writeParams.keysLine4 = [...writeParams.keysLine4, ...writeParams.keysToAdd];
+          }
+        }
+      }
+      this.parameters.set(def.interactionParameters);
+    }
     if (def.ribbonBars) this.ribbonBars.set(def.ribbonBars);
     if (def.closingMetaButtons) this.closingMetaButtons.set(def.closingMetaButtons);
     if (def.mainAudio?.disableInteractionUntilComplete) {
@@ -176,7 +214,5 @@ export class UnitService {
     } else if (mainAudio?.audioSource) {
       this._currentAudioSrc.set(mainAudio);
     }
-
-    console.log(this.closingMetaButtons());
   }
 }

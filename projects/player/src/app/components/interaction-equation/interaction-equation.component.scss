@@ -11,6 +11,10 @@
   justify-content: center;
   padding: variables.$layoutPadding;
 
+  &:not(.no-image) {
+    padding-top: 10px;
+  }
+
   // Stimulus
   .stimulus-wrapper {
     display: flex;

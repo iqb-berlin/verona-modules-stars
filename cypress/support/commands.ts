@@ -191,16 +191,35 @@ Cypress.Commands.add('waitUntilAudioIsFinishedPlaying', () => {
 });
 
 Cypress.Commands.add('writeTextOnKeyboard', (text: string) => {
-  const letters = text.toLowerCase().split('');
+  const letters = text.split('');
+  const isFirstLetterCapitalizedOnly = text.length > 0 &&
+    text[0] === text[0].toUpperCase() &&
+    text.slice(1) === text.slice(1).toLowerCase() &&
+    text.slice(1).length > 0;
 
-  letters.forEach(char => {
-    cy.get(`[data-cy=character-button-${char}]`).click();
+  letters.forEach((char, index) => {
+    let charToClick = char;
+    if (index === 0 && isFirstLetterCapitalizedOnly) {
+      charToClick = char.toLowerCase();
+    }
+    cy.get('body').then(($body) => {
+      const selector = `[data-cy=character-button-${charToClick}]`;
+      if ($body.find(selector).length > 0) {
+        cy.get(selector).click();
+      } else {
+        // Fallback to case-insensitive matching if the exact selector is not found
+        cy.get('[data-cy^=character-button-]')
+          .filter((idx, el) => {
+            const dataCy = el.getAttribute('data-cy');
+            return dataCy?.toLowerCase() === `character-button-${charToClick.toLowerCase()}`;
+          })
+          .first()
+          .click();
+      }
+    });
   });
 
-  const capitalizedText =
-    (text[0]?.toUpperCase() ?? '') + text.slice(1).toLowerCase();
-
-  cy.get('[data-cy=text-span]').should('contain', capitalizedText);
+  cy.get('[data-cy=text-span]').should('contain', text);
 });
 
 Cypress.Commands.add('waitUntilFeedbackIsFinishedPlaying', () => {
@@ -510,14 +529,26 @@ Cypress.Commands.add('applyStandardScenarios', (interactionType: string, navigat
         // allow 'a' | 'A' or 'character-button-a'
         const letterMatch = navigator.match(/^[a-z]$/i);
         if (letterMatch && letterMatch[0]) {
-          const letter = letterMatch[0].toLowerCase();
-          cy.get(`[data-cy=character-button-${letter}]`).click();
+          const letter = letterMatch[0];
+          cy.get('body').then(($body) => {
+            if ($body.find(`[data-cy=character-button-${letter.toLowerCase()}]`).length > 0) {
+              cy.get(`[data-cy=character-button-${letter.toLowerCase()}]`).click();
+            } else {
+              cy.get(`[data-cy=character-button-${letter.toUpperCase()}]`).click();
+            }
+          });
           return;
         }
         const btnMatch = navigator.match(/^character-button-([a-z])$/i);
         if (btnMatch && btnMatch[1]) {
-          const letter = btnMatch[1].toLowerCase();
-          cy.get(`[data-cy=character-button-${letter}]`).click();
+          const letter = btnMatch[1];
+          cy.get('body').then(($body) => {
+            if ($body.find(`[data-cy=character-button-${letter.toLowerCase()}]`).length > 0) {
+              cy.get(`[data-cy=character-button-${letter.toLowerCase()}]`).click();
+            } else {
+              cy.get(`[data-cy=character-button-${letter.toUpperCase()}]`).click();
+            }
+          });
           return;
         }
         // if a raw selector is passed
@@ -527,8 +558,20 @@ Cypress.Commands.add('applyStandardScenarios', (interactionType: string, navigat
         }
       }
     }
-    // Default behavior
-    cy.get('[data-cy=character-button-a]').click();
+    // Default behavior: find ANY character or number button and click it
+    cy.get('body').then(($body) => {
+      const charBtn = $body.find('[data-cy^=character-button-]').first();
+      const numBtn = $body.find('[data-cy^=numbers-button-]').first();
+
+      if (charBtn.length > 0) {
+        cy.wrap(charBtn).click();
+      } else if (numBtn.length > 0) {
+        cy.wrap(numBtn).click();
+      } else {
+        // Fallback to let it fail if nothing found
+        cy.get('[data-cy^=character-button-], [data-cy^=numbers-button-]').first().click();
+      }
+    });
     return;
   }
 

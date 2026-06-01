@@ -17,7 +17,6 @@ export class ResponsesService {
   mainAudioComplete = signal(false);
   videoComplete = signal(false);
   closingMetaRunning = signal(false);
-
   allResponses: Response[] = [];
   variableInfo: VariableInfo[] = [];
   veronaPostService = inject(VeronaPostService);
@@ -33,6 +32,7 @@ export class ResponsesService {
   formerStateResponses = signal<Response[]>([]);
   presentationProgress = signal<Progress>('some');
   closingMetaButtons = signal<ClosingMetaButtonsParams>({} as ClosingMetaButtonsParams);
+  metaInteractionDone = signal(false);
 
   /**
   * Interpret mixed input as a number
@@ -74,6 +74,7 @@ export class ResponsesService {
     this.formerStateResponses.set([]);
     this.closingMetaButtons.set({} as ClosingMetaButtonsParams);
     this.closingMetaRunning.set(false);
+    this.metaInteractionDone.set(false);
   }
 
   /**
@@ -174,8 +175,21 @@ export class ResponsesService {
         } else {
           this.allResponses.push(codedResponse);
         }
-        if (response.id === 'videoPlayer') {
-          this.videoComplete.set((response.value as number) >= 1);
+
+        // Mark meta as "done" the first time the meta variable changes value
+        // TODO change it
+        if (this.closingMetaRunning()) {
+          const metaId = this.closingMetaButtons().variableIdMetaSelection;
+          const metaTouched = responses.some(r =>
+            r.id === metaId && r.status === 'VALUE_CHANGED' && r.relevantForResponsesProgress);
+          if (metaTouched) this.metaInteractionDone.set(true);
+        }
+        if (response.id === 'VIDEO') {
+          const videoValue = response.value as number;
+          this.videoComplete.set(videoValue >= 1);
+          if (videoValue >= 1) {
+            this.presentationProgress.set('complete');
+          }
         }
       }
     });
@@ -217,6 +231,7 @@ export class ResponsesService {
 
   startClosingMeta() {
     this.closingMetaRunning.set(true);
+    this.metaInteractionDone.set(false);
   }
 
   private static isPositionInRange(responseValue: string, range: string): boolean {
@@ -491,14 +506,22 @@ export class ResponsesService {
               const n = this.asNumberOrZero(mainAudioResp.value);
               this.mainAudioComplete.set(n >= 1);
             }
-            if (this.mainAudioComplete()) {
+
+            // Restore VIDEO completion from saved responses
+            const videoResp = parsedResponses.find(r => r.id === 'VIDEO');
+            if (videoResp) {
+              const videoValue = this.asNumberOrZero(videoResp.value);
+              this.videoComplete.set(videoValue >= 1);
+            }
+
+            if (this.mainAudioComplete() || this.videoComplete()) {
               this.presentationProgress.set('complete');
             }
 
             // Restore responseProgress: if any interaction response has VALUE_CHANGED (or CODING_COMPLETE), mark complete
             const hasInteractionValueChanged =
               parsedResponses.some(r => (r.status === 'VALUE_CHANGED' || r.status === 'CODING_COMPLETE') &&
-                r.id !== 'mainAudio' && r.id !== 'videoPlayer');
+                r.id !== 'mainAudio' && r.id !== 'VIDEO');
             if (hasInteractionValueChanged) {
               this.responseProgress.set('complete');
             } else if (unitState.responseProgress) {
