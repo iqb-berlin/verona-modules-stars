@@ -22,6 +22,8 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
   localParameters!: InteractionVideoParams;
   private _isPlaying = signal(false);
   isPlaying = this._isPlaying.asReadonly();
+  private _showPlayButton = signal(true);
+  showPlayButton = this._showPlayButton.asReadonly();
 
   playCount = 0;
   private currentTime = 0;
@@ -50,6 +52,7 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
         this.playCount = 0;
         this.currentTime = 0;
         this.percentElapsed = 0;
+        this._showPlayButton.set(true);
 
         this.localParameters.imageSource = parameters.imageSource || '';
         this.localParameters.videoSource = parameters.videoSource || '';
@@ -146,6 +149,8 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
 
     // Check if triggerNavigationOnEnd is enabled
     if (this.localParameters.triggerNavigationOnEnd === true) {
+      // Don't show the play button at the end when triggerNavigationOnEnd is true
+      this._showPlayButton.set(false);
       this.localParameters.triggerNavigationOnEnd = false;
       setTimeout(() => {
         this.veronaPostService.sendVopUnitNavigationRequestedNotification('next');

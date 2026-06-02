@@ -39,7 +39,8 @@ export class AudioComponent {
 
     effect(() => {
       // play audio when triggered from the firstClickLayer
-      if (this.unitService.firstClickLayerClicked()) {
+      // but not during closing meta phase (which has its own autoPlay handling)
+      if (this.unitService.firstClickLayerClicked() && !this.responsesService.closingMetaRunning()) {
         this.play();
       }
     });

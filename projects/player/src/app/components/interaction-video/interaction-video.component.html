@@ -5,7 +5,8 @@
         <source [src]="localParameters.videoSource" data-cy="video-player-source">
       </video>
     </div>
-    <button class="play-button" data-cy="video-play-button">
+    @if (showPlayButton()) {
+      <button class="play-button" data-cy="video-play-button">
       <svg width="100px" height="100px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
         <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
@@ -17,7 +18,8 @@
           <path d="M16 12L10 16.3301V7.66987L16 12Z" fill="#0050E5"></path>
         </g>
       </svg>
-    </button>
+      </button>
+    }
   </div>
   @if (localParameters.text) {
     <div class="text-wrapper" data-cy="text-wrapper">
