@@ -166,23 +166,16 @@ export class ResponsesService {
           this.presentationProgress.set('complete');
         }
       } else {
-        // Default behavior for all other responses
-        if (responseInStore) {
-          responseInStore.value = response.value;
-          responseInStore.status = codedResponse.status;
-          responseInStore.code = codedResponse.code;
-          responseInStore.score = codedResponse.score;
-        } else {
-          this.allResponses.push(codedResponse);
-        }
+        // Default behavior for all other responses (including closing meta selection)
+        this.upsertCodedResponseInStore(response, codedResponse);
 
-        // Mark meta as "done" the first time the meta variable changes value
-        // TODO change it
         if (this.closingMetaRunning()) {
           const metaId = this.closingMetaButtons().variableIdMetaSelection;
           const metaTouched = responses.some(r =>
             r.id === metaId && r.status === 'VALUE_CHANGED' && r.relevantForResponsesProgress);
-          if (metaTouched) this.metaInteractionDone.set(true);
+          if (metaTouched) {
+            this.metaInteractionDone.set(true);
+          }
         }
         if (response.id === 'VIDEO') {
           const videoValue = response.value as number;
@@ -194,44 +187,113 @@ export class ResponsesService {
       }
     });
 
-    const responsesAsString = JSON.stringify(this.allResponses);
-    if (responsesAsString !== this.lastResponsesString) {
-      this.lastResponsesString = responsesAsString;
-      // only set response progress if it is relevant for the progress and the status is VALUE_CHANGED
-      if (responses.some(r => r.relevantForResponsesProgress && r.status === 'VALUE_CHANGED')) {
-        const getResponsesCompleteOutput = this.getResponsesComplete();
-        this.responseProgress.set(getResponsesCompleteOutput);
-      }
-      const unitState: UnitState = {
-        unitStateDataType: UnitStateDataType,
-        dataParts: {
-          responses: responsesAsString
-        },
-        responseProgress: this.responseProgress(),
-        presentationProgress: this.getPresentationStatus()
-      };
+    if (this.closingMetaRunning()) {
+      this.updateClosingMetaOutcome();
+    }
 
-      if (this.hasParentWindow) {
-        // tslint:disable-next-line:no-console
-        console.log('unit state changed: ', unitState);
-      }
-      if (this.veronaPostService) {
-        this.veronaPostService.sendVopStateChangedNotification({ unitState });
-        console.log('unit state changed: ', unitState);
-      }
-      if (this.feedbackDefinitions.length > 0 && responses.length > 0) {
-        this.provideFeedback(responses[0].id);
+    this.notifyUnitStateChangedIfResponsesChanged(responses);
+  }
+
+  /** Persists coded response fields (status, code, score) like other interaction types. */
+  private upsertCodedResponseInStore(givenResponse: Response, codedResponse: Response): void {
+    const responseInStore = this.allResponses.find(r => r.id === givenResponse.id);
+    if (responseInStore) {
+      responseInStore.value = codedResponse.value ?? givenResponse.value;
+      responseInStore.status = codedResponse.status;
+      responseInStore.code = codedResponse.code ?? 0;
+      responseInStore.score = codedResponse.score ?? 0;
+    } else {
+      this.allResponses.push(codedResponse);
+    }
+  }
+
+  private notifyUnitStateChangedIfResponsesChanged(triggerResponses: StarsResponse[] = []): void {
+    const responsesAsString = JSON.stringify(this.allResponses);
+    if (responsesAsString === this.lastResponsesString) return;
+
+    this.lastResponsesString = responsesAsString;
+    if (triggerResponses.some(r => r.relevantForResponsesProgress && r.status === 'VALUE_CHANGED')) {
+      this.responseProgress.set(this.getResponsesComplete());
+    }
+    const unitState: UnitState = {
+      unitStateDataType: UnitStateDataType,
+      dataParts: {
+        responses: responsesAsString
+      },
+      responseProgress: this.responseProgress(),
+      presentationProgress: this.getPresentationStatus()
+    };
+
+    if (this.hasParentWindow) {
+      // tslint:disable-next-line:no-console
+      console.log('unit state changed: ', unitState);
+    }
+    if (this.veronaPostService) {
+      this.veronaPostService.sendVopStateChangedNotification({ unitState });
+      console.log('unit state changed: ', unitState);
+    }
+    const trigger = triggerResponses[0];
+    if (this.feedbackDefinitions.length > 0 && trigger) {
+      this.provideFeedback(trigger.id);
+    }
+  }
+
+  /**
+   * Derives variableIdMetaOutcome from the source interaction score and meta-button selection.
+   * Requires variableIdReference (main interaction) to be CODING_COMPLETE; otherwise DERIVE_ERROR.
+   * Meta selection may stay VALUE_CHANGED; only its value is used in the outcome string.
+   */
+  private updateClosingMetaOutcome(): void {
+    const {
+      variableIdMetaSelection,
+      variableIdReference,
+      variableIdMetaOutcome
+    } = this.closingMetaButtons();
+    if (!variableIdMetaOutcome) return;
+
+    const referenceResponse = this.getResponseByVariableId(variableIdReference);
+    let outcomeResponse: Response;
+
+    if (!referenceResponse?.id || referenceResponse.status !== 'CODING_COMPLETE') {
+      outcomeResponse = {
+        id: variableIdMetaOutcome,
+        status: 'DERIVE_ERROR',
+        value: 0,
+        code: 0,
+        score: 0
+      };
+    } else {
+      const metaSelectionId = variableIdMetaSelection ?? '';
+      const metaSelectionResponse = this.getResponseByVariableId(metaSelectionId);
+      const metaSelectionValue = metaSelectionResponse?.value?.toString() ?? '0';
+      const referenceScore = referenceResponse.score ?? 0;
+      const outcomeValue = `${referenceScore}_${metaSelectionValue}`;
+      outcomeResponse = this.getCodedResponse({
+        id: variableIdMetaOutcome,
+        status: 'VALUE_CHANGED',
+        value: outcomeValue
+      });
+      if (outcomeValue === '0_0') {
+        outcomeResponse.status = 'DISPLAYED';
       }
     }
 
-    if (this.closingMetaRunning()) {
-      // TODO calculate closing meta
+    const outcomeInStore = this.allResponses.find(r => r.id === variableIdMetaOutcome);
+    if (outcomeInStore) {
+      outcomeInStore.value = outcomeResponse.value;
+      outcomeInStore.status = outcomeResponse.status;
+      outcomeInStore.code = outcomeResponse.code ?? 0;
+      outcomeInStore.score = outcomeResponse.score ?? 0;
+    } else {
+      this.allResponses.push(outcomeResponse);
     }
   }
 
   startClosingMeta() {
     this.closingMetaRunning.set(true);
     this.metaInteractionDone.set(false);
+    this.updateClosingMetaOutcome();
+    this.notifyUnitStateChangedIfResponsesChanged();
   }
 
   private static isPositionInRange(responseValue: string, range: string): boolean {

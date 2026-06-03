@@ -7,7 +7,7 @@ export interface VariableInfo {
 }
 
 export interface Code {
-  method: 'EQUALS' | 'GREATER_THAN' | 'LESS_THAN' | 'IN_POSITION_RANGE';
+  method: 'EQUALS' | 'GREATER_THAN' | 'LESS_THAN' | 'IN_POSITION_RANGE' | 'REGEX_MATCH';
   parameter: string;
   code: number;
   score: number;
