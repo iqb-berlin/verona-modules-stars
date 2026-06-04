@@ -1,52 +1,10 @@
 import {
   UnitDefinition
 } from '../../../projects/player/src/app/models/unit-definition';
+import { MockMessage } from '../../support/utils';
 
 export function testCodingSumCharMatches(configFile: string, interactionType: string) {
   describe(`Check coding SUM_CHAR_MATCHES for ${interactionType.toUpperCase()} with multiselect: true`, () => {
-
-    type MockMessage = {
-      data: {
-        type: string;
-        unitState?: {
-          dataParts: {
-            responses: string;
-          };
-          responseProgress: string;
-        };
-      },
-      origin: string
-    };
-
-    type ResponseItem = {
-      id?: string;
-      status?: string;
-      score?: number;
-      code?: number;
-      [key: string]: unknown;
-    };
-
-    /**
-     * Parse `dataParts` and extract arrays of `ResponseItem` from JSON string values.
-     * @param dataParts - Record of keyed parts where some values may be JSON strings containing response arrays
-     * @returns Array of parsed `ResponseItem[]` (empty array if no valid response arrays found)
-     */
-    const parseDataPartsResponses = (dataParts: Record<string, unknown>): ResponseItem[][] => Object.values(dataParts)
-      .filter((dataPart): dataPart is string => typeof dataPart === 'string')
-      .map(rawPart => {
-        try {
-          const parsed = JSON.parse(rawPart) as unknown;
-          if (Array.isArray(parsed) && parsed.every(item => typeof item === 'object' && item !== null)) {
-            return parsed as ResponseItem[];
-          }
-        } catch {
-          // ignore non-JSON strings
-          console.warn(`Non-JSON string found in dataParts: ${rawPart}`);
-        }
-        return null;
-      })
-      .filter((parsed): parsed is ResponseItem[] => Array.isArray(parsed));
-
     beforeEach(() => {
       cy.setupTestDataWithPostMessageMock(configFile, interactionType);
     });
@@ -83,20 +41,21 @@ export function testCodingSumCharMatches(configFile: string, interactionType: st
             throw new Error('Latest message or unitState is undefined');
           }
 
-          const parsedResponsesArrays = parseDataPartsResponses(latestMessage.data.unitState.dataParts);
+          cy.parseDataPartsResponses(latestMessage.data.unitState.dataParts as Record<string, unknown>)
+            .then(parsedResponsesArrays => {
+              const hasCodingComplete =
+              // eslint-disable-next-line max-len
+                parsedResponsesArrays.some(responses => responses.some(response => (response.id === interactionType.toUpperCase()) &&
+                  response.status === 'CODING_COMPLETE' &&
+                  response.score === 1 &&
+                  response.code === 1
+                )
+                );
 
-          const hasCodingComplete =
-            // eslint-disable-next-line max-len
-            parsedResponsesArrays.some(responses => responses.some(response => (response.id === interactionType.toUpperCase()) &&
-                response.status === 'CODING_COMPLETE' &&
-                response.score === 1 &&
-                response.code === 1
-            )
-            );
-
-          expect(hasCodingComplete, `Should have CODING_COMPLETE for ${interactionType} with score=1 and code=1`)
-            .to
-            .equal(true);
+              expect(hasCodingComplete, `Should have CODING_COMPLETE for ${interactionType} with score=1 and code=1`)
+                .to
+                .equal(true);
+            });
         });
     });
 
@@ -132,20 +91,21 @@ export function testCodingSumCharMatches(configFile: string, interactionType: st
             throw new Error('Latest message or unitState is undefined');
           }
 
-          const parsedResponsesArrays = parseDataPartsResponses(latestMessage.data.unitState.dataParts);
+          cy.parseDataPartsResponses(latestMessage.data.unitState.dataParts as Record<string, unknown>)
+            .then(parsedResponsesArrays => {
+              const hasCodingComplete =
+              // eslint-disable-next-line max-len
+                parsedResponsesArrays.some(responses => responses.some(response => (response.id === interactionType.toUpperCase()) &&
+                  response.status === 'CODING_COMPLETE' &&
+                  response.score === 1 &&
+                  response.code === 2
+                )
+                );
 
-          const hasCodingComplete =
-            // eslint-disable-next-line max-len
-            parsedResponsesArrays.some(responses => responses.some(response => (response.id === interactionType.toUpperCase()) &&
-                response.status === 'CODING_COMPLETE' &&
-                response.score === 1 &&
-                response.code === 2
-            )
-            );
-
-          expect(hasCodingComplete, `Should have CODING_COMPLETE for ${interactionType} with score=1 and code=2`)
-            .to
-            .equal(true);
+              expect(hasCodingComplete, `Should have CODING_COMPLETE for ${interactionType} with score=1 and code=2`)
+                .to
+                .equal(true);
+            });
         });
     });
   });

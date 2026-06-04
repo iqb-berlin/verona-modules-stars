@@ -41,7 +41,12 @@ import {
   InteractionParameters,
   UnitDefinition
 } from '../../projects/player/src/app/models/unit-definition';
-import { getButtonOptions, getCorrectAnswerParam, getIndexByOneBasedInput } from './utils';
+import {
+  getButtonOptions,
+  getCorrectAnswerParam,
+  getIndexByOneBasedInput,
+  parseDataPartsResponses
+} from './utils';
 
 Cypress.Commands.add('loadUnit', (filename: string) => {
   cy.fixture(filename).as('unit').then(unit => {
@@ -1097,4 +1102,8 @@ Cypress.Commands.add('clickCorrectMultiselectButtons', (interactionType: string,
 
 Cypress.Commands.add('clickIncorrectMultiselectButtons', (interactionType: string, unit: UnitDefinition) => {
   cy.clickMultiselectButtons(interactionType, unit, false);
+});
+
+Cypress.Commands.add('parseDataPartsResponses', (dataParts: Record<string, unknown>) => {
+  return cy.wrap(parseDataPartsResponses(dataParts), { log: false });
 });

@@ -273,7 +273,8 @@ export class ResponsesService {
         status: 'VALUE_CHANGED',
         value: outcomeValue
       });
-      if (outcomeValue === '0_0') {
+      // No meta selection yet (default meta part is '0') → show outcome as DISPLAYED, not coded
+      if (metaSelectionValue === '0') {
         outcomeResponse.status = 'DISPLAYED';
       }
     }

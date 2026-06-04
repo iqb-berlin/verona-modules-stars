@@ -1,42 +1,9 @@
+import { UnitDefinition } from '../../../projects/player/src/app/models/unit-definition';
+import { MockMessage } from '../../support/utils';
+
 export function testClosingMetaButtons(interactionType: string) {
 
   describe(`Closing Meta Buttons Features for interactionType - ${interactionType}`, () => {
-    type MockMessage = {
-      data: {
-        type: string;
-        unitState?: {
-          dataParts: {
-            responses: string;
-          };
-        };
-      };
-      origin: string;
-    };
-
-    type ResponseItem = {
-      id?: string;
-      status?: string;
-      value?: string | number;
-      score?: number;
-      code?: number;
-      [key: string]: unknown;
-    };
-
-    const parseDataPartsResponses = (dataParts: Record<string, unknown>): ResponseItem[][] => Object.values(dataParts)
-      .filter((dataPart): dataPart is string => typeof dataPart === 'string')
-      .map(rawPart => {
-        try {
-          const parsed = JSON.parse(rawPart) as unknown;
-          if (Array.isArray(parsed) && parsed.every(item => typeof item === 'object' && item !== null)) {
-            return parsed as ResponseItem[];
-          }
-        } catch {
-          console.warn(`Non-JSON string found in dataParts: ${rawPart}`);
-        }
-        return null;
-      })
-      .filter((parsed): parsed is ResponseItem[] => Array.isArray(parsed));
-
     beforeEach(() => {
       cy.clearUnitStates();
     });
@@ -127,49 +94,60 @@ export function testClosingMetaButtons(interactionType: string) {
       cy.get('[data-cy="custom-audio-button"]').should('have.class', 'playing');
     });
 
-    it('derives and codes META_OUTCOME from reference score and meta selection (variableInfo)', () => {
-      if (interactionType !== 'buttons') {
-        return;
-      }
+    it('derives and codes variableIdMetaOutcome from reference score and selected meta button', () => {
+      const configFile = `${interactionType}_with_closingMetaButtons_with_variableInfo_test.json`;
 
-      const configFile = 'buttons_with_closingMetaButtons_with_variableInfo_test.json';
       cy.setupTestDataWithPostMessageMock(configFile, interactionType);
       cy.loadUnit(`interaction-${interactionType}/${configFile}`);
 
-      // Correct BUTTONS answer (value "3" → score 1)
-      cy.get('[data-cy="button-2"]').click();
-      cy.get('[data-cy="continue-button"]').should('exist').click();
-      cy.get('[data-cy="interaction-meta"]').should('exist');
+      cy.get('@testData').then(data => {
+        const dataToCheck = data as unknown as UnitDefinition;
+        const metaOutcomeRule = dataToCheck.variableInfo?.find(v => v.variableId === 'META_OUTCOME')
+          ?.codes?.find(c => c.code === 1 && c.score === 1);
+        if (!metaOutcomeRule) {
+          throw new Error(`No META_OUTCOME success rule in ${configFile}`);
+        }
 
-      // Meta button 4 (index 3) → outcome value "1_4"
-      cy.get('[data-cy="button-3"]').click();
+        const expectedValue = metaOutcomeRule.parameter;
+        const metaSelectionParam = expectedValue.split('_')[1] ?? '4';
+        const metaButtonIndex = Number(metaSelectionParam) - 1;
 
-      cy.get('@outgoingMessages')
-        .then(messages => {
-          const arr = messages as unknown as MockMessage[];
-          const stateMessages = arr.filter(msg => msg.data.type === 'vopStateChangedNotification');
+        cy.applyCorrectAnswerScenarios(interactionType, dataToCheck);
+        cy.get('[data-cy="continue-button"]').should('exist').click();
+        cy.get('[data-cy="interaction-meta"]').should('exist');
+        cy.get(`[data-cy="button-${metaButtonIndex}"]`).click();
 
-          const latestMessage = stateMessages[stateMessages.length - 1];
-          if (!latestMessage?.data?.unitState) {
-            throw new Error('Latest message or unitState is undefined');
-          }
+        cy.get('@outgoingMessages')
+          .then(messages => {
+            const arr = messages as unknown as MockMessage[];
+            const stateMessages = arr.filter(msg => msg.data.type === 'vopStateChangedNotification');
 
-          const parsedResponsesArrays = parseDataPartsResponses(latestMessage.data.unitState.dataParts);
+            const latestMessage = stateMessages[stateMessages.length - 1];
+            if (!latestMessage?.data?.unitState) {
+              throw new Error('Latest message or unitState is undefined');
+            }
 
-          const hasMetaOutcome = parsedResponsesArrays.some(responses =>
-            responses.some(response =>
-              response.id === 'META_OUTCOME' &&
-              response.status === 'CODING_COMPLETE' &&
-              response.value === '1_4' &&
-              response.code === 1 &&
-              response.score === 1
-            )
-          );
+            cy.parseDataPartsResponses(latestMessage.data.unitState.dataParts as Record<string, unknown>)
+              .then(parsedResponsesArrays => {
+                const hasMetaOutcome = parsedResponsesArrays.some(responses =>
+                  responses.some(response =>
+                    response.id === 'META_OUTCOME' &&
+                    response.status === 'CODING_COMPLETE' &&
+                    response.value === expectedValue &&
+                    response.code === 1 &&
+                    response.score === 1
+                  )
+                );
 
-          expect(hasMetaOutcome, 'META_OUTCOME should be CODING_COMPLETE with value 1_4, code 1, score 1')
-            .to
-            .equal(true);
-        });
+                expect(
+                  hasMetaOutcome,
+                  `META_OUTCOME should be CODING_COMPLETE with value ${expectedValue}, code 1, score 1`
+                )
+                  .to
+                  .equal(true);
+              });
+          });
+      });
     });
   });
 }
