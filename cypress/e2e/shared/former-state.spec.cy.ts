@@ -49,7 +49,7 @@ export function testFormerStateFeatures(interactionType: string, defaultTestFile
       });
     });
 
-    it.only('preserves the click-layer state when navigating between multiple units', () => {
+    it('preserves the click-layer state when navigating between multiple units', () => {
       const firstTestFile = `${interactionType}_firstClickLayer_transparent_test`;
       const secondTestFile = `${interactionType}_firstClickLayer_transparent_second_test`;
 

@@ -78,12 +78,6 @@ export class InteractionMetaComponent extends InteractionComponentDirective {
 
           if (foundResponse && foundResponse.value) {
             this.restoreFromFormerState(foundResponse);
-            this.responses.emit([{
-              id: this.localParameters.variableId,
-              status: 'VALUE_CHANGED',
-              value: foundResponse.value.toString(),
-              relevantForResponsesProgress: true
-            } as StarsResponse]);
             return;
           }
         }
