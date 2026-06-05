@@ -82,8 +82,6 @@
   }
 
   .input-wrapper {
-    padding-top: 2rem;
-
     .text-wrapper {
       width: 160px;
       height: 160px;
@@ -106,10 +104,6 @@
 
 .keyboard-wrapper {
   @include variables.keyboard-numbers-button-wrapper;
-
-  .grapheme-list {
-    float: left;
-  }
 }
 
 .keyboard-button {

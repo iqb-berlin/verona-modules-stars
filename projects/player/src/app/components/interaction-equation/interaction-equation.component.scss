@@ -126,7 +126,6 @@
   // Keyboards
   .keyboard-wrapper {
     @include variables.keyboard-numbers-button-wrapper;
-    left: -45px;
     min-height: 76px;
   }
 

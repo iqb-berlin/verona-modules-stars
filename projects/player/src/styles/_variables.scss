@@ -177,6 +177,7 @@ $layoutPadding: 90px;
   @include flex-center;
   flex-direction: row;
   position: relative;
+  left: -50px;
 }
 
 @mixin keyboard-numbers-button-extra-styles {
