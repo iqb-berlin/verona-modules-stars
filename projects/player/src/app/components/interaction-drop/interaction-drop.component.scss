@@ -8,12 +8,15 @@
   // Image at the bottom, buttons at the top
   &.image-position-bottom {
     flex-direction: column-reverse;
+    padding-top: 50px;
+    padding-bottom: 10px;
   }
 
   // Image at the top, buttons at the bottom
   &.image-position-top {
     flex-direction: column;
     padding-top: 10px;
+    padding-bottom: 10px;
   }
 
   .stimulus-wrapper {
