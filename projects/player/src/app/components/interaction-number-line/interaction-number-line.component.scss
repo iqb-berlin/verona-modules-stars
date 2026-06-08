@@ -5,7 +5,8 @@
 .number-line-container {
   @include variables.flex-center;
   flex-direction: column;
-  padding: 20px;
+  padding-top: 0;
+  padding-bottom: variables.$layoutPadding;
 }
 
 .svg-container {
@@ -110,7 +111,6 @@
 // --- Keyboard ---
 .keyboard-wrapper {
   @include variables.keyboard-numbers-button-wrapper;
-  left: -45px;
 }
 
 .keyboard-button {
