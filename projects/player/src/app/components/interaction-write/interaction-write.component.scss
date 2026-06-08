@@ -16,13 +16,18 @@
 }
 
 .stimulus-wrapper {
-  margin: 0 auto;
-  height: 25vh;
+  @include variables.stimulus-wrapper;
+  //margin: 0 auto;
+  //height: 25vh;
+  //
+  //img {
+  //  width: auto;
+  //  height: 100%;
+  //}
+}
 
-  img {
-    width: auto;
-    height: 100%;
-  }
+.image-wrapper {
+  @include variables.image-wrapper;
 }
 
 .text-wrapper {
