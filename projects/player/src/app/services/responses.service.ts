@@ -408,6 +408,16 @@ export class ResponsesService {
     return this.allResponses.find(r => r.id === id) || {} as Response;
   }
 
+  /** Completed play count for an audio response (integer part of stored value). */
+  getAudioPlayCount(id: string): number {
+    return Math.floor(this.asNumberOrZero(this.getResponseByVariableId(id).value));
+  }
+
+  /** Whether the audio has reached its maxPlay limit for the current unit. */
+  isAudioMaxPlayReached(id: string, maxPlay: number): boolean {
+    return maxPlay !== 0 && this.getAudioPlayCount(id) >= maxPlay;
+  }
+
   private getResponsesComplete(): Progress {
     if (this.allResponses.length === 0) return 'none';
     if (!this.variableInfo || this.variableInfo.length === 0) return 'complete';

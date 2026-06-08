@@ -8,7 +8,8 @@
   justify-content: center;
   width: 100%;
   height: 100%;
-  gap: 40px;
+  padding-top: 10px;
+  padding-bottom: variables.$layoutPadding;
 }
 
 .pyramids-wrapper {
@@ -109,7 +110,6 @@
 
 .keyboard-wrapper {
   @include variables.keyboard-numbers-button-wrapper;
-  left: -45px;
 }
 
 .keyboard-button {
