@@ -3,7 +3,8 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Response } from '@iqbspecs/response/response.interface';
 import { Progress, UnitState, UnitStateDataType } from '../models/verona';
 import { VeronaPostService } from './verona-post.service';
-import { ClosingMetaButtonsParams, UnitDefinition } from '../models/unit-definition';
+import { ComponentStateService } from './component-state.service';
+import { UnitDefinition } from '../models/unit-definition';
 import { Code, VariableInfo } from '../models/responses';
 import { FeedbackDefinition, ShowResponse } from '../models/feedback';
 
@@ -14,25 +15,14 @@ import { FeedbackDefinition, ShowResponse } from '../models/feedback';
 export class ResponsesService {
   unitDefinitionProblem = signal('');
   responseProgress = signal<Progress>('none');
-  mainAudioComplete = signal(false);
-  videoComplete = signal(false);
-  closingMetaRunning = signal(false);
   allResponses: Response[] = [];
   variableInfo: VariableInfo[] = [];
   veronaPostService = inject(VeronaPostService);
+  componentStateService = inject(ComponentStateService);
   hasParentWindow = window === window.parent;
   lastResponsesString = '';
-  pendingAudioFeedback = signal(false);
-  feedbackHint = signal('');
-  feedbackActive = signal(false);
-  private pendingAudioFeedbackSource = '';
-  private pendingFeedbackHint = '';
-  private pendingHintDelay = 0;
   feedbackDefinitions: FeedbackDefinition[] = [];
   formerStateResponses = signal<Response[]>([]);
-  presentationProgress = signal<Progress>('some');
-  closingMetaButtons = signal<ClosingMetaButtonsParams>({} as ClosingMetaButtonsParams);
-  metaInteractionDone = signal(false);
 
   /**
   * Interpret mixed input as a number
@@ -57,24 +47,13 @@ export class ResponsesService {
    */
   reset() {
     this.unitDefinitionProblem.set('');
-    this.videoComplete.set(false);
     this.variableInfo = [];
     this.allResponses = [];
     this.lastResponsesString = '';
-    this.pendingAudioFeedback.set(false);
-    this.pendingAudioFeedbackSource = '';
-    this.feedbackHint.set('');
-    this.feedbackActive.set(false);
     this.feedbackDefinitions = [];
-    this.pendingFeedbackHint = '';
-    this.pendingHintDelay = 0;
     this.responseProgress.set('none');
-    this.presentationProgress.set('some');
-    this.mainAudioComplete.set(false);
     this.formerStateResponses.set([]);
-    this.closingMetaButtons.set({} as ClosingMetaButtonsParams);
-    this.closingMetaRunning.set(false);
-    this.metaInteractionDone.set(false);
+    this.componentStateService.reset();
   }
 
   /**
@@ -84,9 +63,6 @@ export class ResponsesService {
   setNewData(unitDefinition: UnitDefinition = null) {
     this.reset();
     if (unitDefinition) {
-      if (unitDefinition.closingMetaButtons) {
-        this.closingMetaButtons.set(unitDefinition.closingMetaButtons);
-      }
       const problems: string[] = [];
       if (unitDefinition.variableInfo && unitDefinition.variableInfo.length > 0) {
         unitDefinition.variableInfo.forEach(vInfo => {
@@ -161,9 +137,8 @@ export class ResponsesService {
           codedResponse.value = incomingN;
           this.allResponses.push(codedResponse);
         }
-        if (incomingN >= 1 || this.mainAudioComplete()) {
-          this.mainAudioComplete.set(true);
-          this.presentationProgress.set('complete');
+        if (incomingN >= 1 || this.componentStateService.mainAudioComplete()) {
+          this.componentStateService.setMainAudioComplete(true);
         }
       } else {
         // Default behavior for all other responses
@@ -176,20 +151,9 @@ export class ResponsesService {
           this.allResponses.push(codedResponse);
         }
 
-        // Mark meta as "done" the first time the meta variable changes value
-        // TODO change it
-        if (this.closingMetaRunning()) {
-          const metaId = this.closingMetaButtons().variableIdMetaSelection;
-          const metaTouched = responses.some(r =>
-            r.id === metaId && r.status === 'VALUE_CHANGED' && r.relevantForResponsesProgress);
-          if (metaTouched) this.metaInteractionDone.set(true);
-        }
         if (response.id === 'VIDEO') {
           const videoValue = response.value as number;
-          this.videoComplete.set(videoValue >= 1);
-          if (videoValue >= 1) {
-            this.presentationProgress.set('complete');
-          }
+          this.componentStateService.setVideoComplete(videoValue >= 1);
         }
       }
     });
@@ -208,7 +172,7 @@ export class ResponsesService {
           responses: responsesAsString
         },
         responseProgress: this.responseProgress(),
-        presentationProgress: this.getPresentationStatus()
+        presentationProgress: this.componentStateService.getPresentationStatus()
       };
 
       if (this.hasParentWindow) {
@@ -224,14 +188,7 @@ export class ResponsesService {
       }
     }
 
-    if (this.closingMetaRunning()) {
-      // TODO calculate closing meta
-    }
-  }
-
-  startClosingMeta() {
-    this.closingMetaRunning.set(true);
-    this.metaInteractionDone.set(false);
+    this.componentStateService.handleMetaResponses(responses);
   }
 
   private static isPositionInRange(responseValue: string, range: string): boolean {
@@ -381,7 +338,7 @@ export class ResponsesService {
   }
 
   getPresentationStatus(): Progress {
-    return this.presentationProgress();
+    return this.componentStateService.getPresentationStatus();
   }
 
   /**
@@ -392,47 +349,22 @@ export class ResponsesService {
    * Each update triggers a vopStateChangedNotification to the Verona host.
    */
   updatePresentationProgress(progress: Progress): void {
-    if (this.presentationProgress() === 'complete' && progress !== 'complete') {
-      return;
-    }
-    this.presentationProgress.set(progress);
+    this.componentStateService.updatePresentationProgress(progress);
     const unitState: UnitState = {
       unitStateDataType: UnitStateDataType,
       dataParts: {
         responses: this.lastResponsesString
       },
       responseProgress: this.responseProgress(),
-      presentationProgress: this.presentationProgress()
+      presentationProgress: this.componentStateService.getPresentationStatus()
     };
     if (this.veronaPostService) {
       this.veronaPostService.sendVopStateChangedNotification({ unitState });
     }
   }
 
-  getAudioFeedback(setAsPlayed: boolean): string {
-    const returnValue = this.pendingAudioFeedbackSource;
-    if (setAsPlayed) {
-      this.pendingAudioFeedbackSource = '';
-      this.pendingAudioFeedback.set(false);
-    }
-    return returnValue;
-  }
-
-  startFeedback() {
-    this.feedbackActive.set(true);
-    if (this.pendingFeedbackHint === '') return;
-    if (this.pendingHintDelay > 0) {
-      setTimeout(() => {
-        this.feedbackHint.set(this.pendingFeedbackHint);
-      }, this.pendingHintDelay);
-    } else {
-      this.feedbackHint.set(this.pendingFeedbackHint);
-    }
-  }
-
   private provideFeedback(startVariable: string): void {
-    this.pendingAudioFeedback.set(false);
-    this.pendingAudioFeedbackSource = '';
+    this.componentStateService.clearPendingFeedback();
     const responsesToCheck: string[] = [startVariable,
       ...this.allResponses.filter(r => r.id !== startVariable).map(r => r.id)];
     const audioToPlay = responsesToCheck.map(varId => {
@@ -475,10 +407,11 @@ export class ResponsesService {
       return undefined;
     }).find(sourceString => !!sourceString);
     if (audioToPlay) {
-      this.pendingAudioFeedback.set(true);
-      this.pendingAudioFeedbackSource = audioToPlay.audioSource;
-      this.pendingFeedbackHint = audioToPlay.showResponse?.value || '';
-      this.pendingHintDelay = audioToPlay.showResponse?.delayMS || 0;
+      this.componentStateService.setPendingFeedback(
+        audioToPlay.audioSource,
+        audioToPlay.showResponse?.value || '',
+        audioToPlay.showResponse?.delayMS || 0
+      );
     }
   }
 
@@ -488,16 +421,13 @@ export class ResponsesService {
 
     // Reset all state to defaults first
     this.formerStateResponses.set([]);
-    this.mainAudioComplete.set(false);
-    this.presentationProgress.set('some');
     this.allResponses = [];
     this.lastResponsesString = '';
     this.responseProgress.set('none');
+    this.componentStateService.reset();
+    this.componentStateService.updatePresentationProgress('some');
 
     if (unitState) {
-      if (unitState.presentationProgress) {
-        this.presentationProgress.set(unitState.presentationProgress);
-      }
       if (unitState.dataParts) {
         const dataParts = unitState.dataParts || {};
         const responsesJson = dataParts.responses;
@@ -510,23 +440,17 @@ export class ResponsesService {
             this.allResponses = JSON.parse(JSON.stringify(parsedResponses));
             this.lastResponsesString = responsesJson as string;
 
-            // Restore mainAudio completion from saved responses
             const mainAudioResp = parsedResponses.find(r => r.id === 'mainAudio');
-            if (mainAudioResp) {
-              const n = this.asNumberOrZero(mainAudioResp.value);
-              this.mainAudioComplete.set(n >= 1);
-            }
-
-            // Restore VIDEO completion from saved responses
             const videoResp = parsedResponses.find(r => r.id === 'VIDEO');
-            if (videoResp) {
-              const videoValue = this.asNumberOrZero(videoResp.value);
-              this.videoComplete.set(videoValue >= 1);
-            }
-
-            if (this.mainAudioComplete() || this.videoComplete()) {
-              this.presentationProgress.set('complete');
-            }
+            this.componentStateService.restorePresentationState({
+              presentationProgress: unitState.presentationProgress,
+              mainAudioComplete: mainAudioResp ?
+                this.asNumberOrZero(mainAudioResp.value) >= 1 :
+                undefined,
+              videoComplete: videoResp ?
+                this.asNumberOrZero(videoResp.value) >= 1 :
+                undefined
+            });
 
             // Restore responseProgress: if any interaction response has VALUE_CHANGED (or CODING_COMPLETE), mark complete
             const hasInteractionValueChanged =

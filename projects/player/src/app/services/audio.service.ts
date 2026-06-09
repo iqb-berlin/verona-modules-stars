@@ -121,6 +121,14 @@ export class AudioService {
     this._isPlaying.set(false);
   }
 
+  /** Stops playback and resets the element position without clearing the loaded source. */
+  stopPlayback(): void {
+    this.pause();
+    if (this._audioElement) {
+      this._audioElement.currentTime = 0;
+    }
+  }
+
   reset() {
     this.pause();
     if (this._audioElement) {

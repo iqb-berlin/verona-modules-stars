@@ -3,6 +3,7 @@ import { NgModule, provideZonelessChangeDetection } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 
 import { ResponsesService } from './services/responses.service';
+import { ComponentStateService } from './services/component-state.service';
 import { VeronaPostService } from './services/verona-post.service';
 import { VeronaSubscriptionService } from './services/verona-subscription.service';
 import { MetadataService } from './services/metadata.service';
@@ -64,6 +65,7 @@ import { InteractionMetaComponent } from './components/interaction-meta/interact
   providers: [
     provideZonelessChangeDetection(),
     ResponsesService,
+    ComponentStateService,
     AudioService,
     VeronaPostService,
     VeronaSubscriptionService,

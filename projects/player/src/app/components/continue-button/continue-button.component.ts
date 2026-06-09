@@ -2,7 +2,7 @@ import {
   Component, EventEmitter, inject, Output, signal
 } from '@angular/core';
 
-import { ResponsesService } from '../../services/responses.service';
+import { ComponentStateService } from '../../services/component-state.service';
 import { AudioService } from '../../services/audio.service';
 import { UnitService } from '../../services/unit.service';
 
@@ -15,7 +15,7 @@ import { UnitService } from '../../services/unit.service';
 
 export class ContinueButtonComponent {
   @Output() navigate = new EventEmitter();
-  responseService = inject(ResponsesService);
+  componentStateService = inject(ComponentStateService);
   audioService = inject(AudioService);
   unitService = inject(UnitService);
 
@@ -31,8 +31,8 @@ export class ContinueButtonComponent {
       this.clicked.set(false);
     }, 200);
 
-    if (this.responseService.pendingAudioFeedback()) {
-      const newAudioSource = this.responseService.getAudioFeedback(true);
+    if (this.componentStateService.pendingAudioFeedback()) {
+      const newAudioSource = this.componentStateService.getAudioFeedback(true);
       if (newAudioSource !== this.lastAudioSource) {
         this.audioService.setAudioSrc({
           audioSource: newAudioSource,
@@ -41,7 +41,7 @@ export class ContinueButtonComponent {
           this.audioService.getPlayFinished('AudioFeedback').then(() => {
             // TODO add here automatic function when audio finished aka navigation next
           });
-          this.responseService.startFeedback();
+          this.componentStateService.startFeedback();
         });
         this.lastAudioSource = newAudioSource;
       } else {
@@ -50,7 +50,7 @@ export class ContinueButtonComponent {
         }, 200);
       }
     } else if (this.unitService.closingMetaButtons()?.variableIdReference &&
-      !this.responseService.closingMetaRunning()) {
+      !this.componentStateService.closingMetaRunning()) {
       this.unitService.startClosingMeta();
     } else {
       setTimeout(() => {
