@@ -2,8 +2,9 @@ import {
   Component, EventEmitter, inject, Output, signal
 } from '@angular/core';
 
-import { ComponentStateService } from '../../services/component-state.service';
-import { AudioService } from '../../services/audio.service';
+import { AudioFeedbackService } from '../../services/audio-feedback.service';
+import { ClosingMetaService } from '../../services/closing-meta.service';
+import { AudioPlayerService } from '../../services/audio-player.service';
 import { UnitService } from '../../services/unit.service';
 
 @Component({
@@ -15,8 +16,9 @@ import { UnitService } from '../../services/unit.service';
 
 export class ContinueButtonComponent {
   @Output() navigate = new EventEmitter();
-  componentStateService = inject(ComponentStateService);
-  audioService = inject(AudioService);
+  audioFeedbackService = inject(AudioFeedbackService);
+  closingMetaService = inject(ClosingMetaService);
+  audioPlayerService = inject(AudioPlayerService);
   unitService = inject(UnitService);
 
   clicked = signal(false);
@@ -24,24 +26,24 @@ export class ContinueButtonComponent {
   lastAudioSource = '';
 
   handleClick() {
-    if (this.audioService.isPlaying()) return;
+    if (this.audioPlayerService.isPlaying()) return;
     this.clicked.set(true);
 
     setTimeout(() => {
       this.clicked.set(false);
     }, 200);
 
-    if (this.componentStateService.pendingAudioFeedback()) {
-      const newAudioSource = this.componentStateService.getAudioFeedback(true);
+    if (this.audioFeedbackService.pendingAudioFeedback()) {
+      const newAudioSource = this.audioFeedbackService.getAudioFeedback(true);
       if (newAudioSource !== this.lastAudioSource) {
-        this.audioService.setAudioSrc({
+        this.audioPlayerService.setAudioSrc({
           audioSource: newAudioSource,
           audioId: 'AudioFeedback'
         }).then(() => {
-          this.audioService.getPlayFinished('AudioFeedback').then(() => {
+          this.audioPlayerService.getPlayFinished('AudioFeedback').then(() => {
             // TODO add here automatic function when audio finished aka navigation next
           });
-          this.componentStateService.startFeedback();
+          this.audioFeedbackService.startFeedback();
         });
         this.lastAudioSource = newAudioSource;
       } else {
@@ -50,7 +52,7 @@ export class ContinueButtonComponent {
         }, 200);
       }
     } else if (this.unitService.closingMetaButtons()?.variableIdReference &&
-      !this.componentStateService.closingMetaRunning()) {
+      !this.closingMetaService.closingMetaRunning()) {
       this.unitService.startClosingMeta();
     } else {
       setTimeout(() => {

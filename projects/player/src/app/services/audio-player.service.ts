@@ -1,4 +1,4 @@
-import { inject, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 import { ResponsesService } from './responses.service';
@@ -21,7 +21,10 @@ type MediaEventType =
   | 'loadedmetadata'
   | 'canplaythrough';
 
-export class AudioService {
+@Injectable({
+  providedIn: 'root'
+})
+export class AudioPlayerService {
   responsesService = inject(ResponsesService);
   private readonly _audioElement: HTMLAudioElement | null = null;
 

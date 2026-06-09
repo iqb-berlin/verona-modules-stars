@@ -15,7 +15,9 @@ import {
 } from '../models/unit-definition';
 import { ResponsesService } from './responses.service';
 import { ComponentStateService } from './component-state.service';
-import { AudioService } from './audio.service';
+import { AudioFeedbackService } from './audio-feedback.service';
+import { ClosingMetaService } from './closing-meta.service';
+import { AudioPlayerService } from './audio-player.service';
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +26,9 @@ import { AudioService } from './audio.service';
 export class UnitService {
   responsesService = inject(ResponsesService);
   componentStateService = inject(ComponentStateService);
-  audioService = inject(AudioService);
+  audioFeedbackService = inject(AudioFeedbackService);
+  closingMetaService = inject(ClosingMetaService);
+  audioPlayerService = inject(AudioPlayerService);
 
   firstAudioOptions = signal<FirstAudioOptionsParams | undefined>(undefined);
   mainAudio = signal<AudioOptions>({} as AudioOptions);
@@ -69,20 +73,21 @@ export class UnitService {
     }
 
     const responseProgress = this.responsesService.responseProgress();
-    const state = this.componentStateService;
+    const presentation = this.componentStateService;
+    const closingMeta = this.closingMetaService;
     switch (this.continueButton()) {
       case 'ALWAYS':
         return true;
       case 'ON_MAIN_AUDIO_COMPLETE':
-        return state.mainAudioComplete();
+        return presentation.mainAudioComplete();
       case 'ON_AUDIO_AND_RESPONSE':
-        return state.mainAudioComplete() &&
+        return presentation.mainAudioComplete() &&
           (responseProgress === 'complete' || responseProgress === 'some');
       case 'ON_VIDEO_COMPLETE':
-        return state.videoComplete();
+        return presentation.videoComplete();
       case 'ON_ANY_RESPONSE':
-        if (state.closingMetaRunning()) {
-          return state.metaInteractionDone();
+        if (closingMeta.closingMetaRunning()) {
+          return closingMeta.metaInteractionDone();
         }
         return responseProgress === 'some' || responseProgress === 'complete';
       case 'ON_RESPONSES_COMPLETE':
@@ -95,7 +100,7 @@ export class UnitService {
   /** Whether the interaction overlay should block user input. */
   interactionDisabled = computed(() =>
     (this.disableInteractionUntilComplete() && !this.componentStateService.mainAudioComplete()) ||
-    this.componentStateService.feedbackActive());
+    this.audioFeedbackService.feedbackActive());
 
   /** Opening flow is active: interactions and main audio hidden */
   private _openingFlowActive = signal<boolean>(false);
@@ -120,6 +125,10 @@ export class UnitService {
     if (this.mainAudio().audioSource) this._currentAudioSrc.set(this.mainAudio());
   }
 
+  setCurrentAudioSrc(audio: AudioOptions): void {
+    this._currentAudioSrc.set(audio);
+  }
+
   /** Clears the active audio source during silent opening-image display. */
   clearCurrentAudioSrc(): void {
     this._currentAudioSrc.set({} as AudioOptions);
@@ -135,40 +144,14 @@ export class UnitService {
 
   /** Starts the closing meta phase */
   startClosingMeta() {
-    // TODO: Change this logic
-    if (this.closingMetaButtons()?.triggerNavigationOnSelect === false) {
-      this.continueButton.set('ON_ANY_RESPONSE');
-    } else {
-      this.continueButton.set('NO');
-    }
-
-    const parameters: InteractionParameters = {} as InteractionParameters;
-    parameters.variableId = this.closingMetaButtons().variableIdMetaSelection;
-    this.parameters.set(parameters);
-    this.interaction.set('META');
-    if (this.closingMetaButtons()?.audioSource?.trim()) {
-      const audioOptions: AudioOptions = {
-        audioSource: this.closingMetaButtons().audioSource as string,
-        audioId: 'closingMetaButtonsAudio'
-      };
-      this._currentAudioSrc.set(audioOptions);
-      if (this.closingMetaButtons().autoPlay) {
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this.audioService.setAudioSrc(audioOptions).then(ready => {
-          if (ready) {
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            this.audioService.getPlayFinished('closingMetaButtonsAudio');
-          }
-        });
-      }
-    } else {
-      this._currentAudioSrc.set({} as AudioOptions);
-    }
-    this.componentStateService.startClosingMeta(this.closingMetaButtons().variableIdMetaSelection);
+    this.closingMetaService.startClosingMetaPhase({
+      unitService: this,
+      audioPlayerService: this.audioPlayerService
+    });
   }
 
   reset() {
-    this.audioService.reset();
+    this.audioPlayerService.reset();
     this.mainAudio.set({} as AudioOptions);
     this.firstAudioOptions.set(undefined);
     this.backgroundColor.set('#EEE');
@@ -192,7 +175,7 @@ export class UnitService {
     const firstAudioOptions: FirstAudioOptionsParams = {};
     this.firstAudioOptions.set(def.firstAudioOptions || firstAudioOptions);
     this.hasInteraction.set(def.interactionType !== undefined || def.interactionParameters !== undefined);
-    // add audioId to the mainAudio object to be able to use it in audioService.setAudioSrc()
+    // add audioId to the mainAudio object to be able to use it in audioPlayerService.setAudioSrc()
     const mainAudio: AudioOptions | undefined = def.mainAudio ?
       ({ ...def.mainAudio, audioId: 'mainAudio' } as AudioOptions) :
       undefined;

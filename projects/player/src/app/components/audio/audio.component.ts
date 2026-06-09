@@ -3,8 +3,8 @@ import {
 } from '@angular/core';
 
 import { ResponsesService } from '../../services/responses.service';
-import { ComponentStateService } from '../../services/component-state.service';
-import { AudioService } from '../../services/audio.service';
+import { ClosingMetaService } from '../../services/closing-meta.service';
+import { AudioPlayerService } from '../../services/audio-player.service';
 import { AudioOptions, FirstAudioOptionsParams } from '../../models/unit-definition';
 import { UnitService } from '../../services/unit.service';
 
@@ -19,9 +19,9 @@ export class AudioComponent {
   audio = input.required<AudioOptions>();
   firstAudioOptions = input<FirstAudioOptionsParams>();
 
-  audioService = inject(AudioService);
+  audioPlayerService = inject(AudioPlayerService);
   responsesService = inject(ResponsesService);
-  componentStateService = inject(ComponentStateService);
+  closingMetaService = inject(ClosingMetaService);
   unitService = inject(UnitService);
 
   movingButton = signal<'OFF' | 'KIND' | 'BOLD'>('BOLD');
@@ -42,7 +42,7 @@ export class AudioComponent {
     effect(() => {
       // Only the component-provided input should trigger a load.
       if (this.audio()?.audioSource) {
-        this.audioService.setAudioSrc(this.audio()).then(() => {});
+        this.audioPlayerService.setAudioSrc(this.audio()).then(() => {});
       }
     });
 
@@ -55,7 +55,7 @@ export class AudioComponent {
       } else {
         const risingEdge = clicked && !this.prevFirstClickLayerClicked;
         this.prevFirstClickLayerClicked = clicked;
-        if (risingEdge && !this.componentStateService.closingMetaRunning()) {
+        if (risingEdge && !this.closingMetaService.closingMetaRunning()) {
           this.play();
         }
       }
@@ -71,7 +71,7 @@ export class AudioComponent {
     effect(() => {
       // set play style when triggered somewhere else
       // TODO check if can be done in a more elegant way
-      if (this.audioService.isPlaying() && this.audioService.audioId() === this.audio()?.audioId) {
+      if (this.audioPlayerService.isPlaying() && this.audioPlayerService.audioId() === this.audio()?.audioId) {
         this.isPlaying.set(true);
       } else {
         this.isPlaying.set(false);
@@ -106,9 +106,9 @@ export class AudioComponent {
     if (this.disabled()) return;
 
     if (audio && audio.audioId) {
-      this.audioService.setAudioSrc(audio).then(() => {
+      this.audioPlayerService.setAudioSrc(audio).then(() => {
         this.isPlaying.set(true);
-        this.audioService.getPlayFinished(audio.audioId).then(() => {
+        this.audioPlayerService.getPlayFinished(audio.audioId).then(() => {
           this.isPlaying.set(false);
           this.syncMaxPlayDisabled();
         });
@@ -119,7 +119,7 @@ export class AudioComponent {
   }
 
   disabled() {
-    return this.audioService.isPlaying() || this.isMaxPlayReached();
+    return this.audioPlayerService.isPlaying() || this.isMaxPlayReached();
   }
 
   private syncMaxPlayDisabled() {

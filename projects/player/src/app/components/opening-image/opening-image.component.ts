@@ -2,7 +2,7 @@ import {
   Component, effect, inject, signal
 } from '@angular/core';
 import { UnitService } from '../../services/unit.service';
-import { AudioService } from '../../services/audio.service';
+import { AudioPlayerService } from '../../services/audio-player.service';
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
 import { OpeningImageParams } from '../../models/unit-definition';
 
@@ -21,7 +21,7 @@ export class OpeningImageComponent extends InteractionComponentDirective {
   showImage = signal<boolean>(false);
 
   unitService = inject(UnitService);
-  audioService = inject(AudioService);
+  audioPlayerService = inject(AudioPlayerService);
 
   private imagePhaseEntered = false;
   private finishScheduled = false;
@@ -50,9 +50,9 @@ export class OpeningImageComponent extends InteractionComponentDirective {
       const params = this.unitService.openingImageParams();
       if (!params?.audioSource) return;
 
-      const currentAudioId = this.audioService.audioId();
-      const isPlaying = this.audioService.isPlaying();
-      const playCount = this.audioService.playCount();
+      const currentAudioId = this.audioPlayerService.audioId();
+      const isPlaying = this.audioPlayerService.isPlaying();
+      const playCount = this.audioPlayerService.playCount();
 
       if (currentAudioId === 'openingAudio' && !isPlaying && playCount >= 1) {
         this.enterImagePhase();
@@ -64,7 +64,7 @@ export class OpeningImageComponent extends InteractionComponentDirective {
     if (this.imagePhaseEntered) return;
     this.imagePhaseEntered = true;
 
-    this.audioService.stopPlayback();
+    this.audioPlayerService.stopPlayback();
     this.unitService.clearCurrentAudioSrc();
     this.showImage.set(true);
     this.unitService.showingOpeningImage.set(true);
