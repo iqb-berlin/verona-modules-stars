@@ -1,5 +1,6 @@
 import { VopStartCommand } from '../../projects/player/src/app/models/verona';
 import { UnitDefinition } from '../../projects/player/src/app/models/unit-definition';
+import { CypressResponseItem } from './utils';
 
 export {};
 
@@ -153,6 +154,11 @@ declare global {
        * @param correct - Boolean value to click either correct or incorrect buttons
        */
       clickMultiselectButtons(interactionType: string, unit: UnitDefinition, correct: boolean): Chainable<void>;
+
+      /**
+       * Parse Verona unitState `dataParts` into response arrays (JSON strings → objects).
+       */
+      parseDataPartsResponses(dataParts: Record<string, unknown>): Chainable<CypressResponseItem[][]>;
     }
   }
 }
