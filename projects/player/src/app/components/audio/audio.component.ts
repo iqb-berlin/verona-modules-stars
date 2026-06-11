@@ -24,12 +24,20 @@ export class AudioComponent {
 
   movingButton = signal<'OFF' | 'KIND' | 'BOLD'>('BOLD');
   isPlaying = signal(false);
-  isDisabled = signal(false);
+  isMaxPlayReached = signal(false);
 
   // timer reference for delayed animateButton start
   private animateTimer: any = undefined;
 
+  private prevFirstClickLayerClicked: boolean | undefined;
+
   constructor() {
+    effect(() => {
+      // Re-sync maxPlay disabled state when the unit/audio config changes.
+      this.audio();
+      this.syncMaxPlayDisabled();
+    });
+
     effect(() => {
       // Only the component-provided input should trigger a load.
       if (this.audio()?.audioSource) {
@@ -38,9 +46,17 @@ export class AudioComponent {
     });
 
     effect(() => {
-      // play audio when triggered from the firstClickLayer
-      if (this.unitService.firstClickLayerClicked()) {
-        this.play();
+      // Play only on the click-layer rising edge so remounting main audio after opening
+      // does not restart playback when firstClickLayerClicked is already true.
+      const clicked = this.unitService.firstClickLayerClicked();
+      if (this.prevFirstClickLayerClicked === undefined) {
+        this.prevFirstClickLayerClicked = clicked;
+      } else {
+        const risingEdge = clicked && !this.prevFirstClickLayerClicked;
+        this.prevFirstClickLayerClicked = clicked;
+        if (risingEdge && !this.responsesService.closingMetaRunning()) {
+          this.play();
+        }
       }
     });
 
@@ -79,19 +95,14 @@ export class AudioComponent {
   play() {
     const audio = this.unitService.currentAudioSrc();
 
+    if (this.disabled()) return;
+
     if (audio && audio.audioId) {
       this.audioService.setAudioSrc(audio).then(() => {
         this.isPlaying.set(true);
         this.audioService.getPlayFinished(audio.audioId).then(() => {
           this.isPlaying.set(false);
-
-          /** check if maxPlay reached */
-          const variableId = audio.audioId;
-          const maxPlay = audio.maxPlay || 0;
-          const currentCount = this.responsesService.getResponseByVariableId(variableId);
-          if (maxPlay !== 0 && currentCount.value as number >= maxPlay) {
-            this.isDisabled.set(true);
-          }
+          this.syncMaxPlayDisabled();
         });
       });
     }
@@ -100,6 +111,17 @@ export class AudioComponent {
   }
 
   disabled() {
-    return this.audioService.isPlaying() || this.isDisabled();
+    return this.audioService.isPlaying() || this.isMaxPlayReached();
+  }
+
+  private syncMaxPlayDisabled() {
+    const audio = this.audio();
+    const audioId = audio?.audioId || '';
+    const maxPlay = audio?.maxPlay || 0;
+    if (!audioId) {
+      this.isMaxPlayReached.set(false);
+      return;
+    }
+    this.isMaxPlayReached.set(this.responsesService.isAudioMaxPlayReached(audioId, maxPlay));
   }
 }

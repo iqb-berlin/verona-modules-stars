@@ -18,10 +18,6 @@
     "text": "Tastatur",
     "addBackspaceKey": true,
     "keyboardMode": "NUMBERS_LINE",
-    "keysLine1": ["A", "B", "C", "D", "E", "F", "G", "H", "I"],
-    "keysLine2": ["J", "K", "L", "M", "N", "O", "P", "Q", "R"],
-    "keysLine3": ["S", "T", "U", "V", "W", "X", "Y", "Z"],
-    "keysLine4": ["ä", "ö", "ü", "eu", "au", "ei", "ch", "sch", "ng"],
     "maxInputLength": 2
   }
 }

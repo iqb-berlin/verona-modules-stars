@@ -4,7 +4,7 @@
 .write-container {
   @include variables.flex-center;
   flex-direction: column;
-  padding: 1rem;
+  padding-top: 1rem;
   height: 100%;
   box-sizing: border-box;
 }
@@ -12,39 +12,39 @@
 .input-wrapper {
   @include variables.flex-center;
   flex-direction: column;
+  flex-shrink: 0;
   padding: 1rem;
 }
 
 .stimulus-wrapper {
-  margin: 0 auto;
-  height: 25vh;
+  @include variables.stimulus-wrapper;
+}
 
-  img {
-    width: auto;
-    height: 100%;
-  }
+.image-wrapper {
+  @include variables.image-wrapper;
 }
 
 .text-wrapper {
   display: block;
-  margin-bottom: 24px;
+  margin-bottom: 15px;
   min-width: 150px;
   width: auto;
 
   .text-display {
     display: block;
     width: 90%;
-    min-height: 100px;
     margin: 0 auto;
     border-bottom: 4px solid #000;
+    box-sizing: border-box;
   }
 
   .text-content {
     font-family: variables.$font-family;
-    font-size: 5rem;
+    font-size: 3.4rem;
+    line-height: 1;
     letter-spacing: 0.15rem;
     text-align: center;
-    min-height: 2rem;
+    min-height: 3.4rem;
 
     &.hint {
       color: colors.$hint;
@@ -82,22 +82,21 @@
   }
 
   .input-wrapper {
-    padding-top: 2rem;
-
     .text-wrapper {
       width: 160px;
       height: 160px;
       border-radius: 12px;
       background-color: white;
-      box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
 
       .text-display {
+        display: flex;
+        justify-content: center;
+        align-items: center;
         border: none;
         min-height: 160px;
 
         .text-content {
           font-size: 7rem;
-          margin-top: 16px;
         }
       }
     }
@@ -106,10 +105,6 @@
 
 .keyboard-wrapper {
   @include variables.keyboard-numbers-button-wrapper;
-
-  .grapheme-list {
-    float: left;
-  }
 }
 
 .keyboard-button {
@@ -122,6 +117,5 @@
 
 .backspace-button {
  @include variables.backspace-button;
-  width: 100px;
-  right: -140px;
+  right: -100px;
 }
