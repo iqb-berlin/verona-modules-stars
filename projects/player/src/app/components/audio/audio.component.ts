@@ -29,6 +29,8 @@ export class AudioComponent {
   // timer reference for delayed animateButton start
   private animateTimer: any = undefined;
 
+  private prevFirstClickLayerClicked: boolean | undefined;
+
   constructor() {
     effect(() => {
       // Re-sync maxPlay disabled state when the unit/audio config changes.
@@ -44,10 +46,17 @@ export class AudioComponent {
     });
 
     effect(() => {
-      // play audio when triggered from the firstClickLayer
-      // but not during closing meta phase (which has its own autoPlay handling)
-      if (this.unitService.firstClickLayerClicked() && !this.responsesService.closingMetaRunning()) {
-        this.play();
+      // Play only on the click-layer rising edge so remounting main audio after opening
+      // does not restart playback when firstClickLayerClicked is already true.
+      const clicked = this.unitService.firstClickLayerClicked();
+      if (this.prevFirstClickLayerClicked === undefined) {
+        this.prevFirstClickLayerClicked = clicked;
+      } else {
+        const risingEdge = clicked && !this.prevFirstClickLayerClicked;
+        this.prevFirstClickLayerClicked = clicked;
+        if (risingEdge && !this.responsesService.closingMetaRunning()) {
+          this.play();
+        }
       }
     });
 
