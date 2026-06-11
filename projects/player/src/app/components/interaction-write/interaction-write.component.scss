@@ -89,12 +89,14 @@
       background-color: white;
 
       .text-display {
+        display: flex;
+        justify-content: center;
+        align-items: center;
         border: none;
         min-height: 160px;
 
         .text-content {
           font-size: 7rem;
-          margin-top: 16px;
         }
       }
     }
