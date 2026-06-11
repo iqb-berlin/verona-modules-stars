@@ -11,6 +11,6 @@
 
 ## Bugfixes
 + Ein Fehler wurde behoben, bei dem closingMetaButtons autoPlay: false nicht funktionierte, wenn firstClickLayer etwas anderes als OFF war.
-+ Die Tastatur wurde für interactionType: WRITE, EQUATION, PYRAMID und NUMBER_LINE behoben.
++ Die Tastatur wurde für interactionType: WRITE, EQUATION, PYRAMID und NUMBER_LINE verbessert.
 + Ein Audio-Fehler wurde behoben, der dazu führte, dass die Wiedergabe mehrmals ausgelöst wurde.
 
