@@ -10,7 +10,7 @@ $font-family: 'IQBprimar', 'Quicksand', sans-serif;
 $font-weight-600: 600;
 $big-text-font-size: 112px;
 $small-text-font-size: 32px;
-$ribbon-bar-height: 30px;
+$ribbon-bar-height: 20px;
 $audio-waves-animation-height: 100px;
 $gap-between-two-buttons-in-a-row: 106px;
 $gap-between-two-extra-large-buttons-in-a-row: 50px;
@@ -198,6 +198,9 @@ $layoutPadding: 90px;
 }
 
 @mixin backspace-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   position: absolute;
   top: 0;
   background-color: #d0d0d0;
