@@ -7,6 +7,8 @@ import { VeronaSubscriptionService } from './services/verona-subscription.servic
 import { UnitService } from './services/unit.service';
 import { MetadataService } from './services/metadata.service';
 import { ResponsesService } from './services/responses.service';
+import { ComponentStateService } from './services/component-state.service';
+import { AudioFeedbackService } from './services/audio-feedback.service';
 import { VopStartCommand } from './models/verona';
 import { environment } from '../environments/environment';
 
@@ -35,6 +37,8 @@ export class AppComponent implements OnInit {
   constructor(
     public unitService: UnitService,
     public responsesService: ResponsesService,
+    public componentStateService: ComponentStateService,
+    public audioFeedbackService: AudioFeedbackService,
     public veronaPostService: VeronaPostService,
     private veronaSubscriptionService: VeronaSubscriptionService,
     private metadataService: MetadataService
@@ -58,9 +62,9 @@ export class AppComponent implements OnInit {
     }
   }
 
-  sendNavigationRequest($event) {
+  sendNavigationRequest($event: string) {
     if ($event === 'next') {
-      this.veronaPostService.sendVopUnitNavigationRequestedNotification('next');
+      this.componentStateService.requestNavigation('next');
     }
   }
 

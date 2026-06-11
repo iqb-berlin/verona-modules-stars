@@ -14,7 +14,10 @@ import {
   UnitDefinition
 } from '../models/unit-definition';
 import { ResponsesService } from './responses.service';
-import { AudioService } from './audio.service';
+import { ComponentStateService } from './component-state.service';
+import { AudioFeedbackService } from './audio-feedback.service';
+import { ClosingMetaService } from './closing-meta.service';
+import { AudioPlayerService } from './audio-player.service';
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +25,10 @@ import { AudioService } from './audio.service';
 
 export class UnitService {
   responsesService = inject(ResponsesService);
-  audioService = inject(AudioService);
+  componentStateService = inject(ComponentStateService);
+  audioFeedbackService = inject(AudioFeedbackService);
+  closingMetaService = inject(ClosingMetaService);
+  audioPlayerService = inject(AudioPlayerService);
 
   firstAudioOptions = signal<FirstAudioOptionsParams | undefined>(undefined);
   mainAudio = signal<AudioOptions>({} as AudioOptions);
@@ -46,9 +52,9 @@ export class UnitService {
 
   /** Any interaction done: click layer clicked, audio heard, or response given */
   interactionDone = computed(() => this._firstClickLayerClicked() ||
-      this.responsesService.mainAudioComplete() ||
+      this.componentStateService.mainAudioComplete() ||
       this.responsesService.responseProgress() !== 'none' ||
-      this.responsesService.getPresentationStatus() === 'complete');
+      this.componentStateService.getPresentationStatus() === 'complete');
 
   /** Whether to show the first click layer based on configuration and interaction status */
   showFirstClickLayer = computed(() => {
@@ -59,9 +65,50 @@ export class UnitService {
       !this.interactionDone();
   });
 
+  /** Whether the continue button should be visible for the current unit and interaction state. */
+  showContinueButton = computed(() => {
+    if (this.openingFlowActive()) return false;
+    if (this.interaction() === 'META' && this.closingMetaButtons().triggerNavigationOnSelect) {
+      return false;
+    }
+
+    const responseProgress = this.responsesService.responseProgress();
+    const presentation = this.componentStateService;
+    const closingMeta = this.closingMetaService;
+    switch (this.continueButton()) {
+      case 'ALWAYS':
+        return true;
+      case 'ON_MAIN_AUDIO_COMPLETE':
+        return presentation.mainAudioComplete();
+      case 'ON_AUDIO_AND_RESPONSE':
+        return presentation.mainAudioComplete() &&
+          (responseProgress === 'complete' || responseProgress === 'some');
+      case 'ON_VIDEO_COMPLETE':
+        return presentation.videoComplete();
+      case 'ON_ANY_RESPONSE':
+        if (closingMeta.closingMetaRunning()) {
+          return closingMeta.metaInteractionDone();
+        }
+        return responseProgress === 'some' || responseProgress === 'complete';
+      case 'ON_RESPONSES_COMPLETE':
+        return responseProgress === 'complete';
+      default:
+        return false;
+    }
+  });
+
+  /** Whether the interaction overlay should block user input. */
+  interactionDisabled = computed(() =>
+    (this.disableInteractionUntilComplete() && !this.componentStateService.mainAudioComplete()) ||
+    this.audioFeedbackService.feedbackActive());
+
   /** Opening flow is active: interactions and main audio hidden */
   private _openingFlowActive = signal<boolean>(false);
   openingFlowActive = this._openingFlowActive.asReadonly();
+
+  /** Triggers a single automatic main-audio play after the opening image phase ends. */
+  private _autoPlayMainAudioOnce = signal(false);
+  autoPlayMainAudioOnce = this._autoPlayMainAudioOnce.asReadonly();
 
   /** current audio source for the main audio */
   private _currentAudioSrc = signal<AudioOptions>({} as AudioOptions);
@@ -73,46 +120,38 @@ export class UnitService {
     this.responsesService.updatePresentationProgress('some');
   }
 
-  finishOpeningFlow() {    this._openingFlowActive.set(false);
+  finishOpeningFlow() {
+    this._openingFlowActive.set(false);
     if (this.mainAudio().audioSource) this._currentAudioSrc.set(this.mainAudio());
+  }
+
+  setCurrentAudioSrc(audio: AudioOptions): void {
+    this._currentAudioSrc.set(audio);
+  }
+
+  /** Clears the active audio source during silent opening-image display. */
+  clearCurrentAudioSrc(): void {
+    this._currentAudioSrc.set({} as AudioOptions);
+  }
+
+  requestMainAudioAutoPlayOnce(): void {
+    this._autoPlayMainAudioOnce.set(true);
+  }
+
+  clearMainAudioAutoPlayOnce(): void {
+    this._autoPlayMainAudioOnce.set(false);
   }
 
   /** Starts the closing meta phase */
   startClosingMeta() {
-    // TODO: Change this logic
-    if (this.closingMetaButtons()?.triggerNavigationOnSelect === false) {
-      this.continueButton.set('ON_ANY_RESPONSE');
-    } else {
-      this.continueButton.set('NO');
-    }
-
-    const parameters: InteractionParameters = {} as InteractionParameters;
-    parameters.variableId = this.closingMetaButtons().variableIdMetaSelection;
-    this.parameters.set(parameters);
-    this.interaction.set('META');
-    if (this.closingMetaButtons()?.audioSource?.trim()) {
-      const audioOptions: AudioOptions = {
-        audioSource: this.closingMetaButtons().audioSource as string,
-        audioId: 'closingMetaButtonsAudio'
-      };
-      this._currentAudioSrc.set(audioOptions);
-      if (this.closingMetaButtons().autoPlay) {
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this.audioService.setAudioSrc(audioOptions).then(ready => {
-          if (ready) {
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            this.audioService.getPlayFinished('closingMetaButtonsAudio');
-          }
-        });
-      }
-    } else {
-      this._currentAudioSrc.set({} as AudioOptions);
-    }
-    this.responsesService.startClosingMeta();
+    this.closingMetaService.startClosingMetaPhase({
+      unitService: this,
+      audioPlayerService: this.audioPlayerService
+    });
   }
 
   reset() {
-    this.audioService.reset();
+    this.audioPlayerService.reset();
     this.mainAudio.set({} as AudioOptions);
     this.firstAudioOptions.set(undefined);
     this.backgroundColor.set('#EEE');
@@ -127,6 +166,7 @@ export class UnitService {
     this.showingOpeningImage.set(false);
     this._openingFlowActive.set(false);
     this._firstClickLayerClicked.set(false);
+    this._autoPlayMainAudioOnce.set(false);
   }
 
   setNewData(unitDefinition: unknown) {
@@ -135,7 +175,7 @@ export class UnitService {
     const firstAudioOptions: FirstAudioOptionsParams = {};
     this.firstAudioOptions.set(def.firstAudioOptions || firstAudioOptions);
     this.hasInteraction.set(def.interactionType !== undefined || def.interactionParameters !== undefined);
-    // add audioId to the mainAudio object to be able to use it in audioService.setAudioSrc()
+    // add audioId to the mainAudio object to be able to use it in audioPlayerService.setAudioSrc()
     const mainAudio: AudioOptions | undefined = def.mainAudio ?
       ({ ...def.mainAudio, audioId: 'mainAudio' } as AudioOptions) :
       undefined;

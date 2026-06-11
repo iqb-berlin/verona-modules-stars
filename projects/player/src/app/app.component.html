@@ -14,31 +14,13 @@
     <stars-audio [audio]="unitService.currentAudioSrc()" [firstAudioOptions]="unitService.firstAudioOptions()"></stars-audio>
   }
 
-  <!-- Continue Button (hidden during opening flow and when closing meta buttons are active).
-  In ON_ANY_RESPONSE mode, while closing-meta is running we check
-  metaInteractionDone, so the button doesn't appear before the user actually selects a meta option (responseProgress
-  may still be "some"/"complete" from the previous main interaction).
-  TODO: change the logic for ON_ANY_RESPONSE
-  -->
-  @if (!unitService.openingFlowActive() &&
-      !(unitService.interaction() === 'META' && unitService.closingMetaButtons().triggerNavigationOnSelect) &&
-      (unitService.continueButton() === "ALWAYS" ||
-      (unitService.continueButton() === "ON_MAIN_AUDIO_COMPLETE" && responsesService.mainAudioComplete()) ||
-      (unitService.continueButton() === "ON_AUDIO_AND_RESPONSE" && responsesService.mainAudioComplete() &&
-      (responsesService.responseProgress() === "complete" || responsesService.responseProgress() === "some")) ||
-      (unitService.continueButton() === "ON_VIDEO_COMPLETE" && responsesService.videoComplete()) ||
-        (unitService.continueButton() === "ON_ANY_RESPONSE" &&
-          (responsesService.closingMetaRunning()
-            ? responsesService.metaInteractionDone()
-            : (responsesService.responseProgress() === "some" || responsesService.responseProgress() === "complete"))) ||
-      (unitService.continueButton() === "ON_RESPONSES_COMPLETE" && responsesService.responseProgress() === "complete"))) {
+  @if (unitService.showContinueButton()) {
     <stars-continue-button
-      (navigate)="veronaPostService.sendVopUnitNavigationRequestedNotification('next')"></stars-continue-button>
+      (navigate)="componentStateService.requestNavigation('next')"></stars-continue-button>
   }
 
   <!-- disable interaction until complete via overlay -->
-  @if ((unitService.disableInteractionUntilComplete() && !responsesService.mainAudioComplete()) ||
-    responsesService.feedbackActive()) {
+  @if (unitService.interactionDisabled()) {
     <div class="interaction-disabled-overlay" (click)="disabledOverlay($event)" data-cy="interaction-disabled-overlay"></div>
   }
 
@@ -57,59 +39,59 @@
   @if (!unitService.openingFlowActive() && unitService.interaction() === 'BUTTONS' || unitService.interaction() === 'IMAGE_ONLY') {
     <stars-interaction-buttons class="interaction"
       [parameters]="getParametersWithFormerState()"
-      [showHint]="responsesService.feedbackHint()"
+      [showHint]="audioFeedbackService.feedbackHint()"
       (responses)="responsesService.newResponses($event)"
       (navigationNextRequest)="sendNavigationRequest($event)">
     </stars-interaction-buttons>
   } @else if (!unitService.openingFlowActive() && unitService.interaction() === 'DROP') {
     <stars-interaction-drop class="interaction"
       [parameters]="getParametersWithFormerState()"
-      [showHint]="responsesService.feedbackHint()"
+      [showHint]="audioFeedbackService.feedbackHint()"
       (responses)="responsesService.newResponses($event)"></stars-interaction-drop>
   } @else if (!unitService.openingFlowActive() && unitService.interaction() === 'WRITE') {
     <stars-interaction-write class="interaction"
       [parameters]="getParametersWithFormerState()"
-      [showHint]="responsesService.feedbackHint()"
+      [showHint]="audioFeedbackService.feedbackHint()"
       (responses)="responsesService.newResponses($event)"></stars-interaction-write>
   } @else if (unitService.interaction() === 'VIDEO') {
     <stars-interaction-video class="interaction"
       [parameters]="getParametersWithFormerState()"
-      [showHint]="responsesService.feedbackHint()"
+      [showHint]="audioFeedbackService.feedbackHint()"
       (responses)="responsesService.newResponses($event)"></stars-interaction-video>
   } @else if (unitService.interaction() === 'FIND_ON_IMAGE') {
     <stars-interaction-find-on-image class="interaction"
       [parameters]="getParametersWithFormerState()"
-      [showHint]="responsesService.feedbackHint()"
+      [showHint]="audioFeedbackService.feedbackHint()"
       (responses)="responsesService.newResponses($event)"></stars-interaction-find-on-image>
   } @else if (!unitService.openingFlowActive() && unitService.interaction() === 'POLYGON_BUTTONS') {
     <stars-interaction-polygon-buttons class="interaction"
       [parameters]="getParametersWithFormerState()"
-      [showHint]="responsesService.feedbackHint()"
+      [showHint]="audioFeedbackService.feedbackHint()"
       (responses)="responsesService.newResponses($event)"></stars-interaction-polygon-buttons>
   } @else if (!unitService.openingFlowActive() && unitService.interaction() === 'PLACE_VALUE') {
     <stars-interaction-place-value class="interaction"
       [parameters]="getParametersWithFormerState()"
-      [showHint]="responsesService.feedbackHint()"
+      [showHint]="audioFeedbackService.feedbackHint()"
       (responses)="responsesService.newResponses($event)"></stars-interaction-place-value>
   } @else if (!unitService.openingFlowActive() && unitService.interaction() === 'NUMBER_LINE') {
     <stars-interaction-number-line class="interaction"
       [parameters]="getParametersWithFormerState()"
-      [showHint]="responsesService.feedbackHint()"
+      [showHint]="audioFeedbackService.feedbackHint()"
       (responses)="responsesService.newResponses($event)"></stars-interaction-number-line>
   } @else if (!unitService.openingFlowActive() && unitService.interaction() === 'PYRAMID') {
     <stars-interaction-pyramid class="interaction"
       [parameters]="getParametersWithFormerState()"
-      [showHint]="responsesService.feedbackHint()"
+      [showHint]="audioFeedbackService.feedbackHint()"
       (responses)="responsesService.newResponses($event)"></stars-interaction-pyramid>
   } @else if (!unitService.openingFlowActive() && unitService.interaction() === 'EQUATION') {
     <stars-interaction-equation class="interaction"
        [parameters]="getParametersWithFormerState()"
-       [showHint]="responsesService.feedbackHint()"
+       [showHint]="audioFeedbackService.feedbackHint()"
        (responses)="responsesService.newResponses($event)"></stars-interaction-equation>
   } @else if (!unitService.openingFlowActive() && unitService.interaction() === 'META') {
     <stars-interaction-meta class="interaction"
        [parameters]="getParametersWithFormerState()"
-       [showHint]="responsesService.feedbackHint()"
+       [showHint]="audioFeedbackService.feedbackHint()"
        (responses)="responsesService.newResponses($event)"
        (navigationNextRequest)="sendNavigationRequest($event)"></stars-interaction-meta>
   }

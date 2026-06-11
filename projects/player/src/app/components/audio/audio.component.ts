@@ -3,7 +3,8 @@ import {
 } from '@angular/core';
 
 import { ResponsesService } from '../../services/responses.service';
-import { AudioService } from '../../services/audio.service';
+import { ClosingMetaService } from '../../services/closing-meta.service';
+import { AudioPlayerService } from '../../services/audio-player.service';
 import { AudioOptions, FirstAudioOptionsParams } from '../../models/unit-definition';
 import { UnitService } from '../../services/unit.service';
 
@@ -18,8 +19,9 @@ export class AudioComponent {
   audio = input.required<AudioOptions>();
   firstAudioOptions = input<FirstAudioOptionsParams>();
 
-  audioService = inject(AudioService);
+  audioPlayerService = inject(AudioPlayerService);
   responsesService = inject(ResponsesService);
+  closingMetaService = inject(ClosingMetaService);
   unitService = inject(UnitService);
 
   movingButton = signal<'OFF' | 'KIND' | 'BOLD'>('BOLD');
@@ -28,6 +30,7 @@ export class AudioComponent {
 
   // timer reference for delayed animateButton start
   private animateTimer: any = undefined;
+  private prevFirstClickLayerClicked: boolean | undefined;
 
   constructor() {
     effect(() => {
@@ -39,22 +42,36 @@ export class AudioComponent {
     effect(() => {
       // Only the component-provided input should trigger a load.
       if (this.audio()?.audioSource) {
-        this.audioService.setAudioSrc(this.audio()).then(() => {});
+        this.audioPlayerService.setAudioSrc(this.audio()).then(() => {});
       }
     });
 
     effect(() => {
-      // play audio when triggered from the firstClickLayer
-      // but not during closing meta phase (which has its own autoPlay handling)
-      if (this.unitService.firstClickLayerClicked() && !this.responsesService.closingMetaRunning()) {
-        this.play();
+      // Play only on the click-layer rising edge so remounting main audio after opening
+      // does not restart playback when firstClickLayerClicked is already true.
+      const clicked = this.unitService.firstClickLayerClicked();
+      if (this.prevFirstClickLayerClicked === undefined) {
+        this.prevFirstClickLayerClicked = clicked;
+      } else {
+        const risingEdge = clicked && !this.prevFirstClickLayerClicked;
+        this.prevFirstClickLayerClicked = clicked;
+        if (risingEdge && !this.closingMetaService.closingMetaRunning()) {
+          this.play();
+        }
       }
+    });
+
+    effect(() => {
+      if (!this.unitService.autoPlayMainAudioOnce()) return;
+      if (this.audio()?.audioId !== 'mainAudio' || !this.audio()?.audioSource) return;
+      this.unitService.clearMainAudioAutoPlayOnce();
+      this.play();
     });
 
     effect(() => {
       // set play style when triggered somewhere else
       // TODO check if can be done in a more elegant way
-      if (this.audioService.isPlaying() && this.audioService.audioId() === this.audio()?.audioId) {
+      if (this.audioPlayerService.isPlaying() && this.audioPlayerService.audioId() === this.audio()?.audioId) {
         this.isPlaying.set(true);
       } else {
         this.isPlaying.set(false);
@@ -89,9 +106,9 @@ export class AudioComponent {
     if (this.disabled()) return;
 
     if (audio && audio.audioId) {
-      this.audioService.setAudioSrc(audio).then(() => {
+      this.audioPlayerService.setAudioSrc(audio).then(() => {
         this.isPlaying.set(true);
-        this.audioService.getPlayFinished(audio.audioId).then(() => {
+        this.audioPlayerService.getPlayFinished(audio.audioId).then(() => {
           this.isPlaying.set(false);
           this.syncMaxPlayDisabled();
         });
@@ -102,7 +119,7 @@ export class AudioComponent {
   }
 
   disabled() {
-    return this.audioService.isPlaying() || this.isMaxPlayReached();
+    return this.audioPlayerService.isPlaying() || this.isMaxPlayReached();
   }
 
   private syncMaxPlayDisabled() {

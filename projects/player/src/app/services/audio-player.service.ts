@@ -1,4 +1,4 @@
-import { inject, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 import { ResponsesService } from './responses.service';
@@ -21,7 +21,10 @@ type MediaEventType =
   | 'loadedmetadata'
   | 'canplaythrough';
 
-export class AudioService {
+@Injectable({
+  providedIn: 'root'
+})
+export class AudioPlayerService {
   responsesService = inject(ResponsesService);
   private readonly _audioElement: HTMLAudioElement | null = null;
 
@@ -119,6 +122,14 @@ export class AudioService {
   pause() {
     this._audioElement?.pause();
     this._isPlaying.set(false);
+  }
+
+  /** Stops playback and resets the element position without clearing the loaded source. */
+  stopPlayback(): void {
+    this.pause();
+    if (this._audioElement) {
+      this._audioElement.currentTime = 0;
+    }
   }
 
   reset() {

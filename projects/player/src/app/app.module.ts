@@ -3,10 +3,13 @@ import { NgModule, provideZonelessChangeDetection } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 
 import { ResponsesService } from './services/responses.service';
+import { ComponentStateService } from './services/component-state.service';
+import { AudioFeedbackService } from './services/audio-feedback.service';
+import { ClosingMetaService } from './services/closing-meta.service';
 import { VeronaPostService } from './services/verona-post.service';
 import { VeronaSubscriptionService } from './services/verona-subscription.service';
 import { MetadataService } from './services/metadata.service';
-import { AudioService } from './services/audio.service';
+import { AudioPlayerService } from './services/audio-player.service';
 import { SafeResourceUrlPipe } from './pipes/safe-resource-url.pipe';
 import { LinebreaksHtmlPipe } from './pipes/linebreaks-html.pipe';
 import { AppComponent } from './app.component';
@@ -64,7 +67,10 @@ import { InteractionMetaComponent } from './components/interaction-meta/interact
   providers: [
     provideZonelessChangeDetection(),
     ResponsesService,
-    AudioService,
+    ComponentStateService,
+    AudioFeedbackService,
+    ClosingMetaService,
+    AudioPlayerService,
     VeronaPostService,
     VeronaSubscriptionService,
     MetadataService

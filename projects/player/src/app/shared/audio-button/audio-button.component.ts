@@ -2,7 +2,7 @@ import {
   Component, inject, input, output, signal
 } from '@angular/core';
 
-import { AudioService } from '../../services/audio.service';
+import { AudioPlayerService } from '../../services/audio-player.service';
 import { AudioOptions } from '../../models/unit-definition';
 
 @Component({
@@ -16,16 +16,16 @@ export class AudioButtonComponent {
   elementValueChanged = output();
 
   isPlaying = signal(false);
-  audioService = inject(AudioService);
+  audioPlayerService = inject(AudioPlayerService);
 
   // TODO: Refactoring to be able to use this component and audio.component.html instead of using similar components
 
   play() {
-    if (this.audioService.isPlaying()) return;
+    if (this.audioPlayerService.isPlaying()) return;
     if (this.audio().audioSource && this.audio().audioId) {
-      this.audioService.setAudioSrc(this.audio()).then(() => {
+      this.audioPlayerService.setAudioSrc(this.audio()).then(() => {
         this.isPlaying.set(true);
-        this.audioService.getPlayFinished(this.audio().audioId).then(() => {
+        this.audioPlayerService.getPlayFinished(this.audio().audioId).then(() => {
           this.isPlaying.set(false);
         });
       });
@@ -33,6 +33,6 @@ export class AudioButtonComponent {
   }
 
   disabled() {
-    return this.audioService.isPlaying();
+    return this.audioPlayerService.isPlaying();
   }
 }
