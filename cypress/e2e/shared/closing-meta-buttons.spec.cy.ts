@@ -1,3 +1,6 @@
+import { UnitDefinition } from '../../../projects/player/src/app/models/unit-definition';
+import { MockMessage } from '../../support/utils';
+
 export function testClosingMetaButtons(interactionType: string) {
 
   describe(`Closing Meta Buttons Features for interactionType - ${interactionType}`, () => {
@@ -89,6 +92,62 @@ export function testClosingMetaButtons(interactionType: string) {
       // Click to play
       cy.get('[data-cy="custom-audio-button"]').click();
       cy.get('[data-cy="custom-audio-button"]').should('have.class', 'playing');
+    });
+
+    it('derives and codes variableIdMetaOutcome from reference score and selected meta button', () => {
+      const configFile = `${interactionType}_with_closingMetaButtons_with_variableInfo_test.json`;
+
+      cy.setupTestDataWithPostMessageMock(configFile, interactionType);
+      cy.loadUnit(`interaction-${interactionType}/${configFile}`);
+
+      cy.get('@testData').then(data => {
+        const dataToCheck = data as unknown as UnitDefinition;
+        const metaOutcomeRule = dataToCheck.variableInfo?.find(v => v.variableId === 'META_OUTCOME')
+          ?.codes?.find(c => c.code === 1 && c.score === 1);
+        if (!metaOutcomeRule) {
+          throw new Error(`No META_OUTCOME success rule in ${configFile}`);
+        }
+
+        const expectedValue = metaOutcomeRule.parameter;
+        const metaSelectionParam = expectedValue.split('_')[1] ?? '4';
+        const metaButtonIndex = Number(metaSelectionParam) - 1;
+
+        cy.applyCorrectAnswerScenarios(interactionType, dataToCheck);
+        cy.get('[data-cy="continue-button"]').should('exist').click();
+        cy.get('[data-cy="interaction-meta"]').should('exist');
+        cy.get(`[data-cy="button-${metaButtonIndex}"]`).click();
+
+        cy.get('@outgoingMessages')
+          .then(messages => {
+            const arr = messages as unknown as MockMessage[];
+            const stateMessages = arr.filter(msg => msg.data.type === 'vopStateChangedNotification');
+
+            const latestMessage = stateMessages[stateMessages.length - 1];
+            if (!latestMessage?.data?.unitState) {
+              throw new Error('Latest message or unitState is undefined');
+            }
+
+            cy.parseDataPartsResponses(latestMessage.data.unitState.dataParts as Record<string, unknown>)
+              .then(parsedResponsesArrays => {
+                const hasMetaOutcome = parsedResponsesArrays.some(responses =>
+                  responses.some(response =>
+                    response.id === 'META_OUTCOME' &&
+                    response.status === 'CODING_COMPLETE' &&
+                    response.value === expectedValue &&
+                    response.code === 1 &&
+                    response.score === 1
+                  )
+                );
+
+                expect(
+                  hasMetaOutcome,
+                  `META_OUTCOME should be CODING_COMPLETE with value ${expectedValue}, code 1, score 1`
+                )
+                  .to
+                  .equal(true);
+              });
+          });
+      });
     });
   });
 }

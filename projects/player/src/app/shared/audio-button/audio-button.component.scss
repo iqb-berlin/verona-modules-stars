@@ -28,7 +28,7 @@
       fill: white;
     }
 
-    &.playing {
+    &.is-playing {
       filter: none;
       .white-circle {
         fill: colors.$highlight;
