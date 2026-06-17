@@ -38,10 +38,12 @@
     }
 
     .play-button {
+      @include variables.move-bold-animation;
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       z-index: 1;
       background: transparent;
       border: none;
