@@ -30,7 +30,7 @@ export class StandardIconComponent {
 
   private renderIconHtml(iconKey: string, selected: boolean, hint: boolean): string {
     const smileyIconClass = iconKey.startsWith('SMILEY')
-      ? ['smiley-icon', hint ? 'has-hint' : '', selected ? 'is-selected' : ''].filter(Boolean).join(' ')
+      ? `smiley-icon${hint ? ' has-hint' : ''}${selected ? ' is-selected' : ''}`
       : '';
 
     switch (iconKey) {
