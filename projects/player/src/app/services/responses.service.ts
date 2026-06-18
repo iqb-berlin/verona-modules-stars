@@ -297,6 +297,11 @@ export class ResponsesService {
     this.notifyUnitStateChangedIfResponsesChanged();
   }
 
+  /** True when underscore-separated sub-values have gaps (leading/trailing/double underscore). */
+  private static hasIncompleteSubValues(value: string): boolean {
+    return value.startsWith('_') || value.endsWith('_') || value.includes('__');
+  }
+
   private static isPositionInRange(responseValue: string, range: string): boolean {
     if (responseValue && range) {
       const responseMatches = responseValue.match(/\d+/g);
@@ -385,7 +390,11 @@ export class ResponsesService {
             }
           }
         });
-        newResponse.status = 'CODING_COMPLETE';
+        const allSubValuesPresent = codingScheme.responseComplete !== 'ON_ALL_SUB_VALUES'
+          || !ResponsesService.hasIncompleteSubValues(valueAsString);
+        if (allSubValuesPresent) {
+          newResponse.status = 'CODING_COMPLETE';
+        }
         if (newCode > Number.MIN_VALUE) {
           newResponse.code = newCode;
           newResponse.score = newScore;
@@ -425,11 +434,18 @@ export class ResponsesService {
       .map(coding => coding.variableId);
     const onFullCredit = this.variableInfo
       .filter(coding => coding.responseComplete === 'ON_FULL_CREDIT');
-    if (onAny.length + onFullCredit.length === 0) return 'complete';
+    const onAllSubValues = this.variableInfo
+      .filter(coding => coding.responseComplete === 'ON_ALL_SUB_VALUES');
+    if (onAny.length + onFullCredit.length + onAllSubValues.length === 0) return 'complete';
     let isComplete = true;
     onAny.forEach(id => {
       const myResponse = this.allResponses
         .find(r => r.id === id && r.status === 'CODING_COMPLETE');
+      if (!myResponse) isComplete = false;
+    });
+    onAllSubValues.forEach(vi => {
+      const myResponse = this.allResponses
+        .find(r => r.id === vi.variableId && r.status === 'CODING_COMPLETE');
       if (!myResponse) isComplete = false;
     });
     if (isComplete) {
