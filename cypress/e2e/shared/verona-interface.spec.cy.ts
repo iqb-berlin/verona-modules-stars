@@ -1,7 +1,36 @@
 import { UnitDefinition } from '../../../projects/player/src/app/models/unit-definition';
 import { MockMessage } from '../../support/utils';
 
+const RESPONSE_COMPLETE_INTERACTION_TYPES_WITH_ON_ALL_SUB_VALUES = ['equation', 'pyramid'];
+
 export function veronaInterfaceFeatures(interactionType: string) {
+  const startUnitFromFixture = (): void => {
+    cy.get('@unitJson')
+      .then(unitJson => {
+        cy.sendMessageFromParent({
+          type: 'vopStartCommand',
+          sessionId: 'test-session-123',
+          unitDefinition: unitJson as unknown as string
+        }, '*');
+      });
+    cy.assertInteractionComponentVisible(interactionType);
+  };
+
+  const assertLatestResponseProgress = (expected: 'complete' | 'some'): void => {
+    cy.get('@outgoingMessages')
+      .then(messages => {
+        const arr = messages as unknown as MockMessage[];
+        const stateMessages = arr.filter(msg => msg.data.type === 'vopStateChangedNotification');
+        const latestMessage = stateMessages[stateMessages.length - 1];
+        if (!latestMessage?.data?.unitState) {
+          throw new Error('Latest message or unitState is undefined');
+        }
+        expect(latestMessage.data.unitState.responseProgress, `responseProgress should be ${expected}`)
+          .to
+          .equal(expected);
+      });
+  };
+
   describe('Verona Interface Features', () => {
     describe(`Testing interaction: ${interactionType}`, () => {
       const configFile = `${interactionType}_test.json`;
@@ -177,6 +206,80 @@ export function veronaInterfaceFeatures(interactionType: string) {
               .equal(true);
               });
           });
+      });
+
+      describe('responseComplete in variableInfo', () => {
+        it('sets responseProgress to complete when responseComplete is ALWAYS after any response', () => {
+          cy.setupTestDataWithPostMessageMock(
+            `${interactionType}_responseComplete_always_test.json`,
+            interactionType
+          );
+          startUnitFromFixture();
+          cy.applyStandardScenarios(interactionType);
+          assertLatestResponseProgress('complete');
+        });
+
+        it('sets responseProgress to complete when responseComplete is ON_ANY_RESPONSE after any response', () => {
+          cy.setupTestDataWithPostMessageMock(
+            `${interactionType}_responseComplete_onAnyResponse_test.json`,
+            interactionType
+          );
+          startUnitFromFixture();
+          cy.applyStandardScenarios(interactionType);
+          assertLatestResponseProgress('complete');
+        });
+
+        it('sets responseProgress to some when responseComplete is ON_FULL_CREDIT after a wrong response', () => {
+          cy.setupTestDataWithPostMessageMock(
+            `${interactionType}_responseComplete_onFullCredit_test.json`,
+            interactionType
+          );
+          startUnitFromFixture();
+          cy.applyStandardScenarios(interactionType);
+          assertLatestResponseProgress('some');
+        });
+
+        it('sets responseProgress to complete when responseComplete is ON_FULL_CREDIT after a correct response', () => {
+          cy.setupTestDataWithPostMessageMock(
+            `${interactionType}_responseComplete_onFullCredit_test.json`,
+            interactionType
+          );
+          startUnitFromFixture();
+          cy.get('@testData').then(data => {
+            const unit = data as unknown as UnitDefinition;
+            cy.applyCorrectAnswerScenarios(interactionType, unit);
+          });
+          assertLatestResponseProgress('complete');
+        });
+
+        if (RESPONSE_COMPLETE_INTERACTION_TYPES_WITH_ON_ALL_SUB_VALUES.includes(interactionType)) {
+          it('sets responseProgress to some when responseComplete is ON_ALL_SUB_VALUES and sub-values are incomplete', () => {
+            cy.setupTestDataWithPostMessageMock(
+              `${interactionType}_responseComplete_onAllSubValues_test.json`,
+              interactionType
+            );
+            startUnitFromFixture();
+            if (interactionType === 'pyramid') {
+              cy.applyStandardScenarios(interactionType, '1_');
+            } else {
+              cy.applyStandardScenarios(interactionType);
+            }
+            assertLatestResponseProgress('some');
+          });
+
+          it('sets responseProgress to complete when responseComplete is ON_ALL_SUB_VALUES and all sub-values are present', () => {
+            cy.setupTestDataWithPostMessageMock(
+              `${interactionType}_responseComplete_onAllSubValues_test.json`,
+              interactionType
+            );
+            startUnitFromFixture();
+            cy.get('@testData').then(data => {
+              const unit = data as unknown as UnitDefinition;
+              cy.applyCorrectAnswerScenarios(interactionType, unit);
+            });
+            assertLatestResponseProgress('complete');
+          });
+        }
       });
     });
   });

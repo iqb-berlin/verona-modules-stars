@@ -16,7 +16,7 @@
   "interactionType": "EQUATION",
   "interactionParameters": {
     "variableId": "EQUATION",
-    "fixOperand2": 1,
+    "fixOperand2": 9,
     "operators": [
       "+",
       "-"
@@ -31,7 +31,7 @@
       "codes": [
         {
           "method": "EQUALS",
-          "parameter": "9_+",
+          "parameter": "1_+",
           "code": 1,
           "score": 1
         }
