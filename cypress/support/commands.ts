@@ -806,14 +806,14 @@ Cypress.Commands.add('applyCorrectAnswerScenarios', (interactionType: string, da
     const parts = correctAnswerParam.split('_');
 
     if (parts.length === editableFields.length) {
-      editableFields.forEach((field, index) => {
+      cy.clearEquationInput();
+      cy.wait(500);
+      cy.get('.field-container.editable').each(($el, index) => {
+        if (index >= parts.length) return;
         const val = parts[index] || '';
         if (val === '') return;
-        cy.get(`[data-cy="${field}"]`).click();
-        // Delete the current input if it exists
-        cy.clearEquationInput();
-        cy.wait(500);
-        if (field === 'operator') {
+        cy.wrap($el).click();
+        if ($el.hasClass('operator')) {
           cy.get(`[data-cy="operator-button-${val}"]`).click();
         } else {
           val.split('').forEach(char => {
@@ -821,6 +821,7 @@ Cypress.Commands.add('applyCorrectAnswerScenarios', (interactionType: string, da
           });
         }
       });
+      cy.wait(500);
     }
   } else if (interactionType === 'meta') {
     // For meta, we always have 4 stars (buttons), so we use a dummy array of length 4

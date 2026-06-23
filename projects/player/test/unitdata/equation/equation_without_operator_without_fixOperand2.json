@@ -1,6 +1,6 @@
 {
   "id": "stars-unit-definition",
-  "version": "5.2",
+  "version": "5.3",
   "backgroundColor": "#E1E9FF",
   "continueButtonShow": "ALWAYS",
   "ribbonBars": false,
@@ -27,7 +27,7 @@
   "variableInfo": [
     {
       "variableId": "EQUATION",
-      "responseComplete": "ON_ANY_RESPONSE",
+      "responseComplete": "ON_ALL_SUB_VALUES",
       "codingSource": "VALUE",
       "codes": [
         {
