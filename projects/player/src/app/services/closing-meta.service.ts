@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 
-import { AudioOptions, InteractionParameters } from '../models/unit-definition';
+import { AudioOptions, ClosingMetaButtonsParams, InteractionParameters } from '../models/unit-definition';
 import { AudioPlayerService } from './audio-player.service';
 import type { UnitService } from './unit.service';
 
@@ -19,12 +19,14 @@ export interface ClosingMetaPhaseDeps {
 export class ClosingMetaService {
   closingMetaRunning = signal(false);
   metaInteractionDone = signal(false);
+  closingMetaButtons = signal<ClosingMetaButtonsParams>({} as ClosingMetaButtonsParams);
 
   private metaVariableId = '';
 
   reset(): void {
     this.closingMetaRunning.set(false);
     this.metaInteractionDone.set(false);
+    this.closingMetaButtons.set({} as ClosingMetaButtonsParams);
     this.metaVariableId = '';
   }
 
@@ -65,6 +67,7 @@ export class ClosingMetaService {
       unitService.clearCurrentAudioSrc();
     }
 
+    this.closingMetaButtons.set(closingMetaButtons);
     this.closingMetaRunning.set(true);
     this.metaInteractionDone.set(false);
     this.metaVariableId = closingMetaButtons.variableIdMetaSelection;

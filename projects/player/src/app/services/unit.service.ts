@@ -148,6 +148,7 @@ export class UnitService {
       unitService: this,
       audioPlayerService: this.audioPlayerService
     });
+    this.responsesService.onClosingMetaStarted();
   }
 
   reset() {

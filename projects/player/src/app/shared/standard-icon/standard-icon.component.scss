@@ -18,6 +18,11 @@
       outline: 5px solid #EE00FF;
       box-shadow: none;
     }
+
+    &.is-selected {
+      filter: none;
+      box-shadow: none;
+    }
   }
 
   .clap-hands {

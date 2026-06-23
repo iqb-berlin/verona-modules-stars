@@ -5,27 +5,17 @@
   position: relative;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  isolation: isolate;
 
-  input, label {
+  label {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-
+    inset: 0;
     background-color: colors.$white;
     border: 8px solid colors.$white;
     border-radius: variables.$border-radius;
     @include variables.default-box-shadow;
     @include variables.flex-center;
-  }
 
-  input {
-    opacity: 0;
-    z-index: 10;
-  }
-
-  label {
     img {
       display: block;
       max-width: 100%;
@@ -39,6 +29,22 @@
     .long-rectangle-img {
       object-fit: fill;
     }
+  }
+
+  input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    z-index: 2;
+    cursor: pointer;
   }
 
   &:focus,
@@ -69,16 +75,7 @@
     position: relative;
 
     input {
-      width: 100%;
-      height: 100%;
       border-radius: 50%;
-      background-color: colors.$white;
-      border: none;
-      position: absolute;
-      top: 0;
-      left: 0;
-      margin: 0;
-      padding: 0;
     }
 
     label {
@@ -86,11 +83,6 @@
       width: 100%;
       height: 100%;
       border-radius: 50%;
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
       cursor: pointer;
       @include variables.flex-center;
     }
@@ -120,7 +112,7 @@
   &.has-smiley-icon {
     margin-right: 15px;
 
-    input, label {
+    label {
       box-shadow: none;
     }
 
@@ -134,13 +126,9 @@
   }
 
   &.text-button-mode {
-    input {
-      border: none;
-
-      &:checked + label {
-        background-color: colors.$highlight;
-        color: colors.$white;
-      }
+    input:checked + label {
+      background-color: colors.$highlight;
+      color: colors.$white;
     }
   }
 
@@ -183,19 +171,6 @@
 // Type modifiers
 .button-option {
 
-  input {
-    width: 100%;
-    height: 100%;
-    box-sizing: border-box;
-
-    // Remove default browser styling
-    border: none;
-    padding: 0;
-    margin: 0;
-    background: transparent;
-    outline: none;
-  }
-
   &.extra_large_square-type {
     @include variables.extra-large-button-size;
     min-width: 353px;
@@ -231,11 +206,8 @@
 
   &.tall_rectangle-type {
     @include variables.tall-rectangle-button-size;
-    input, label {
-      box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.2);
-    }
-
     label {
+      box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.2);
       background-color: transparent;
       border: 2px solid transparent;
     }

@@ -16,8 +16,7 @@
     }
 
     &.moving-button-bold {
-      animation: moving-bold 4s infinite;
-      animation-duration: 2.5s;
+      @include variables.move-bold-animation;
     }
 
     &.playing {
@@ -78,28 +77,6 @@
   }
 
   25% {
-    transform: scale(1);
-  }
-
-  100% {
-    transform: scale(1);
-  }
-}
-
-@keyframes moving-bold {
-  0% {
-    transform: scale(1);
-  }
-
-  5%, 15%, 25%, 35% {
-    transform: scale(1.2);
-  }
-
-  10%, 20%, 30%, 40%  {
-    transform: scale(0.85);
-  }
-
-  45% {
     transform: scale(1);
   }
 
