@@ -1,16 +1,11 @@
-# Release Note 0.6.39 #
+# Release Note 0.6.40 #
 
 ## Neu
-+ Feedback-Hinweis für runde buttons wurde aktualisiert.
-+ interactionType: VIDEO
-  + Wenn triggerNavigationOnEnd true ist, wird der Play-Button am Ende des Videos nicht angezeigt.
-+ interactionType: DROP
-  + padding-bottom wird auf 10px verringert, um mehr Platz zu schaffen, wenn sich ein Bild unten befindet.
-+ interactionType: WRITE
-  + Layout-Verbesserungen wurden vorgenommen.
++ ON_ALL_SUB_VALUES wird zu responseComplete hinzugefügt, womit der CODING_COMPLETE-Status für die interactionTypes EQUATION oder PYRAMID bestimmt werden kann, bei denen 2 Werte durch einen Unterstrich getrennt sind.
++ interactionType: VIDEO: Dem Play-Symbol wird zu Beginn des Videos ein Pulsieren hinzugefügt.
+
 
 ## Bugfixes
-+ Ein Fehler wurde behoben, bei dem closingMetaButtons autoPlay: false nicht funktionierte, wenn firstClickLayer etwas anderes als OFF war.
-+ Die Tastatur wurde für interactionType: WRITE, EQUATION, PYRAMID und NUMBER_LINE verbessert.
-+ Ein Audio-Fehler wurde behoben, der dazu führte, dass die Wiedergabe mehrmals ausgelöst wurde.
++ Stilverbesserungen am Standard-Button.
++ Der Schatten wird vom ausgewählten Smiley-Symbol entfernt.
 
