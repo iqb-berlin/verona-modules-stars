@@ -40,6 +40,47 @@ export function getCorrectAnswerParam(testData: UnitDefinition): string {
   return variableInfo[0]?.codes[0]?.parameter || '';
 }
 
+export type MockMessage = {
+  data: {
+    type: string;
+    unitState?: {
+      dataParts: Record<string, unknown>;
+      responseProgress?: string;
+    };
+    sessionId?: string;
+    target?: string;
+  };
+  origin: string;
+};
+
+export type CypressResponseItem = {
+  id?: string;
+  status?: string;
+  value?: string | number;
+  score?: number;
+  code?: number;
+  [key: string]: unknown;
+};
+
+/**
+ * Parse `dataParts` and extract arrays of responses from JSON string values.
+ */
+export const parseDataPartsResponses = (dataParts: Record<string, unknown>): CypressResponseItem[][] =>
+  Object.values(dataParts)
+    .filter((dataPart): dataPart is string => typeof dataPart === 'string')
+    .map(rawPart => {
+      try {
+        const parsed = JSON.parse(rawPart) as unknown;
+        if (Array.isArray(parsed) && parsed.every(item => typeof item === 'object' && item !== null)) {
+          return parsed as CypressResponseItem[];
+        }
+      } catch {
+        console.warn(`Non-JSON string found in dataParts: ${rawPart}`);
+      }
+      return null;
+    })
+    .filter((parsed): parsed is CypressResponseItem[] => Array.isArray(parsed));
+
 /**
  * Function that extracts and returns an array of selection options from the given interaction parameters.
  * Supports BUTTONS, DROP, and POLYGON_BUTTONS interaction types.

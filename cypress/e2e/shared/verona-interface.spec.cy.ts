@@ -1,49 +1,37 @@
 import { UnitDefinition } from '../../../projects/player/src/app/models/unit-definition';
+import { MockMessage } from '../../support/utils';
+
+const RESPONSE_COMPLETE_INTERACTION_TYPES_WITH_ON_ALL_SUB_VALUES = ['equation', 'pyramid'];
 
 export function veronaInterfaceFeatures(interactionType: string) {
-  describe('Verona Interface Features', () => {
-    type MockMessage = {
-      data: {
-        type: string;
-        unitState?: {
-          dataParts: {
-            responses: string;
-          };
-          responseProgress: string;
-        };
-      },
-      origin: string
-    };
+  const startUnitFromFixture = (): void => {
+    cy.get('@unitJson')
+      .then(unitJson => {
+        cy.sendMessageFromParent({
+          type: 'vopStartCommand',
+          sessionId: 'test-session-123',
+          unitDefinition: unitJson as unknown as string
+        }, '*');
+      });
+    cy.assertInteractionComponentVisible(interactionType);
+  };
 
-    type ResponseItem = {
-      id?: string;
-      status?: string;
-      score?: number;
-      code?: number;
-      [key: string]: unknown;
-    };
-
-    /**
-     * Parse `dataParts` and extract arrays of `ResponseItem` from JSON string values.
-     * @param dataParts - Record of keyed parts where some values may be JSON strings containing response arrays
-     * @returns Array of parsed `ResponseItem[]` (empty array if no valid response arrays found)
-     */
-    const parseDataPartsResponses = (dataParts: Record<string, unknown>): ResponseItem[][] => Object.values(dataParts)
-      .filter((dataPart): dataPart is string => typeof dataPart === 'string')
-      .map(rawPart => {
-        try {
-          const parsed = JSON.parse(rawPart) as unknown;
-          if (Array.isArray(parsed) && parsed.every(item => typeof item === 'object' && item !== null)) {
-            return parsed as ResponseItem[];
-          }
-        } catch {
-          // ignore non-JSON strings
-          console.warn(`Non-JSON string found in dataParts: ${rawPart}`);
+  const assertLatestResponseProgress = (expected: 'complete' | 'some'): void => {
+    cy.get('@outgoingMessages')
+      .then(messages => {
+        const arr = messages as unknown as MockMessage[];
+        const stateMessages = arr.filter(msg => msg.data.type === 'vopStateChangedNotification');
+        const latestMessage = stateMessages[stateMessages.length - 1];
+        if (!latestMessage?.data?.unitState) {
+          throw new Error('Latest message or unitState is undefined');
         }
-        return null;
-      })
-      .filter((parsed): parsed is ResponseItem[] => Array.isArray(parsed));
+        expect(latestMessage.data.unitState.responseProgress, `responseProgress should be ${expected}`)
+          .to
+          .equal(expected);
+      });
+  };
 
+  describe('Verona Interface Features', () => {
     describe(`Testing interaction: ${interactionType}`, () => {
       const configFile = `${interactionType}_test.json`;
       // const containerSelector = `[data-cy=${interactionType.replace(/_/g, '-')}-container]`;
@@ -112,8 +100,8 @@ export function veronaInterfaceFeatures(interactionType: string) {
               throw new Error('Latest message or unitState is undefined');
             }
 
-            const parsedResponsesArrays = parseDataPartsResponses(latestMessage.data.unitState.dataParts);
-
+            cy.parseDataPartsResponses(latestMessage.data.unitState.dataParts as Record<string, unknown>)
+              .then(parsedResponsesArrays => {
             const hasDisplayedStatus =
             // eslint-disable-next-line max-len
                 parsedResponsesArrays.some(responseArray => responseArray.some(response => response.id === interactionType.toUpperCase() && response.status === 'DISPLAYED')
@@ -122,6 +110,7 @@ export function veronaInterfaceFeatures(interactionType: string) {
             expect(hasDisplayedStatus, 'Should have DISPLAYED status')
               .to
               .equal(true);
+              });
           });
       });
 
@@ -155,8 +144,8 @@ export function veronaInterfaceFeatures(interactionType: string) {
               throw new Error('Latest message or unitState is undefined');
             }
 
-            const parsedResponsesArrays = parseDataPartsResponses(latestMessage.data.unitState.dataParts);
-
+            cy.parseDataPartsResponses(latestMessage.data.unitState.dataParts as Record<string, unknown>)
+              .then(parsedResponsesArrays => {
             const hasValueChanged =
             // eslint-disable-next-line max-len
                 parsedResponsesArrays.some(responseArray => responseArray.some(response => response.id === interactionType.toUpperCase() && response.status === 'VALUE_CHANGED')
@@ -165,6 +154,7 @@ export function veronaInterfaceFeatures(interactionType: string) {
             expect(hasValueChanged, 'Should have VALUE_CHANGED status')
               .to
               .equal(true);
+              });
           });
       });
 
@@ -200,8 +190,8 @@ export function veronaInterfaceFeatures(interactionType: string) {
               throw new Error('Latest message or unitState is undefined');
             }
 
-            const parsedResponsesArrays = parseDataPartsResponses(latestMessage.data.unitState.dataParts);
-
+            cy.parseDataPartsResponses(latestMessage.data.unitState.dataParts as Record<string, unknown>)
+              .then(parsedResponsesArrays => {
             const hasCodingComplete =
             // eslint-disable-next-line max-len
                 parsedResponsesArrays.some(responses => responses.some(response => (response.id === interactionType.toUpperCase()) &&
@@ -214,7 +204,82 @@ export function veronaInterfaceFeatures(interactionType: string) {
             expect(hasCodingComplete, `Should have CODING_COMPLETE for ${interactionType} with score=1 and code=1`)
               .to
               .equal(true);
+              });
           });
+      });
+
+      describe('responseComplete in variableInfo', () => {
+        it('sets responseProgress to complete when responseComplete is ALWAYS after any response', () => {
+          cy.setupTestDataWithPostMessageMock(
+            `${interactionType}_responseComplete_always_test.json`,
+            interactionType
+          );
+          startUnitFromFixture();
+          cy.applyStandardScenarios(interactionType);
+          assertLatestResponseProgress('complete');
+        });
+
+        it('sets responseProgress to complete when responseComplete is ON_ANY_RESPONSE after any response', () => {
+          cy.setupTestDataWithPostMessageMock(
+            `${interactionType}_responseComplete_onAnyResponse_test.json`,
+            interactionType
+          );
+          startUnitFromFixture();
+          cy.applyStandardScenarios(interactionType);
+          assertLatestResponseProgress('complete');
+        });
+
+        it('sets responseProgress to some when responseComplete is ON_FULL_CREDIT after a wrong response', () => {
+          cy.setupTestDataWithPostMessageMock(
+            `${interactionType}_responseComplete_onFullCredit_test.json`,
+            interactionType
+          );
+          startUnitFromFixture();
+          cy.applyStandardScenarios(interactionType);
+          assertLatestResponseProgress('some');
+        });
+
+        it('sets responseProgress to complete when responseComplete is ON_FULL_CREDIT after a correct response', () => {
+          cy.setupTestDataWithPostMessageMock(
+            `${interactionType}_responseComplete_onFullCredit_test.json`,
+            interactionType
+          );
+          startUnitFromFixture();
+          cy.get('@testData').then(data => {
+            const unit = data as unknown as UnitDefinition;
+            cy.applyCorrectAnswerScenarios(interactionType, unit);
+          });
+          assertLatestResponseProgress('complete');
+        });
+
+        if (RESPONSE_COMPLETE_INTERACTION_TYPES_WITH_ON_ALL_SUB_VALUES.includes(interactionType)) {
+          it('sets responseProgress to some when responseComplete is ON_ALL_SUB_VALUES and sub-values are incomplete', () => {
+            cy.setupTestDataWithPostMessageMock(
+              `${interactionType}_responseComplete_onAllSubValues_test.json`,
+              interactionType
+            );
+            startUnitFromFixture();
+            if (interactionType === 'pyramid') {
+              cy.applyStandardScenarios(interactionType, '1_');
+            } else {
+              cy.applyStandardScenarios(interactionType);
+            }
+            assertLatestResponseProgress('some');
+          });
+
+          it('sets responseProgress to complete when responseComplete is ON_ALL_SUB_VALUES and all sub-values are present', () => {
+            cy.setupTestDataWithPostMessageMock(
+              `${interactionType}_responseComplete_onAllSubValues_test.json`,
+              interactionType
+            );
+            startUnitFromFixture();
+            cy.get('@testData').then(data => {
+              const unit = data as unknown as UnitDefinition;
+              cy.applyCorrectAnswerScenarios(interactionType, unit);
+            });
+            assertLatestResponseProgress('complete');
+          });
+        }
       });
     });
   });
