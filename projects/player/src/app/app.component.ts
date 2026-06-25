@@ -34,6 +34,11 @@ export class AppComponent implements OnInit {
     };
   });
 
+  /** Interaction type when the opening flow is not active; null hides standard interactions. */
+  activeInteractionType = computed(() =>
+    this.unitService.openingFlowActive() ? null : this.unitService.interaction()
+  );
+
   constructor(
     public unitService: UnitService,
     public responsesService: ResponsesService,
