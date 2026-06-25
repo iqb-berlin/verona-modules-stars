@@ -13,12 +13,20 @@ import {
   OpeningImageParams,
   UnitDefinition
 } from '../models/unit-definition';
+import { UnitState, UnitStateDataType, Progress } from '../models/verona';
+import { Response } from '@iqbspecs/response/response.interface';
 import { ResponsesService } from './responses.service';
 import { ComponentStateService } from './component-state.service';
 import { AudioFeedbackService } from './audio-feedback.service';
 import { ClosingMetaService } from './closing-meta.service';
 import { AudioPlayerService } from './audio-player.service';
+import { VeronaPostService } from './verona-post.service';
 
+/**
+ * Holds unit-definition config, layout, and computed UI state for the active item.
+ * Orchestrates unit load: definition parsing, backward compatibility, and former state.
+ * Delegates response storage and coding to ResponsesService.
+ */
 @Injectable({
   providedIn: 'root'
 })
@@ -29,6 +37,7 @@ export class UnitService {
   audioFeedbackService = inject(AudioFeedbackService);
   closingMetaService = inject(ClosingMetaService);
   audioPlayerService = inject(AudioPlayerService);
+  veronaPostService = inject(VeronaPostService);
 
   firstAudioOptions = signal<FirstAudioOptionsParams | undefined>(undefined);
   mainAudio = signal<AudioOptions>({} as AudioOptions);
@@ -56,11 +65,11 @@ export class UnitService {
       this.responsesService.responseProgress() !== 'none' ||
       this.componentStateService.getPresentationStatus() === 'complete');
 
-  /** Whether to show the first click layer based on configuration and interaction status */
+  /** Full-screen overlay before presentation starts; applies during opening and main phases when mainAudio exists. */
   showFirstClickLayer = computed(() => {
     const options = this.firstAudioOptions();
     const mainAudio = this.mainAudio();
-    return (options?.firstClickLayer !== 'OFF') &&
+    return !this.isFirstClickLayerOff(options?.firstClickLayer) &&
       !!mainAudio?.audioSource &&
       !this.interactionDone();
   });
@@ -114,10 +123,119 @@ export class UnitService {
   private _currentAudioSrc = signal<AudioOptions>({} as AudioOptions);
   currentAudioSrc = this._currentAudioSrc.asReadonly();
 
+  /** Whether firstClickLayer is unset or explicitly OFF. */
+  isFirstClickLayerOff(layer: FirstClickLayerEnum | boolean | undefined = this.firstAudioOptions()?.firstClickLayer): boolean {
+    return !layer || layer === 'OFF';
+  }
+
   /** Marks the first click as done to hide the layer and allow audio playback */
   setFirstClickLayerClicked() {
     this._firstClickLayerClicked.set(true);
     this.responsesService.updatePresentationProgress('some');
+  }
+
+  /**
+   * Loads a unit from the Verona host or standalone menu.
+   * Initializes ResponsesService coding rules, restores former state, then applies unit config.
+   */
+  loadUnit(unitDefinition: unknown, unitState: UnitState | null = null): void {
+    const def = unitDefinition as UnitDefinition;
+    this.responsesService.initResponseConfig(def);
+    if (unitState) {
+      this.setFormerState(unitState);
+    }
+    this.setNewData(def);
+  }
+
+  /** Restores saved responses and presentation progress from a Verona unitState. */
+  private setFormerState(unitState: UnitState | null): void {
+    const rs = this.responsesService;
+    const prevPresentation = this.componentStateService.getPresentationStatus();
+    const prevResponse = rs.responseProgress();
+
+    rs.formerStateResponses.set([]);
+    rs.allResponses = [];
+    rs.lastResponsesString = '';
+    rs.responseProgress.set('none');
+    this.componentStateService.reset();
+    this.componentStateService.updatePresentationProgress('some');
+
+    if (unitState?.dataParts) {
+      const dataParts = unitState.dataParts || {};
+      const responsesJson = dataParts.responses;
+
+      if (responsesJson) {
+        try {
+          const parsedResponses = JSON.parse(responsesJson as string) as Response[];
+          rs.formerStateResponses.set(parsedResponses);
+          rs.allResponses = JSON.parse(JSON.stringify(parsedResponses));
+          rs.lastResponsesString = responsesJson as string;
+
+          const mainAudioResp = parsedResponses.find(r => r.id === 'mainAudio');
+          const videoResp = parsedResponses.find(r => r.id === 'VIDEO');
+          const restorePresentationState: {
+            presentationProgress?: Progress;
+            mainAudioComplete?: boolean;
+            videoComplete?: boolean;
+          } = {};
+          if (unitState.presentationProgress !== undefined) {
+            restorePresentationState.presentationProgress = unitState.presentationProgress;
+          }
+          if (mainAudioResp) {
+            restorePresentationState.mainAudioComplete =
+              UnitService.asNumberOrZero(mainAudioResp.value) >= 1;
+          }
+          if (videoResp) {
+            restorePresentationState.videoComplete =
+              UnitService.asNumberOrZero(videoResp.value) >= 1;
+          }
+          this.componentStateService.restorePresentationState(restorePresentationState);
+
+          const hasInteractionValueChanged =
+            parsedResponses.some(r => (r.status === 'VALUE_CHANGED' || r.status === 'CODING_COMPLETE') &&
+              r.id !== 'mainAudio' && r.id !== 'VIDEO');
+          if (hasInteractionValueChanged) {
+            rs.responseProgress.set('complete');
+          } else if (unitState.responseProgress) {
+            rs.responseProgress.set(unitState.responseProgress);
+          }
+        } catch (error) {
+          console.warn('UNIT SERVICE Failed to parse former state responses:', error);
+        }
+      }
+    }
+
+    const newPresentation = this.componentStateService.getPresentationStatus();
+    const newResponse = rs.responseProgress();
+    if ((newPresentation !== prevPresentation || newResponse !== prevResponse) && this.veronaPostService) {
+      const restoredDataParts: Record<string, string> = unitState?.dataParts ?
+        { ...unitState.dataParts } :
+        {};
+      const unitStateToPost: UnitState = {
+        unitStateDataType: UnitStateDataType,
+        dataParts: restoredDataParts,
+        responseProgress: newResponse,
+        presentationProgress: newPresentation
+      };
+
+      if (restoredDataParts.responses) {
+        rs.lastResponsesString = restoredDataParts.responses;
+      }
+
+      this.veronaPostService.sendVopStateChangedNotification({ unitState: unitStateToPost });
+    }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private static asNumberOrZero(value: unknown): number {
+    if (typeof value === 'number') return value;
+    if (typeof value === 'boolean') return value ? 1 : 0;
+    if (typeof value === 'string') {
+      const n = Number.parseFloat(value);
+      return Number.isNaN(n) ? 0 : n;
+    }
+    if (Array.isArray(value)) return value.length > 0 ? UnitService.asNumberOrZero(value[0]) : 0;
+    return 0;
   }
 
   finishOpeningFlow() {
@@ -146,9 +264,9 @@ export class UnitService {
   startClosingMeta() {
     this.closingMetaService.startClosingMetaPhase({
       unitService: this,
-      audioPlayerService: this.audioPlayerService
+      audioPlayerService: this.audioPlayerService,
+      hooks: this.responsesService
     });
-    this.responsesService.onClosingMetaStarted();
   }
 
   reset() {
@@ -170,6 +288,11 @@ export class UnitService {
     this._autoPlayMainAudioOnce.set(false);
   }
 
+  /**
+   * Applies presentation and interaction config from the unit definition (interaction type,
+   * audio, opening image, continue button, etc.). Called by loadUnit after the response
+   * subsystem is initialized; does not configure coding rules or restore saved responses.
+   */
   setNewData(unitDefinition: unknown) {
     this.reset();
     const def = unitDefinition as UnitDefinition;

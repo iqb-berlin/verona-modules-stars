@@ -4,7 +4,7 @@ import {
 import { UnitService } from '../../services/unit.service';
 import { AudioPlayerService } from '../../services/audio-player.service';
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
-import { OpeningImageParams } from '../../models/unit-definition';
+import { OpeningImageParams, AudioOptions } from '../../models/unit-definition';
 
 @Component({
   selector: 'stars-opening-image',
@@ -97,13 +97,20 @@ export class OpeningImageComponent extends InteractionComponentDirective {
     this.unitService.showingOpeningImage.set(false);
     this.unitService.finishOpeningFlow();
 
+    // Opening flow consumed the first-click gate; main audio auto-plays without another layer.
     const currentOpts = this.unitService.firstAudioOptions() || {};
-    if (currentOpts.firstClickLayer) {
-      this.unitService.firstAudioOptions.set({ ...currentOpts, firstClickLayer: false });
+    if (!this.unitService.isFirstClickLayerOff(currentOpts.firstClickLayer)) {
+      this.unitService.firstAudioOptions.set({ ...currentOpts, firstClickLayer: 'OFF' });
     }
 
-    if (this.unitService.mainAudio()?.audioSource) {
-      this.unitService.requestMainAudioAutoPlayOnce();
+    const main = this.unitService.mainAudio();
+    if (main?.audioSource) {
+      const mainAudio: AudioOptions = { ...main, audioId: 'mainAudio' };
+      void this.audioPlayerService.setAudioSrc(mainAudio).then(ready => {
+        if (ready) {
+          void this.audioPlayerService.getPlayFinished('mainAudio');
+        }
+      });
     }
   }
 

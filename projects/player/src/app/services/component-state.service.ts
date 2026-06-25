@@ -4,7 +4,8 @@ import { NavigationTarget, Progress } from '../models/verona';
 import { VeronaPostService } from './verona-post.service';
 
 /**
- * Presentation state for the player: main audio, video, and Verona presentation progress.
+ * Tracks presentation progress: main audio, video, and click-layer state.
+ * Posts navigation requests when the player signals interaction completion.
  */
 @Injectable({
   providedIn: 'root'

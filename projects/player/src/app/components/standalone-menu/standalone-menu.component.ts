@@ -56,8 +56,7 @@ export class StandaloneMenuComponent implements OnDestroy {
 
   private setNewUnitDefinition() {
     const unitDefinition = JSON.parse(this.unitDefinitionAsString);
-    this.unitService.setNewData(unitDefinition);
-    this.responsesService.setNewData(unitDefinition);
+    this.unitService.loadUnit(unitDefinition);
   }
 
   openDialog() {

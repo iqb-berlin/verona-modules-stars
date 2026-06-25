@@ -4,14 +4,28 @@ import { AudioOptions, ClosingMetaButtonsParams, InteractionParameters } from '.
 import { AudioPlayerService } from './audio-player.service';
 import type { UnitService } from './unit.service';
 
+export interface MetaResponseTouch {
+  id: string;
+  status: string;
+  relevantForResponsesProgress: boolean;
+}
+
+/** Hooks into the response store for derived meta-outcome coding and Verona posts. */
+export interface ClosingMetaResponseHooks {
+  deriveMetaOutcome(buttons: ClosingMetaButtonsParams): void;
+  notifyResponsesChanged(triggerResponses?: MetaResponseTouch[]): void;
+}
+
 export interface ClosingMetaPhaseDeps {
   unitService: UnitService;
   audioPlayerService: AudioPlayerService;
+  hooks: ClosingMetaResponseHooks;
 }
 
 /**
- * Runtime state and orchestration for the closing-meta interaction phase.
- * Unit config (closingMetaButtons) stays on UnitService; this service owns the phase lifecycle.
+ * Orchestrates the closing-meta phase after the main interaction finishes.
+ * Manages phase state, UI setup, and meta-selection tracking.
+ * Invokes response hooks to derive and post the meta-outcome variable.
  */
 @Injectable({
   providedIn: 'root'
@@ -34,7 +48,7 @@ export class ClosingMetaService {
    * Switches the unit into the META interaction and optionally plays closing-meta audio.
    */
   startClosingMetaPhase(deps: ClosingMetaPhaseDeps): void {
-    const { unitService, audioPlayerService } = deps;
+    const { unitService, audioPlayerService, hooks } = deps;
     const closingMetaButtons = unitService.closingMetaButtons();
 
     if (closingMetaButtons?.triggerNavigationOnSelect === false) {
@@ -71,9 +85,22 @@ export class ClosingMetaService {
     this.closingMetaRunning.set(true);
     this.metaInteractionDone.set(false);
     this.metaVariableId = closingMetaButtons.variableIdMetaSelection;
+
+    hooks.deriveMetaOutcome(this.closingMetaButtons());
+    hooks.notifyResponsesChanged();
   }
 
-  handleMetaResponses(responses: { id: string; status: string; relevantForResponsesProgress: boolean }[]): void {
+  /**
+   * Handles a response batch during or outside the closing-meta phase.
+   * Tracks meta selection and refreshes the derived outcome when the phase is active.
+   */
+  onResponsesBatch(responses: MetaResponseTouch[], hooks: ClosingMetaResponseHooks): void {
+    this.trackMetaSelection(responses);
+    if (!this.closingMetaRunning()) return;
+    hooks.deriveMetaOutcome(this.closingMetaButtons());
+  }
+
+  private trackMetaSelection(responses: MetaResponseTouch[]): void {
     if (!this.closingMetaRunning() || !this.metaVariableId) return;
     const metaTouched = responses.some(r =>
       r.id === this.metaVariableId && r.status === 'VALUE_CHANGED' && r.relevantForResponsesProgress);

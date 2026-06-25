@@ -5,8 +5,8 @@ import { UnitDefinition } from '../models/unit-definition';
 import { FeedbackDefinition, ShowResponse } from '../models/feedback';
 
 /**
- * Queues and plays audio feedback after responses, and manages feedback UI state
- * (pending clip, active overlay, hints).
+ * Loads audio-feedback rules from the unit definition.
+ * Evaluates responses and queues clips, hints, and overlay UI state.
  */
 @Injectable({
   providedIn: 'root'

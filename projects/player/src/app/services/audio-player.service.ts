@@ -21,6 +21,10 @@ type MediaEventType =
   | 'loadedmetadata'
   | 'canplaythrough';
 
+/**
+ * Wraps the HTML audio element: load, play, pause, and progress events.
+ * Reports play counts and completion back through the response store.
+ */
 @Injectable({
   providedIn: 'root'
 })

@@ -5,15 +5,20 @@ import { Progress, UnitState, UnitStateDataType } from '../models/verona';
 import { VeronaPostService } from './verona-post.service';
 import { ComponentStateService } from './component-state.service';
 import { AudioFeedbackService } from './audio-feedback.service';
-import { ClosingMetaService } from './closing-meta.service';
-import { UnitDefinition } from '../models/unit-definition';
+import { ClosingMetaResponseHooks, ClosingMetaService } from './closing-meta.service';
+import { ClosingMetaButtonsParams, UnitDefinition } from '../models/unit-definition';
 import { Code, VariableInfo } from '../models/responses';
 
+/**
+ * Owns the response store, coding rules, and Verona unit-state posts.
+ * Coordinates presentation and audio-feedback services when responses change.
+ * Implements hooks used by ClosingMetaService for derived meta-outcome responses.
+ */
 @Injectable({
   providedIn: 'root'
 })
 
-export class ResponsesService {
+export class ResponsesService implements ClosingMetaResponseHooks {
   unitDefinitionProblem = signal('');
   responseProgress = signal<Progress>('none');
   allResponses: Response[] = [];
@@ -63,7 +68,7 @@ export class ResponsesService {
    * Initializes the service with a new unit definition.
    * Calls reset() at the beginning to ensure any previous unit state is cleared.
    */
-  setNewData(unitDefinition: UnitDefinition = null) {
+  initResponseConfig(unitDefinition: UnitDefinition = null) {
     this.reset();
     if (unitDefinition) {
       const problems: string[] = [];
@@ -133,12 +138,8 @@ export class ResponsesService {
       }
     });
 
-    if (this.closingMetaService.closingMetaRunning()) {
-      this.updateClosingMetaOutcome();
-    }
-
-    this.notifyUnitStateChangedIfResponsesChanged(responses);
-    this.closingMetaService.handleMetaResponses(responses);
+    this.closingMetaService.onResponsesBatch(responses, this);
+    this.notifyResponsesChanged(responses);
   }
 
   /** Persists coded response fields (status, code, score) like other interaction types. */
@@ -154,7 +155,7 @@ export class ResponsesService {
     }
   }
 
-  private notifyUnitStateChangedIfResponsesChanged(triggerResponses: StarsResponse[] = []): void {
+  notifyResponsesChanged(triggerResponses: StarsResponse[] = []): void {
     const responsesAsString = JSON.stringify(this.allResponses);
     if (responsesAsString === this.lastResponsesString) return;
 
@@ -185,24 +186,16 @@ export class ResponsesService {
   }
 
   /**
-   * Called when the closing-meta phase starts so the initial meta outcome is posted.
-   */
-  onClosingMetaStarted(): void {
-    this.updateClosingMetaOutcome();
-    this.notifyUnitStateChangedIfResponsesChanged();
-  }
-
-  /**
    * Derives variableIdMetaOutcome from the source interaction score and meta-button selection.
    * Requires variableIdReference (main interaction) to be CODING_COMPLETE; otherwise DERIVE_ERROR.
    * Meta selection may stay VALUE_CHANGED; only its value is used in the outcome string.
    */
-  private updateClosingMetaOutcome(): void {
+  deriveMetaOutcome(buttons: ClosingMetaButtonsParams): void {
     const {
       variableIdMetaSelection,
       variableIdReference,
       variableIdMetaOutcome
-    } = this.closingMetaService.closingMetaButtons();
+    } = buttons;
     if (!variableIdMetaOutcome) return;
 
     const referenceResponse = this.getResponseByVariableId(variableIdReference);
@@ -429,90 +422,6 @@ export class ResponsesService {
     };
     if (this.veronaPostService) {
       this.veronaPostService.sendVopStateChangedNotification({ unitState });
-    }
-  }
-
-  setFormerState(unitState: UnitState | null) {
-    const prevPresentation = this.getPresentationStatus();
-    const prevResponse = this.responseProgress();
-
-    // Reset all state to defaults first
-    this.formerStateResponses.set([]);
-    this.allResponses = [];
-    this.lastResponsesString = '';
-    this.responseProgress.set('none');
-    this.componentStateService.reset();
-    this.componentStateService.updatePresentationProgress('some');
-
-    if (unitState) {
-      if (unitState.dataParts) {
-        const dataParts = unitState.dataParts || {};
-        const responsesJson = dataParts.responses;
-
-        if (responsesJson) {
-          try {
-            const parsedResponses = JSON.parse(responsesJson as string) as Response[];
-            this.formerStateResponses.set(parsedResponses);
-
-            this.allResponses = JSON.parse(JSON.stringify(parsedResponses));
-            this.lastResponsesString = responsesJson as string;
-
-            const mainAudioResp = parsedResponses.find(r => r.id === 'mainAudio');
-            const videoResp = parsedResponses.find(r => r.id === 'VIDEO');
-            const restorePresentationState: {
-              presentationProgress?: Progress;
-              mainAudioComplete?: boolean;
-              videoComplete?: boolean;
-            } = {};
-            if (unitState.presentationProgress !== undefined) {
-              restorePresentationState.presentationProgress = unitState.presentationProgress;
-            }
-            if (mainAudioResp) {
-              restorePresentationState.mainAudioComplete =
-                this.asNumberOrZero(mainAudioResp.value) >= 1;
-            }
-            if (videoResp) {
-              restorePresentationState.videoComplete =
-                this.asNumberOrZero(videoResp.value) >= 1;
-            }
-            this.componentStateService.restorePresentationState(restorePresentationState);
-
-            // Restore responseProgress: if any interaction response has VALUE_CHANGED (or CODING_COMPLETE), mark complete
-            const hasInteractionValueChanged =
-              parsedResponses.some(r => (r.status === 'VALUE_CHANGED' || r.status === 'CODING_COMPLETE') &&
-                r.id !== 'mainAudio' && r.id !== 'VIDEO');
-            if (hasInteractionValueChanged) {
-              this.responseProgress.set('complete');
-            } else if (unitState.responseProgress) {
-              // fall back to provided responseProgress from unitState when available
-              this.responseProgress.set(unitState.responseProgress);
-            }
-          } catch (error) {
-            console.warn('RESPONSE SERVICE Failed to parse former state responses:', error);
-          }
-        }
-      }
-    }
-
-    const newPresentation = this.getPresentationStatus();
-    const newResponse = this.responseProgress();
-    if ((newPresentation !== prevPresentation || newResponse !== prevResponse) && this.veronaPostService) {
-      const restoredDataParts: Record<string, string> = unitState?.dataParts ?
-        { ...unitState.dataParts } :
-        {};
-      const unitStateToPost: UnitState = {
-        unitStateDataType: UnitStateDataType,
-        dataParts: restoredDataParts,
-        responseProgress: newResponse,
-        presentationProgress: newPresentation
-      };
-
-      // Keep lastResponsesString in sync to avoid duplicate postings after first interaction
-      if (restoredDataParts && restoredDataParts.responses) {
-        this.lastResponsesString = restoredDataParts.responses;
-      }
-
-      this.veronaPostService.sendVopStateChangedNotification({ unitState: unitStateToPost });
     }
   }
 }
