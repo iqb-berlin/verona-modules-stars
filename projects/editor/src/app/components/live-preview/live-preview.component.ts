@@ -4,6 +4,7 @@ import {
   inject,
   OnDestroy,
   OnInit,
+  signal,
   ViewChild,
   effect,
 } from '@angular/core';
@@ -19,6 +20,9 @@ import { environment } from '../../../environments/environment';
   imports: [CommonModule],
   template: `
     <div class="live-preview-container">
+      @if (previewWarning()) {
+        <div class="preview-warning">{{ previewWarning() }}</div>
+      }
       @if (playerSrcdoc) {
         <iframe
           #playerIframe
@@ -65,6 +69,21 @@ import { environment } from '../../../environments/environment';
         height: 100%;
         border: none;
       }
+      .preview-warning {
+        position: absolute;
+        right: 16px;
+        bottom: 16px;
+        left: 16px;
+        z-index: 1;
+        padding: 12px 14px;
+        border: 1px solid #f59e0b;
+        border-radius: 10px;
+        background: rgba(15, 23, 42, 0.92);
+        color: #fde68a;
+        font-size: 13px;
+        line-height: 1.4;
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.28);
+      }
       .no-player-msg {
         display: flex;
         justify-content: center;
@@ -82,11 +101,13 @@ export class LivePreviewComponent implements OnInit, OnDestroy {
 
   @ViewChild('playerIframe') playerIframe!: ElementRef<HTMLIFrameElement>;
 
-  playerUrl = environment.playerUrl;
+  playerUrl = this.resolvePlayerUrl();
   playerSafeUrl: SafeResourceUrl;
   playerSrcdoc: string = '';
   blobUrl: string | null = null;
+  previewWarning = signal<string | null>(null);
   private isPlayerReady = false;
+  private readyTimeoutId: number | null = null;
 
   constructor() {
     this.playerSafeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
@@ -114,6 +135,7 @@ export class LivePreviewComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     window.removeEventListener('message', this.handlePlayerMessage);
+    this.clearReadyTimeout();
     if (this.blobUrl) {
       URL.revokeObjectURL(this.blobUrl);
     }
@@ -121,16 +143,51 @@ export class LivePreviewComponent implements OnInit, OnDestroy {
 
   // eslint-disable-next-line class-methods-use-this
   onPlayerLoad(): void {
-    // Player iframe loaded
+    this.isPlayerReady = false;
+    this.previewWarning.set(null);
+    this.scheduleReadyTimeout();
   }
 
   private handlePlayerMessage = (event: MessageEvent): void => {
+    if (
+      this.playerIframe?.nativeElement?.contentWindow &&
+      event.source !== this.playerIframe.nativeElement.contentWindow
+    ) {
+      return;
+    }
     if (event.data?.type === 'vopReadyNotification') {
       this.isPlayerReady = true;
+      this.clearReadyTimeout();
+      this.previewWarning.set(null);
       const definition = this.state.buildUnitDefinition();
       this.updatePlayer(JSON.stringify(definition));
     }
   };
+
+  private resolvePlayerUrl(): string {
+    const override = new URLSearchParams(window.location.search)
+      .get('playerUrl')
+      ?.trim();
+    return override || environment.playerUrl;
+  }
+
+  private scheduleReadyTimeout(): void {
+    this.clearReadyTimeout();
+    this.readyTimeoutId = window.setTimeout(() => {
+      if (this.isPlayerReady) return;
+      this.previewWarning.set(
+        `Live-Vorschau hat unter ${this.playerUrl} keinen STARS-Player erkannt. ` +
+          'Tipp: Editor mit ?playerUrl=http://localhost:4202 oeffnen.',
+      );
+    }, 2500);
+  }
+
+  private clearReadyTimeout(): void {
+    if (this.readyTimeoutId !== null) {
+      window.clearTimeout(this.readyTimeoutId);
+      this.readyTimeoutId = null;
+    }
+  }
 
   private updatePlayer(unitDefinition: string): void {
     if (!this.isPlayerReady || !this.playerIframe) return;
