@@ -8,6 +8,7 @@ import { AudioFeedbackService } from './audio-feedback.service';
 import { ClosingMetaResponseHooks, ClosingMetaService } from './closing-meta.service';
 import { ClosingMetaButtonsParams, UnitDefinition } from '../models/unit-definition';
 import { Code, VariableInfo } from '../models/responses';
+import { collectUnitDefinitionProblems } from './unit-definition-validation';
 
 /**
  * Owns the response store, coding rules, and Verona unit-state posts.
@@ -71,38 +72,38 @@ export class ResponsesService implements ClosingMetaResponseHooks {
   initResponseConfig(unitDefinition: UnitDefinition = null) {
     this.reset();
     if (unitDefinition) {
-      const problems: string[] = [];
+      const problems = collectUnitDefinitionProblems(unitDefinition);
+      if (problems.length > 0) {
+        this.reportUnitDefinitionError(problems.join('; '));
+        return;
+      }
+
       if (unitDefinition.variableInfo && unitDefinition.variableInfo.length > 0) {
         unitDefinition.variableInfo.forEach(vInfo => {
-          if (vInfo.variableId && vInfo.variableId.length > 0 && vInfo.codes && vInfo.codes.length > 0) {
-            const newVInfo: VariableInfo = {
-              variableId: vInfo.variableId,
-              responseComplete: 'ALWAYS',
-              codingSource: 'VALUE',
-              codes: []
+          const newVInfo: VariableInfo = {
+            variableId: vInfo.variableId,
+            responseComplete: 'ALWAYS',
+            codingSource: 'VALUE',
+            codes: []
+          };
+          if (vInfo.codingSource) newVInfo.codingSource = vInfo.codingSource;
+          vInfo.codes.forEach(c => {
+            const newCode: Code = {
+              method: 'EQUALS',
+              parameter: '',
+              code: 1,
+              score: 1
             };
-            if (vInfo.codingSource) newVInfo.codingSource = vInfo.codingSource;
-            vInfo.codes.forEach(c => {
-              const newCode: Code = {
-                method: 'EQUALS',
-                parameter: '',
-                code: 1,
-                score: 1
-              };
-              if (c.method) newCode.method = c.method;
-              if (c.parameter) newCode.parameter = c.parameter;
-              if (c.code) newCode.code = c.code;
-              if (c.score) newCode.score = c.score;
-              newVInfo.codes.push(newCode);
-            });
-            this.variableInfo.push(vInfo);
-          } else {
-            problems.push('variableInfo: variableId or codes missing');
-          }
+            if (c.method) newCode.method = c.method;
+            if (c.parameter) newCode.parameter = c.parameter;
+            if (c.code) newCode.code = c.code;
+            if (c.score) newCode.score = c.score;
+            newVInfo.codes.push(newCode);
+          });
+          this.variableInfo.push(vInfo);
         });
       }
-      this.audioFeedbackService.loadFromUnitDefinition(unitDefinition, problems);
-      if (problems.length > 0) this.unitDefinitionProblem.set(problems.join('; '));
+      this.audioFeedbackService.loadFromUnitDefinition(unitDefinition);
     }
   }
 
@@ -152,6 +153,16 @@ export class ResponsesService implements ClosingMetaResponseHooks {
       responseInStore.score = codedResponse.score ?? 0;
     } else {
       this.allResponses.push(codedResponse);
+    }
+  }
+
+  private reportUnitDefinitionError(message: string): void {
+    this.unitDefinitionProblem.set(message);
+    if (this.veronaPostService) {
+      this.veronaPostService.sendVopRuntimeErrorNotification({
+        code: 'STARS_PLAYER_CRASH',
+        message
+      });
     }
   }
 

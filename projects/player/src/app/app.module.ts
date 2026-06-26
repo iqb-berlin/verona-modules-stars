@@ -33,6 +33,7 @@ import { InteractionNumberLineComponent } from './components/interaction-number-
 import { InteractionPyramidComponent } from './components/interaction-pyramid/interaction-pyramid.component';
 import { InteractionEquationComponent } from './components/interaction-equation/interaction-equation.component';
 import { InteractionMetaComponent } from './components/interaction-meta/interaction-meta.component';
+import { UnitDefinitionErrorComponent } from './components/unit-definition-error/unit-definition-error.component';
 
 @NgModule({
   declarations: [
@@ -62,7 +63,8 @@ import { InteractionMetaComponent } from './components/interaction-meta/interact
         InteractionNumberLineComponent,
         InteractionPyramidComponent,
         InteractionEquationComponent,
-        InteractionMetaComponent
+        InteractionMetaComponent,
+        UnitDefinitionErrorComponent
     ],
   providers: [
     provideZonelessChangeDetection(),

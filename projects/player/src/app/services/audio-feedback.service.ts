@@ -32,27 +32,23 @@ export class AudioFeedbackService {
   }
 
   /** Loads feedback rules from the unit definition. */
-  loadFromUnitDefinition(unitDefinition: UnitDefinition | null, problems: string[]): void {
+  loadFromUnitDefinition(unitDefinition: UnitDefinition | null): void {
     if (!unitDefinition?.audioFeedback?.feedback?.length) return;
 
     unitDefinition.audioFeedback.feedback.forEach(f => {
-      if (f.variableId && f.variableId.length > 0 && f.parameter && f.audioSource) {
-        const showResponse: ShowResponse = {
-          variableId: f.showResponse?.variableId || '',
-          value: f.showResponse?.value || '',
-          delayMS: f.showResponse?.delayMS || 0
-        };
-        this.feedbackDefinitions.push({
-          variableId: f.variableId,
-          source: f.source || 'CODE',
-          method: f.method || 'EQUALS',
-          parameter: f.parameter,
-          audioSource: f.audioSource,
-          showResponse: showResponse
-        });
-      } else {
-        problems.push('audioFeedback: variableId or parameter or audioSource missing');
-      }
+      const showResponse: ShowResponse = {
+        variableId: f.showResponse?.variableId || '',
+        value: f.showResponse?.value || '',
+        delayMS: f.showResponse?.delayMS || 0
+      };
+      this.feedbackDefinitions.push({
+        variableId: f.variableId,
+        source: f.source || 'CODE',
+        method: f.method || 'EQUALS',
+        parameter: f.parameter,
+        audioSource: f.audioSource,
+        showResponse: showResponse
+      });
     });
   }
 

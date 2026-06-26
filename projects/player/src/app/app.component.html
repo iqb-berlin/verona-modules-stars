@@ -1,9 +1,12 @@
 <div class="interaction-body" [style.background-color]="unitService.backgroundColor()" data-cy="interaction-body">
 
-  <!-- menu for standalone mode -->
   @if (isStandalone) {
     <stars-standalone-menu></stars-standalone-menu>
   }
+
+  @if (responsesService.unitDefinitionProblem(); as errorMessage) {
+    <stars-unit-definition-error [message]="errorMessage"></stars-unit-definition-error>
+  } @else {
 
   @if (unitService.showFirstClickLayer()) {
     <stars-click-layer [FirstAudioOptionsParams]="unitService.firstAudioOptions()"></stars-click-layer>
@@ -119,5 +122,6 @@
   <!-- lower ribbons -->
   @if (hasRibbonBars()) {
     <stars-ribbon-bar></stars-ribbon-bar>
+  }
   }
 </div>

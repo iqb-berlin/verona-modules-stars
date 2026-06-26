@@ -1,0 +1,15 @@
+{
+  "id": "stars-unit-definition",
+  "version": "5.3",
+  "interactionType": "BUTTONS",
+  "interactionParameters": {
+    "variableId": "BUTTONS",
+    "buttons": [{ "id": 1, "text": "A" }]
+  },
+  "variableInfo": [
+    {
+      "variableId": "",
+      "codes": [{ "method": "EQUALS", "parameter": "1", "code": 1, "score": 1 }]
+    }
+  ]
+}

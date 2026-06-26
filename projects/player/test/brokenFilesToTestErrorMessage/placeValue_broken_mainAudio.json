@@ -1,0 +1,23 @@
+{
+  "id": "stars-unit-definition",
+  "version": "5.3",
+  "backgroundColor": "#E1E9FF",
+  "ribbonBars": false,
+  "firstAudioOptions": {
+    "firstClickLayer": "OFF",
+    "animateButton": "KIND"
+  },
+  "continueButtonShow": "ALWAYS",
+  "mainAudio": {
+    "audioSource": "",
+    "maxPlay": 3,
+    "disableInteractionUntilComplete": false
+  },
+  "interactionType": "PLACE_VALUE",
+  "interactionParameters": {
+    "variableId": "PLACE_VALUE",
+    "value": 24,
+    "maxNumberOfTens": 3,
+    "maxNumberOfOnes": 20
+  }
+}

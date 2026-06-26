@@ -1,0 +1,29 @@
+@use 'colors';
+@use 'variables';
+
+.unit-definition-error {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 200;
+  @include variables.flex-center;
+  flex-direction: column;
+  background-color: colors.$white;
+  padding: 2rem;
+  text-align: center;
+}
+
+.unit-definition-error__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1rem;
+}
+
+.unit-definition-error__detail {
+  font-size: 0.95rem;
+  color: #666;
+  margin: 0;
+  max-width: 40rem;
+}

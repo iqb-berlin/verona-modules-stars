@@ -141,6 +141,9 @@ export class UnitService {
   loadUnit(unitDefinition: unknown, unitState: UnitState | null = null): void {
     const def = unitDefinition as UnitDefinition;
     this.responsesService.initResponseConfig(def);
+    if (this.responsesService.unitDefinitionProblem()) {
+      return;
+    }
     if (unitState) {
       this.setFormerState(unitState);
     }
@@ -272,6 +275,7 @@ export class UnitService {
   reset() {
     this.audioPlayerService.reset();
     this.mainAudio.set({} as AudioOptions);
+    this._currentAudioSrc.set({} as AudioOptions);
     this.firstAudioOptions.set(undefined);
     this.backgroundColor.set('#EEE');
     this.continueButton.set('NO');
