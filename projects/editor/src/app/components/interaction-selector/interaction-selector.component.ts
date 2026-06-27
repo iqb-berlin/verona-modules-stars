@@ -45,8 +45,6 @@ export class InteractionSelectorComponent {
   ];
 
   onTypeChange(newType: string): void {
-    this.state.interactionType.set(newType as InteractionEnum);
-    this.state.resetInteractionParams(newType as InteractionEnum);
-    this.state.notifyChange();
+    this.state.setInteractionType(newType as InteractionEnum);
   }
 }

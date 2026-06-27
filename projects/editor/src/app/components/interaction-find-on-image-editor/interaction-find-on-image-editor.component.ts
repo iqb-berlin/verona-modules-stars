@@ -59,8 +59,7 @@ export class InteractionFindOnImageEditorComponent {
   updateField(field: string, value: any): void {
     const current = { ...this.params };
     (current as any)[field] = value;
-    this.state.interactionParams.set(current);
-    this.state.notifyChange();
+    this.state.setInteractionParams(current);
   }
 
   onImageSelected(event: Event): void {

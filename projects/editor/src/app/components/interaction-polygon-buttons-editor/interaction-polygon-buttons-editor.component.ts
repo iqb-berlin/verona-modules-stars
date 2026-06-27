@@ -80,8 +80,7 @@ export class InteractionPolygonButtonsEditorComponent {
   updateField(field: string, value: any): void {
     const current = { ...this.params };
     (current as any)[field] = value;
-    this.state.interactionParams.set(current);
-    this.state.notifyChange();
+    this.state.setInteractionParams(current);
   }
 
   addOption(): void {
@@ -89,8 +88,7 @@ export class InteractionPolygonButtonsEditorComponent {
     const options = [...(current.options || [])];
     options.push({ label: `Polygon ${options.length + 1}` });
     current.options = options;
-    this.state.interactionParams.set(current);
-    this.state.notifyChange();
+    this.state.setInteractionParams(current);
   }
 
   removeOption(index: number): void {
@@ -98,8 +96,7 @@ export class InteractionPolygonButtonsEditorComponent {
     const options = [...(current.options || [])];
     options.splice(index, 1);
     current.options = options;
-    this.state.interactionParams.set(current);
-    this.state.notifyChange();
+    this.state.setInteractionParams(current);
   }
 
   updateOption(index: number, field: string, value: any): void {
@@ -107,8 +104,7 @@ export class InteractionPolygonButtonsEditorComponent {
     const options = [...(current.options || [])];
     options[index] = { ...options[index], [field]: value };
     current.options = options;
-    this.state.interactionParams.set(current);
-    this.state.notifyChange();
+    this.state.setInteractionParams(current);
   }
 
   onOptionImageSelected(event: Event, index: number): void {

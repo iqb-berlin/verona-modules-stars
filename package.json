@@ -21,6 +21,7 @@
     "build:editor": "ng build editor --configuration production",
     "postbuild:editor": "node projects/tools/distpacker.js dist/stars-editor/browser index_packed.html",
     "build:editor-bundled": "node projects/tools/build-editor-bundled.js",
+    "test:editor-architecture": "TS_NODE_PROJECT=tsconfig.base.json TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' node -r ts-node/register -r tsconfig-paths/register projects/editor/tests/editor-state-builders.test.ts",
     "e2e": "npx cypress run",
     "cy:open": "cypress open --browser chrome cypress/e2e/interaction-find-on-image",
     "test": "start-server-and-test start:player http://localhost:4200 cy:open"

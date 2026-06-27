@@ -2,20 +2,25 @@ import { Injectable, signal, inject } from '@angular/core';
 import { Subject, debounceTime } from 'rxjs';
 import {
   UnitDefinition, InteractionEnum, ContinueButtonEnum,
-  InteractionParameters, MainAudio, OpeningImageParams, FirstAudioOptionsParams,
-  InteractionButtonParams, InteractionWriteParams, InteractionDropParams,
-  InteractionVideoParams, InteractionFindOnImageParams, InteractionPolygonButtonsParams,
-  InteractionPlaceValueParams, InteractionNumberLineParams, InteractionPyramidParams,
-  InteractionEquationParams, ClosingMetaButtonsParams, FirstClickLayerEnum, AnimateButtonEnum
+  InteractionParameters, ClosingMetaButtonsParams, FirstClickLayerEnum, AnimateButtonEnum, InteractionButtonParams
 } from '@shared/models/unit-definition';
 import { VariableInfo } from '@shared/models/responses';
 import { AudioFeedback } from '@shared/models/feedback';
 import { VeronaVariableInfo } from '../models/verona-editor';
 import { EditorVeronaPostService } from './editor-verona-post.service';
+import { EditorInteractionAdapterRegistry } from './editor-interaction-adapters';
+import { EditorDefinitionBuilderService } from './editor-definition-builder.service';
+import { EditorDefinitionLoaderService } from './editor-definition-loader.service';
+import { EditorVariableMetadataBuilderService } from './editor-variable-metadata-builder.service';
+import { EditorStatePatch, EditorStateSnapshot } from './editor-state.model';
 
 @Injectable({ providedIn: 'root' })
 export class EditorStateService {
   private veronaPostService = inject(EditorVeronaPostService);
+  private interactionAdapters = new EditorInteractionAdapterRegistry();
+  private definitionBuilder = new EditorDefinitionBuilderService();
+  private definitionLoader = new EditorDefinitionLoaderService(this.interactionAdapters);
+  private variableMetadataBuilder = new EditorVariableMetadataBuilderService(this.interactionAdapters);
   private changeSubject = new Subject<void>();
 
   // Unit definition fields
@@ -69,6 +74,90 @@ export class EditorStateService {
     this.changeSubject.next();
   }
 
+  updateUnitVersion(value: string): void {
+    this.unitVersion.set(value);
+    this.notifyChange();
+  }
+
+  updateBackgroundColor(value: string): void {
+    this.backgroundColor.set(value);
+    this.notifyChange();
+  }
+
+  updateRibbonBars(value: boolean): void {
+    this.ribbonBars.set(value);
+    this.notifyChange();
+  }
+
+  updateContinueButtonShow(value: ContinueButtonEnum): void {
+    this.continueButtonShow.set(value);
+    this.notifyChange();
+  }
+
+  updateMainAudioSource(value: string): void {
+    this.mainAudioSource.set(value);
+    this.notifyChange();
+  }
+
+  updateMainAudioMaxPlay(value: number): void {
+    this.mainAudioMaxPlay.set(value);
+    this.notifyChange();
+  }
+
+  updateMainAudioDisableInteractionUntilComplete(value: boolean): void {
+    this.mainAudioDisableInteractionUntilComplete.set(value);
+    this.notifyChange();
+  }
+
+  updateOpeningImageSource(value: string): void {
+    this.openingImageSource.set(value);
+    this.notifyChange();
+  }
+
+  updateOpeningAudioSource(value: string): void {
+    this.openingAudioSource.set(value);
+    this.notifyChange();
+  }
+
+  updateOpeningPresentationDurationMS(value: number): void {
+    this.openingPresentationDurationMS.set(value);
+    this.notifyChange();
+  }
+
+  setInteractionType(type: InteractionEnum): void {
+    this.interactionType.set(type);
+    this.resetInteractionParams(type);
+    this.notifyChange();
+  }
+
+  setInteractionParams(params: InteractionParameters): void {
+    this.interactionParams.set(params);
+    this.notifyChange();
+  }
+
+  updateInteractionParams(update: (params: InteractionParameters) => InteractionParameters): void {
+    this.setInteractionParams(update(this.interactionParams()));
+  }
+
+  setVariableInfo(variableInfo: VariableInfo[]): void {
+    this.variableInfo.set(variableInfo);
+    this.notifyChange();
+  }
+
+  updateVariableInfo(update: (variableInfo: VariableInfo[]) => VariableInfo[]): void {
+    this.setVariableInfo(update(this.variableInfo()));
+  }
+
+  setAudioFeedback(audioFeedback: AudioFeedback | undefined): void {
+    this.audioFeedback.set(audioFeedback);
+    this.notifyChange();
+  }
+
+  setClosingMetaButtons(closingMetaButtons: ClosingMetaButtonsParams | undefined): void {
+    this.closingMetaButtons.set(closingMetaButtons);
+    this.notifyChange();
+  }
+
   resetState(): void {
     this.unitId.set('stars-unit-definition');
     this.unitVersion.set('');
@@ -98,68 +187,7 @@ export class EditorStateService {
 
   loadFromDefinition(json: string): void {
     try {
-      this.resetState();
-      const rawDef = JSON.parse(json) as Record<string, unknown>;
-      const def = rawDef as unknown as UnitDefinition;
-      if (def.id) this.unitId.set(def.id);
-      if (def.version) this.unitVersion.set(def.version);
-      if (def.backgroundColor !== undefined) this.backgroundColor.set(def.backgroundColor);
-      if (def.ribbonBars !== undefined) this.ribbonBars.set(def.ribbonBars);
-      if (def.continueButtonShow) this.continueButtonShow.set(def.continueButtonShow);
-      if (typeof rawDef.interactionType === 'string') {
-        this.interactionType.set(rawDef.interactionType === 'META_BUTTONS' ? 'META' : rawDef.interactionType as InteractionEnum);
-      }
-
-      // MainAudio
-      if (def.mainAudio) {
-        this.mainAudioEnabled.set(true);
-        this.mainAudioSource.set(def.mainAudio.audioSource || '');
-        this.mainAudioMaxPlay.set(def.mainAudio.maxPlay ?? 0);
-        this.mainAudioDisableInteractionUntilComplete.set(def.mainAudio.disableInteractionUntilComplete || false);
-        if (def.mainAudio.firstClickLayer !== undefined && !def.firstAudioOptions?.firstClickLayer) {
-          this.firstClickLayer.set(def.mainAudio.firstClickLayer);
-        }
-        if (def.mainAudio.animateButton !== undefined && !def.firstAudioOptions?.animateButton) {
-          this.animateButton.set(def.mainAudio.animateButton);
-        }
-      }
-
-      // FirstAudioOptions
-      if (def.firstAudioOptions) {
-        this.firstClickLayer.set(def.firstAudioOptions.firstClickLayer ?? 'OFF');
-        this.animateButton.set(def.firstAudioOptions.animateButton ?? 'OFF');
-      }
-
-      // Opening image
-      if (def.openingImage) {
-        this.openingImageEnabled.set(true);
-        this.openingImageSource.set(def.openingImage.imageSource || '');
-        this.openingAudioSource.set(def.openingImage.audioSource || '');
-        this.openingPresentationDurationMS.set(def.openingImage.presentationDurationMS ?? 1500);
-      }
-
-      // Interaction parameters
-      if (def.interactionParameters) {
-        this.interactionParams.set(
-          this.normalizeInteractionParams(this.interactionType(), def.interactionParameters)
-        );
-      } else {
-        this.resetInteractionParams(this.interactionType());
-      }
-
-      // Variable info
-      if (def.variableInfo) {
-        this.variableInfo.set(def.variableInfo);
-      }
-
-      // Audio feedback
-      if (def.audioFeedback) {
-        this.audioFeedback.set(def.audioFeedback);
-      }
-
-      if (def.closingMetaButtons) {
-        this.closingMetaButtons.set(def.closingMetaButtons);
-      }
+      this.applyPatch(this.definitionLoader.loadFromJson(json));
     } catch (e) {
       console.warn('Editor: failed to parse unit definition', e);
     }
@@ -172,6 +200,7 @@ export class EditorStateService {
       this.mainAudioMaxPlay.set(0);
       this.mainAudioDisableInteractionUntilComplete.set(false);
     }
+    this.notifyChange();
   }
 
   setOpeningImageEnabled(enabled: boolean): void {
@@ -181,14 +210,17 @@ export class EditorStateService {
       this.openingAudioSource.set('');
       this.openingPresentationDurationMS.set(1500);
     }
+    this.notifyChange();
   }
 
   setFirstClickLayerFromSelection(value: string): void {
     if (value === 'true') {
       this.firstClickLayer.set(true);
+      this.notifyChange();
       return;
     }
     this.firstClickLayer.set(value as FirstClickLayerEnum);
+    this.notifyChange();
   }
 
   firstClickLayerSelection(): string {
@@ -205,9 +237,11 @@ export class EditorStateService {
   setAnimateButtonFromSelection(value: string): void {
     if (value === 'true') {
       this.animateButton.set(true);
+      this.notifyChange();
       return;
     }
     this.animateButton.set(value as AnimateButtonEnum);
+    this.notifyChange();
   }
 
   animateButtonSelection(): string {
@@ -222,247 +256,15 @@ export class EditorStateService {
   }
 
   resetInteractionParams(type: InteractionEnum): void {
-    switch (type) {
-      case 'BUTTONS':
-      case 'IMAGE_ONLY':
-        this.interactionParams.set({
-          variableId: 'BUTTONS',
-          options: { buttons: [] },
-          buttonType: 'BIG_SQUARE',
-          numberOfRows: 1,
-          multiSelect: false,
-          imagePosition: 'LEFT',
-          layout: 'LEFT_CENTER'
-        } as InteractionButtonParams);
-        break;
-      case 'WRITE':
-        this.interactionParams.set({
-          variableId: 'WRITE',
-          addBackspaceKey: true,
-          addUmlautKeys: false,
-          keyboardMode: 'CHARACTERS',
-          keysLine1: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'],
-          keysLine2: ['j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r'],
-          keysLine3: ['s', 't', 'u', 'v', 'w', 'x', 'y', 'z'],
-          keysLine4: [],
-          maxInputLength: 20
-        } as InteractionWriteParams);
-        break;
-      case 'DROP':
-        this.interactionParams.set({
-          variableId: 'DROP',
-          options: [],
-          buttonType: 'SMALL_SQUARE',
-          imagePosition: 'BOTTOM'
-        } as InteractionDropParams);
-        break;
-      case 'FIND_ON_IMAGE':
-        this.interactionParams.set({
-          variableId: 'FIND_ON_IMAGE',
-          imageSource: '',
-          size: 'MEDIUM'
-        } as InteractionFindOnImageParams);
-        break;
-      case 'VIDEO':
-        this.interactionParams.set({
-          variableId: 'VIDEO',
-          videoSource: ''
-        } as InteractionVideoParams);
-        break;
-      case 'POLYGON_BUTTONS':
-        this.interactionParams.set({
-          variableId: 'POLYGON_BUTTONS',
-          options: [],
-          multiSelect: false
-        } as InteractionPolygonButtonsParams);
-        break;
-      case 'PLACE_VALUE':
-        this.interactionParams.set({
-          variableId: 'PLACE_VALUE',
-          value: 0,
-          maxNumberOfTens: 9,
-          maxNumberOfOnes: 9
-        } as InteractionPlaceValueParams);
-        break;
-      case 'NUMBER_LINE':
-        this.interactionParams.set({
-          variableId: 'NUMBER_LINE',
-          firstNumber: 0,
-          lastNumber: 20,
-          numberInput: 10,
-          style: 'WAVE'
-        } as InteractionNumberLineParams);
-        break;
-      case 'PYRAMID':
-        this.interactionParams.set({
-          variableId: 'PYRAMID',
-          topNumber: 10
-        } as InteractionPyramidParams);
-        break;
-      case 'EQUATION':
-        this.interactionParams.set({
-          variableId: 'EQUATION',
-          operators: ['+']
-        } as InteractionEquationParams);
-        break;
-      case 'META':
-        this.interactionParams.set({
-          variableId: 'META_SELECTION'
-        } as any);
-        break;
-      default:
-        this.interactionParams.set({
-          variableId: 'NONE'
-        } as any);
-    }
+    this.interactionParams.set(this.interactionAdapters.defaultParams(type));
   }
 
   buildUnitDefinition(): UnitDefinition {
-    const def: UnitDefinition = {
-      id: this.unitId() || 'stars-unit-definition',
-      interactionType: this.interactionType(),
-      interactionParameters: this.interactionParams(),
-      variableInfo: this.variableInfo().length > 0 ? this.variableInfo() : undefined,
-      audioFeedback: this.audioFeedback()
-    };
-
-    if (this.unitVersion()) def.version = this.unitVersion();
-    if (this.backgroundColor() !== '#EEE') def.backgroundColor = this.backgroundColor();
-    if (this.ribbonBars()) def.ribbonBars = true;
-    if (this.continueButtonShow() !== 'ALWAYS') def.continueButtonShow = this.continueButtonShow();
-
-    // MainAudio
-    if (this.mainAudioEnabled() && this.mainAudioSource()) {
-      const mainAudio: MainAudio = {
-        audioSource: this.mainAudioSource(),
-        maxPlay: this.mainAudioMaxPlay(),
-        disableInteractionUntilComplete: this.mainAudioDisableInteractionUntilComplete()
-      };
-      def.mainAudio = mainAudio;
-    }
-
-    // FirstAudioOptions
-    const firstClickLayer = this.firstClickLayer();
-    const animateButton = this.animateButton();
-    if (animateButton === true || (typeof animateButton === 'string' && animateButton !== 'OFF') || firstClickLayer === true ||
-      (typeof firstClickLayer === 'string' && firstClickLayer !== 'OFF')) {
-      const firstAudioOptions: FirstAudioOptionsParams = {};
-      if (animateButton !== false) {
-        firstAudioOptions.animateButton = animateButton;
-      }
-      if (firstClickLayer !== false) {
-        firstAudioOptions.firstClickLayer = firstClickLayer;
-      }
-      def.firstAudioOptions = firstAudioOptions;
-    }
-
-    // Opening Image
-    if (this.openingImageEnabled() && this.openingImageSource()) {
-      const params: OpeningImageParams = {
-        imageSource: this.openingImageSource()
-      };
-      if (this.openingAudioSource()) params.audioSource = this.openingAudioSource();
-      if (this.openingPresentationDurationMS() !== 1500) {
-        params.presentationDurationMS = this.openingPresentationDurationMS();
-      }
-      def.openingImage = params;
-    }
-
-    if (this.closingMetaButtons()) {
-      def.closingMetaButtons = this.closingMetaButtons();
-    }
-
-    return def;
+    return this.definitionBuilder.build(this.snapshot());
   }
 
   buildVariables(): VeronaVariableInfo[] {
-    const variables: VeronaVariableInfo[] = [];
-    const params = this.interactionParams() as any;
-    const declaredVariables = this.variableInfo();
-    const variableIds = declaredVariables.length > 0
-      ? declaredVariables.map(variable => variable.variableId)
-      : (params?.variableId ? [params.variableId] : []);
-
-    variableIds
-      .filter((value, index, values) => !!value && values.indexOf(value) === index)
-      .forEach(variableId => {
-        const currentVariableInfo = declaredVariables.find(variable => variable.variableId === variableId);
-        const variable: VeronaVariableInfo = {
-          id: variableId,
-          type: this.getVariableType(currentVariableInfo),
-          multiple: false,
-          nullable: false,
-          page: '1'
-        };
-
-        if ((this.interactionType() === 'BUTTONS' || this.interactionType() === 'POLYGON_BUTTONS') &&
-          variableId === params?.variableId && params.options) {
-          const buttons = params.options.buttons || params.options;
-          if (Array.isArray(buttons) && buttons.length > 0) {
-            const labels = buttons.map((button: any, i: number) => button?.text || button?.label || `Option ${i + 1}`);
-            if (params.multiSelect) {
-              variable.multiple = true;
-              variable.valuePositionLabels = labels;
-            } else {
-              variable.valuesComplete = true;
-              variable.values = labels.map((label: string, i: number) => ({
-                value: (i + 1).toString(),
-                label
-              }));
-            }
-          }
-        }
-        variables.push(variable);
-      });
-    return variables;
-  }
-
-  private getVariableType(variableInfo?: VariableInfo): 'string' | 'integer' | 'number' | 'boolean' | 'coded' {
-    if (variableInfo?.codes?.length) {
-      return 'coded';
-    }
-    switch (this.interactionType()) {
-      case 'NUMBER_LINE':
-      case 'PLACE_VALUE':
-      case 'EQUATION':
-        return 'integer';
-      default:
-        return 'string';
-    }
-  }
-
-  private normalizeInteractionParams(type: InteractionEnum, params: InteractionParameters): InteractionParameters {
-    if (type === 'WRITE') {
-      const writeParams = { ...(params as InteractionWriteParams) };
-      if (!writeParams.keysLine1) {
-        writeParams.keysLine1 = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
-      }
-      if (!writeParams.keysLine2) {
-        writeParams.keysLine2 = ['j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r'];
-      }
-      if (!writeParams.keysLine3) {
-        writeParams.keysLine3 = ['s', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
-      }
-      if (!writeParams.keysLine4) {
-        const keysLine4: string[] = [];
-        if (writeParams.addUmlautKeys) {
-          keysLine4.push('ä', 'ö', 'ü');
-        }
-        if (writeParams.keysToAdd?.length) {
-          keysLine4.push(...writeParams.keysToAdd);
-        }
-        writeParams.keysLine4 = keysLine4;
-      }
-      writeParams.addUmlautKeys = ['ä', 'ö', 'ü'].every(umlaut => writeParams.keysLine4?.includes(umlaut));
-      return writeParams;
-    }
-    if (type === 'DROP') {
-      return {
-        buttonType: 'SMALL_SQUARE',
-        ...(params as InteractionDropParams)
-      } as InteractionDropParams;
-    }
-    return params;
+    return this.variableMetadataBuilder.build(this.snapshot());
   }
 
   private emitDefinitionChanged(): void {
@@ -474,5 +276,57 @@ export class EditorStateService {
       `iqb-stars@${this.unitVersion() || '1.0'}`,
       variables
     );
+  }
+
+  private snapshot(): EditorStateSnapshot {
+    return {
+      unitId: this.unitId(),
+      unitVersion: this.unitVersion(),
+      backgroundColor: this.backgroundColor(),
+      ribbonBars: this.ribbonBars(),
+      continueButtonShow: this.continueButtonShow(),
+      interactionType: this.interactionType(),
+      mainAudioEnabled: this.mainAudioEnabled(),
+      mainAudioSource: this.mainAudioSource(),
+      mainAudioMaxPlay: this.mainAudioMaxPlay(),
+      mainAudioDisableInteractionUntilComplete: this.mainAudioDisableInteractionUntilComplete(),
+      firstClickLayer: this.firstClickLayer(),
+      animateButton: this.animateButton(),
+      openingImageEnabled: this.openingImageEnabled(),
+      openingImageSource: this.openingImageSource(),
+      openingAudioSource: this.openingAudioSource(),
+      openingPresentationDurationMS: this.openingPresentationDurationMS(),
+      interactionParams: this.interactionParams(),
+      variableInfo: this.variableInfo(),
+      audioFeedback: this.audioFeedback(),
+      closingMetaButtons: this.closingMetaButtons()
+    };
+  }
+
+  private applyPatch(patch: EditorStatePatch): void {
+    if (patch.unitId !== undefined) this.unitId.set(patch.unitId);
+    if (patch.unitVersion !== undefined) this.unitVersion.set(patch.unitVersion);
+    if (patch.backgroundColor !== undefined) this.backgroundColor.set(patch.backgroundColor);
+    if (patch.ribbonBars !== undefined) this.ribbonBars.set(patch.ribbonBars);
+    if (patch.continueButtonShow !== undefined) this.continueButtonShow.set(patch.continueButtonShow);
+    if (patch.interactionType !== undefined) this.interactionType.set(patch.interactionType);
+    if (patch.mainAudioEnabled !== undefined) this.mainAudioEnabled.set(patch.mainAudioEnabled);
+    if (patch.mainAudioSource !== undefined) this.mainAudioSource.set(patch.mainAudioSource);
+    if (patch.mainAudioMaxPlay !== undefined) this.mainAudioMaxPlay.set(patch.mainAudioMaxPlay);
+    if (patch.mainAudioDisableInteractionUntilComplete !== undefined) {
+      this.mainAudioDisableInteractionUntilComplete.set(patch.mainAudioDisableInteractionUntilComplete);
+    }
+    if (patch.firstClickLayer !== undefined) this.firstClickLayer.set(patch.firstClickLayer);
+    if (patch.animateButton !== undefined) this.animateButton.set(patch.animateButton);
+    if (patch.openingImageEnabled !== undefined) this.openingImageEnabled.set(patch.openingImageEnabled);
+    if (patch.openingImageSource !== undefined) this.openingImageSource.set(patch.openingImageSource);
+    if (patch.openingAudioSource !== undefined) this.openingAudioSource.set(patch.openingAudioSource);
+    if (patch.openingPresentationDurationMS !== undefined) {
+      this.openingPresentationDurationMS.set(patch.openingPresentationDurationMS);
+    }
+    if (patch.interactionParams !== undefined) this.interactionParams.set(patch.interactionParams);
+    if (patch.variableInfo !== undefined) this.variableInfo.set(patch.variableInfo);
+    if ('audioFeedback' in patch) this.audioFeedback.set(patch.audioFeedback);
+    if ('closingMetaButtons' in patch) this.closingMetaButtons.set(patch.closingMetaButtons);
   }
 }

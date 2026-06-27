@@ -30,9 +30,7 @@ import { MediaUploadComponent } from '../media-upload/media-upload.component';
               label="Audio-Datei"
               type="audio"
               [source]="state.mainAudioSource()"
-              (sourceChange)="
-                state.mainAudioSource.set($event); state.notifyChange()
-              "
+              (sourceChange)="state.updateMainAudioSource($event)"
             >
             </stars-media-upload>
 
@@ -42,12 +40,7 @@ import { MediaUploadComponent } from '../media-upload/media-upload.component';
                   <input
                     type="checkbox"
                     [checked]="state.mainAudioDisableInteractionUntilComplete()"
-                    (change)="
-                      state.mainAudioDisableInteractionUntilComplete.set(
-                        $any($event.target).checked
-                      );
-                      state.notifyChange()
-                    "
+                    (change)="state.updateMainAudioDisableInteractionUntilComplete($any($event.target).checked)"
                   />
                   Interaktion deaktivieren bis Audio fertig
                 </label>
@@ -57,10 +50,7 @@ import { MediaUploadComponent } from '../media-upload/media-upload.component';
                 <input
                   type="number"
                   [value]="state.mainAudioMaxPlay()"
-                  (input)="
-                    state.mainAudioMaxPlay.set(+$any($event.target).value);
-                    state.notifyChange()
-                  "
+                  (input)="state.updateMainAudioMaxPlay(+$any($event.target).value)"
                   min="0"
                   max="99"
                 />
@@ -120,16 +110,13 @@ export class MainAudioSettingsComponent {
 
   toggleMainAudio(enabled: boolean): void {
     this.state.setMainAudioEnabled(enabled);
-    this.state.notifyChange();
   }
 
   updateFirstClickLayer(value: string): void {
     this.state.setFirstClickLayerFromSelection(value);
-    this.state.notifyChange();
   }
 
   updateAnimateButton(value: string): void {
     this.state.setAnimateButtonFromSelection(value);
-    this.state.notifyChange();
   }
 }

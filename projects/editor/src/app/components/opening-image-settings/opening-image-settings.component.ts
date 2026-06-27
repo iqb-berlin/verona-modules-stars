@@ -30,14 +30,14 @@ import { MediaUploadComponent } from '../media-upload/media-upload.component';
               label="Bild-Datei"
               type="image"
               [source]="state.openingImageSource()"
-              (sourceChange)="state.openingImageSource.set($event); state.notifyChange()">
+              (sourceChange)="state.updateOpeningImageSource($event)">
             </stars-media-upload>
 
             <stars-media-upload
               label="Begleit-Audio"
               type="audio"
               [source]="state.openingAudioSource()"
-              (sourceChange)="state.openingAudioSource.set($event); state.notifyChange()">
+              (sourceChange)="state.updateOpeningAudioSource($event)">
             </stars-media-upload>
 
             <div class="field">
@@ -45,10 +45,7 @@ import { MediaUploadComponent } from '../media-upload/media-upload.component';
               <input
                 type="number"
                 [value]="state.openingPresentationDurationMS()"
-                (input)="
-                  state.openingPresentationDurationMS.set(+$any($event.target).value);
-                  state.notifyChange()
-                "
+                (input)="state.updateOpeningPresentationDurationMS(+$any($event.target).value)"
                 min="0"
                 step="100"
               />
@@ -65,6 +62,5 @@ export class OpeningImageSettingsComponent {
 
   toggleOpeningImage(enabled: boolean): void {
     this.state.setOpeningImageEnabled(enabled);
-    this.state.notifyChange();
   }
 }

@@ -78,7 +78,6 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.veronaSubscriptionService.voeStartCommand.subscribe(command => {
-      this.veronaPostService.sessionId = command.sessionId;
       if (command.unitDefinition) {
         this.state.loadFromDefinition(command.unitDefinition);
       }
@@ -92,10 +91,9 @@ export class AppComponent implements OnInit {
   }
 
   updateMetaButtonsVariableId(value: string): void {
-    this.state.interactionParams.set({
-      ...(this.state.interactionParams() as any),
+    this.state.updateInteractionParams(params => ({
+      ...(params as any),
       variableId: value
-    });
-    this.state.notifyChange();
+    }));
   }
 }

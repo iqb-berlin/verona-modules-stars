@@ -239,14 +239,13 @@ export class AudioFeedbackEditorComponent {
   toggleFeedback(event: Event): void {
     const checked = (event.target as HTMLInputElement).checked;
     if (checked) {
-      this.state.audioFeedback.set({
+      this.state.setAudioFeedback({
         trigger: 'CONTINUE_BUTTON_CLICK',
         feedback: []
       });
     } else {
-      this.state.audioFeedback.set(undefined);
+      this.state.setAudioFeedback(undefined);
     }
-    this.state.notifyChange();
   }
 
   updateFeedback(field: string, value: any): void {
@@ -254,8 +253,7 @@ export class AudioFeedbackEditorComponent {
     if (!current) {
       return;
     }
-    this.state.audioFeedback.set({ ...current, [field]: value });
-    this.state.notifyChange();
+    this.state.setAudioFeedback({ ...current, [field]: value });
   }
 
   addRule(): void {
@@ -271,8 +269,7 @@ export class AudioFeedbackEditorComponent {
       audioSource: '',
       method: 'EQUALS'
     });
-    this.state.audioFeedback.set({ ...current, feedback });
-    this.state.notifyChange();
+    this.state.setAudioFeedback({ ...current, feedback });
   }
 
   removeRule(index: number): void {
@@ -282,8 +279,7 @@ export class AudioFeedbackEditorComponent {
     }
     const feedback = [...(current.feedback || [])];
     feedback.splice(index, 1);
-    this.state.audioFeedback.set({ ...current, feedback });
-    this.state.notifyChange();
+    this.state.setAudioFeedback({ ...current, feedback });
   }
 
   updateRule(index: number, field: keyof FeedbackDefinition, value: any): void {
@@ -293,8 +289,7 @@ export class AudioFeedbackEditorComponent {
     }
     const feedback = [...(current.feedback || [])];
     feedback[index] = { ...feedback[index], [field]: value };
-    this.state.audioFeedback.set({ ...current, feedback });
-    this.state.notifyChange();
+    this.state.setAudioFeedback({ ...current, feedback });
   }
 
   toggleShowResponse(index: number, enabled: boolean): void {

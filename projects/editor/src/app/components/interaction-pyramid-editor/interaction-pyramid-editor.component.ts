@@ -60,8 +60,7 @@ export class InteractionPyramidEditorComponent {
   updateField(field: string, value: any): void {
     const current = { ...this.params };
     (current as any)[field] = value;
-    this.state.interactionParams.set(current);
-    this.state.notifyChange();
+    this.state.setInteractionParams(current);
   }
 
   toggleExample(event: Event): void {
@@ -72,16 +71,14 @@ export class InteractionPyramidEditorComponent {
     } else {
       current.example = undefined;
     }
-    this.state.interactionParams.set(current);
-    this.state.notifyChange();
+    this.state.setInteractionParams(current);
   }
 
   updateExample(field: string, value: number): void {
     const current = { ...this.params };
     if (current.example) {
       current.example = { ...current.example, [field]: value };
-      this.state.interactionParams.set(current);
-      this.state.notifyChange();
+      this.state.setInteractionParams(current);
     }
   }
 }

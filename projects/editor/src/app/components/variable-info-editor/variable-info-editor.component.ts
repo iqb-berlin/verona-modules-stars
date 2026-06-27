@@ -248,15 +248,13 @@ export class VariableInfoEditorComponent {
       codingSource: 'VALUE',
       codes: []
     });
-    this.state.variableInfo.set(variables);
-    this.state.notifyChange();
+    this.state.setVariableInfo(variables);
   }
 
   removeVariable(index: number): void {
     const variables = [...this.variables];
     variables.splice(index, 1);
-    this.state.variableInfo.set(variables);
-    this.state.notifyChange();
+    this.state.setVariableInfo(variables);
   }
 
   updateVariable(index: number, field: keyof VariableInfo, value: any): void {
@@ -268,8 +266,7 @@ export class VariableInfoEditorComponent {
     }
 
     variables[index] = variable;
-    this.state.variableInfo.set(variables);
-    this.state.notifyChange();
+    this.state.setVariableInfo(variables);
   }
 
   addCode(variableIndex: number): void {
@@ -282,8 +279,7 @@ export class VariableInfoEditorComponent {
       score: 0
     });
     variables[variableIndex] = { ...variables[variableIndex], codes };
-    this.state.variableInfo.set(variables);
-    this.state.notifyChange();
+    this.state.setVariableInfo(variables);
   }
 
   removeCode(variableIndex: number, codeIndex: number): void {
@@ -291,8 +287,7 @@ export class VariableInfoEditorComponent {
     const codes = [...variables[variableIndex].codes];
     codes.splice(codeIndex, 1);
     variables[variableIndex] = { ...variables[variableIndex], codes };
-    this.state.variableInfo.set(variables);
-    this.state.notifyChange();
+    this.state.setVariableInfo(variables);
   }
 
   updateCode(variableIndex: number, codeIndex: number, field: keyof Code, value: any): void {
@@ -300,8 +295,7 @@ export class VariableInfoEditorComponent {
     const codes = [...variables[variableIndex].codes];
     codes[codeIndex] = { ...codes[codeIndex], [field]: value };
     variables[variableIndex] = { ...variables[variableIndex], codes };
-    this.state.variableInfo.set(variables);
-    this.state.notifyChange();
+    this.state.setVariableInfo(variables);
   }
 
   requiresCodingSourceParameter(variable: VariableInfo): boolean {

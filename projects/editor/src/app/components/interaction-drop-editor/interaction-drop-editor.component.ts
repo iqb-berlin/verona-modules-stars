@@ -108,8 +108,7 @@ export class InteractionDropEditorComponent {
   updateField(field: string, value: any): void {
     const current = { ...this.params };
     (current as any)[field] = value;
-    this.state.interactionParams.set(current);
-    this.state.notifyChange();
+    this.state.setInteractionParams(current);
   }
 
   addOption(): void {
@@ -117,8 +116,7 @@ export class InteractionDropEditorComponent {
     const options = [...(current.options || [])];
     options.push({ text: `Option ${options.length + 1}` });
     current.options = options;
-    this.state.interactionParams.set(current);
-    this.state.notifyChange();
+    this.state.setInteractionParams(current);
   }
 
   removeOption(index: number): void {
@@ -126,8 +124,7 @@ export class InteractionDropEditorComponent {
     const options = [...(current.options || [])];
     options.splice(index, 1);
     current.options = options;
-    this.state.interactionParams.set(current);
-    this.state.notifyChange();
+    this.state.setInteractionParams(current);
   }
 
   updateOption(index: number, field: string, value: any): void {
@@ -135,8 +132,7 @@ export class InteractionDropEditorComponent {
     const options = [...(current.options || [])];
     options[index] = { ...options[index], [field]: value };
     current.options = options;
-    this.state.interactionParams.set(current);
-    this.state.notifyChange();
+    this.state.setInteractionParams(current);
   }
 
   onImageSelected(event: Event): void {

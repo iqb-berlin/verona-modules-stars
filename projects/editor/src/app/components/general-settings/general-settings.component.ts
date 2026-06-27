@@ -29,10 +29,7 @@ import { MediaUploadComponent } from '../media-upload/media-upload.component';
             <input
               type="text"
               [value]="state.unitVersion()"
-              (input)="
-                state.unitVersion.set($any($event.target).value);
-                state.notifyChange()
-              "
+              (input)="state.updateUnitVersion($any($event.target).value)"
             />
           </div>
           <div class="field">
@@ -41,18 +38,12 @@ import { MediaUploadComponent } from '../media-upload/media-upload.component';
               <input
                 type="color"
                 [value]="state.backgroundColor()"
-                (input)="
-                  state.backgroundColor.set($any($event.target).value);
-                  state.notifyChange()
-                "
+                (input)="state.updateBackgroundColor($any($event.target).value)"
               />
               <input
                 type="text"
                 [value]="state.backgroundColor()"
-                (input)="
-                  state.backgroundColor.set($any($event.target).value);
-                  state.notifyChange()
-                "
+                (input)="state.updateBackgroundColor($any($event.target).value)"
                 class="color-text"
               />
             </div>
@@ -61,10 +52,7 @@ import { MediaUploadComponent } from '../media-upload/media-upload.component';
             <label>Weiter-Button</label>
             <select
               [value]="state.continueButtonShow()"
-              (change)="
-                state.continueButtonShow.set($any($event.target).value);
-                state.notifyChange()
-              "
+              (change)="state.updateContinueButtonShow($any($event.target).value)"
             >
               <option value="ALWAYS">Immer anzeigen</option>
               <option value="NO">Nie anzeigen</option>
@@ -84,10 +72,7 @@ import { MediaUploadComponent } from '../media-upload/media-upload.component';
               <input
                 type="checkbox"
                 [checked]="state.ribbonBars()"
-                (change)="
-                  state.ribbonBars.set($any($event.target).checked);
-                  state.notifyChange()
-                "
+                (change)="state.updateRibbonBars($any($event.target).checked)"
               />
               Übungsleiste anzeigen
             </label>
@@ -187,7 +172,7 @@ export class GeneralSettingsComponent {
   toggleClosingMetaButtons(enabled: boolean): void {
     if (enabled) {
       const currentVariableId = (this.state.interactionParams() as any)?.variableId || 'BUTTONS';
-      this.state.closingMetaButtons.set({
+      this.state.setClosingMetaButtons({
         audioSource: '',
         autoPlay: false,
         variableIdReference: currentVariableId,
@@ -196,9 +181,8 @@ export class GeneralSettingsComponent {
         triggerNavigationOnSelect: true
       });
     } else {
-      this.state.closingMetaButtons.set(undefined);
+      this.state.setClosingMetaButtons(undefined);
     }
-    this.state.notifyChange();
   }
 
   updateClosingMetaButtons(
@@ -209,10 +193,9 @@ export class GeneralSettingsComponent {
     if (!current) {
       return;
     }
-    this.state.closingMetaButtons.set({
+    this.state.setClosingMetaButtons({
       ...current,
       [field]: value
     });
-    this.state.notifyChange();
   }
 }

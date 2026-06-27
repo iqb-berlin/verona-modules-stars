@@ -72,8 +72,7 @@ export class InteractionNumberLineEditorComponent {
   updateField(field: string, value: any): void {
     const current = { ...this.params };
     (current as any)[field] = value;
-    this.state.interactionParams.set(current);
-    this.state.notifyChange();
+    this.state.setInteractionParams(current);
   }
 
   updateNumberList(field: 'leadingNumbers' | 'trailingNumbers', value: string): void {

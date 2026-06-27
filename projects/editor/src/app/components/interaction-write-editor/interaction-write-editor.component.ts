@@ -101,8 +101,7 @@ export class InteractionWriteEditorComponent {
   updateField(field: string, value: any): void {
     const current = { ...this.params };
     (current as any)[field] = value;
-    this.state.interactionParams.set(current);
-    this.state.notifyChange();
+    this.state.setInteractionParams(current);
   }
 
   updateKeysLine(field: 'keysLine1' | 'keysLine2' | 'keysLine3' | 'keysLine4', value: string): void {
@@ -112,8 +111,7 @@ export class InteractionWriteEditorComponent {
     if (field === 'keysLine4') {
       current.addUmlautKeys = this.hasAllUmlautKeys(keys);
     }
-    this.state.interactionParams.set(current);
-    this.state.notifyChange();
+    this.state.setInteractionParams(current);
   }
 
   toggleUmlautKeys(enabled: boolean): void {
@@ -126,8 +124,7 @@ export class InteractionWriteEditorComponent {
       ? [...InteractionWriteEditorComponent.UMLAUT_KEYS, ...line4WithoutUmlauts]
       : line4WithoutUmlauts;
 
-    this.state.interactionParams.set(current);
-    this.state.notifyChange();
+    this.state.setInteractionParams(current);
   }
 
   onImageSelected(event: Event): void {

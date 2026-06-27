@@ -448,8 +448,7 @@ export class InteractionButtonsEditorComponent {
   updateField(field: string, value: any): void {
     const current = { ...this.params };
     (current as any)[field] = value;
-    this.state.interactionParams.set(current);
-    this.state.notifyChange();
+    this.state.setInteractionParams(current);
   }
 
   setButtonMode(mode: 'BUTTONS' | 'REPEAT'): void {
@@ -468,8 +467,7 @@ export class InteractionButtonsEditorComponent {
           : [{ text: 'Option 1' }]
       };
     }
-    this.state.interactionParams.set(current);
-    this.state.notifyChange();
+    this.state.setInteractionParams(current);
   }
 
   addButton(): void {
@@ -477,8 +475,7 @@ export class InteractionButtonsEditorComponent {
     const buttons = [...(current.options?.buttons || [])];
     buttons.push({ text: `Option ${buttons.length + 1}` });
     current.options = { ...current.options, buttons };
-    this.state.interactionParams.set(current);
-    this.state.notifyChange();
+    this.state.setInteractionParams(current);
   }
 
   removeButton(index: number): void {
@@ -486,8 +483,7 @@ export class InteractionButtonsEditorComponent {
     const buttons = [...(current.options?.buttons || [])];
     buttons.splice(index, 1);
     current.options = { ...current.options, buttons };
-    this.state.interactionParams.set(current);
-    this.state.notifyChange();
+    this.state.setInteractionParams(current);
   }
 
   updateButton(index: number, field: string, value: any): void {
@@ -495,8 +491,7 @@ export class InteractionButtonsEditorComponent {
     const buttons = [...(current.options?.buttons || [])];
     buttons[index] = { ...buttons[index], [field]: value };
     current.options = { ...current.options, buttons };
-    this.state.interactionParams.set(current);
-    this.state.notifyChange();
+    this.state.setInteractionParams(current);
   }
 
   updateRepeatButton(field: keyof RepeatButtonConfig, value: any): void {
@@ -507,8 +502,7 @@ export class InteractionButtonsEditorComponent {
         [field]: value
       }
     };
-    this.state.interactionParams.set(current);
-    this.state.notifyChange();
+    this.state.setInteractionParams(current);
   }
 
   updateRepeatButtonOption(field: keyof SelectionOption, value: any): void {
@@ -522,8 +516,7 @@ export class InteractionButtonsEditorComponent {
         }
       }
     };
-    this.state.interactionParams.set(current);
-    this.state.notifyChange();
+    this.state.setInteractionParams(current);
   }
 
   onImageSelected(event: Event): void {
