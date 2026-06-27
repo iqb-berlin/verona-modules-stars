@@ -11,11 +11,11 @@ import { EditorStateService } from '../../services/editor-state.service';
     <div class="interaction-editor">
       <div class="field">
         <label>Variablen-ID</label>
-        <input type="text" [value]="params.variableId" (input)="updateField('variableId', $any($event.target).value)">
+        <input type="text" [value]="params.variableId || ''" (input)="updateField('variableId', $any($event.target).value)">
       </div>
       <div class="field">
         <label>Text</label>
-        <input type="text" [value]="params.text" (input)="updateField('text', $any($event.target).value)">
+        <input type="text" [value]="params.text || ''" (input)="updateField('text', $any($event.target).value)">
       </div>
       <div class="field field-row">
         <label><input type="checkbox" [checked]="params.triggerNavigationOnEnd" (change)="updateField('triggerNavigationOnEnd', $any($event.target).checked)"> Navigation nach Video-Ende</label>

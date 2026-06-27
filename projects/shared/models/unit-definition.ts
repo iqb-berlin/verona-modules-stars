@@ -16,19 +16,22 @@ export type InteractionEnum = 'BUTTONS' |
 'NUMBER_LINE' |
 'PYRAMID' |
 'EQUATION' |
-'META_BUTTONS' |
+'META' |
 'NONE';
-export type FirstClickLayerMode = 'OFF' | 'TRANSPARENT' | 'BLUR' | 'DISABLED';
 export type IconButtonTypeEnum = 'CHECK_GREEN' | 'CLOSE_RED' | 'CLAP_HANDS' | 'SMILEY_1' | 'SMILEY_2' |
 'SMILEY_3' | 'SMILEY_4' | 'SMILEY_5' | 'ONES' | 'TENS';
 export type ButtonTypeEnum = 'MEDIUM_SQUARE' | 'BIG_SQUARE' | 'SMALL_SQUARE' | 'TEXT' | 'CIRCLE' |
 'EXTRA_LARGE_SQUARE' | 'LONG_RECTANGLE' | 'TALL_RECTANGLE';
+export type DropButtonTypeEnum = 'SMALL_SQUARE' | 'EXTRA_SMALL_SQUARE';
 export type ImagePositionEnum = 'TOP' | 'LEFT' | 'BOTTOM';
 export type TargetSizeEnum = 'MEDIUM' | 'LARGE' | 'SMALL';
 export type LayoutEnum = 'LEFT_CENTER' | 'TOP_CENTER' | 'LEFT_BOTTOM' | 'LEFT_CENTER_50';
+export type FirstClickLayerEnum = 'OFF' | 'TRANSPARENT' | 'BLUR' | 'DISABLED';
+export type AnimateButtonEnum = 'OFF' | 'KIND' | 'BOLD';
 
 export type InteractionParameters = InteractionButtonParams | InteractionWriteParams | InteractionDropParams |
-InteractionVideoParams | InteractionFindOnImageParams | InteractionPolygonButtonsParams | InteractionPlaceValueParams | InteractionNumberLineParams | InteractionPyramidParams | InteractionEquationParams;
+InteractionVideoParams | InteractionFindOnImageParams | InteractionPolygonButtonsParams | InteractionPlaceValueParams |
+InteractionNumberLineParams | InteractionPyramidParams | InteractionEquationParams | InteractionMetaParams;
 export interface UnitDefinition {
   id: string;
   version?: string;
@@ -83,6 +86,7 @@ export interface InteractionDropParams {
   variableId?: string;
   options: SelectionOption[];
   imageSource?: string;
+  buttonType?: DropButtonTypeEnum;
   imagePosition?: ImagePositionEnum;
   imageLandingXY?: string;
   text?: string;
@@ -92,7 +96,6 @@ export interface InteractionDropParams {
 export interface InteractionPlaceValueParams {
   variableId?: string;
   value: number;
-  numberOfRows?: number;
   maxNumberOfTens?: number;
   maxNumberOfOnes?: number;
   formerState?: Response[];
@@ -104,7 +107,11 @@ export interface InteractionWriteParams {
   text?: string;
   addBackspaceKey?: boolean;
   addUmlautKeys?: boolean;
-  keyboardMode?: 'CHARACTERS' | 'NUMBERS_LINE' | 'NUMBERS_BLOCK';
+  keyboardMode?: 'CHARACTERS' | 'NUMBERS_LINE';
+  keysLine1?: string[];
+  keysLine2?: string[];
+  keysLine3?: string[];
+  keysLine4?: string[];
   keysToAdd?: string[];
   maxInputLength?: number;
   formerState?: Response[];
@@ -166,17 +173,22 @@ export interface InteractionEquationParams {
   formerState?: Response[] | undefined;
 }
 
+export interface InteractionMetaParams {
+  variableId?: string;
+  formerState?: Response[] | undefined;
+}
+
 export interface MainAudio {
   audioSource: string;
   maxPlay?: number;
-  firstClickLayer?: boolean | FirstClickLayerMode; // deprecated, use firstAudioOptions.firstClickLayer
-  animateButton?: boolean; // deprecated, use firstAudioOptions.animateButton
+  firstClickLayer?: boolean; // deprecated, use firstAudioOptions.firstClickLayer
+  animateButton?: AnimateButtonEnum; // deprecated, use firstAudioOptions.animateButton
   disableInteractionUntilComplete?: boolean;
 }
 
 export interface FirstAudioOptionsParams {
-  firstClickLayer?: boolean | FirstClickLayerMode;
-  animateButton?: boolean;
+  firstClickLayer?: FirstClickLayerEnum | boolean;
+  animateButton?: AnimateButtonEnum | boolean;
 }
 
 export interface OpeningImageParams {
@@ -192,7 +204,10 @@ export interface AudioOptions extends MainAudio {
 }
 
 export interface ClosingMetaButtonsParams {
+  audioSource?: string;
+  autoPlay?: boolean;
   variableIdMetaSelection?: string;
   variableIdReference: string;
   variableIdMetaOutcome?: string;
+  triggerNavigationOnSelect?: boolean;
 }

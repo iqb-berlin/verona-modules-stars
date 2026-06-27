@@ -6,7 +6,7 @@ import {
   InteractionButtonParams, InteractionWriteParams, InteractionDropParams,
   InteractionVideoParams, InteractionFindOnImageParams, InteractionPolygonButtonsParams,
   InteractionPlaceValueParams, InteractionNumberLineParams, InteractionPyramidParams,
-  InteractionEquationParams, ClosingMetaButtonsParams, FirstClickLayerMode
+  InteractionEquationParams, ClosingMetaButtonsParams, FirstClickLayerEnum, AnimateButtonEnum
 } from '@shared/models/unit-definition';
 import { VariableInfo } from '@shared/models/responses';
 import { AudioFeedback } from '@shared/models/feedback';
@@ -33,8 +33,8 @@ export class EditorStateService {
   mainAudioDisableInteractionUntilComplete = signal(false);
 
   // FirstAudioOptions
-  firstClickLayer = signal<boolean | FirstClickLayerMode>('OFF');
-  animateButton = signal(false);
+  firstClickLayer = signal<boolean | FirstClickLayerEnum>('OFF');
+  animateButton = signal<boolean | AnimateButtonEnum>('OFF');
 
   // Opening Image
   openingImageEnabled = signal(false);
@@ -83,7 +83,7 @@ export class EditorStateService {
     this.mainAudioDisableInteractionUntilComplete.set(false);
 
     this.firstClickLayer.set('OFF');
-    this.animateButton.set(false);
+    this.animateButton.set('OFF');
 
     this.openingImageEnabled.set(false);
     this.openingImageSource.set('');
@@ -99,13 +99,16 @@ export class EditorStateService {
   loadFromDefinition(json: string): void {
     try {
       this.resetState();
-      const def = JSON.parse(json) as UnitDefinition;
+      const rawDef = JSON.parse(json) as Record<string, unknown>;
+      const def = rawDef as unknown as UnitDefinition;
       if (def.id) this.unitId.set(def.id);
       if (def.version) this.unitVersion.set(def.version);
       if (def.backgroundColor !== undefined) this.backgroundColor.set(def.backgroundColor);
       if (def.ribbonBars !== undefined) this.ribbonBars.set(def.ribbonBars);
       if (def.continueButtonShow) this.continueButtonShow.set(def.continueButtonShow);
-      if (def.interactionType) this.interactionType.set(def.interactionType);
+      if (typeof rawDef.interactionType === 'string') {
+        this.interactionType.set(rawDef.interactionType === 'META_BUTTONS' ? 'META' : rawDef.interactionType as InteractionEnum);
+      }
 
       // MainAudio
       if (def.mainAudio) {
@@ -113,12 +116,18 @@ export class EditorStateService {
         this.mainAudioSource.set(def.mainAudio.audioSource || '');
         this.mainAudioMaxPlay.set(def.mainAudio.maxPlay ?? 0);
         this.mainAudioDisableInteractionUntilComplete.set(def.mainAudio.disableInteractionUntilComplete || false);
+        if (def.mainAudio.firstClickLayer !== undefined && !def.firstAudioOptions?.firstClickLayer) {
+          this.firstClickLayer.set(def.mainAudio.firstClickLayer);
+        }
+        if (def.mainAudio.animateButton !== undefined && !def.firstAudioOptions?.animateButton) {
+          this.animateButton.set(def.mainAudio.animateButton);
+        }
       }
 
       // FirstAudioOptions
       if (def.firstAudioOptions) {
         this.firstClickLayer.set(def.firstAudioOptions.firstClickLayer ?? 'OFF');
-        this.animateButton.set(def.firstAudioOptions.animateButton || false);
+        this.animateButton.set(def.firstAudioOptions.animateButton ?? 'OFF');
       }
 
       // Opening image
@@ -131,9 +140,11 @@ export class EditorStateService {
 
       // Interaction parameters
       if (def.interactionParameters) {
-        this.interactionParams.set(def.interactionParameters);
+        this.interactionParams.set(
+          this.normalizeInteractionParams(this.interactionType(), def.interactionParameters)
+        );
       } else {
-        this.resetInteractionParams(def.interactionType || 'BUTTONS');
+        this.resetInteractionParams(this.interactionType());
       }
 
       // Variable info
@@ -177,11 +188,30 @@ export class EditorStateService {
       this.firstClickLayer.set(true);
       return;
     }
-    this.firstClickLayer.set(value as FirstClickLayerMode);
+    this.firstClickLayer.set(value as FirstClickLayerEnum);
   }
 
   firstClickLayerSelection(): string {
     const value = this.firstClickLayer();
+    if (value === true) {
+      return 'true';
+    }
+    if (value === false || value === undefined) {
+      return 'OFF';
+    }
+    return value;
+  }
+
+  setAnimateButtonFromSelection(value: string): void {
+    if (value === 'true') {
+      this.animateButton.set(true);
+      return;
+    }
+    this.animateButton.set(value as AnimateButtonEnum);
+  }
+
+  animateButtonSelection(): string {
+    const value = this.animateButton();
     if (value === true) {
       return 'true';
     }
@@ -211,6 +241,10 @@ export class EditorStateService {
           addBackspaceKey: true,
           addUmlautKeys: false,
           keyboardMode: 'CHARACTERS',
+          keysLine1: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'],
+          keysLine2: ['j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r'],
+          keysLine3: ['s', 't', 'u', 'v', 'w', 'x', 'y', 'z'],
+          keysLine4: [],
           maxInputLength: 20
         } as InteractionWriteParams);
         break;
@@ -218,6 +252,7 @@ export class EditorStateService {
         this.interactionParams.set({
           variableId: 'DROP',
           options: [],
+          buttonType: 'SMALL_SQUARE',
           imagePosition: 'BOTTOM'
         } as InteractionDropParams);
         break;
@@ -245,7 +280,6 @@ export class EditorStateService {
         this.interactionParams.set({
           variableId: 'PLACE_VALUE',
           value: 0,
-          numberOfRows: 1,
           maxNumberOfTens: 9,
           maxNumberOfOnes: 9
         } as InteractionPlaceValueParams);
@@ -271,7 +305,7 @@ export class EditorStateService {
           operators: ['+']
         } as InteractionEquationParams);
         break;
-      case 'META_BUTTONS':
+      case 'META':
         this.interactionParams.set({
           variableId: 'META_SELECTION'
         } as any);
@@ -309,11 +343,13 @@ export class EditorStateService {
 
     // FirstAudioOptions
     const firstClickLayer = this.firstClickLayer();
-    if (this.animateButton() || firstClickLayer === true ||
+    const animateButton = this.animateButton();
+    if (animateButton === true || (typeof animateButton === 'string' && animateButton !== 'OFF') || firstClickLayer === true ||
       (typeof firstClickLayer === 'string' && firstClickLayer !== 'OFF')) {
-      const firstAudioOptions: FirstAudioOptionsParams = {
-        animateButton: this.animateButton()
-      };
+      const firstAudioOptions: FirstAudioOptionsParams = {};
+      if (animateButton !== false) {
+        firstAudioOptions.animateButton = animateButton;
+      }
       if (firstClickLayer !== false) {
         firstAudioOptions.firstClickLayer = firstClickLayer;
       }
@@ -387,6 +423,40 @@ export class EditorStateService {
       default:
         return 'string';
     }
+  }
+
+  private normalizeInteractionParams(type: InteractionEnum, params: InteractionParameters): InteractionParameters {
+    if (type === 'WRITE') {
+      const writeParams = { ...(params as InteractionWriteParams) };
+      if (!writeParams.keysLine1) {
+        writeParams.keysLine1 = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
+      }
+      if (!writeParams.keysLine2) {
+        writeParams.keysLine2 = ['j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r'];
+      }
+      if (!writeParams.keysLine3) {
+        writeParams.keysLine3 = ['s', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+      }
+      if (!writeParams.keysLine4) {
+        const keysLine4: string[] = [];
+        if (writeParams.addUmlautKeys) {
+          keysLine4.push('ä', 'ö', 'ü');
+        }
+        if (writeParams.keysToAdd?.length) {
+          keysLine4.push(...writeParams.keysToAdd);
+        }
+        writeParams.keysLine4 = keysLine4;
+      }
+      writeParams.addUmlautKeys = ['ä', 'ö', 'ü'].every(umlaut => writeParams.keysLine4?.includes(umlaut));
+      return writeParams;
+    }
+    if (type === 'DROP') {
+      return {
+        buttonType: 'SMALL_SQUARE',
+        ...(params as InteractionDropParams)
+      } as InteractionDropParams;
+    }
+    return params;
   }
 
   private emitDefinitionChanged(): void {

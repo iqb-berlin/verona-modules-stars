@@ -11,22 +11,29 @@ import { EditorStateService } from '../../services/editor-state.service';
     <div class="interaction-editor">
       <div class="field">
         <label>Variablen-ID</label>
-        <input type="text" [value]="params.variableId" (input)="updateField('variableId', $any($event.target).value)">
+        <input type="text" [value]="params.variableId || ''" (input)="updateField('variableId', $any($event.target).value)">
       </div>
       <div class="field">
         <label>Text</label>
-        <input type="text" [value]="params.text" (input)="updateField('text', $any($event.target).value)">
+        <input type="text" [value]="params.text || ''" (input)="updateField('text', $any($event.target).value)">
+      </div>
+      <div class="field">
+        <label>Button-Typ</label>
+        <select [value]="params.buttonType || 'SMALL_SQUARE'" (change)="updateField('buttonType', $any($event.target).value)">
+          <option value="SMALL_SQUARE">Klein</option>
+          <option value="EXTRA_SMALL_SQUARE">Extra klein</option>
+        </select>
       </div>
       <div class="field">
         <label>Bildposition</label>
-        <select [value]="params.imagePosition" (change)="updateField('imagePosition', $any($event.target).value)">
+        <select [value]="params.imagePosition || 'BOTTOM'" (change)="updateField('imagePosition', $any($event.target).value)">
           <option value="TOP">Oben</option>
           <option value="BOTTOM">Unten</option>
         </select>
       </div>
       <div class="field">
         <label>Bild-Landing X,Y</label>
-        <input type="text" [value]="params.imageLandingXY" (input)="updateField('imageLandingXY', $any($event.target).value)" placeholder="z.B. 50,100">
+        <input type="text" [value]="params.imageLandingXY || ''" (input)="updateField('imageLandingXY', $any($event.target).value)" placeholder="z.B. 50,100">
       </div>
       <div class="field">
         <label>Bild</label>
@@ -54,7 +61,7 @@ import { EditorStateService } from '../../services/editor-state.service';
             </div>
             <div class="field">
               <label>Text</label>
-              <input type="text" [value]="opt.text" (input)="updateOption($index, 'text', $any($event.target).value)">
+              <input type="text" [value]="opt.text || ''" (input)="updateOption($index, 'text', $any($event.target).value)">
             </div>
             <div class="field">
               <label>Bild</label>

@@ -41,7 +41,7 @@ export class InteractionSelectorComponent {
     { value: 'NUMBER_LINE', label: 'Zahlenstrahl' },
     { value: 'PYRAMID', label: 'Rechenpyramide' },
     { value: 'EQUATION', label: 'Gleichung / Term' },
-    { value: 'META_BUTTONS', label: 'Meta Buttons (ohne Formular-Editor)' }
+    { value: 'META', label: 'Meta Buttons' }
   ];
 
   onTypeChange(newType: string): void {

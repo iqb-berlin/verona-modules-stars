@@ -59,6 +59,7 @@ import { EditorStateService } from '../../services/editor-state.service';
                     <option value="ALWAYS">Immer</option>
                     <option value="ON_ANY_RESPONSE">Bei jeder Antwort</option>
                     <option value="ON_FULL_CREDIT">Bei voller Punktzahl</option>
+                    <option value="ON_ALL_SUB_VALUES">Alle Teilwerte vorhanden</option>
                   </select>
                 </div>
 
@@ -72,7 +73,6 @@ import { EditorStateService } from '../../services/editor-state.service';
                     <option value="VALUE_TO_UPPER">Wert in Großbuchstaben</option>
                     <option value="SUM">Summe</option>
                     <option value="SUM_CHAR_MATCHES">Zeichen-Matches summieren</option>
-                    <option value="REGEX_FRACTION">Regex Fraction</option>
                   </select>
                 </div>
               </div>
@@ -122,7 +122,6 @@ import { EditorStateService } from '../../services/editor-state.service';
                           <option value="GREATER_THAN">Größer als</option>
                           <option value="LESS_THAN">Kleiner als</option>
                           <option value="IN_POSITION_RANGE">Im Positionsbereich</option>
-                          <option value="REGEX_MATCH">Regex Match</option>
                         </select>
                       </div>
                       <div class="field">
@@ -306,7 +305,7 @@ export class VariableInfoEditorComponent {
   }
 
   requiresCodingSourceParameter(variable: VariableInfo): boolean {
-    return variable.codingSource === 'SUM_CHAR_MATCHES' || variable.codingSource === 'REGEX_FRACTION';
+    return variable.codingSource === 'SUM_CHAR_MATCHES';
   }
 
   private getNextVariableId(suggestedVariableId: string, variables: VariableInfo[]): string {

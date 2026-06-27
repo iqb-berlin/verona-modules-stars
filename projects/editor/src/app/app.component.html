@@ -43,7 +43,7 @@
             @case ('NUMBER_LINE') { <stars-interaction-number-line-editor></stars-interaction-number-line-editor> }
             @case ('PYRAMID') { <stars-interaction-pyramid-editor></stars-interaction-pyramid-editor> }
             @case ('EQUATION') { <stars-interaction-equation-editor></stars-interaction-equation-editor> }
-            @case ('META_BUTTONS') {
+            @case ('META') {
               <div class="interaction-editor">
                 <div class="field">
                   <label>Variablen-ID</label>
@@ -54,8 +54,8 @@
                   />
                 </div>
                 <div class="no-interaction">
-                  Der Player rendert <code>META_BUTTONS</code> aktuell noch nicht.
-                  Die Definition kann hier aber erstellt und als JSON exportiert werden.
+                  Die Meta-Interaktion wird im Player ueber die Closing-Meta-Konfiguration
+                  und die Variable-ID gesteuert.
                 </div>
               </div>
             }

@@ -11,7 +11,7 @@ import { EditorStateService } from '../../services/editor-state.service';
     <div class="interaction-editor">
       <div class="field">
         <label>Variablen-ID</label>
-        <input type="text" [value]="params.variableId" (input)="updateField('variableId', $any($event.target).value)">
+        <input type="text" [value]="params.variableId || ''" (input)="updateField('variableId', $any($event.target).value)">
       </div>
       <div class="field">
         <label>Operatoren (kommagetrennt)</label>
@@ -20,15 +20,15 @@ import { EditorStateService } from '../../services/editor-state.service';
       <div class="field-row-group">
         <div class="field">
           <label>Fester Operand 1</label>
-          <input type="number" [value]="params.fixOperand1" (input)="updateOptionalNumber('fixOperand1', $any($event.target).value)" placeholder="(leer = Eingabe)">
+          <input type="number" [value]="params.fixOperand1 ?? ''" (input)="updateOptionalNumber('fixOperand1', $any($event.target).value)" placeholder="(leer = Eingabe)">
         </div>
         <div class="field">
           <label>Fester Operand 2</label>
-          <input type="number" [value]="params.fixOperand2" (input)="updateOptionalNumber('fixOperand2', $any($event.target).value)" placeholder="(leer = Eingabe)">
+          <input type="number" [value]="params.fixOperand2 ?? ''" (input)="updateOptionalNumber('fixOperand2', $any($event.target).value)" placeholder="(leer = Eingabe)">
         </div>
         <div class="field">
           <label>Festes Ergebnis</label>
-          <input type="number" [value]="params.fixResult" (input)="updateOptionalNumber('fixResult', $any($event.target).value)" placeholder="(leer = Eingabe)">
+          <input type="number" [value]="params.fixResult ?? ''" (input)="updateOptionalNumber('fixResult', $any($event.target).value)" placeholder="(leer = Eingabe)">
         </div>
       </div>
       <div class="field">

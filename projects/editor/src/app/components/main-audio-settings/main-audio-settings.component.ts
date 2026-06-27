@@ -84,17 +84,16 @@ import { MediaUploadComponent } from '../media-upload/media-upload.component';
               </select>
             </div>
             <div class="field field-row">
-              <label>
-                <input
-                  type="checkbox"
-                  [checked]="state.animateButton()"
-                  (change)="
-                    state.animateButton.set($any($event.target).checked);
-                    state.notifyChange()
-                  "
-                />
-                Audio-Button animieren
-              </label>
+              <label>Audio-Button Animation</label>
+              <select
+                [value]="state.animateButtonSelection()"
+                (change)="updateAnimateButton($any($event.target).value)"
+              >
+                <option value="OFF">Aus</option>
+                <option value="KIND">Kind</option>
+                <option value="BOLD">Bold</option>
+                <option value="true">Legacy: Ein</option>
+              </select>
             </div>
           </div>
         </div>
@@ -126,6 +125,11 @@ export class MainAudioSettingsComponent {
 
   updateFirstClickLayer(value: string): void {
     this.state.setFirstClickLayerFromSelection(value);
+    this.state.notifyChange();
+  }
+
+  updateAnimateButton(value: string): void {
+    this.state.setAnimateButtonFromSelection(value);
     this.state.notifyChange();
   }
 }

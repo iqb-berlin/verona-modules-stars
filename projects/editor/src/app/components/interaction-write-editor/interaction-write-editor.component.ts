@@ -11,33 +11,44 @@ import { EditorStateService } from '../../services/editor-state.service';
     <div class="interaction-editor">
       <div class="field">
         <label>Variablen-ID</label>
-        <input type="text" [value]="params.variableId" (input)="updateField('variableId', $any($event.target).value)">
+        <input type="text" [value]="params.variableId || ''" (input)="updateField('variableId', $any($event.target).value)">
       </div>
       <div class="field">
         <label>Text / Aufgabenstellung</label>
-        <input type="text" [value]="params.text" (input)="updateField('text', $any($event.target).value)">
+        <input type="text" [value]="params.text || ''" (input)="updateField('text', $any($event.target).value)">
       </div>
       <div class="field">
         <label>Tastatur-Modus</label>
-        <select [value]="params.keyboardMode" (change)="updateField('keyboardMode', $any($event.target).value)">
+        <select [value]="params.keyboardMode || 'CHARACTERS'" (change)="updateField('keyboardMode', $any($event.target).value)">
           <option value="CHARACTERS">Buchstaben</option>
           <option value="NUMBERS_LINE">Zahlen (Zeile)</option>
-          <option value="NUMBERS_BLOCK">Zahlenblock</option>
         </select>
       </div>
       <div class="field">
         <label>Max. Eingabelänge</label>
-        <input type="number" [value]="params.maxInputLength" (input)="updateField('maxInputLength', +$any($event.target).value)" min="1" max="100">
+        <input type="number" [value]="params.maxInputLength ?? 20" (input)="updateField('maxInputLength', +$any($event.target).value)" min="1" max="100">
       </div>
       <div class="field field-row">
         <label><input type="checkbox" [checked]="params.addBackspaceKey" (change)="updateField('addBackspaceKey', $any($event.target).checked)"> Rücktaste</label>
       </div>
       <div class="field field-row">
-        <label><input type="checkbox" [checked]="params.addUmlautKeys" (change)="updateField('addUmlautKeys', $any($event.target).checked)"> Umlauttasten</label>
+        <label><input type="checkbox" [checked]="addUmlautKeysEnabled" (change)="toggleUmlautKeys($any($event.target).checked)"> Umlauttasten</label>
       </div>
       <div class="field">
-        <label>Zusätzliche Tasten (kommagetrennt)</label>
-        <input type="text" [value]="keysString" (input)="updateKeys($any($event.target).value)">
+        <label>Tastenreihe 1 (kommagetrennt)</label>
+        <input type="text" [value]="line1String" (input)="updateKeysLine('keysLine1', $any($event.target).value)">
+      </div>
+      <div class="field">
+        <label>Tastenreihe 2 (kommagetrennt)</label>
+        <input type="text" [value]="line2String" (input)="updateKeysLine('keysLine2', $any($event.target).value)">
+      </div>
+      <div class="field">
+        <label>Tastenreihe 3 (kommagetrennt)</label>
+        <input type="text" [value]="line3String" (input)="updateKeysLine('keysLine3', $any($event.target).value)">
+      </div>
+      <div class="field">
+        <label>Tastenreihe 4 (kommagetrennt)</label>
+        <input type="text" [value]="line4String" (input)="updateKeysLine('keysLine4', $any($event.target).value)">
       </div>
       <div class="field">
         <label>Bild</label>
@@ -60,14 +71,31 @@ import { EditorStateService } from '../../services/editor-state.service';
   `]
 })
 export class InteractionWriteEditorComponent {
+  private static readonly UMLAUT_KEYS = ['ä', 'ö', 'ü'];
   state = inject(EditorStateService);
 
   get params(): InteractionWriteParams {
     return this.state.interactionParams() as InteractionWriteParams;
   }
 
-  get keysString(): string {
-    return (this.params.keysToAdd || []).join(', ');
+  get line1String(): string {
+    return (this.params.keysLine1 || []).join(', ');
+  }
+
+  get line2String(): string {
+    return (this.params.keysLine2 || []).join(', ');
+  }
+
+  get line3String(): string {
+    return (this.params.keysLine3 || []).join(', ');
+  }
+
+  get line4String(): string {
+    return (this.params.keysLine4 || []).join(', ');
+  }
+
+  get addUmlautKeysEnabled(): boolean {
+    return this.hasAllUmlautKeys(this.params.keysLine4 || []);
   }
 
   updateField(field: string, value: any): void {
@@ -77,9 +105,29 @@ export class InteractionWriteEditorComponent {
     this.state.notifyChange();
   }
 
-  updateKeys(value: string): void {
+  updateKeysLine(field: 'keysLine1' | 'keysLine2' | 'keysLine3' | 'keysLine4', value: string): void {
     const keys = value.split(',').map(k => k.trim()).filter(k => k.length > 0);
-    this.updateField('keysToAdd', keys);
+    const current = { ...this.params };
+    (current as any)[field] = keys;
+    if (field === 'keysLine4') {
+      current.addUmlautKeys = this.hasAllUmlautKeys(keys);
+    }
+    this.state.interactionParams.set(current);
+    this.state.notifyChange();
+  }
+
+  toggleUmlautKeys(enabled: boolean): void {
+    const current = { ...this.params };
+    const line4WithoutUmlauts = (current.keysLine4 || [])
+      .filter(key => !InteractionWriteEditorComponent.UMLAUT_KEYS.includes(key));
+
+    current.addUmlautKeys = enabled;
+    current.keysLine4 = enabled
+      ? [...InteractionWriteEditorComponent.UMLAUT_KEYS, ...line4WithoutUmlauts]
+      : line4WithoutUmlauts;
+
+    this.state.interactionParams.set(current);
+    this.state.notifyChange();
   }
 
   onImageSelected(event: Event): void {
@@ -88,5 +136,9 @@ export class InteractionWriteEditorComponent {
     const reader = new FileReader();
     reader.onload = () => this.updateField('imageSource', reader.result as string);
     reader.readAsDataURL(file);
+  }
+
+  private hasAllUmlautKeys(keys: string[]): boolean {
+    return InteractionWriteEditorComponent.UMLAUT_KEYS.every(umlaut => keys.includes(umlaut));
   }
 }

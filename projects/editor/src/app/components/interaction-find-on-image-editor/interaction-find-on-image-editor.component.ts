@@ -11,19 +11,19 @@ import { EditorStateService } from '../../services/editor-state.service';
     <div class="interaction-editor">
       <div class="field">
         <label>Variablen-ID</label>
-        <input type="text" [value]="params.variableId" (input)="updateField('variableId', $any($event.target).value)">
+        <input type="text" [value]="params.variableId || ''" (input)="updateField('variableId', $any($event.target).value)">
       </div>
       <div class="field">
         <label>Text</label>
-        <input type="text" [value]="params.text" (input)="updateField('text', $any($event.target).value)">
+        <input type="text" [value]="params.text || ''" (input)="updateField('text', $any($event.target).value)">
       </div>
       <div class="field">
         <label>Zielbereich (Koordinaten)</label>
-        <input type="text" [value]="params.showArea" (input)="updateField('showArea', $any($event.target).value)" placeholder="x1,y1,x2,y2">
+        <input type="text" [value]="params.showArea || ''" (input)="updateField('showArea', $any($event.target).value)" placeholder="x1,y1,x2,y2">
       </div>
       <div class="field">
         <label>Zielgröße</label>
-        <select [value]="params.size" (change)="updateField('size', $any($event.target).value)">
+        <select [value]="params.size || 'MEDIUM'" (change)="updateField('size', $any($event.target).value)">
           <option value="SMALL">Klein</option>
           <option value="MEDIUM">Mittel</option>
           <option value="LARGE">Groß</option>

@@ -18,14 +18,14 @@ import { EditorStateService } from '../../services/editor-state.service';
         <label>Variablen-ID</label>
         <input
           type="text"
-          [value]="params.variableId"
+          [value]="params.variableId || ''"
           (input)="updateField('variableId', $any($event.target).value)"
         />
       </div>
       <div class="field">
         <label>Button-Typ</label>
         <select
-          [value]="params.buttonType"
+          [value]="params.buttonType || 'BIG_SQUARE'"
           (change)="updateField('buttonType', $any($event.target).value)"
         >
           @for (opt of buttonTypes; track opt.value) {
@@ -38,7 +38,7 @@ import { EditorStateService } from '../../services/editor-state.service';
           <label>Zeilen</label>
           <input
             type="number"
-            [value]="params.numberOfRows"
+            [value]="params.numberOfRows ?? 1"
             (input)="updateField('numberOfRows', +$any($event.target).value)"
             min="1"
             max="5"
@@ -47,7 +47,7 @@ import { EditorStateService } from '../../services/editor-state.service';
         <div class="field">
           <label>Bildposition</label>
           <select
-            [value]="params.imagePosition"
+            [value]="params.imagePosition || 'LEFT'"
             (change)="updateField('imagePosition', $any($event.target).value)"
           >
             <option value="LEFT">Links</option>
@@ -58,7 +58,7 @@ import { EditorStateService } from '../../services/editor-state.service';
       <div class="field">
         <label>Layout</label>
         <select
-          [value]="params.layout"
+          [value]="params.layout || 'LEFT_CENTER'"
           (change)="updateField('layout', $any($event.target).value)"
         >
           <option value="LEFT_CENTER">Links zentriert</option>
@@ -108,7 +108,7 @@ import { EditorStateService } from '../../services/editor-state.service';
         <label>Text</label>
         <input
           type="text"
-          [value]="params.text"
+          [value]="params.text || ''"
           (input)="updateField('text', $any($event.target).value)"
         />
       </div>
@@ -238,7 +238,7 @@ import { EditorStateService } from '../../services/editor-state.service';
                 <label>Text</label>
                 <input
                   type="text"
-                  [value]="btn.text"
+                  [value]="btn.text || ''"
                   (input)="
                     updateButton($index, 'text', $any($event.target).value)
                   "

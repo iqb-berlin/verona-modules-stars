@@ -11,15 +11,11 @@ import { EditorStateService } from '../../services/editor-state.service';
     <div class="interaction-editor">
       <div class="field">
         <label>Variablen-ID</label>
-        <input type="text" [value]="params.variableId" (input)="updateField('variableId', $any($event.target).value)">
+        <input type="text" [value]="params.variableId || ''" (input)="updateField('variableId', $any($event.target).value)">
       </div>
       <div class="field">
         <label>Wert</label>
         <input type="number" [value]="params.value" (input)="updateField('value', +$any($event.target).value)" min="0">
-      </div>
-      <div class="field">
-        <label>Zeilen</label>
-        <input type="number" [value]="params.numberOfRows" (input)="updateField('numberOfRows', +$any($event.target).value)" min="1" max="5">
       </div>
       <div class="field">
         <label>Max. Zehner</label>

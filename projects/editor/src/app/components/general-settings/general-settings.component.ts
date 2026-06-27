@@ -1,11 +1,13 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ClosingMetaButtonsParams } from '@shared/models/unit-definition';
 import { EditorStateService } from '../../services/editor-state.service';
+import { MediaUploadComponent } from '../media-upload/media-upload.component';
 
 @Component({
   selector: 'stars-general-settings',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MediaUploadComponent],
   template: `
     <section class="editor-section">
       <h3 class="section-title" (click)="collapsed = !collapsed">
@@ -130,6 +132,35 @@ import { EditorStateService } from '../../services/editor-state.service';
                   />
                 </div>
               </div>
+              <stars-media-upload
+                label="Closing-Meta-Audio"
+                type="audio"
+                [source]="closingMetaButtons.audioSource || ''"
+                (sourceChange)="updateClosingMetaButtons('audioSource', $event)"
+              >
+              </stars-media-upload>
+              <div class="field-row-group">
+                <div class="field field-row">
+                  <label>
+                    <input
+                      type="checkbox"
+                      [checked]="closingMetaButtons.autoPlay || false"
+                      (change)="updateClosingMetaButtons('autoPlay', $any($event.target).checked)"
+                    />
+                    Audio automatisch abspielen
+                  </label>
+                </div>
+                <div class="field field-row">
+                  <label>
+                    <input
+                      type="checkbox"
+                      [checked]="closingMetaButtons.triggerNavigationOnSelect !== false"
+                      (change)="updateClosingMetaButtons('triggerNavigationOnSelect', $any($event.target).checked)"
+                    />
+                    Navigation bei Auswahl
+                  </label>
+                </div>
+              </div>
             }
           </div>
         </div>
@@ -157,9 +188,12 @@ export class GeneralSettingsComponent {
     if (enabled) {
       const currentVariableId = (this.state.interactionParams() as any)?.variableId || 'BUTTONS';
       this.state.closingMetaButtons.set({
+        audioSource: '',
+        autoPlay: false,
         variableIdReference: currentVariableId,
         variableIdMetaSelection: 'META_SELECTION',
-        variableIdMetaOutcome: 'META_OUTCOME'
+        variableIdMetaOutcome: 'META_OUTCOME',
+        triggerNavigationOnSelect: true
       });
     } else {
       this.state.closingMetaButtons.set(undefined);
@@ -167,7 +201,10 @@ export class GeneralSettingsComponent {
     this.state.notifyChange();
   }
 
-  updateClosingMetaButtons(field: 'variableIdReference' | 'variableIdMetaSelection' | 'variableIdMetaOutcome', value: string): void {
+  updateClosingMetaButtons(
+    field: keyof ClosingMetaButtonsParams,
+    value: string | boolean
+  ): void {
     const current = this.state.closingMetaButtons();
     if (!current) {
       return;
