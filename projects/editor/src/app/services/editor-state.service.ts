@@ -399,11 +399,17 @@ export class EditorStateService {
           variableId === params?.variableId && params.options) {
           const buttons = params.options.buttons || params.options;
           if (Array.isArray(buttons) && buttons.length > 0) {
-            variable.valuesComplete = true;
-            variable.values = buttons.map((_: any, i: number) => ({
-              value: i.toString(),
-              label: buttons[i]?.text || buttons[i]?.label || `Option ${i + 1}`
-            }));
+            const labels = buttons.map((button: any, i: number) => button?.text || button?.label || `Option ${i + 1}`);
+            if (params.multiSelect) {
+              variable.multiple = true;
+              variable.valuePositionLabels = labels;
+            } else {
+              variable.valuesComplete = true;
+              variable.values = labels.map((label: string, i: number) => ({
+                value: (i + 1).toString(),
+                label
+              }));
+            }
           }
         }
         variables.push(variable);

@@ -27,17 +27,13 @@ function log(message) {
   console.log(`[build-editor-bundled] ${message}`);
 }
 
-// Step 1: Build player if packed file doesn't exist
-if (fs.existsSync(playerPackedFile)) {
-  log("Player packed file already exists, skipping player build.");
-} else {
-  log("Building player...");
-  try {
-    execSync("npm run build", { cwd: rootDir, stdio: "inherit" });
-  } catch (error) {
-    console.error("Failed to build player:", error);
-    process.exit(1);
-  }
+// Step 1: Always build the player so the embedded preview cannot use a stale artifact.
+log("Building player...");
+try {
+  execSync("npm run build", { cwd: rootDir, stdio: "inherit" });
+} catch (error) {
+  console.error("Failed to build player:", error);
+  process.exit(1);
 }
 
 // Step 2: Check if packed player exists

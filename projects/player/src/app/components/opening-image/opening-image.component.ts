@@ -43,7 +43,7 @@ export class OpeningImageComponent extends InteractionComponentDirective {
           params.presentationDurationMS || 0;
 
         // If there is no opening audio, show image immediately and schedule finish based on duration
-        if (params.audioSource === '') {
+        if (!params.audioSource?.trim()) {
           if (!this.showImage()) {
             this.showImage.set(true);
             this.unitService.showingOpeningImage.set(true);
