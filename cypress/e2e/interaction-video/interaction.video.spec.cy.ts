@@ -146,16 +146,12 @@ describe('Interaction VIDEO Component', () => {
 
   describe('Navigation on triggerNavigationOnEnd', () => {
     it('requests navigation to next unit when triggerNavigationOnEnd is true and video ends', () => {
-      cy.setupTestData(
-        'video_triggerNavigationOnEnd_true_test.json',
-        interactionType
-      );
 
-      // Spy on postMessage of the parent window (used by VeronaPostService)
-      cy.window().then(window => {
-        const target = window.parent || window;
-        cy.spy(target, 'postMessage').as('postMessage');
-      });
+      const configFile = 'video_triggerNavigationOnEnd_true_test';
+
+      cy.setupTestDataWithPostMessageMock(configFile, interactionType);
+
+      cy.loadUnit(`interaction-${interactionType}/${configFile}`);
 
       // Start the video
       clickVideoPlay();
@@ -165,11 +161,14 @@ describe('Interaction VIDEO Component', () => {
       // Wait for navigation after small delay in component
       cy.wait(600);
 
-      cy.get('@postMessage').should('have.been.called');
-      cy.get('@postMessage').should('have.been.calledWithMatch', Cypress.sinon.match({
-        type: 'vopUnitNavigationRequestedNotification',
-        target: 'next'
-      }));
+      cy.get('@outgoingMessages').should('contain.deep', {
+        data: {
+          type: 'vopUnitNavigationRequestedNotification',
+          sessionId: 'cypress-test-session',
+          target: 'next'
+        },
+        origin: '*'
+      });
     });
   });
 

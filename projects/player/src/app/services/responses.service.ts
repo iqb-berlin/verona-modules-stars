@@ -25,6 +25,7 @@ export class ResponsesService {
   pendingAudioFeedback = signal(false);
   feedbackHint = signal('');
   feedbackActive = signal(false);
+  triggerNavigationOnEnd = signal(false);
   private pendingAudioFeedbackSource = '';
   private pendingFeedbackHint = '';
   private pendingHintDelay = 0;
@@ -65,6 +66,7 @@ export class ResponsesService {
     this.pendingAudioFeedbackSource = '';
     this.feedbackHint.set('');
     this.feedbackActive.set(false);
+    this.triggerNavigationOnEnd.set(false);
     this.feedbackDefinitions = [];
     this.pendingFeedbackHint = '';
     this.pendingHintDelay = 0;
@@ -119,6 +121,7 @@ export class ResponsesService {
       }
       if (unitDefinition.audioFeedback && unitDefinition.audioFeedback.feedback &&
         unitDefinition.audioFeedback.feedback.length > 0) {
+        this.triggerNavigationOnEnd.set(unitDefinition.audioFeedback.triggerNavigationOnEnd ?? false);
         unitDefinition.audioFeedback.feedback.forEach(f => {
           if (f.variableId && f.variableId.length > 0 && f.parameter && f.audioSource) {
             let showResponse: ShowResponse = {
