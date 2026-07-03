@@ -27,8 +27,7 @@
 
   &.example-pyramid {
     .number-box {
-      background-color: transparent;
-      box-shadow: 0 4px 15px 4px rgba(0, 0, 0, 0.1);
+      background-color: rgba(255, 255, 255, 0.5);
     }
   }
 }
@@ -82,7 +81,6 @@
   justify-content: center;
   font-size: 64px;
   color: black;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   user-select: none;
 
   &.input-box {
@@ -91,7 +89,6 @@
 
     &.selected {
       border-color: colors.$highlight;
-      box-shadow: 0 0 12px rgba(colors.$highlight, 0.6);
       z-index: 1;
     }
 
