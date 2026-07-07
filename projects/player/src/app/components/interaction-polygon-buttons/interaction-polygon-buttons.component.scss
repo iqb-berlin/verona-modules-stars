@@ -9,12 +9,12 @@
 
 svg {
   path {
-    stroke: darkblue;
+    stroke: colors.$highlight;
     stroke-width: 3px;
     fill: white;
 
     &.clicked {
-      fill: darkblue;
+      fill: colors.$highlight;
     }
 
     &.hint {
