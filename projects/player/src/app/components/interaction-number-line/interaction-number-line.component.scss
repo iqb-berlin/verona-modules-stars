@@ -34,7 +34,7 @@
   }
 }
 
-.number-input-field-wave {
+.number-input-field-wave, .number-input-field-ruler {
   @include variables.empty-input-box-stroke;
 }
 
