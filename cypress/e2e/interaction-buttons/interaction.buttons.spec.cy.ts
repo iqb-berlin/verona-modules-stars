@@ -101,6 +101,7 @@ describe('Interaction BUTTONS Component', () => {
         { buttonType: 'MEDIUM_SQUARE', file: 'buttons_buttonType_mediumSquare_test.json' },
         { buttonType: 'BIG_SQUARE', file: 'buttons_buttonType_bigSquare_test.json' },
         { buttonType: 'SMALL_SQUARE', file: 'buttons_buttonType_smallSquare_test.json' },
+        { buttonType: 'EXTRA_SMALL_SQUARE', file: 'buttons_buttonType_extraSmallSquare_test.json' },
         { buttonType: 'TEXT', file: 'buttons_buttonType_text_test.json' },
         { buttonType: 'CIRCLE', file: 'buttons_buttonType_circle_test.json' },
         { buttonType: 'EXTRA_LARGE_SQUARE', file: 'buttons_buttonType_extraLargeSquare_test.json' },

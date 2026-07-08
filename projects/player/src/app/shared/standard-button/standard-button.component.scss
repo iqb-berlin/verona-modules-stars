@@ -198,6 +198,10 @@
     @include variables.extra-small-button-size;
     min-width: 150px;
     min-height: 150px;
+
+    span {
+      font-size: 96px;
+    }
   }
 
   &.long_rectangle-type {
@@ -209,7 +213,7 @@
     label {
       box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.2);
       background-color: transparent;
-      border: 2px solid transparent;
+      border: 3px solid transparent;
     }
 
     img {
