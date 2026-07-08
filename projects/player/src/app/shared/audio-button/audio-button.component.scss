@@ -29,11 +29,11 @@
     }
 
     &.is-playing {
-      filter: none;
       .white-circle {
         fill: colors.$highlight;
       }
       .speaker-icon {
+        filter: none;
         g path {
           stroke: white;
           stroke-width: 0;
