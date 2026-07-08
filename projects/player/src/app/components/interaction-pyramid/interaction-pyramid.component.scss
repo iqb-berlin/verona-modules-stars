@@ -85,7 +85,7 @@
 
   &.input-box {
     cursor: pointer;
-    border: 2px solid transparent;
+    border: variables.$border-width solid transparent;
 
     &.selected {
       border-color: colors.$highlight;
