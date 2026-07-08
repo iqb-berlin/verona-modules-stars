@@ -19,6 +19,7 @@
       <div
         class="animate-wrapper"
         [class.no-transition]="shouldDisableTransition($index)"
+        [class.dragging]="draggingIndex() === $index"
         cdkDrag
         [cdkDragFreeDragPosition]="freeDragPositionFor($index)"
         [cdkDragStartDelay]="0"

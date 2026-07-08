@@ -38,9 +38,20 @@
 .animate-wrapper {
   margin-right: variables.$small-gap-margin;
   transition: transform 1s ease-in-out;
+  position: relative;
+  z-index: 1;
+
+  &:last-child {
+    margin-right: 0;
+  }
 
   &.no-transition {
     transition: none;
+  }
+
+  &.dragging {
+    /* Keep the dragged item above all siblings, before and after it */
+    z-index: 101;
   }
 }
 
