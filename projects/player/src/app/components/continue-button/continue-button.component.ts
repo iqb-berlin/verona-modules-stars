@@ -23,8 +23,6 @@ export class ContinueButtonComponent {
 
   clicked = signal(false);
 
-  lastAudioSource = '';
-
   handleClick() {
     if (this.audioPlayerService.isPlaying()) return;
     this.clicked.set(true);
@@ -33,31 +31,18 @@ export class ContinueButtonComponent {
       this.clicked.set(false);
     }, 200);
 
-    if (this.audioFeedbackService.pendingAudioFeedback()) {
-      const newAudioSource = this.audioFeedbackService.getAudioFeedback(true);
-      if (newAudioSource !== this.lastAudioSource) {
-        this.audioPlayerService.setAudioSrc({
-          audioSource: newAudioSource,
-          audioId: 'AudioFeedback'
-        }).then(() => {
-          this.audioPlayerService.getPlayFinished('AudioFeedback').then(() => {
-            // TODO add here automatic function when audio finished aka navigation next
-          });
-          this.audioFeedbackService.startFeedback();
-        });
-        this.lastAudioSource = newAudioSource;
+    void this.audioFeedbackService.playPendingFeedbackOnContinue(this.audioPlayerService).then(result => {
+      if (result === 'feedback-started') {
+        return;
+      }
+      if (this.unitService.closingMetaButtons()?.variableIdReference &&
+        !this.closingMetaService.closingMetaRunning()) {
+        this.unitService.startClosingMeta();
       } else {
         setTimeout(() => {
           this.navigate.emit();
         }, 200);
       }
-    } else if (this.unitService.closingMetaButtons()?.variableIdReference &&
-      !this.closingMetaService.closingMetaRunning()) {
-      this.unitService.startClosingMeta();
-    } else {
-      setTimeout(() => {
-        this.navigate.emit();
-      }, 200);
-    }
+    });
   }
 }

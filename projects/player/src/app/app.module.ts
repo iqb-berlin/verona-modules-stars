@@ -3,7 +3,7 @@ import { NgModule, provideZonelessChangeDetection } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 
 import { ResponsesService } from './services/responses.service';
-import { ComponentStateService } from './services/component-state.service';
+import { StateService } from './services/state.service';
 import { AudioFeedbackService } from './services/audio-feedback.service';
 import { ClosingMetaService } from './services/closing-meta.service';
 import { VeronaPostService } from './services/verona-post.service';
@@ -69,7 +69,7 @@ import { UnitDefinitionErrorComponent } from './components/unit-definition-error
   providers: [
     provideZonelessChangeDetection(),
     ResponsesService,
-    ComponentStateService,
+    StateService,
     AudioFeedbackService,
     ClosingMetaService,
     AudioPlayerService,

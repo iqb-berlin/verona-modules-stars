@@ -3,7 +3,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Response } from '@iqbspecs/response/response.interface';
 import { Progress, UnitState, UnitStateDataType } from '../models/verona';
 import { VeronaPostService } from './verona-post.service';
-import { ComponentStateService } from './component-state.service';
+import { StateService } from './state.service';
 import { AudioFeedbackService } from './audio-feedback.service';
 import { ClosingMetaResponseHooks, ClosingMetaService } from './closing-meta.service';
 import { ClosingMetaButtonsParams, UnitDefinition } from '../models/unit-definition';
@@ -25,7 +25,7 @@ export class ResponsesService implements ClosingMetaResponseHooks {
   allResponses: Response[] = [];
   variableInfo: VariableInfo[] = [];
   veronaPostService = inject(VeronaPostService);
-  componentStateService = inject(ComponentStateService);
+  stateService = inject(StateService);
   audioFeedbackService = inject(AudioFeedbackService);
   closingMetaService = inject(ClosingMetaService);
   hasParentWindow = window === window.parent;
@@ -60,7 +60,7 @@ export class ResponsesService implements ClosingMetaResponseHooks {
     this.lastResponsesString = '';
     this.responseProgress.set('none');
     this.formerStateResponses.set([]);
-    this.componentStateService.reset();
+    this.stateService.reset();
     this.audioFeedbackService.reset();
     this.closingMetaService.reset();
   }
@@ -125,8 +125,8 @@ export class ResponsesService implements ClosingMetaResponseHooks {
           codedResponse.value = incomingN;
           this.allResponses.push(codedResponse);
         }
-        if (incomingN >= 1 || this.componentStateService.mainAudioComplete()) {
-          this.componentStateService.setMainAudioComplete(true);
+        if (incomingN >= 1 || this.stateService.mainAudioComplete()) {
+          this.stateService.setMainAudioComplete(true);
         }
       } else {
         // Default behavior for all other responses (including closing meta selection)
@@ -134,7 +134,7 @@ export class ResponsesService implements ClosingMetaResponseHooks {
 
         if (response.id === 'VIDEO') {
           const videoValue = response.value as number;
-          this.componentStateService.setVideoComplete(videoValue >= 1);
+          this.stateService.setVideoComplete(videoValue >= 1);
         }
       }
     });
@@ -180,7 +180,7 @@ export class ResponsesService implements ClosingMetaResponseHooks {
         responses: responsesAsString
       },
       responseProgress: this.responseProgress(),
-      presentationProgress: this.componentStateService.getPresentationStatus()
+      presentationProgress: this.stateService.getPresentationStatus()
     };
 
     if (this.hasParentWindow) {
@@ -411,7 +411,7 @@ export class ResponsesService implements ClosingMetaResponseHooks {
   }
 
   getPresentationStatus(): Progress {
-    return this.componentStateService.getPresentationStatus();
+    return this.stateService.getPresentationStatus();
   }
 
   /**
@@ -422,14 +422,14 @@ export class ResponsesService implements ClosingMetaResponseHooks {
    * Each update triggers a vopStateChangedNotification to the Verona host.
    */
   updatePresentationProgress(progress: Progress): void {
-    this.componentStateService.updatePresentationProgress(progress);
+    this.stateService.updatePresentationProgress(progress);
     const unitState: UnitState = {
       unitStateDataType: UnitStateDataType,
       dataParts: {
         responses: this.lastResponsesString
       },
       responseProgress: this.responseProgress(),
-      presentationProgress: this.componentStateService.getPresentationStatus()
+      presentationProgress: this.stateService.getPresentationStatus()
     };
     if (this.veronaPostService) {
       this.veronaPostService.sendVopStateChangedNotification({ unitState });

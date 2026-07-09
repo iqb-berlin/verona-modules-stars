@@ -1,7 +1,8 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 
 import { AudioOptions, ClosingMetaButtonsParams, InteractionParameters } from '../models/unit-definition';
 import { AudioPlayerService } from './audio-player.service';
+import { StateService } from './state.service';
 import type { UnitService } from './unit.service';
 
 export interface MetaResponseTouch {
@@ -31,6 +32,8 @@ export interface ClosingMetaPhaseDeps {
   providedIn: 'root'
 })
 export class ClosingMetaService {
+  private stateService = inject(StateService);
+
   closingMetaRunning = signal(false);
   metaInteractionDone = signal(false);
   closingMetaButtons = signal<ClosingMetaButtonsParams>({} as ClosingMetaButtonsParams);
@@ -60,14 +63,14 @@ export class ClosingMetaService {
     const parameters: InteractionParameters = {} as InteractionParameters;
     parameters.variableId = closingMetaButtons.variableIdMetaSelection;
     unitService.parameters.set(parameters);
-    unitService.interaction.set('META');
+    unitService.interactionType.set('META');
 
     if (closingMetaButtons?.audioSource?.trim()) {
       const audioOptions: AudioOptions = {
         audioSource: closingMetaButtons.audioSource as string,
         audioId: 'closingMetaButtonsAudio'
       };
-      unitService.setCurrentAudioSrc(audioOptions);
+      this.stateService.setCurrentAudioSrc(audioOptions);
       if (closingMetaButtons.autoPlay) {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         audioPlayerService.setAudioSrc(audioOptions).then(ready => {
@@ -78,7 +81,7 @@ export class ClosingMetaService {
         });
       }
     } else {
-      unitService.clearCurrentAudioSrc();
+      this.stateService.clearCurrentAudioSrc();
     }
 
     this.closingMetaButtons.set(closingMetaButtons);

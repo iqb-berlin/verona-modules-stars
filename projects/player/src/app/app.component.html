@@ -8,18 +8,16 @@
     <stars-unit-definition-error [message]="errorMessage"></stars-unit-definition-error>
   } @else {
 
-  @if (unitService.showFirstClickLayer()) {
-    <stars-click-layer [FirstAudioOptionsParams]="unitService.firstAudioOptions()"></stars-click-layer>
-  }
+  <stars-click-layer [FirstAudioOptionsParams]="unitService.firstAudioOptions()" (layerClicked)="onLayerClicked()"></stars-click-layer>
 
   <!-- audio component (show if player is not hidden) -->
-  @if (unitService.currentAudioSrc().audioSource && !unitService.showingOpeningImage()) {
-    <stars-audio [audio]="unitService.currentAudioSrc()" [firstAudioOptions]="unitService.firstAudioOptions()"></stars-audio>
+  @if (stateService.currentAudioSrc().audioSource && !unitService.showingOpeningImage()) {
+    <stars-audio [audio]="stateService.currentAudioSrc()" [firstAudioOptions]="unitService.firstAudioOptions()"></stars-audio>
   }
 
   @if (unitService.showContinueButton()) {
     <stars-continue-button
-      (navigate)="componentStateService.requestNavigation('next')"></stars-continue-button>
+      (navigate)="stateService.requestNavigation('next')"></stars-continue-button>
   }
 
   <!-- disable interaction until complete via overlay -->
@@ -32,14 +30,12 @@
     <stars-ribbon-bar></stars-ribbon-bar>
   }
 
-  @if (unitService.openingFlowActive()) {
+  @if (stateService.openingFlowActive()) {
     <stars-opening-image
       [parameters]="unitService.openingImageParams()"
     ></stars-opening-image>
-  }
-
-  <!-- interaction elements (hidden during opening flow) -->
-  @switch (activeInteractionType()) {
+  } @else {
+  @switch (unitService.interactionType()) {
     @case ('BUTTONS') {
       <stars-interaction-buttons class="interaction"
         [parameters]="getParametersWithFormerState()"
@@ -117,6 +113,7 @@
         [showHint]="audioFeedbackService.feedbackHint()"
         (responses)="responsesService.newResponses($event)"></stars-interaction-find-on-image>
     }
+  }
   }
 
   <!-- lower ribbons -->

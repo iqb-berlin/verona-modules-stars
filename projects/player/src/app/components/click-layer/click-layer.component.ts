@@ -1,5 +1,5 @@
 import {
-  Component, inject, input
+  Component, inject, input, output
 } from '@angular/core';
 
 import { UnitService } from '../../services/unit.service';
@@ -15,8 +15,9 @@ export class ClickLayerComponent {
   unitService = inject(UnitService);
 
   FirstAudioOptionsParams = input<FirstAudioOptionsParams>();
+  layerClicked = output<boolean>();
 
   handleClick() {
-    this.unitService.setFirstClickLayerClicked();
+     this.layerClicked.emit(true);
   }
 }

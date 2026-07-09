@@ -6,6 +6,7 @@ import { ResponsesService } from '../../services/responses.service';
 import { ClosingMetaService } from '../../services/closing-meta.service';
 import { AudioPlayerService } from '../../services/audio-player.service';
 import { AudioOptions, FirstAudioOptionsParams } from '../../models/unit-definition';
+import { StateService } from '../../services/state.service';
 import { UnitService } from '../../services/unit.service';
 
 @Component({
@@ -23,6 +24,7 @@ export class AudioComponent {
   responsesService = inject(ResponsesService);
   closingMetaService = inject(ClosingMetaService);
   unitService = inject(UnitService);
+  stateService = inject(StateService);
 
   movingButton = signal<'OFF' | 'KIND' | 'BOLD'>('BOLD');
   isPlaying = signal(false);
@@ -49,7 +51,7 @@ export class AudioComponent {
     effect(() => {
       // Play only on the click-layer rising edge so remounting main audio after opening
       // does not restart playback when firstClickLayerClicked is already true.
-      const clicked = this.unitService.firstClickLayerClicked();
+      const clicked = this.stateService.firstClickLayerClicked();
       if (this.prevFirstClickLayerClicked === undefined) {
         this.prevFirstClickLayerClicked = clicked;
       } else {
@@ -101,7 +103,7 @@ export class AudioComponent {
   }
 
   play() {
-    const audio = this.unitService.currentAudioSrc();
+    const audio = this.stateService.currentAudioSrc();
 
     if (this.disabled()) return;
 

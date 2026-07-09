@@ -1,26 +1,70 @@
 import { inject, Injectable, signal } from '@angular/core';
 
+import { AudioOptions } from '../models/unit-definition';
 import { NavigationTarget, Progress } from '../models/verona';
 import { VeronaPostService } from './verona-post.service';
 
 /**
- * Tracks presentation progress: main audio, video, and click-layer state.
+ * Tracks presentation progress, UI flow state, and navigation requests.
  * Posts navigation requests when the player signals interaction completion.
  */
 @Injectable({
   providedIn: 'root'
 })
-export class ComponentStateService {
+export class StateService {
   private veronaPostService = inject(VeronaPostService);
 
   mainAudioComplete = signal(false);
   videoComplete = signal(false);
   presentationProgress = signal<Progress>('some');
 
+  /** Opening flow is active: interactions and main audio hidden */
+  private _openingFlowActive = signal<boolean>(false);
+  openingFlowActive = this._openingFlowActive.asReadonly();
+
+  /** To show the first click layer */
+  private _firstClickLayerClicked = signal<boolean>(false);
+  firstClickLayerClicked = this._firstClickLayerClicked.asReadonly();
+
+  /** Current audio source for the main audio */
+  private _currentAudioSrc = signal<AudioOptions>({} as AudioOptions);
+  currentAudioSrc = this._currentAudioSrc.asReadonly();
+
   reset(): void {
     this.mainAudioComplete.set(false);
     this.videoComplete.set(false);
     this.presentationProgress.set('some');
+    this._openingFlowActive.set(false);
+    this._firstClickLayerClicked.set(false);
+    this._currentAudioSrc.set({} as AudioOptions);
+  }
+
+  resetClickLayerAndAudioSrc(): void {
+    this._firstClickLayerClicked.set(false);
+    this._currentAudioSrc.set({} as AudioOptions);
+  }
+
+  finishOpeningFlow(): void {
+    this._openingFlowActive.set(false);
+  }
+
+  startOpeningFlow(): void {
+    this._openingFlowActive.set(true);
+  }
+
+  /** Marks the first click as done to hide the layer and allow audio playback */
+  setFirstClickLayerClicked(): void {
+    this._firstClickLayerClicked.set(true);
+    this.updatePresentationProgress('some');
+  }
+
+  setCurrentAudioSrc(audio: AudioOptions): void {
+    this._currentAudioSrc.set(audio);
+  }
+
+  /** Clears the active audio source during silent opening-image display. */
+  clearCurrentAudioSrc(): void {
+    this._currentAudioSrc.set({} as AudioOptions);
   }
 
   /**

@@ -2,9 +2,10 @@ import {
   Component, effect, inject, signal
 } from '@angular/core';
 import { UnitService } from '../../services/unit.service';
+import { StateService } from '../../services/state.service';
 import { AudioPlayerService } from '../../services/audio-player.service';
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
-import { OpeningImageParams, AudioOptions } from '../../models/unit-definition';
+import { OpeningImageParams } from '../../models/unit-definition';
 
 @Component({
   selector: 'stars-opening-image',
@@ -21,17 +22,17 @@ export class OpeningImageComponent extends InteractionComponentDirective {
   showImage = signal<boolean>(false);
 
   unitService = inject(UnitService);
+  stateService = inject(StateService);
   audioPlayerService = inject(AudioPlayerService);
 
   private imagePhaseEntered = false;
   private finishScheduled = false;
-  private openingFlowFinished = false;
   private finishTimerId: ReturnType<typeof setTimeout> | undefined;
 
   constructor() {
     super();
     effect(() => {
-      if (!this.unitService.openingFlowActive()) return;
+      if (!this.stateService.openingFlowActive()) return;
       const params = this.parameters() as OpeningImageParams;
       this.localParameters = this.createDefaultParameters();
       if (!params) return;
@@ -46,7 +47,7 @@ export class OpeningImageComponent extends InteractionComponentDirective {
     });
 
     effect(() => {
-      if (!this.unitService.openingFlowActive()) return;
+      if (!this.stateService.openingFlowActive()) return;
       const params = this.unitService.openingImageParams();
       if (!params?.audioSource) return;
 
@@ -65,7 +66,7 @@ export class OpeningImageComponent extends InteractionComponentDirective {
     this.imagePhaseEntered = true;
 
     this.audioPlayerService.stopPlayback();
-    this.unitService.clearCurrentAudioSrc();
+    this.stateService.clearCurrentAudioSrc();
     this.showImage.set(true);
     this.unitService.showingOpeningImage.set(true);
     this.scheduleFinishAfterDuration();
@@ -77,41 +78,13 @@ export class OpeningImageComponent extends InteractionComponentDirective {
 
     const duration = Number(this.unitService.openingImageParams()?.presentationDurationMS || 0);
     if (!Number.isFinite(duration) || duration <= 0) {
-      this.finishOpeningFlowAndStartMainAudio();
+      this.unitService.finishOpeningFlowAndStartMainAudio();
       return;
     }
     this.finishTimerId = setTimeout(() => {
-      this.finishOpeningFlowAndStartMainAudio();
-    }, duration);
-  }
-
-  private finishOpeningFlowAndStartMainAudio(): void {
-    if (this.openingFlowFinished) return;
-    this.openingFlowFinished = true;
-
-    if (this.finishTimerId) {
-      clearTimeout(this.finishTimerId);
       this.finishTimerId = undefined;
-    }
-
-    this.unitService.showingOpeningImage.set(false);
-    this.unitService.finishOpeningFlow();
-
-    // Opening flow consumed the first-click gate; main audio auto-plays without another layer.
-    const currentOpts = this.unitService.firstAudioOptions() || {};
-    if (!this.unitService.isFirstClickLayerOff(currentOpts.firstClickLayer)) {
-      this.unitService.firstAudioOptions.set({ ...currentOpts, firstClickLayer: 'OFF' });
-    }
-
-    const main = this.unitService.mainAudio();
-    if (main?.audioSource) {
-      const mainAudio: AudioOptions = { ...main, audioId: 'mainAudio' };
-      void this.audioPlayerService.setAudioSrc(mainAudio).then(ready => {
-        if (ready) {
-          void this.audioPlayerService.getPlayFinished('mainAudio');
-        }
-      });
-    }
+      this.unitService.finishOpeningFlowAndStartMainAudio();
+    }, duration);
   }
 
   // eslint-disable-next-line class-methods-use-this

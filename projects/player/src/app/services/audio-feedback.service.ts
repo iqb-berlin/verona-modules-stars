@@ -3,6 +3,10 @@ import { Injectable, signal } from '@angular/core';
 import { Response } from '@iqbspecs/response/response.interface';
 import { UnitDefinition } from '../models/unit-definition';
 import { FeedbackDefinition, ShowResponse } from '../models/feedback';
+import { AudioPlayerService } from './audio-player.service';
+
+/** Tells the continue button what to do after a click. */
+export type PendingFeedbackContinueResult = 'feedback-started' | 'proceed';
 
 /**
  * Loads audio-feedback rules from the unit definition.
@@ -20,6 +24,7 @@ export class AudioFeedbackService {
   private pendingAudioFeedbackSource = '';
   private pendingFeedbackHint = '';
   private pendingHintDelay = 0;
+  private lastPlayedAudioSource = '';
 
   reset(): void {
     this.feedbackDefinitions = [];
@@ -29,6 +34,7 @@ export class AudioFeedbackService {
     this.feedbackActive.set(false);
     this.pendingFeedbackHint = '';
     this.pendingHintDelay = 0;
+    this.lastPlayedAudioSource = '';
   }
 
   /** Loads feedback rules from the unit definition. */
@@ -149,5 +155,31 @@ export class AudioFeedbackService {
     } else {
       this.feedbackHint.set(this.pendingFeedbackHint);
     }
+  }
+
+  /**
+   * Plays queued feedback audio when the continue button is clicked.
+   * @returns `feedback-started` while feedback audio is playing, otherwise `proceed`
+   */
+  async playPendingFeedbackOnContinue(audioPlayerService: AudioPlayerService): Promise<PendingFeedbackContinueResult> {
+    if (!this.pendingAudioFeedback()) {
+      return 'proceed';
+    }
+
+    const newAudioSource = this.getAudioFeedback(true);
+    if (newAudioSource === this.lastPlayedAudioSource) {
+      return 'proceed';
+    }
+
+    await audioPlayerService.setAudioSrc({
+      audioSource: newAudioSource,
+      audioId: 'AudioFeedback'
+    });
+    void audioPlayerService.getPlayFinished('AudioFeedback').then(() => {
+      // TODO add here automatic function when audio finished aka navigation next
+    });
+    this.startFeedback();
+    this.lastPlayedAudioSource = newAudioSource;
+    return 'feedback-started';
   }
 }

@@ -1,6 +1,8 @@
+@if (unitService.showFirstClickLayer()) {
 <div #starsClickLayer
      class="layer"
      data-cy="click-layer"
      [class.blur]="FirstAudioOptionsParams()?.firstClickLayer === 'BLUR'"
      [class.disabled]="FirstAudioOptionsParams()?.firstClickLayer === 'DISABLED'"
      (click)="handleClick()"></div>
+}
