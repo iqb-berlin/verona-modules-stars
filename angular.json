@@ -105,6 +105,86 @@
           }
         }
       }
+    },
+    "editor": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:application": {
+          "strict": true
+        }
+      },
+      "root": "projects/editor",
+      "sourceRoot": "projects/editor/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "outputPath": {
+              "base": "dist/stars-editor"
+            },
+            "index": "projects/editor/src/index.html",
+            "tsConfig": "projects/editor/tsconfig.app.json",
+            "aot": true,
+            "assets": [
+              "projects/editor/src/assets"
+            ],
+            "styles": [
+              "projects/editor/src/styles.css"
+            ],
+            "scripts": [],
+            "browser": "projects/editor/src/main.ts"
+          },
+          "configurations": {
+            "production": {
+              "fileReplacements": [
+                {
+                  "replace": "projects/editor/src/environments/environment.ts",
+                  "with": "projects/editor/src/environments/environment.prod.ts"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "namedChunks": false,
+              "extractLicenses": true,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb",
+                  "maximumError": "10kb"
+                }
+              ]
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
+            }
+          }
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "options": {
+            "buildTarget": "editor:build"
+          },
+          "configurations": {
+            "development": {
+              "buildTarget": "editor:build:development"
+            },
+            "production": {
+              "buildTarget": "editor:build:production"
+            }
+          },
+          "defaultConfiguration": "development"
+        }
+      }
     }
   },
   "cli": {

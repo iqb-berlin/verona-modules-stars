@@ -1,0 +1,70 @@
+@import 'styles/_colors.scss';
+@import "styles/_variables.scss";
+@import '@angular/cdk/overlay-prebuilt.css';
+
+@font-face {
+  font-family: 'IQBprimar';
+  src: url('./assets/fonts/IQBprimar-Regular.woff2') format('woff2'),
+        url('./assets/fonts/IQBprimar-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'IQBprimar', sans-serif;
+  font-weight: normal;
+  color: black;
+  font-size: 28px;
+}
+
+button {
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Apply font family to all elements */
+*, *::before, *::after {
+  font-family: 'IQBprimar', sans-serif;
+}
+
+/* Disable selection/touch callouts only when restricted */
+.disable-user-interaction,
+.disable-user-interaction *,
+.disable-user-interaction *::before,
+.disable-user-interaction *::after {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.disable-user-interaction img {
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+}
+
+player-sub-form {
+  display: block;
+  padding-bottom: 1em;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+stars-player {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
