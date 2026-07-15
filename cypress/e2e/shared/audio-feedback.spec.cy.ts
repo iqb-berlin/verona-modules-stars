@@ -59,9 +59,6 @@ export function testAudioFeedback(interactionType: string, configFile: string) {
     });
 
     it('does not show the hint class after feedback, if the answer is correct', () => {
-
-      cy.log('Checking correct answer scenario');
-
       // Load the file again for correct answer scenario
       loadDefaultTestFile().then(testData => {
 
@@ -80,6 +77,56 @@ export function testAudioFeedback(interactionType: string, configFile: string) {
 
         const hintSelector = getHintElementSelector(interactionType);
         cy.get(hintSelector).should('not.exist');
+      });
+    });
+
+    it('does not requests navigation to next unit when triggerNavigationOnEnd is false and feedback audio ends', () => {
+
+      cy.setupTestDataWithPostMessageMock(configFile, interactionType);
+
+      cy.loadUnit(`interaction-${interactionType}/${configFile}`);
+
+      cy.applyStandardScenarios(interactionType);
+
+      cy.clickContinueButton();
+
+      cy.waitUntilFeedbackIsFinishedPlaying();
+
+      cy.wait(600);
+
+      cy.get('@outgoingMessages').should('not.contain.deep', {
+        data: {
+          type: 'vopUnitNavigationRequestedNotification',
+          sessionId: 'cypress-test-session',
+          target: 'next'
+        },
+        origin: '*'
+      });
+    });
+
+    it('requests navigation to next unit when triggerNavigationOnEnd is true and feedback audio ends', () => {
+
+      const configFile = `${interactionType}_feedback_triggerNavigationOnEnd_true_test.json`;
+
+      cy.setupTestDataWithPostMessageMock(configFile, interactionType);
+
+      cy.loadUnit(`interaction-${interactionType}/${configFile}`);
+
+      cy.applyStandardScenarios(interactionType);
+
+      cy.clickContinueButton();
+
+      cy.waitUntilFeedbackIsFinishedPlaying();
+
+      cy.wait(600);
+
+      cy.get('@outgoingMessages').should('contain.deep', {
+        data: {
+          type: 'vopUnitNavigationRequestedNotification',
+          sessionId: 'cypress-test-session',
+          target: 'next'
+        },
+        origin: '*'
       });
     });
   });

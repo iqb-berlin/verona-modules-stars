@@ -71,6 +71,7 @@
           "delayMS": 1000
         }
       }
-    ]
+    ],
+    "triggerNavigationOnEnd": false
   }
 }

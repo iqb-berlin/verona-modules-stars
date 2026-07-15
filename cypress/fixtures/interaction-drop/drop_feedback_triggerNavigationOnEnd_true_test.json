@@ -74,6 +74,6 @@
         }
       }
     ],
-    "triggerNavigationOnEnd": false
+    "triggerNavigationOnEnd": true
   }
 }

@@ -47,6 +47,6 @@
         }
       }
     ],
-    "triggerNavigationOnEnd": false
+    "triggerNavigationOnEnd": true
   }
 }
