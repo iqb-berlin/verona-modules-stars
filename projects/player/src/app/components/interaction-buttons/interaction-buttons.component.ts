@@ -38,7 +38,7 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
   optionRows: Array<Array<RowOption>> = [];
 
   /** Flag to disable Interaction after triggerNaviagtionOnSelect is active */
-  disableInteraction = false;
+  disableInteraction = signal(false);
   /** Flag to mark images useFullArea: true. */
   useFullArea = false;
 
@@ -318,7 +318,7 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
   }
 
   onButtonClick(index: number): void {
-    if (this.disableInteraction) return;
+    if (this.disableInteraction()) return;
 
     // Update UI state
     this.updateSelection(index);
@@ -328,7 +328,7 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
 
     // Check if triggerNavigationOnSelect is enabled
     if (this.localParameters.triggerNavigationOnSelect === true) {
-      this.disableInteraction = true;
+      this.disableInteraction.set(true);
       setTimeout(() => {
         this.navigationNextRequest.emit('next');
       }, 500);
