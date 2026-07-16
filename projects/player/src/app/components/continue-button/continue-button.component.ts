@@ -23,8 +23,12 @@ export class ContinueButtonComponent {
 
   lastAudioSource = '';
 
+  isFeedbackPlaying(): boolean {
+    return this.audioService.isPlaying() && this.audioService.audioId() === 'AudioFeedback';
+  }
+
   handleClick() {
-    if (this.audioService.isPlaying()) return;
+    if (this.isFeedbackPlaying()) return;
     this.clicked.set(true);
 
     setTimeout(() => {
