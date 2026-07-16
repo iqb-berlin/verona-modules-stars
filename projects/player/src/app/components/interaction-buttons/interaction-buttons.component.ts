@@ -53,6 +53,7 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
     effect(() => {
       const parameters = this.parameters() as InteractionButtonParams;
       this.localParameters = this.createDefaultParameters();
+      this.disableInteraction.set(false);
 
       if (parameters) {
         this.localParameters.options = parameters.options || {};
