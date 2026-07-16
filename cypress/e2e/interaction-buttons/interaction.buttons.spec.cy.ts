@@ -268,7 +268,7 @@ describe('Interaction BUTTONS Component', () => {
 
       cy.get('[data-cy="button-0"]').click();
       cy.wait(50);
-      cy.get('[data-cy="buttons-deactivated"]').should('exist');
+      cy.get('[data-cy="buttons-container"]').should('have.attr', 'data-state', 'buttons-deactivated');
       cy.wait(600);
 
       cy.get('@outgoingMessages').should('contain.deep', {
