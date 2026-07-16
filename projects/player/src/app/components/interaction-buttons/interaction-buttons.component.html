@@ -3,7 +3,7 @@
      [class]="getLayoutClass()"
      [class.has-image]="localParameters.imageSource !== ''"
      [class.full-area]="useFullArea"
-     [attr.data-cy]="disableInteraction() ? 'buttons-deactivated' : ''">
+     [attr.data-cy]="disableInteraction() ? 'buttons-deactivated' : ''"
 >
   @if (localParameters.imageSource || localParameters.text) {
     <div class="stimulus-wrapper">
