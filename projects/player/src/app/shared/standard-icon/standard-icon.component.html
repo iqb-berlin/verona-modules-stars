@@ -1,1 +1,6 @@
-<span [innerHTML]="svgHtml()"></span>
+<span
+  [class]="isSmiley() ? 'smiley-icon-wrap' : 'icon-wrap'"
+  [class.has-hint]="isSmiley() && hint()"
+  [class.is-selected]="isSmiley() && selected()"
+  [innerHTML]="svgHtml()">
+</span>

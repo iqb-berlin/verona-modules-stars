@@ -1,28 +1,35 @@
 @use 'variables';
+@use 'colors';
 
 :host {
   display: contents;
 }
 
 :host ::ng-deep {
+  .smiley-icon-wrap {
+    display: block;
+    line-height: 0;
+
+    &.has-hint {
+      border-radius: 50%;
+      background-color: colors.$hint;
+      box-shadow: 0 0 0 5px colors.$hint;
+    }
+  }
+
   .smiley-icon {
     display: block;
     margin: auto;
     overflow: visible;
     filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, 0.2));
+    -webkit-filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, 0.2));
+    transform: translateZ(0);
+  }
 
-    &.has-hint {
-      filter: none;
-      background: #EE00FF;
-      border-radius: 50%;
-      outline: 5px solid #EE00FF;
-      box-shadow: none;
-    }
-
-    &.is-selected {
-      filter: none;
-      box-shadow: none;
-    }
+  .smiley-icon-wrap.has-hint .smiley-icon,
+  .smiley-icon-wrap.is-selected .smiley-icon {
+    filter: none;
+    -webkit-filter: none;
   }
 
   .clap-hands {

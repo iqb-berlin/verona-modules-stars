@@ -12,6 +12,8 @@ export class StandardIconComponent {
   readonly selected = input<boolean>(false);
   readonly hint = input<boolean>(false);
 
+  readonly isSmiley = computed(() => (this.icon() ?? '').toString().trim().startsWith('SMILEY'));
+
   // computed SafeHtml used by the template
   readonly svgHtml = computed<SafeHtml>(() => {
     const raw = this.icon?.() ?? '';
@@ -29,9 +31,7 @@ export class StandardIconComponent {
   constructor(private sanitizer: DomSanitizer) {}
 
   private renderIconHtml(iconKey: string, selected: boolean, hint: boolean): string {
-    const smileyIconClass = iconKey.startsWith('SMILEY')
-      ? `smiley-icon${hint ? ' has-hint' : ''}${selected ? ' is-selected' : ''}`
-      : '';
+    const smileyIconClass = iconKey.startsWith('SMILEY') ? 'smiley-icon' : '';
 
     switch (iconKey) {
       case 'CHECK_GREEN': {
@@ -53,7 +53,7 @@ export class StandardIconComponent {
       case 'SMILEY_1': {
         if (selected) {
           return `
-            <svg width="124" height="124"  viewBox="0 0 124 124" fill="none" xmlns="http://www.w3.org/2000/svg" class="${smileyIconClass}">
+            <svg width="124" height="124" viewBox="0 0 124 124" fill="none" xmlns="http://www.w3.org/2000/svg" class="${smileyIconClass}">
               <circle cx="61.676" cy="61.676" r="61.676" fill="#0050E5"/>
               <path d="M87.5776 41.0195L81.5161 47.0811L87.5776 53.1426L84.1802 56.54L78.1187 50.4785L78.1021 50.4951L74.7046 47.0977L74.7212 47.0811L74.7212 47.0811L74.7046 47.0645L78.1021 43.667L78.1187 43.6836L84.1802 37.6221L87.5776 41.0195Z" fill="white"/>
               <path d="M35.7703 53.1426L41.8328 47.0801L35.7722 41.0195L39.1697 37.6221L45.2302 43.6826L45.2459 43.667L48.6433 47.0645L48.6277 47.0801L48.6453 47.0977L45.2478 50.4951L45.2302 50.4775L39.1677 56.54L35.7703 53.1426Z" fill="white"/>
