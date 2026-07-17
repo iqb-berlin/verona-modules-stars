@@ -13,7 +13,7 @@ import {
 } from '../../models/unit-definition';
 import { StandardButtonComponent } from '../../shared/standard-button/standard-button.component';
 import { AudioButtonComponent } from '../../shared/audio-button/audio-button.component';
-import { StarsResponse } from "../../services/responses.service";
+import { StarsResponse } from '../../services/responses.service';
 
 @Component({
   selector: 'stars-interaction-buttons',
@@ -37,6 +37,8 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
   /** Options sorted by rows. */
   optionRows: Array<Array<RowOption>> = [];
 
+  /** Flag to disable Interaction after triggerNaviagtionOnSelect is active */
+  disableInteraction = signal(false);
   /** Flag to mark images useFullArea: true. */
   useFullArea = false;
 
@@ -51,6 +53,7 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
     effect(() => {
       const parameters = this.parameters() as InteractionButtonParams;
       this.localParameters = this.createDefaultParameters();
+      this.disableInteraction.set(false);
 
       if (parameters) {
         this.localParameters.options = parameters.options || {};
@@ -316,6 +319,8 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
   }
 
   onButtonClick(index: number): void {
+    if (this.disableInteraction()) return;
+
     // Update UI state
     this.updateSelection(index);
 
@@ -324,6 +329,7 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
 
     // Check if triggerNavigationOnSelect is enabled
     if (this.localParameters.triggerNavigationOnSelect === true) {
+      this.disableInteraction.set(true);
       setTimeout(() => {
         this.navigationNextRequest.emit('next');
       }, 500);

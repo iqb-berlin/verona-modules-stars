@@ -23,8 +23,12 @@ export class ContinueButtonComponent {
 
   lastAudioSource = '';
 
+  isFeedbackPlaying(): boolean {
+    return this.audioService.isPlaying() && this.audioService.audioId() === 'AudioFeedback';
+  }
+
   handleClick() {
-    if (this.audioService.isPlaying()) return;
+    if (this.isFeedbackPlaying()) return;
     this.clicked.set(true);
 
     setTimeout(() => {
@@ -39,7 +43,11 @@ export class ContinueButtonComponent {
           audioId: 'AudioFeedback'
         }).then(() => {
           this.audioService.getPlayFinished('AudioFeedback').then(() => {
-            // TODO add here automatic function when audio finished aka navigation next
+            if (this.responseService.triggerNavigationOnEnd()) {
+              setTimeout(() => {
+                this.navigate.emit();
+              }, 500);
+            }
           });
           this.responseService.startFeedback();
         });

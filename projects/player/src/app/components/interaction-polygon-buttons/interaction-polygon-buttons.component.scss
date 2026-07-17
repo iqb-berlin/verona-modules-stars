@@ -8,10 +8,14 @@
 }
 
 svg {
+  -webkit-tap-highlight-color: transparent;
+
   path {
     stroke: colors.$highlight;
     stroke-width: 3px;
     fill: white;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
 
     &.clicked {
       fill: colors.$highlight;

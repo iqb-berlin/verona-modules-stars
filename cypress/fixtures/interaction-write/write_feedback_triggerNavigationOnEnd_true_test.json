@@ -61,6 +61,6 @@
         }
       }
     ],
-    "triggerNavigationOnEnd": false
+    "triggerNavigationOnEnd": true
   }
 }
