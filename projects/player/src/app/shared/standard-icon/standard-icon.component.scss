@@ -22,8 +22,8 @@
     margin: auto;
     overflow: visible;
     filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, 0.2));
-    -webkit-filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, 0.2));
-    transform: translateZ(0);
+    -webkit-filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, 0.2)); /* Safari and SEB fix for broken drop-shadow on filter */
+    transform: translateZ(0); /* Safari and SEB fix for broken drop-shadow on filter */
   }
 
   .smiley-icon-wrap.has-hint .smiley-icon,
