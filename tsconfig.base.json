@@ -17,6 +17,7 @@
     ],
     "useDefineForClassFields": false,
     "skipLibCheck": true,
+    "ignoreDeprecations": "6.0",
     "paths": {
       "@styles/*": [
         "src/styles/*"

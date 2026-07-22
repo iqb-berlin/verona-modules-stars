@@ -4,6 +4,7 @@ import {
   effect,
   signal,
   WritableSignal,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 
 import { Response } from '@iqbspecs/response/response.interface';
@@ -15,7 +16,8 @@ import { StarsResponse } from '../../services/responses.service';
 @Component({
   selector: 'stars-interaction-equation',
   templateUrl: './interaction-equation.component.html',
-  styleUrls: ['./interaction-equation.component.scss']
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrls: ['./interaction-equation.component.scss'],
 })
 export class InteractionEquationComponent extends InteractionComponentDirective {
   /** Local copy of the component parameters with defaults applied. */

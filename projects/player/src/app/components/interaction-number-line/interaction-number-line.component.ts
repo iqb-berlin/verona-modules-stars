@@ -1,5 +1,12 @@
 import {
-  Component, effect, ElementRef, ViewChild, AfterViewInit, signal, OnDestroy
+  Component,
+  effect,
+  ElementRef,
+  ViewChild,
+  AfterViewInit,
+  signal,
+  OnDestroy,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 
 import { Response } from '@iqbspecs/response/response.interface';
@@ -9,12 +16,17 @@ import { InteractionNumberLineParams } from '../../models/unit-definition';
 @Component({
   selector: 'stars-interaction-number-line',
   templateUrl: './interaction-number-line.component.html',
-  styleUrls: ['./interaction-number-line.component.scss']
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrls: ['./interaction-number-line.component.scss'],
 })
-
-export class InteractionNumberLineComponent extends InteractionComponentDirective implements AfterViewInit, OnDestroy {
-  @ViewChild('numberLinePathWave') numberLinePathWave!: ElementRef<SVGPathElement>;
-  @ViewChild('numberLinePathRuler') numberLinePathRuler!: ElementRef<SVGPathElement>;
+export class InteractionNumberLineComponent
+  extends InteractionComponentDirective
+  implements AfterViewInit, OnDestroy
+{
+  @ViewChild('numberLinePathWave')
+  numberLinePathWave!: ElementRef<SVGPathElement>;
+  @ViewChild('numberLinePathRuler')
+  numberLinePathRuler!: ElementRef<SVGPathElement>;
   localParameters!: InteractionNumberLineParams;
 
   /** Boolean flag indicating whether the write interaction input is currently disabled. */
@@ -23,13 +35,15 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
   numbersList: string[] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
   /** List of number line items with their values and calculated SVG coordinates. */
-  numberLineItems = signal<{
-    value: number,
-    index: number,
-    x: number,
-    y: number,
-    isEmpty: boolean
-  }[]>([]);
+  numberLineItems = signal<
+    {
+      value: number;
+      index: number;
+      x: number;
+      y: number;
+      isEmpty: boolean;
+    }[]
+  >([]);
   /** Current value of the numberInput field on the number line. */
   numberInputValue: string = '';
   hasHint = signal(false);
@@ -53,7 +67,8 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
         this.localParameters.leadingNumbers = parameters.leadingNumbers;
         this.localParameters.trailingNumbers = parameters.trailingNumbers;
         this.localParameters.style = parameters.style || 'WAVE';
-        this.localParameters.variableId = parameters.variableId || 'NUMBER_LINE';
+        this.localParameters.variableId =
+          parameters.variableId || 'NUMBER_LINE';
 
         // Reset the input state whenever parameters change
         this.numberInputValue = '';
@@ -65,8 +80,13 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
 
         const formerStateResponses: Response[] = parameters.formerState || [];
 
-        if (Array.isArray(formerStateResponses) && formerStateResponses.length > 0) {
-          const found = formerStateResponses.find(r => r.id === this.localParameters.variableId);
+        if (
+          Array.isArray(formerStateResponses) &&
+          formerStateResponses.length > 0
+        ) {
+          const found = formerStateResponses.find(
+            (r) => r.id === this.localParameters.variableId,
+          );
 
           if (found && typeof found.value === 'string') {
             this.restoreFromFormerState(found);
@@ -75,12 +95,14 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
         }
 
         // Only emit DISPLAYED if there's no formerState for the current task
-        this.responses.emit([{
-          id: this.localParameters.variableId,
-          status: 'DISPLAYED',
-          value: '',
-          relevantForResponsesProgress: false
-        }]);
+        this.responses.emit([
+          {
+            id: this.localParameters.variableId,
+            status: 'DISPLAYED',
+            value: '',
+            relevantForResponsesProgress: false,
+          },
+        ]);
         if (!this.numberInputValue) this.numberInputValue = '';
       }
     });
@@ -138,7 +160,8 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
     const numberInput = this.localParameters.numberInput;
     const style = this.localParameters.style;
 
-    const pathElement = style === 'WAVE' ? this.numberLinePathWave : this.numberLinePathRuler;
+    const pathElement =
+      style === 'WAVE' ? this.numberLinePathWave : this.numberLinePathRuler;
 
     if (style !== 'BLOCK' && !pathElement?.nativeElement) {
       this.scheduleCalculation();
@@ -147,20 +170,28 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
 
     // Store and manage the data for each number or input box that needs to be rendered on the number line
     const items = [] as {
-      value: number,
-      index: number,
-      x: number,
-      y: number,
-      isEmpty: boolean
+      value: number;
+      index: number;
+      x: number;
+      y: number;
+      isEmpty: boolean;
     }[];
 
     // It is possible to use BLOCK and WAVE with leading/trailing numbers
-    if (style === 'BLOCK' || (style === 'WAVE' && (leadingNumbers || trailingNumbers))) {
-      const tempItems: { value: number, index: number, isEmpty: boolean }[] = [];
+    if (
+      style === 'BLOCK' ||
+      (style === 'WAVE' && (leadingNumbers || trailingNumbers))
+    ) {
+      const tempItems: { value: number; index: number; isEmpty: boolean }[] =
+        [];
       let idx = 0;
-      (leadingNumbers || []).forEach((val) => tempItems.push({ value: val, index: idx++, isEmpty: false }));
+      (leadingNumbers || []).forEach((val) =>
+        tempItems.push({ value: val, index: idx++, isEmpty: false }),
+      );
       tempItems.push({ value: 0, index: idx++, isEmpty: true });
-      (trailingNumbers || []).forEach((val) => tempItems.push({ value: val, index: idx++, isEmpty: false }));
+      (trailingNumbers || []).forEach((val) =>
+        tempItems.push({ value: val, index: idx++, isEmpty: false }),
+      );
 
       if (style === 'BLOCK') {
         const blockWidth = 60;
@@ -175,7 +206,7 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
         const itemsWithCoords = tempItems.map((item, idx) => ({
           ...item,
           x: startX + idx * (blockWidth + gap) + blockWidth / 2,
-          y: centerY
+          y: centerY,
         }));
 
         this.numberLineItems.set(itemsWithCoords);
@@ -185,7 +216,9 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
       const path = pathElement!.nativeElement;
       const totalLength = path.getTotalLength();
       if (totalLength === 0) {
-        this.animationFrameId = requestAnimationFrame(() => this.calculateNumberPositions());
+        this.animationFrameId = requestAnimationFrame(() =>
+          this.calculateNumberPositions(),
+        );
         return;
       }
 
@@ -197,7 +230,7 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
       for (let i = 0; i < count; i++) {
         const item = tempItems[i]!;
         // The fraction determines the item's position (0 to 1) along the path, with a 0.5 default for single items to prevent division by zero
-        const fraction = count === 1 ? 0.5 : (i / (count - 1));
+        const fraction = count === 1 ? 0.5 : i / (count - 1);
         const distance = startPadding + fraction * availableLength;
         const point = path.getPointAtLength(distance);
         items.push({
@@ -205,7 +238,7 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
           index: item.index,
           isEmpty: item.isEmpty,
           x: point.x,
-          y: point.y
+          y: point.y,
         });
       }
     } else {
@@ -215,7 +248,7 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
 
       // Support both ascending and descending ranges
       // If step is 1, count goes up, if it is -1 it goes down
-      const step = (lastNumber! >= firstNumber!) ? 1 : -1;
+      const step = lastNumber! >= firstNumber! ? 1 : -1;
       const count = Math.abs(lastNumber! - firstNumber!) + 1;
 
       const path = pathElement!.nativeElement;
@@ -223,7 +256,9 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
 
       if (totalLength === 0) {
         // If the path is not yet measured, retry shortly
-        this.animationFrameId = requestAnimationFrame(() => this.calculateNumberPositions());
+        this.animationFrameId = requestAnimationFrame(() =>
+          this.calculateNumberPositions(),
+        );
         return;
       }
 
@@ -234,7 +269,7 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
 
       for (let i = 0; i < count; i++) {
         const value = firstNumber! + i * step;
-        const fraction = count === 1 ? 0.5 : (i / (count - 1));
+        const fraction = count === 1 ? 0.5 : i / (count - 1);
         const distance = startPadding + fraction * availableLength;
         const point = path.getPointAtLength(distance);
         const isEmpty = value === numberInput;
@@ -244,7 +279,7 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
           index: i,
           x: point.x,
           y: point.y,
-          isEmpty
+          isEmpty,
         });
       }
     }
@@ -287,19 +322,28 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
     const trailingNumbers = this.localParameters?.trailingNumbers;
 
     // If no numberInput is defined for WAVE and RULER styles and if there are no leading/trailing numbers, disable the keyboard buttons
-    const noNumberInput = ((style === 'WAVE' || style === 'RULER') && numberInput === undefined && !leadingNumbers && !trailingNumbers) ||
-      (style === 'RULER' && (leadingNumbers !== undefined || trailingNumbers !== undefined) && numberInput === undefined);
+    const noNumberInput =
+      ((style === 'WAVE' || style === 'RULER') &&
+        numberInput === undefined &&
+        !leadingNumbers &&
+        !trailingNumbers) ||
+      (style === 'RULER' &&
+        (leadingNumbers !== undefined || trailingNumbers !== undefined) &&
+        numberInput === undefined);
 
     this.isDisabled = currentVal.length >= maxInputLength || noNumberInput;
   }
 
   private emitResponse() {
-    this.responses.emit([{
-      id: this.localParameters.variableId || 'NUMBER_LINE',
-      status: this.numberInputValue.length >= 1 ? 'VALUE_CHANGED' : 'DISPLAYED',
-      value: this.numberInputValue,
-      relevantForResponsesProgress: true
-    }]);
+    this.responses.emit([
+      {
+        id: this.localParameters.variableId || 'NUMBER_LINE',
+        status:
+          this.numberInputValue.length >= 1 ? 'VALUE_CHANGED' : 'DISPLAYED',
+        value: this.numberInputValue,
+        relevantForResponsesProgress: true,
+      },
+    ]);
   }
 
   /**
@@ -317,7 +361,7 @@ export class InteractionNumberLineComponent extends InteractionComponentDirectiv
   private createDefaultParameters(): InteractionNumberLineParams {
     return {
       variableId: 'NUMBER_LINE',
-      style: 'WAVE'
+      style: 'WAVE',
     };
   }
 }

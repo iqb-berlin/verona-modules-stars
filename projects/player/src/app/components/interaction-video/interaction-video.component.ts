@@ -1,9 +1,15 @@
 import {
-  AfterViewInit, Component, effect, ElementRef, signal, ViewChild, inject, OnDestroy
+  AfterViewInit,
+  Component,
+  effect,
+  ElementRef,
+  signal,
+  ViewChild,
+  inject,
+  OnDestroy,
+  ChangeDetectionStrategy,
 } from '@angular/core';
-import {
-  fromEvent, Subject, tap, throttleTime
-} from 'rxjs';
+import { fromEvent, Subject, tap, throttleTime } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { Response } from '@iqbspecs/response/response.interface';
@@ -15,10 +21,13 @@ import { VeronaPostService } from '../../services/verona-post.service';
 @Component({
   selector: 'stars-interaction-video',
   templateUrl: './interaction-video.component.html',
-  styleUrls: ['./interaction-video.component.scss']
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrls: ['./interaction-video.component.scss'],
 })
-
-export class InteractionVideoComponent extends InteractionComponentDirective implements AfterViewInit, OnDestroy {
+export class InteractionVideoComponent
+  extends InteractionComponentDirective
+  implements AfterViewInit, OnDestroy
+{
   localParameters!: InteractionVideoParams;
   private _isPlaying = signal(false);
   isPlaying = this._isPlaying.asReadonly();
@@ -29,7 +38,8 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
   private currentTime = 0;
   private percentElapsed = 0;
 
-  @ViewChild('videoPlayer', { static: false }) videoPlayerRef!: ElementRef<HTMLVideoElement>;
+  @ViewChild('videoPlayer', { static: false })
+  videoPlayerRef!: ElementRef<HTMLVideoElement>;
   private ngUnsubscribe = new Subject();
 
   veronaPostService = inject(VeronaPostService);
@@ -57,13 +67,20 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
         this.localParameters.imageSource = parameters.imageSource || '';
         this.localParameters.videoSource = parameters.videoSource || '';
         this.localParameters.text = parameters.text || '';
-        this.localParameters.triggerNavigationOnEnd = parameters.triggerNavigationOnEnd || false;
+        this.localParameters.triggerNavigationOnEnd =
+          parameters.triggerNavigationOnEnd || false;
         this.localParameters.variableId = parameters.variableId || 'VIDEO';
 
-        const formerStateResponses: Response[] = (parameters as any).formerState || [];
+        const formerStateResponses: Response[] =
+          (parameters as any).formerState || [];
 
-        if (Array.isArray(formerStateResponses) && formerStateResponses.length > 0) {
-          const found = formerStateResponses.find(r => r.id === this.localParameters.variableId);
+        if (
+          Array.isArray(formerStateResponses) &&
+          formerStateResponses.length > 0
+        ) {
+          const found = formerStateResponses.find(
+            (r) => r.id === this.localParameters.variableId,
+          );
 
           if (found && typeof found.value === 'number') {
             this.restoreFromFormerState(found);
@@ -76,12 +93,14 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
         }
 
         // No valid former state - initialize with DISPLAYED
-        this.responses.emit([{
-          id: this.localParameters.variableId,
-          status: 'DISPLAYED',
-          value: '',
-          relevantForResponsesProgress: false
-        }]);
+        this.responses.emit([
+          {
+            id: this.localParameters.variableId,
+            status: 'DISPLAYED',
+            value: '',
+            relevantForResponsesProgress: false,
+          },
+        ]);
 
         this._isPlaying.set(false);
 
@@ -100,7 +119,7 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
           tap(() => {
             this.calculateTime();
           }),
-          throttleTime(100)
+          throttleTime(100),
         )
         .subscribe(() => this.sendPlaybackTimeChanged());
     }
@@ -117,22 +136,23 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
   private calculateTime() {
     if (this.videoPlayerRef) {
       this.currentTime = this.videoPlayerRef.nativeElement.currentTime;
-      this.setPercentElapsed(this.videoPlayerRef.nativeElement.duration, this.currentTime);
+      this.setPercentElapsed(
+        this.videoPlayerRef.nativeElement.duration,
+        this.currentTime,
+      );
       this.sendPlaybackTimeChanged();
     }
   }
 
   private setPercentElapsed(d: number, ct: number) {
     if (d === 0) return;
-    this.percentElapsed = (ct / d);
+    this.percentElapsed = ct / d;
   }
 
   play() {
-    this.videoPlayerRef.nativeElement
-      .play()
-      .then(() => {
-        this._isPlaying.set(true);
-      });
+    this.videoPlayerRef.nativeElement.play().then(() => {
+      this._isPlaying.set(true);
+    });
   }
 
   ended() {
@@ -153,7 +173,9 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
       this._showPlayButton.set(false);
       this.localParameters.triggerNavigationOnEnd = false;
       setTimeout(() => {
-        this.veronaPostService.sendVopUnitNavigationRequestedNotification('next');
+        this.veronaPostService.sendVopUnitNavigationRequestedNotification(
+          'next',
+        );
       }, 500);
     }
   }
@@ -168,7 +190,7 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
         id: 'VIDEO',
         value: videoValue,
         status: 'VALUE_CHANGED',
-        relevantForResponsesProgress: false
+        relevantForResponsesProgress: false,
       };
 
       this.responses.emit([response]);
@@ -190,7 +212,7 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
       id: this.localParameters.variableId || 'VIDEO',
       status: 'VALUE_CHANGED',
       value: videoValue,
-      relevantForResponsesProgress: false
+      relevantForResponsesProgress: false,
     };
 
     this.responses.emit([restoreResponse]);
@@ -203,7 +225,7 @@ export class InteractionVideoComponent extends InteractionComponentDirective imp
       imageSource: '',
       videoSource: '',
       text: '',
-      triggerNavigationOnEnd: false
+      triggerNavigationOnEnd: false,
     };
   }
 }

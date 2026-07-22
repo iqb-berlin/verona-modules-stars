@@ -1,18 +1,26 @@
-import { Component, computed, input } from '@angular/core';
+import {
+  Component,
+  computed,
+  input,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Component({
   selector: 'stars-standard-icon',
   standalone: true,
   templateUrl: './standard-icon.component.html',
-  styleUrls: ['./standard-icon.component.scss']
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrls: ['./standard-icon.component.scss'],
 })
 export class StandardIconComponent {
   readonly icon = input<string>();
   readonly selected = input<boolean>(false);
   readonly hint = input<boolean>(false);
 
-  readonly isSmiley = computed(() => (this.icon() ?? '').toString().trim().startsWith('SMILEY'));
+  readonly isSmiley = computed(() =>
+    (this.icon() ?? '').toString().trim().startsWith('SMILEY'),
+  );
 
   // computed SafeHtml used by the template
   readonly svgHtml = computed<SafeHtml>(() => {
@@ -24,13 +32,21 @@ export class StandardIconComponent {
       return this.sanitizer.bypassSecurityTrustHtml('');
     }
 
-    const html = this.renderIconHtml(iconKey, !!this.selected?.() || !!this.hint?.(), !!this.hint?.());
+    const html = this.renderIconHtml(
+      iconKey,
+      !!this.selected?.() || !!this.hint?.(),
+      !!this.hint?.(),
+    );
     return this.sanitizer.bypassSecurityTrustHtml(html);
   });
 
   constructor(private sanitizer: DomSanitizer) {}
 
-  private renderIconHtml(iconKey: string, selected: boolean, hint: boolean): string {
+  private renderIconHtml(
+    iconKey: string,
+    selected: boolean,
+    hint: boolean,
+  ): string {
     const smileyIconClass = iconKey.startsWith('SMILEY') ? 'smiley-icon' : '';
 
     switch (iconKey) {

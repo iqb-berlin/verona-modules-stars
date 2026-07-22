@@ -1,5 +1,9 @@
 import {
-  Component, input, output, computed
+  Component,
+  input,
+  output,
+  computed,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 
 import { ButtonTypeEnum } from '../../models/unit-definition';
@@ -9,12 +13,10 @@ import { StandardIconComponent } from '../standard-icon/standard-icon.component'
   selector: 'stars-standard-button',
   templateUrl: './standard-button.component.html',
   styleUrls: ['./standard-button.component.scss'],
-  imports: [
-    StandardIconComponent
-  ],
-  standalone: true
+  imports: [StandardIconComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: true,
 })
-
 export class StandardButtonComponent {
   id = input.required<string>();
   value = input.required<number>();

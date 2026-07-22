@@ -1,4 +1,9 @@
-import { Component, effect, signal } from '@angular/core';
+import {
+  Component,
+  effect,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { Response } from '@iqbspecs/response/response.interface';
 
 import { StarsResponse } from '../../services/responses.service';
@@ -8,9 +13,9 @@ import { InteractionPolygonButtonsParams } from '../../models/unit-definition';
 @Component({
   selector: 'stars-interaction-polygon-buttons',
   templateUrl: './interaction-polygon-buttons.component.html',
-  styleUrls: ['./interaction-polygon-buttons.component.scss']
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrls: ['./interaction-polygon-buttons.component.scss'],
 })
-
 export class InteractionPolygonButtonsComponent extends InteractionComponentDirective {
   /** Local copy of the component parameters with defaults applied. */
   localParameters!: InteractionPolygonButtonsParams;
@@ -36,12 +41,12 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
 
         this.localParameters = {
           ...this.createDefaultParameters(),
-          ...parameters
+          ...parameters,
         };
 
         const formerStateResponse: Response[] = parameters.formerState || [];
         const foundResponse = formerStateResponse.find(
-          response => response.id === this.localParameters.variableId
+          (response) => response.id === this.localParameters.variableId,
         );
 
         if (foundResponse && foundResponse.value) {
@@ -50,12 +55,14 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
         } else {
           // No former state found - initialize as new
           this.resetSelection();
-          this.responses.emit([{
-            id: this.localParameters.variableId || 'POLYGON_BUTTONS',
-            status: 'DISPLAYED',
-            value: 0,
-            relevantForResponsesProgress: false
-          }]);
+          this.responses.emit([
+            {
+              id: this.localParameters.variableId || 'POLYGON_BUTTONS',
+              status: 'DISPLAYED',
+              value: 0,
+              relevantForResponsesProgress: false,
+            },
+          ]);
         }
       } else {
         // Same unit, just keep localParameters' formerState in sync if needed
@@ -67,7 +74,9 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
       const hints = this.showHint();
       if (!this.localParameters) return;
       if (!hints || hints.length === 0) {
-        this.hintValues.set(Array(this.localParameters.options.length).fill(false));
+        this.hintValues.set(
+          Array(this.localParameters.options.length).fill(false),
+        );
         return;
       }
 
@@ -82,7 +91,7 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
         const selectedIndex = parseInt(hints, 10) - 1;
         const selectedStates = Array.from(
           { length: this.localParameters.options.length },
-          (_, i) => i === selectedIndex
+          (_, i) => i === selectedIndex,
         );
         this.hintValues.set(selectedStates);
         this.selectedValues.set([]);
@@ -104,12 +113,15 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
 
   private restoreFromFormerState(response: Response): void {
     // Normalize the incoming value to a string for consistent parsing
-    const valueString = (typeof response.value === 'string') ? response.value : `${response.value}`;
+    const valueString =
+      typeof response.value === 'string' ? response.value : `${response.value}`;
     if (!valueString) return;
 
     if (this.localParameters.multiSelect) {
       // Restore multiselect: e.g., "010" string restored to [false, true, false]
-      const selectedStates = valueString.split('').map((char: string) => char === '1');
+      const selectedStates = valueString
+        .split('')
+        .map((char: string) => char === '1');
       // Create a cloned array to ensure a new reference is stored in the signal
       this.selectedValues.set([...selectedStates]);
     } else {
@@ -128,7 +140,7 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
   private updateSelection(index: number): void {
     if (this.localParameters.multiSelect) {
       // Toggle the clicked item using an immutable update to the signal
-      this.selectedValues.update(values => {
+      this.selectedValues.update((values) => {
         const next = [...values];
         next[index] = !next[index];
         return next;
@@ -145,16 +157,21 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
     }
   }
 
-  private emitResponse(status: 'DISPLAYED' | 'VALUE_CHANGED', relevant: boolean): void {
-    const value = this.localParameters.multiSelect ?
-      this.selectedValues().map(item => (item ? 1 : 0)).join('') :
-      (this.selectedValues().findIndex(item => item) + 1).toString();
+  private emitResponse(
+    status: 'DISPLAYED' | 'VALUE_CHANGED',
+    relevant: boolean,
+  ): void {
+    const value = this.localParameters.multiSelect
+      ? this.selectedValues()
+          .map((item) => (item ? 1 : 0))
+          .join('')
+      : (this.selectedValues().findIndex((item) => item) + 1).toString();
 
     const response: StarsResponse = {
       id: this.localParameters.variableId || '',
       status: status,
       value: value,
-      relevantForResponsesProgress: relevant
+      relevantForResponsesProgress: relevant,
     };
 
     this.responses.emit([response]);
@@ -165,7 +182,7 @@ export class InteractionPolygonButtonsComponent extends InteractionComponentDire
     return {
       variableId: 'POLYGON_BUTTONS',
       options: [],
-      multiSelect: false
+      multiSelect: false,
     };
   }
 }

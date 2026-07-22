@@ -1,4 +1,4 @@
-# Release Note 0.6.41 #
+# Release Note 0.6.42 #
 
 ## Neu
 + triggerNavigationOnEnd wurde zu audioFeedback hinzugefügt, um es zu ermöglichen, zur nächsten unit zu wechseln, ohne auf die Weiter-button klicken zu müssen.

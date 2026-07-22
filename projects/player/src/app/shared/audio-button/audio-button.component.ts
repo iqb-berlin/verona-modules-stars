@@ -1,5 +1,10 @@
 import {
-  Component, inject, input, output, signal
+  Component,
+  inject,
+  input,
+  output,
+  signal,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 
 import { AudioService } from '../../services/audio.service';
@@ -8,9 +13,9 @@ import { AudioOptions } from '../../models/unit-definition';
 @Component({
   selector: 'stars-audio-button',
   templateUrl: 'audio-button.component.html',
-  styleUrl: 'audio-button.component.scss'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: 'audio-button.component.scss',
 })
-
 export class AudioButtonComponent {
   audio = input.required<AudioOptions>();
   elementValueChanged = output();

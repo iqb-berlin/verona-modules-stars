@@ -1,5 +1,12 @@
 import {
-  Component, signal, effect, inject, ViewChild, ElementRef, output
+  Component,
+  signal,
+  effect,
+  inject,
+  ViewChild,
+  ElementRef,
+  output,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 
 import { Response } from '@iqbspecs/response/response.interface';
@@ -9,7 +16,7 @@ import { InteractionComponentDirective } from '../../directives/interaction-comp
 import {
   AudioOptions,
   InteractionButtonParams,
-  SelectionOption
+  SelectionOption,
 } from '../../models/unit-definition';
 import { StandardButtonComponent } from '../../shared/standard-button/standard-button.component';
 import { AudioButtonComponent } from '../../shared/audio-button/audio-button.component';
@@ -18,13 +25,10 @@ import { StarsResponse } from '../../services/responses.service';
 @Component({
   selector: 'stars-interaction-buttons',
   templateUrl: './interaction-buttons.component.html',
-  imports: [
-    StandardButtonComponent,
-    AudioButtonComponent
-  ],
-  styleUrls: ['./interaction-buttons.component.scss']
+  imports: [StandardButtonComponent, AudioButtonComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrls: ['./interaction-buttons.component.scss'],
 })
-
 export class InteractionButtonsComponent extends InteractionComponentDirective {
   navigationNextRequest = output<string>();
 
@@ -45,7 +49,8 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
   veronaPostService = inject(VeronaPostService);
 
   /** Reference to the image element for aspect ratio detection. */
-  @ViewChild('imageElement', { static: false }) imageRef!: ElementRef<HTMLImageElement>;
+  @ViewChild('imageElement', { static: false })
+  imageRef!: ElementRef<HTMLImageElement>;
 
   constructor() {
     super();
@@ -61,15 +66,19 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
         this.localParameters.imageSource = parameters.imageSource || '';
         this.localParameters.numberOfRows = parameters.numberOfRows || 1;
         this.localParameters.multiSelect = parameters.multiSelect || false;
-        this.localParameters.triggerNavigationOnSelect = parameters.triggerNavigationOnSelect || false;
-        this.localParameters.buttonType = parameters.buttonType || 'MEDIUM_SQUARE';
+        this.localParameters.triggerNavigationOnSelect =
+          parameters.triggerNavigationOnSelect || false;
+        this.localParameters.buttonType =
+          parameters.buttonType || 'MEDIUM_SQUARE';
         this.localParameters.text = parameters.text || '';
-        this.localParameters.imageUseFullArea = parameters.imageUseFullArea || false;
+        this.localParameters.imageUseFullArea =
+          parameters.imageUseFullArea || false;
         this.useFullArea = this.localParameters.imageUseFullArea;
 
         // Determine imagePosition first
         if (this.localParameters.imageSource) {
-          this.localParameters.imagePosition = parameters.imagePosition || 'LEFT';
+          this.localParameters.imagePosition =
+            parameters.imagePosition || 'LEFT';
         } else {
           this.localParameters.imagePosition = 'TOP';
         }
@@ -92,9 +101,12 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
         // Only restore from former state once, on initial load
         const formerStateResponse: Response[] = parameters.formerState || [];
 
-        if (Array.isArray(formerStateResponse) && formerStateResponse.length > 0) {
+        if (
+          Array.isArray(formerStateResponse) &&
+          formerStateResponse.length > 0
+        ) {
           const foundResponse = formerStateResponse.find(
-            response => response.id === this.localParameters.variableId
+            (response) => response.id === this.localParameters.variableId,
           );
 
           if (foundResponse && foundResponse.value) {
@@ -105,12 +117,14 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
 
         // No former state found - initialize as new
         this.resetSelection();
-        this.responses.emit([{
-          id: this.localParameters.variableId,
-          status: 'DISPLAYED',
-          value: 0,
-          relevantForResponsesProgress: false
-        }]);
+        this.responses.emit([
+          {
+            id: this.localParameters.variableId,
+            status: 'DISPLAYED',
+            value: 0,
+            relevantForResponsesProgress: false,
+          },
+        ]);
       }
     });
 
@@ -133,7 +147,7 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
         const selectedIndex = parseInt(hints, 10) - 1;
         const selectedStates = Array.from(
           { length: this.localParameters.options?.buttons?.length || 0 },
-          (_, i) => i === selectedIndex
+          (_, i) => i === selectedIndex,
         );
         this.hintValues.set(selectedStates);
         this.selectedValues.set([]);
@@ -161,16 +175,14 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
   private resetSelection(): void {
     if (!this.localParameters.options) return;
 
-    const numberOfOptions = this.localParameters.options?.buttons?.length ||
-      this.localParameters.options?.repeatButton?.numberOfOptions || 0;
-    this.selectedValues.set(Array.from(
-      { length: numberOfOptions },
-      () => false
-    ));
-    this.hintValues.set(Array.from(
-      { length: numberOfOptions },
-      () => false
-    ));
+    const numberOfOptions =
+      this.localParameters.options?.buttons?.length ||
+      this.localParameters.options?.repeatButton?.numberOfOptions ||
+      0;
+    this.selectedValues.set(
+      Array.from({ length: numberOfOptions }, () => false),
+    );
+    this.hintValues.set(Array.from({ length: numberOfOptions }, () => false));
   }
 
   // function to create options array for items with repeat buttons
@@ -185,16 +197,16 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
       options = Array.from(
         { length: repeatButton.numberOfOptions },
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        _ => {
+        (_) => {
           const opt: SelectionOption = {
             text: repeatButton.option?.text || '',
-            imageSource: repeatButton.option?.imageSource || ''
+            imageSource: repeatButton.option?.imageSource || '',
           };
           if (repeatButton.option?.icon !== undefined) {
             opt.icon = repeatButton.option.icon;
           }
           return opt;
-        }
+        },
       );
     } else {
       options = this.localParameters.options?.buttons || [];
@@ -206,7 +218,7 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
   createAudioOptions(button: RowOption): AudioOptions {
     return {
       audioSource: button.option.audioSource || '',
-      audioId: `${button.id + button.index}_audio`
+      audioId: `${button.id + button.index}_audio`,
     };
   }
 
@@ -220,11 +232,14 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
     const baseId = this.localParameters.variableId;
     const totalOptions = options.length;
 
-    const optionsPerRow = this.getCustomDistribution(totalOptions, numberOfRows);
+    const optionsPerRow = this.getCustomDistribution(
+      totalOptions,
+      numberOfRows,
+    );
 
     let currentIndex = 0;
 
-    optionsPerRow.forEach(optionsInThisRow => {
+    optionsPerRow.forEach((optionsInThisRow) => {
       // Skip if no options for this row
       if (optionsInThisRow <= 0) {
         return; // continue to next iteration
@@ -240,11 +255,16 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
 
       const singleRowOptionsIndexed = options
         .slice(currentIndex, currentIndex + actualOptionsForRow)
-        .map((option, i) => (<RowOption>{
-          option: option,
-          index: currentIndex + i,
-          id: this.localParameters.multiSelect ? `${baseId}_${currentIndex + i}` : baseId
-        }));
+        .map(
+          (option, i) =>
+            <RowOption>{
+              option: option,
+              index: currentIndex + i,
+              id: this.localParameters.multiSelect
+                ? `${baseId}_${currentIndex + i}`
+                : baseId,
+            },
+        );
 
       rows.push(singleRowOptionsIndexed);
       currentIndex += actualOptionsForRow;
@@ -255,7 +275,10 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
 
   // TODO simplify, actually no need for it
   // eslint-disable-next-line class-methods-use-this
-  private getCustomDistribution(totalOptions: number, numberOfRows: number): number[] {
+  private getCustomDistribution(
+    totalOptions: number,
+    numberOfRows: number,
+  ): number[] {
     if (numberOfRows === 1) {
       return [totalOptions];
     }
@@ -355,12 +378,14 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
    * Sets selection to a specific index (single select mode)
    */
   private setSelectionAtIndex(index: number): void {
-    const numberOfOptions = this.localParameters.options?.buttons?.length ||
-      this.localParameters.options?.repeatButton?.numberOfOptions || 0;
+    const numberOfOptions =
+      this.localParameters.options?.buttons?.length ||
+      this.localParameters.options?.repeatButton?.numberOfOptions ||
+      0;
 
     const selectedValues = Array.from(
       { length: numberOfOptions },
-      (_, i) => i === index
+      (_, i) => i === index,
     );
     this.selectedValues.set(selectedValues);
   }
@@ -389,16 +414,21 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
   /**
    * Emits the current selection state as a response
    */
-  private emitResponse(status: 'DISPLAYED' | 'VALUE_CHANGED', relevant: boolean): void {
-    const value = this.localParameters.multiSelect ?
-      this.selectedValues().map(item => (item ? 1 : 0)).join('') :
-      (this.selectedValues().findIndex(item => item) + 1).toString();
+  private emitResponse(
+    status: 'DISPLAYED' | 'VALUE_CHANGED',
+    relevant: boolean,
+  ): void {
+    const value = this.localParameters.multiSelect
+      ? this.selectedValues()
+          .map((item) => (item ? 1 : 0))
+          .join('')
+      : (this.selectedValues().findIndex((item) => item) + 1).toString();
 
     const response = <StarsResponse>{
       id: this.localParameters.variableId,
       status: status,
       value: value,
-      relevantForResponsesProgress: relevant
+      relevantForResponsesProgress: relevant,
     };
 
     this.responses.emit([response]);
@@ -417,7 +447,7 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
       multiSelect: false,
       triggerNavigationOnSelect: false,
       numberOfRows: 1,
-      buttonType: 'MEDIUM_SQUARE'
+      buttonType: 'MEDIUM_SQUARE',
     };
   }
 }

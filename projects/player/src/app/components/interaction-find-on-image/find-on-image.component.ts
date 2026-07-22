@@ -1,6 +1,12 @@
 import {
   AfterViewInit,
-  Component, effect, ElementRef, signal, ViewChild, OnDestroy
+  Component,
+  effect,
+  ElementRef,
+  signal,
+  ViewChild,
+  OnDestroy,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 
 import { Response } from '@iqbspecs/response/response.interface';
@@ -10,10 +16,13 @@ import { InteractionFindOnImageParams } from '../../models/unit-definition';
 @Component({
   selector: 'stars-interaction-find-on-image',
   templateUrl: './find-on-image.component.html',
-  styleUrls: ['./find-on-image.component.scss']
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrls: ['./find-on-image.component.scss'],
 })
-
-export class InteractionFindOnImageComponent extends InteractionComponentDirective implements AfterViewInit, OnDestroy {
+export class InteractionFindOnImageComponent
+  extends InteractionComponentDirective
+  implements AfterViewInit, OnDestroy
+{
   /** Local copy of the component parameters with defaults applied. */
   localParameters!: InteractionFindOnImageParams;
   /** Whether to apply the show area style to the image. */
@@ -25,7 +34,8 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
   /** Signal holding the CSS size(px) for the click visual indicator. */
   clickTargetSize = signal('0px');
   /** Template reference to the image DOM node */
-  @ViewChild('imageElement', { static: false }) imageRef!: ElementRef<HTMLImageElement>;
+  @ViewChild('imageElement', { static: false })
+  imageRef!: ElementRef<HTMLImageElement>;
   /** Signal that controls whether the clickTarget button is disabled. */
   buttonDisabled = signal(true);
   /** Signal holding inline CSS for the optional show-area overlay (top/left/width/height). */
@@ -111,9 +121,11 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
 
       // 3. One-time initialization/restoration logic for the current load
       const formerStateResponses: Response[] = parameters.formerState || [];
-      const foundResponse = Array.isArray(formerStateResponses) ?
-        formerStateResponses.find(r => r.id === this.localParameters.variableId) :
-        null;
+      const foundResponse = Array.isArray(formerStateResponses)
+        ? formerStateResponses.find(
+            (r) => r.id === this.localParameters.variableId,
+          )
+        : null;
 
       if (foundResponse && foundResponse.value) {
         // Only call restore if the value is different from what's currently shown/captured
@@ -133,12 +145,14 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
         this.clickTargetSize.set('0px');
 
         // No former state: emit DISPLAYED only once for this load
-        this.responses.emit([{
-          id: this.localParameters.variableId,
-          status: 'DISPLAYED',
-          value: '',
-          relevantForResponsesProgress: false
-        }]);
+        this.responses.emit([
+          {
+            id: this.localParameters.variableId,
+            status: 'DISPLAYED',
+            value: '',
+            relevantForResponsesProgress: false,
+          },
+        ]);
         this.lastRestoredValue = '';
       }
     });
@@ -148,20 +162,26 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
       if (!hints || hints.length === 0) {
         return;
       }
-      const parts = hints.split(',').map(p => p.trim());
+      const parts = hints.split(',').map((p) => p.trim());
       if (parts.length < 2) return;
 
       const percentX = Number.parseInt(parts[0]!, 10);
       const percentY = Number.parseInt(parts[1]!, 10);
-      if (Number.isNaN(percentX) || Number.isNaN(percentY)) return
+      if (Number.isNaN(percentX) || Number.isNaN(percentY)) return;
 
       // convert percent to pixels within image
       const xWithinImage = Math.round((percentX / 100) * this.imgWidth);
       const yWithinImage = Math.round((percentY / 100) * this.imgHeight);
 
       // compute absolute coordinates consistent with the onClick usage
-      const xAbs = Math.max(this.imgLeft, Math.min(this.imgLeft + this.imgWidth, this.imgLeft + xWithinImage));
-      const yAbs = Math.max(this.imgTop, Math.min(this.imgTop + this.imgHeight, this.imgTop + yWithinImage));
+      const xAbs = Math.max(
+        this.imgLeft,
+        Math.min(this.imgLeft + this.imgWidth, this.imgLeft + xWithinImage),
+      );
+      const yAbs = Math.max(
+        this.imgTop,
+        Math.min(this.imgTop + this.imgHeight, this.imgTop + yWithinImage),
+      );
 
       this.clickTargetLeft.set(`${xAbs}px`);
       this.clickTargetTop.set(`${yAbs}px`);
@@ -252,7 +272,10 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
 
   ngOnDestroy() {
     if (this.imageLoadHandler && this.imageRef && this.imageRef.nativeElement) {
-      this.imageRef.nativeElement.removeEventListener('load', this.imageLoadHandler);
+      this.imageRef.nativeElement.removeEventListener(
+        'load',
+        this.imageLoadHandler,
+      );
       this.imageLoadHandler = null;
     }
     if (this.restoreTimer) {
@@ -270,18 +293,29 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
     const imgWidthFactor = this.imgWidth / 100;
     const imgHeightFactor = this.imgHeight / 100;
 
-    const x1 = Math.round((Number.parseInt(area[0]!, 10) * imgWidthFactor) + this.imgLeft);
-    const y1 = Math.round((Number.parseInt(area[1]!, 10) * imgHeightFactor) + this.imgTop);
-    const x2 = Math.round((Number.parseInt(area[2]!, 10) * imgWidthFactor) + this.imgLeft);
-    const y2 = Math.round((Number.parseInt(area[3]!, 10) * imgHeightFactor) + this.imgTop);
-    this.showAreaStyle.set(`top: ${y1}px; left: ${x1}px; width: ${x2 - x1}px; height: ${y2 - y1}px;`);
+    const x1 = Math.round(
+      Number.parseInt(area[0]!, 10) * imgWidthFactor + this.imgLeft,
+    );
+    const y1 = Math.round(
+      Number.parseInt(area[1]!, 10) * imgHeightFactor + this.imgTop,
+    );
+    const x2 = Math.round(
+      Number.parseInt(area[2]!, 10) * imgWidthFactor + this.imgLeft,
+    );
+    const y2 = Math.round(
+      Number.parseInt(area[3]!, 10) * imgHeightFactor + this.imgTop,
+    );
+    this.showAreaStyle.set(
+      `top: ${y1}px; left: ${x1}px; width: ${x2 - x1}px; height: ${y2 - y1}px;`,
+    );
   }
 
   setClickVisualisationAbsolute(x: number, y: number, imageWidth: number) {
     this.clickTargetLeft.set(`${x}px`);
     this.clickTargetTop.set(`${y}px`);
     let sizeFactor = 5;
-    if (this.localParameters.size !== 'SMALL') sizeFactor = this.localParameters.size === 'LARGE' ? 15 : 10;
+    if (this.localParameters.size !== 'SMALL')
+      sizeFactor = this.localParameters.size === 'LARGE' ? 15 : 10;
     this.clickTargetSize.set(`${sizeFactor * (imageWidth / 100)}px`);
     if (this.buttonDisabled()) this.buttonDisabled.set(false);
   }
@@ -290,18 +324,24 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
     this.updateImageMetrics();
     if (this.imgWidth === 0 || this.cachedImgEl == null) return;
 
-    this.setClickVisualisationAbsolute(event.layerX, event.layerY, this.imgWidth);
+    this.setClickVisualisationAbsolute(
+      event.layerX,
+      event.layerY,
+      this.imgWidth,
+    );
 
     const x = Math.round(((event.layerX - this.imgLeft) / this.imgWidth) * 100);
     const y = Math.round(((event.layerY - this.imgTop) / this.imgHeight) * 100);
     this.lastRestoredValue = `${x},${y}`;
 
-    this.responses.emit([{
-      id: this.localParameters.variableId || 'FIND_ON_IMAGE',
-      status: 'VALUE_CHANGED',
-      value: `${x},${y}`,
-      relevantForResponsesProgress: true
-    }]);
+    this.responses.emit([
+      {
+        id: this.localParameters.variableId || 'FIND_ON_IMAGE',
+        status: 'VALUE_CHANGED',
+        value: `${x},${y}`,
+        relevantForResponsesProgress: true,
+      },
+    ]);
   }
 
   /**
@@ -311,7 +351,7 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
   private restoreFromFormerState(response: Response): void {
     if (!response.value || typeof response.value !== 'string') return;
 
-    const parts = response.value.split(',').map(p => p.trim());
+    const parts = response.value.split(',').map((p) => p.trim());
     if (parts.length < 2) return;
 
     const percentX = Number.parseInt(parts[0]!, 10);
@@ -333,10 +373,15 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
     // This prevents using metrics from a previous image that hasn't swapped out yet
     const currentSrc = imgEl.getAttribute('src');
     const expectedSrc = this.localParameters.imageSource;
-    const isDifferentImage = expectedSrc && currentSrc && !currentSrc.includes(expectedSrc);
+    const isDifferentImage =
+      expectedSrc && currentSrc && !currentSrc.includes(expectedSrc);
 
     // TODO check first if image is present and calculate afterwards
-    const imageNotReady = (!imgEl.complete) || this.imgWidth === 0 || this.imgHeight === 0 || isDifferentImage;
+    const imageNotReady =
+      !imgEl.complete ||
+      this.imgWidth === 0 ||
+      this.imgHeight === 0 ||
+      isDifferentImage;
     if (imageNotReady) {
       const oneTimeHandler = () => {
         imgEl.removeEventListener('load', oneTimeHandler);
@@ -352,8 +397,14 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
     const yWithinImage = Math.round((percentY / 100) * this.imgHeight);
 
     // compute absolute coordinates consistent with the onClick usage
-    const xAbs = Math.max(this.imgLeft, Math.min(this.imgLeft + this.imgWidth, this.imgLeft + xWithinImage));
-    const yAbs = Math.max(this.imgTop, Math.min(this.imgTop + this.imgHeight, this.imgTop + yWithinImage));
+    const xAbs = Math.max(
+      this.imgLeft,
+      Math.min(this.imgLeft + this.imgWidth, this.imgLeft + xWithinImage),
+    );
+    const yAbs = Math.max(
+      this.imgTop,
+      Math.min(this.imgTop + this.imgHeight, this.imgTop + yWithinImage),
+    );
 
     this.setClickVisualisationAbsolute(xAbs, yAbs, this.imgWidth);
   }
@@ -365,7 +416,7 @@ export class InteractionFindOnImageComponent extends InteractionComponentDirecti
       imageSource: '',
       text: '',
       showArea: '',
-      size: 'SMALL'
+      size: 'SMALL',
     };
   }
 }

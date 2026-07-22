@@ -1,15 +1,16 @@
 import {
-  Component, computed, inject
+  Component,
+  computed,
+  inject,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { UnitService } from '../../services/unit.service';
 
 @Component({
   selector: 'stars-ribbon-bar',
-  template: `
-    <div [class]="ribbonClass()" data-cy="ribbon-bar">
-    </div>
-  `,
-  styleUrls: ['./ribbon-bar.component.scss']
+  template: ` <div [class]="ribbonClass()" data-cy="ribbon-bar"></div> `,
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrls: ['./ribbon-bar.component.scss'],
 })
 export class RibbonBarComponent {
   private unitService = inject(UnitService);
@@ -19,6 +20,10 @@ export class RibbonBarComponent {
 
   ribbonClass = computed(() => {
     const bgColorUpper = this.backgroundColor().toUpperCase();
-    return ['#FFF', '#FFFFFF', '#EEE', '#EEEEEE', 'WHITE'].includes(bgColorUpper) ? 'ribbon-bar' : 'ribbon-bar-white';
+    return ['#FFF', '#FFFFFF', '#EEE', '#EEEEEE', 'WHITE'].includes(
+      bgColorUpper,
+    )
+      ? 'ribbon-bar'
+      : 'ribbon-bar-white';
   });
 }
