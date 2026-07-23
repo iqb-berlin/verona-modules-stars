@@ -40,6 +40,52 @@ export function getCorrectAnswerParam(testData: UnitDefinition): string {
   return variableInfo[0]?.codes[0]?.parameter || '';
 }
 
+/**
+ * Parses a place-value response/coding parameter into tens and ones counts.
+ * Supported formats:
+ * - `"20_2"` → tens contribution_ones (2 tens, 2 ones)
+ * - `"2,1"` → tens count,ones count (legacy navigator format)
+ * - `22` / `"22"` → combined numeric value (2 tens, 2 ones)
+ */
+export function parsePlaceValueParam(
+  param: string | number | undefined | null
+): { tens: number; ones: number } {
+  if (param === undefined || param === null || param === '') {
+    return { tens: 0, ones: 0 };
+  }
+
+  if (typeof param === 'number') {
+    const total = Number.isFinite(param) ? Math.max(0, param) : 0;
+    return { tens: Math.floor(total / 10), ones: total % 10 };
+  }
+
+  if (param.includes('_')) {
+    const [tensPart, onesPart] = param.split('_');
+    const tensValue = Number.parseInt(tensPart ?? '0', 10);
+    const ones = Number.parseInt(onesPart ?? '0', 10);
+    return {
+      tens: Number.isFinite(tensValue) ? Math.max(0, Math.floor(tensValue / 10)) : 0,
+      ones: Number.isFinite(ones) ? Math.max(0, ones) : 0
+    };
+  }
+
+  if (param.includes(',')) {
+    const [tensPart, onesPart] = param.split(',');
+    const tens = Number.parseInt(tensPart?.trim() ?? '0', 10);
+    const ones = Number.parseInt(onesPart?.trim() ?? '0', 10);
+    return {
+      tens: Number.isFinite(tens) ? Math.max(0, tens) : 0,
+      ones: Number.isFinite(ones) ? Math.max(0, ones) : 0
+    };
+  }
+
+  const total = Number.parseInt(param, 10);
+  if (!Number.isFinite(total)) {
+    return { tens: 0, ones: 0 };
+  }
+  return { tens: Math.floor(Math.max(0, total) / 10), ones: Math.max(0, total) % 10 };
+}
+
 export type MockMessage = {
   data: {
     type: string;
