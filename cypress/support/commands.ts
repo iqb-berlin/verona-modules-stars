@@ -45,7 +45,8 @@ import {
   getButtonOptions,
   getCorrectAnswerParam,
   getIndexByOneBasedInput,
-  parseDataPartsResponses
+  parseDataPartsResponses,
+  parsePlaceValueParam
 } from './utils';
 
 Cypress.Commands.add('loadUnit', (filename: string) => {
@@ -618,21 +619,9 @@ Cypress.Commands.add('applyStandardScenarios', (interactionType: string, navigat
   }
 
   if (interactionType === 'place_value') {
-    if (navigator !== undefined) {
-      let targetTens = 0;
-      let targetOnes = 0;
-      if (typeof navigator === 'string') {
-        const parts = navigator.split(',');
-        if (parts.length === 2) {
-          targetTens = Number.parseInt(parts[0]!.trim(), 10);
-          targetOnes = Number.parseInt(parts[1]!.trim(), 10);
-        } else if (parts.length === 1) {
-          targetOnes = Number.parseInt(parts[0]!.trim(), 10);
-        }
-      } else if (typeof navigator === 'number') {
-        targetTens = Math.floor(navigator / 10);
-        targetOnes = navigator % 10;
-      }
+    if (navigator !== undefined && (typeof navigator === 'string' || typeof navigator === 'number')) {
+      // Response/coding format: "{tens*10}_{ones}" (e.g. "20_2"); also accepts "2,1" or 22
+      const { tens: targetTens, ones: targetOnes } = parsePlaceValueParam(navigator);
       cy.movePlaceValueIcons(targetTens, targetOnes);
       return;
     }
@@ -767,10 +756,8 @@ Cypress.Commands.add('applyCorrectAnswerScenarios', (interactionType: string, da
     // For find_on_image, the correctAnswerParam is in the format "x1,y1-x2,y2"
     cy.clickInPositionRange(correctAnswerParam);
   } else if (interactionType === 'place_value') {
-    // For place_value, the correctAnswerParam is in the format "tens-ones"
-    const targetValue = Number.parseInt(correctAnswerParam, 10);
-    const targetTens = Math.floor(targetValue / 10);
-    const targetOnes = targetValue % 10;
+    // For place_value, the correctAnswerParam is "{tens*10}_{ones}" (e.g. "20_2")
+    const { tens: targetTens, ones: targetOnes } = parsePlaceValueParam(correctAnswerParam);
     cy.movePlaceValueIcons(targetTens, targetOnes);
   } else if (interactionType === 'number_line') {
     // For number_line, clear the input first and then write the correct answer on the keyboard
@@ -980,23 +967,14 @@ Cypress.Commands.add('assertRestoredState', (interactionType: string, expected?:
     cy.get('[data-cy=text-span]', { timeout: 15000 }).should('contain', expectedText);
     cy.log(`Approved: interactionType: ${interactionType} text-span containes expectedText ${expectedText}`);
   } else if (interactionType === 'place_value') {
-    // If expected is provided, parse it to determine how many tens/ones should be moved
+    // expected: "{tens*10}_{ones}" (e.g. "20_2"), or legacy "2,1" / 22
     let expectedTens = undefined as number | undefined;
     let expectedOnes = undefined as number | undefined;
 
-    if (expected !== undefined) {
-      if (typeof expected === 'string') {
-        const parts = expected.split(',').map(p => p.trim());
-        if (parts.length === 2) {
-          expectedTens = Number.parseInt(parts[0]!, 10);
-          expectedOnes = Number.parseInt(parts[1]!, 10);
-        } else if (parts.length === 1) {
-          expectedOnes = Number.parseInt(parts[0]!, 10);
-        }
-      } else if (typeof expected === 'number') {
-        expectedTens = Math.floor(expected / 10);
-        expectedOnes = expected % 10;
-      }
+    if (expected !== undefined && (typeof expected === 'string' || typeof expected === 'number')) {
+      const parsed = parsePlaceValueParam(expected);
+      expectedTens = parsed.tens;
+      expectedOnes = parsed.ones;
     }
 
     // Default expectation: one ones icon moved if nothing provided

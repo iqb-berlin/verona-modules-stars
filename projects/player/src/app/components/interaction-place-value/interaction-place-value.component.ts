@@ -131,13 +131,9 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
       }
 
       this.hasHint.set(true);
-      // Parse numeric value from response
-      const numeric = parseInt(hints, 10);
-      const total = Number.isFinite(numeric) ? Math.max(0, numeric) : 0;
-
-      // Determine desired tens and ones within configured caps
-      const desiredTens = Math.min(this.maxNumberOfTens, Math.floor(total / 10));
-      const desiredOnes = Math.min(this.maxNumberOfOnes, total % 10);
+      const { tens: desiredTensRaw, ones: desiredOnesRaw } = this.parseTensAndOnes(hints);
+      const desiredTens = Math.min(this.maxNumberOfTens, desiredTensRaw);
+      const desiredOnes = Math.min(this.maxNumberOfOnes, desiredOnesRaw);
 
       // Reset internal state
       this.resetSelection();
@@ -546,13 +542,9 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
 
   /** Restores the upper panel selection (tens and ones) from a former-state response. */
   private restoreFromFormerState(response: Response): void {
-    // Parse numeric value from response
-    const numeric = typeof response.value === 'string' ? parseInt(response.value, 10) : Number(response.value);
-    const total = Number.isFinite(numeric) ? Math.max(0, numeric) : 0;
-
-    // Determine desired tens and ones within configured caps
-    const desiredTens = Math.min(this.maxNumberOfTens, Math.floor(total / 10));
-    const desiredOnes = Math.min(this.maxNumberOfOnes, total % 10);
+    const { tens: desiredTensRaw, ones: desiredOnesRaw } = this.parseTensAndOnes(response.value);
+    const desiredTens = Math.min(this.maxNumberOfTens, desiredTensRaw);
+    const desiredOnes = Math.min(this.maxNumberOfOnes, desiredOnesRaw);
 
     // Reset internal state
     this.resetSelection();
@@ -678,16 +670,33 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
       {
         id: this.localParameters?.variableId || 'PLACE_VALUE',
         status: 'VALUE_CHANGED',
-        value: (tensCount * 10) + onesCount,
-        relevantForResponsesProgress: true
-      },
-      {
-        id: this.localParameters?.variableId ? `${this.localParameters?.variableId}_TENS` : 'PLACE_VALUE_TENS',
-        status: 'VALUE_CHANGED',
-        value: tensCount,
+        value: `${tensCount * 10}_${onesCount}`,
         relevantForResponsesProgress: true
       }
     ]);
+  }
+
+  /**
+   * Parses a place-value response into tens/ones counts.
+   * Supports `"20_2"` ({tens*10}_{ones}) and legacy numeric `22`.
+   */
+  // eslint-disable-next-line class-methods-use-this
+  private parseTensAndOnes(value: unknown): { tens: number; ones: number } {
+    if (typeof value === 'string' && value.includes('_')) {
+      const [tensPart, onesPart] = value.split('_');
+      const tensValue = Number.parseInt(tensPart ?? '', 10);
+      const ones = Number.parseInt(onesPart ?? '', 10);
+      return {
+        tens: Number.isFinite(tensValue) ? Math.max(0, Math.floor(tensValue / 10)) : 0,
+        ones: Number.isFinite(ones) ? Math.max(0, ones) : 0
+      };
+    }
+    const numeric = typeof value === 'string' ? Number.parseInt(value, 10) : Number(value);
+    const total = Number.isFinite(numeric) ? Math.max(0, numeric) : 0;
+    return {
+      tens: Math.floor(total / 10),
+      ones: total % 10
+    };
   }
 
   // eslint-disable-next-line class-methods-use-this

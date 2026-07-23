@@ -28,7 +28,7 @@
       "codes": [
         {
           "method": "EQUALS",
-          "parameter": "11",
+          "parameter": "10_1",
           "code": 1,
           "score": 1
         }
@@ -53,7 +53,7 @@
         "parameter": "0",
         "showResponse": {
           "variableId": "PLACE_VALUE",
-          "value": "11",
+          "value": "10_1",
           "delayMS": 1000
         }
       }
