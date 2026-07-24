@@ -1,4 +1,9 @@
-import { Component, effect, signal } from '@angular/core';
+import {
+  Component,
+  effect,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { Response } from '@iqbspecs/response/response.interface';
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
 import { InteractionPyramidParams } from '../../models/unit-definition';
@@ -7,7 +12,8 @@ import { StarsResponse } from '../../services/responses.service';
 @Component({
   selector: 'stars-interaction-pyramid',
   templateUrl: './interaction-pyramid.component.html',
-  styleUrls: ['./interaction-pyramid.component.scss']
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrls: ['./interaction-pyramid.component.scss'],
 })
 export class InteractionPyramidComponent extends InteractionComponentDirective {
   /** Local copy of the component parameters with defaults applied. */
@@ -44,14 +50,16 @@ export class InteractionPyramidComponent extends InteractionComponentDirective {
       const isNewParametersObject = this.lastParametersRef !== parameters;
 
       if (isNewParametersObject) {
-
         this.localParameters = {
           ...this.createDefaultParameters(),
-          ...parameters
+          ...parameters,
         };
 
-        const formerStateResponses: Response[] = this.localParameters.formerState || [];
-        const found = formerStateResponses.find(r => r.id === this.localParameters.variableId);
+        const formerStateResponses: Response[] =
+          this.localParameters.formerState || [];
+        const found = formerStateResponses.find(
+          (r) => r.id === this.localParameters.variableId,
+        );
 
         if (found && typeof found.value === 'string') {
           this.restoreFromFormerState(found.value);
@@ -135,7 +143,10 @@ export class InteractionPyramidComponent extends InteractionComponentDirective {
   }
 
   private updateButtonStates() {
-    const currentVal = this.selectedInput() === 'LEFT' ? this.bottomLeftValue() : this.bottomRightValue();
+    const currentVal =
+      this.selectedInput() === 'LEFT'
+        ? this.bottomLeftValue()
+        : this.bottomRightValue();
     this.keyboardDisabled.set(currentVal.length >= 2);
   }
 
@@ -145,7 +156,7 @@ export class InteractionPyramidComponent extends InteractionComponentDirective {
       id: this.localParameters?.variableId || 'PYRAMID',
       status: status,
       value: value,
-      relevantForResponsesProgress: status === 'VALUE_CHANGED'
+      relevantForResponsesProgress: status === 'VALUE_CHANGED',
     };
 
     this.responses.emit([response]);
@@ -168,7 +179,7 @@ export class InteractionPyramidComponent extends InteractionComponentDirective {
   private createDefaultParameters(): InteractionPyramidParams {
     return {
       variableId: 'PYRAMID',
-      topNumber: 13
+      topNumber: 13,
     };
   }
 }

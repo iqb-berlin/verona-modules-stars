@@ -4,6 +4,18 @@
 # IQB Stars Player
 version: 0.6.42
 
+## Prerequisites
+
+This project requires **Node.js 24.15.0 or newer** (Angular 22 also supports Node 22.22.3+ or 26+).
+
+Check your version:
+
+```
+node -v
+```
+
+If you use [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm), run `nvm use` or `fnm use` in the project root — the required version is defined in `.nvmrc`.
+
 ## Development
 
 This player is an Angular web application. After cloning this repository, you need to download all components this application depends on:

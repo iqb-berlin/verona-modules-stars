@@ -1,4 +1,9 @@
-import { Component, effect, signal } from '@angular/core';
+import {
+  Component,
+  effect,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 
 import { Response } from '@iqbspecs/response/response.interface';
 import { StarsResponse } from '../../services/responses.service';
@@ -8,9 +13,9 @@ import { InteractionWriteParams } from '../../models/unit-definition';
 @Component({
   selector: 'stars-interaction-write',
   templateUrl: 'interaction-write.component.html',
-  styleUrls: ['interaction-write.component.scss']
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrls: ['interaction-write.component.scss'],
 })
-
 export class InteractionWriteComponent extends InteractionComponentDirective {
   /** Local copy of the component parameters with defaults applied. */
   localParameters!: InteractionWriteParams;
@@ -29,28 +34,66 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
       const parameters = this.parameters() as InteractionWriteParams;
       this.localParameters = this.createDefaultParameters();
       if (parameters) {
-        this.localParameters.addBackspaceKey = parameters.addBackspaceKey ?? true;
-        this.localParameters.keysLine1 = parameters.keysLine1 || ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
-        this.localParameters.keysLine2 = parameters.keysLine2 || ['j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r'];
-        this.localParameters.keysLine3 = parameters.keysLine3 || ['s', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+        this.localParameters.addBackspaceKey =
+          parameters.addBackspaceKey ?? true;
+        this.localParameters.keysLine1 = parameters.keysLine1 || [
+          'a',
+          'b',
+          'c',
+          'd',
+          'e',
+          'f',
+          'g',
+          'h',
+          'i',
+        ];
+        this.localParameters.keysLine2 = parameters.keysLine2 || [
+          'j',
+          'k',
+          'l',
+          'm',
+          'n',
+          'o',
+          'p',
+          'q',
+          'r',
+        ];
+        this.localParameters.keysLine3 = parameters.keysLine3 || [
+          's',
+          't',
+          'u',
+          'v',
+          'w',
+          'x',
+          'y',
+          'z',
+        ];
         this.localParameters.keysLine4 = parameters.keysLine4 || [];
         this.localParameters.variableId = parameters.variableId || 'WRITE';
-        this.localParameters.keyboardMode = parameters.keyboardMode || 'CHARACTERS';
+        this.localParameters.keyboardMode =
+          parameters.keyboardMode || 'CHARACTERS';
         this.localParameters.maxInputLength = parameters.maxInputLength || 10;
         this.localParameters.imageSource = parameters.imageSource || '';
         this.localParameters.text = parameters.text || '';
 
-        const formerStateResponses: Response[] = (parameters as any).formerState || [];
+        const formerStateResponses: Response[] =
+          (parameters as any).formerState || [];
 
         // Explicitly reset the text and input status before attempting restoration
         // This prevents state "leakage" if a previous unit used the same variableId
         this.currentText = '';
-        this.isDisabled = this.localParameters?.maxInputLength !== null &&
+        this.isDisabled =
+          this.localParameters?.maxInputLength !== null &&
           this.localParameters?.maxInputLength !== undefined &&
           this.currentText.length >= this.localParameters.maxInputLength;
 
-        if (Array.isArray(formerStateResponses) && formerStateResponses.length > 0) {
-          const found = formerStateResponses.find(r => r.id === this.localParameters.variableId);
+        if (
+          Array.isArray(formerStateResponses) &&
+          formerStateResponses.length > 0
+        ) {
+          const found = formerStateResponses.find(
+            (r) => r.id === this.localParameters.variableId,
+          );
 
           if (found && typeof found.value === 'string') {
             this.restoreFromFormerState(found);
@@ -59,12 +102,14 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
         }
 
         // No valid former state - initialize with empty string
-        this.responses.emit([{
-          id: this.localParameters.variableId,
-          status: 'DISPLAYED',
-          value: '',
-          relevantForResponsesProgress: false
-        }]);
+        this.responses.emit([
+          {
+            id: this.localParameters.variableId,
+            status: 'DISPLAYED',
+            value: '',
+            relevantForResponsesProgress: false,
+          },
+        ]);
       }
 
       if (!this.currentText) this.currentText = '';
@@ -88,16 +133,20 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
   }
 
   addChar(button: string) {
-    if (this.localParameters?.maxInputLength !== null &&
+    if (
+      this.localParameters?.maxInputLength !== null &&
       this.localParameters?.maxInputLength !== undefined &&
-      this.currentText.length >= this.localParameters.maxInputLength) {
+      this.currentText.length >= this.localParameters.maxInputLength
+    ) {
       return;
     }
 
-    const charToAdd = this.currentText.length === 0 ? this.capitalize(button) : button;;
+    const charToAdd =
+      this.currentText.length === 0 ? this.capitalize(button) : button;
     this.currentText += charToAdd;
 
-    this.isDisabled = this.localParameters?.maxInputLength !== null &&
+    this.isDisabled =
+      this.localParameters?.maxInputLength !== null &&
       this.localParameters?.maxInputLength !== undefined &&
       this.currentText.length >= this.localParameters.maxInputLength;
 
@@ -107,7 +156,8 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
   deleteChar() {
     if (this.currentText.length > 0) {
       this.currentText = this.currentText.slice(0, -1);
-      this.isDisabled = this.localParameters?.maxInputLength !== null &&
+      this.isDisabled =
+        this.localParameters?.maxInputLength !== null &&
         this.localParameters?.maxInputLength !== undefined &&
         this.currentText.length >= this.localParameters.maxInputLength;
       this.valueChanged();
@@ -119,7 +169,7 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
       id: this.localParameters?.variableId || 'WRITE',
       status: 'VALUE_CHANGED',
       value: this.currentText,
-      relevantForResponsesProgress: true
+      relevantForResponsesProgress: true,
     };
 
     this.responses.emit([response]);
@@ -133,7 +183,8 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
     if (!response.value || typeof response.value !== 'string') return;
 
     this.currentText = response.value;
-    this.isDisabled = this.localParameters?.maxInputLength !== null &&
+    this.isDisabled =
+      this.localParameters?.maxInputLength !== null &&
       this.localParameters?.maxInputLength !== undefined &&
       this.currentText.length >= this.localParameters.maxInputLength;
   }
@@ -150,7 +201,7 @@ export class InteractionWriteComponent extends InteractionComponentDirective {
       keysLine3: ['s', 't', 'u', 'v', 'w', 'x', 'y', 'z'],
       keysLine4: [],
       keyboardMode: 'CHARACTERS',
-      maxInputLength: 10
+      maxInputLength: 10,
     };
   }
 }

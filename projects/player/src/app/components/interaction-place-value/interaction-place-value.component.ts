@@ -1,17 +1,30 @@
 import {
-  Component, computed, effect, ElementRef, signal, ViewChild
+  Component,
+  computed,
+  effect,
+  ElementRef,
+  signal,
+  ViewChild,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { CdkDrag, CdkDragEnd } from '@angular/cdk/drag-drop';
 import { Response } from '@iqbspecs/response/response.interface';
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
-import { IconButtonTypeEnum, InteractionPlaceValueParams } from '../../models/unit-definition';
-import { parseTranslate, updateTransitionDisabledSet } from '../../shared/utils/drag-drop.util';
+import {
+  IconButtonTypeEnum,
+  InteractionPlaceValueParams,
+} from '../../models/unit-definition';
+import {
+  parseTranslate,
+  updateTransitionDisabledSet,
+} from '../../shared/utils/drag-drop.util';
 
 @Component({
   selector: 'stars-interaction-place-value',
   templateUrl: './interaction-place-value.component.html',
   styleUrls: ['./interaction-place-value.component.scss'],
-  imports: [CdkDrag]
+  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [CdkDrag],
 })
 export class InteractionPlaceValueComponent extends InteractionComponentDirective {
   /** Debounce time for clicks in milliseconds */
@@ -28,9 +41,12 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
   hasHint = signal(false);
 
   /** Image panel (up) and icon wrappers (down) element refs */
-  @ViewChild('iconsUpperPanel', { static: false }) iconsUpperPanel?: ElementRef<HTMLElement>;
-  @ViewChild('tensWrapper', { static: false }) tensWrapper?: ElementRef<HTMLElement>;
-  @ViewChild('onesWrapper', { static: false }) onesWrapper?: ElementRef<HTMLElement>;
+  @ViewChild('iconsUpperPanel', { static: false })
+  iconsUpperPanel?: ElementRef<HTMLElement>;
+  @ViewChild('tensWrapper', { static: false })
+  tensWrapper?: ElementRef<HTMLElement>;
+  @ViewChild('onesWrapper', { static: false })
+  onesWrapper?: ElementRef<HTMLElement>;
 
   localParameters!: InteractionPlaceValueParams;
   /** Maximum number of tens and ones  */
@@ -85,7 +101,8 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
       this.localParameters = this.createDefaultParameters();
       this.resetSelection();
       if (parameters) {
-        this.localParameters.variableId = parameters.variableId || 'PLACE_VALUE';
+        this.localParameters.variableId =
+          parameters.variableId || 'PLACE_VALUE';
         this.localParameters.value = parameters.value || 0;
         this.localParameters.maxNumberOfTens = parameters.maxNumberOfTens || 3;
         this.maxNumberOfTens = this.localParameters.maxNumberOfTens;
@@ -93,21 +110,34 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
         this.maxNumberOfOnes = this.localParameters.maxNumberOfOnes;
 
         // Restore from former state once, if available; otherwise emit DISPLAYED
-        const formerStateResponses: Response[] = (parameters as any).formerState || [];
-        if (Array.isArray(formerStateResponses) && formerStateResponses.length > 0) {
-          const found = formerStateResponses.find(r => r.id === this.localParameters.variableId);
-          if (found && (found.value !== undefined && found.value !== null && `${found.value}` !== '')) {
+        const formerStateResponses: Response[] =
+          (parameters as any).formerState || [];
+        if (
+          Array.isArray(formerStateResponses) &&
+          formerStateResponses.length > 0
+        ) {
+          const found = formerStateResponses.find(
+            (r) => r.id === this.localParameters.variableId,
+          );
+          if (
+            found &&
+            found.value !== undefined &&
+            found.value !== null &&
+            `${found.value}` !== ''
+          ) {
             this.restoreFromFormerState(found);
             return;
           }
         }
         // No former state
-        this.responses.emit([{
-          id: this.localParameters.variableId,
-          status: 'DISPLAYED',
-          value: '',
-          relevantForResponsesProgress: false
-        }]);
+        this.responses.emit([
+          {
+            id: this.localParameters.variableId,
+            status: 'DISPLAYED',
+            value: '',
+            relevantForResponsesProgress: false,
+          },
+        ]);
       }
     });
 
@@ -131,7 +161,8 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
       }
 
       this.hasHint.set(true);
-      const { tens: desiredTensRaw, ones: desiredOnesRaw } = this.parseTensAndOnes(hints);
+      const { tens: desiredTensRaw, ones: desiredOnesRaw } =
+        this.parseTensAndOnes(hints);
       const desiredTens = Math.min(this.maxNumberOfTens, desiredTensRaw);
       const desiredOnes = Math.min(this.maxNumberOfOnes, desiredOnesRaw);
 
@@ -143,7 +174,11 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
       const onesAll = this.onesArray();
 
       const newTens: CountItem[] = [];
-      for (let i = tensAll.length - 1; i >= 0 && newTens.length < desiredTens; i -= 1) {
+      for (
+        let i = tensAll.length - 1;
+        i >= 0 && newTens.length < desiredTens;
+        i -= 1
+      ) {
         const tensItem = tensAll[i];
         if (tensItem) {
           this.addedSeqCounter += 1;
@@ -155,7 +190,11 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
       }
 
       const newOnes: CountItem[] = [];
-      for (let i = onesAll.length - 1; i >= 0 && newOnes.length < desiredOnes; i -= 1) {
+      for (
+        let i = onesAll.length - 1;
+        i >= 0 && newOnes.length < desiredOnes;
+        i -= 1
+      ) {
         const onesItem = onesAll[i];
         if (onesItem) {
           this.addedSeqCounter += 1;
@@ -173,7 +212,10 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
       // Collect all restored item IDs for animation
       // This allows the UI to animate icons "moving up" from their starting positions
       // to their restored slots in the upper panel
-      const restoredIds = [...newTens.map(t => t.id), ...newOnes.map(o => o.id)];
+      const restoredIds = [
+        ...newTens.map((t) => t.id),
+        ...newOnes.map((o) => o.id),
+      ];
 
       // Recalculate layout and mark items as animating for visual transition
       // Passing the IDs triggers the CSS transition for these specific elements
@@ -191,7 +233,9 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
     this.nextOnesSlot = 0;
     this.tensCountAtTheTopPanel.set([]);
     this.onesCountAtTheTopPanel.set([]);
-    Object.keys(this.itemTransforms).forEach(k => { delete this.itemTransforms[Number(k)]; });
+    Object.keys(this.itemTransforms).forEach((k) => {
+      delete this.itemTransforms[Number(k)];
+    });
     this.animatingFlags.set({});
     this.selectionAnimatingIds.clear();
     this.transitionDisabledIds.set(new Set());
@@ -205,19 +249,25 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
   /** Whether the currently dragged item is a 'tens' icon */
   readonly isDraggingTens = computed(() => {
     const draggingId = this.draggingIndex();
-    if (draggingId !== null && this.tensArray().some(t => t.id === draggingId)) {
+    if (
+      draggingId !== null &&
+      this.tensArray().some((t) => t.id === draggingId)
+    ) {
       return true;
     }
-    return this.tensArray().some(t => this.isAnimating(t.id));
+    return this.tensArray().some((t) => this.isAnimating(t.id));
   });
 
   /** Whether the currently dragged item is a 'ones' icon */
   readonly isDraggingOnes = computed(() => {
     const draggingId = this.draggingIndex();
-    if (draggingId !== null && this.onesArray().some(o => o.id === draggingId)) {
+    if (
+      draggingId !== null &&
+      this.onesArray().some((o) => o.id === draggingId)
+    ) {
       return true;
     }
-    return this.onesArray().some(o => this.isAnimating(o.id));
+    return this.onesArray().some((o) => this.isAnimating(o.id));
   });
 
   /** Tens wrapper shows exactly maxNumberOfTens + 1 items stacked on top of each other. */
@@ -226,7 +276,7 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
     // Tens ids start from 1 and go up to tCount
     return Array.from({ length: tCount }, (_, i) => ({
       id: i + 1,
-      icon: 'TENS' as IconButtonTypeEnum
+      icon: 'TENS' as IconButtonTypeEnum,
     }));
   });
 
@@ -237,30 +287,40 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
     // Ones ids continue after tens to keep all ids unique, still starting overall from 1
     return Array.from({ length: oCount }, (_, i) => ({
       id: tCount + i + 1,
-      icon: 'ONES' as IconButtonTypeEnum
+      icon: 'ONES' as IconButtonTypeEnum,
     }));
   });
 
   /** The height of the upper panel when tens and ones are stacked on top of each other (in px) */
   getUpperPanelHeight = computed(() => {
     const tensRows = this.maxNumberOfTens;
-    const marginBetweenRows = InteractionPlaceValueComponent.MARGIN_BETWEEN_ROWS;
+    const marginBetweenRows =
+      InteractionPlaceValueComponent.MARGIN_BETWEEN_ROWS;
 
-    const tensHeight = tensRows > 0 ?
-      (tensRows * this.tensItemHeight) +
-      (Math.max(0, tensRows - 1) * marginBetweenRows) :
-      0;
+    const tensHeight =
+      tensRows > 0
+        ? tensRows * this.tensItemHeight +
+          Math.max(0, tensRows - 1) * marginBetweenRows
+        : 0;
 
-    const onesRows = Math.ceil(this.maxNumberOfOnes / InteractionPlaceValueComponent.ONES_PER_ROW);
-    const onesHeight = onesRows > 0 ?
-      (onesRows * this.onesItemHeight) +
-      (Math.max(0, onesRows - 1) * marginBetweenRows) :
-      0;
+    const onesRows = Math.ceil(
+      this.maxNumberOfOnes / InteractionPlaceValueComponent.ONES_PER_ROW,
+    );
+    const onesHeight =
+      onesRows > 0
+        ? onesRows * this.onesItemHeight +
+          Math.max(0, onesRows - 1) * marginBetweenRows
+        : 0;
 
-    const marginBetweenTensAndOnes = (tensRows > 0 && onesRows > 0) ?
-      marginBetweenRows : 0;
+    const marginBetweenTensAndOnes =
+      tensRows > 0 && onesRows > 0 ? marginBetweenRows : 0;
 
-    return tensHeight + marginBetweenTensAndOnes + onesHeight + (3 * this.marginBetweenElements);
+    return (
+      tensHeight +
+      marginBetweenTensAndOnes +
+      onesHeight +
+      3 * this.marginBetweenElements
+    );
   });
 
   /** Check if tens wrapper should be disabled */
@@ -284,8 +344,10 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
 
   /** Whether an item (by id) currently belongs to the upper panel (either tens or ones list) */
   inUpperPanel(id: number): boolean {
-    return this.tensCountAtTheTopPanel().some(i => i.id === id) ||
-      this.onesCountAtTheTopPanel().some(i => i.id === id);
+    return (
+      this.tensCountAtTheTopPanel().some((i) => i.id === id) ||
+      this.onesCountAtTheTopPanel().some((i) => i.id === id)
+    );
   }
 
   /** Check whether a specific item (by id) is currently marked as animating */
@@ -311,14 +373,24 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
     this.removeTransitionDisabled(id);
   }
 
-  onDragEnded(event: CdkDragEnd, source: 'ones' | 'tens', item: CountItem): void {
-    setTimeout(() => { this.suppressClick = false; }, 0);
+  onDragEnded(
+    event: CdkDragEnd,
+    source: 'ones' | 'tens',
+    item: CountItem,
+  ): void {
+    setTimeout(() => {
+      this.suppressClick = false;
+    }, 0);
     this.draggingIndex.set(null);
 
-    const freePos = (event?.source as CdkDrag)?.getFreeDragPosition?.() ?? { x: 0, y: 0 };
+    const freePos = (event?.source as CdkDrag)?.getFreeDragPosition?.() ?? {
+      x: 0,
+      y: 0,
+    };
     // Update the transform to the dropped position.
     // Transition is still disabled at this point.
-    this.itemTransforms[item.id] = `translate3d(${(freePos?.x ?? 0)}px, ${(freePos?.y ?? 0)}px, 0px)`;
+    this.itemTransforms[item.id] =
+      `translate3d(${freePos?.x ?? 0}px, ${freePos?.y ?? 0}px, 0px)`;
 
     const inPanel = this.inUpperPanel(item.id);
 
@@ -331,7 +403,10 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
       this.onItemClick(source, item, undefined, true);
     } else {
       // Dragged FROM wrapper
-      const isDisabled = source === 'tens' ? this.tensWrapperDisabled() : this.onesWrapperDisabled();
+      const isDisabled =
+        source === 'tens'
+          ? this.tensWrapperDisabled()
+          : this.onesWrapperDisabled();
       if (isDisabled) {
         // Return to wrapper
         this.itemTransforms[item.id] = 'translate3d(0px, 0px, 0px)';
@@ -354,11 +429,19 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
    * @param isFromDrag Indicates if this call originated from a drag-end event
    *                   rather than a direct click.
    */
-  onItemClick(source: 'ones' | 'tens', item?: CountItem, event?: Event, isFromDrag = false): void {
+  onItemClick(
+    source: 'ones' | 'tens',
+    item?: CountItem,
+    event?: Event,
+    isFromDrag = false,
+  ): void {
     if (!isFromDrag) {
       if (this.suppressClick) return;
       const now = Date.now();
-      if (now - this.lastClickTime < InteractionPlaceValueComponent.CLICK_DEBOUNCE_MS) {
+      if (
+        now - this.lastClickTime <
+        InteractionPlaceValueComponent.CLICK_DEBOUNCE_MS
+      ) {
         return;
       }
       this.lastClickTime = now;
@@ -370,11 +453,14 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
 
     // If no specific item provided, select the next available candidate from the wrapper stack
     // NOTE: This picks items in LIFO order (from the top of the visual stack)
-    const chosen: CountItem | undefined = item ?? this.pickNextCandidate(source);
+    const chosen: CountItem | undefined =
+      item ?? this.pickNextCandidate(source);
     if (!chosen) return;
     const movedId = chosen.id;
     if (source === 'tens') {
-      const alreadyInPanel = this.tensCountAtTheTopPanel().some(i => i.id === chosen.id);
+      const alreadyInPanel = this.tensCountAtTheTopPanel().some(
+        (i) => i.id === chosen.id,
+      );
       // Guard adds when disabled; allow removals regardless of disabled state
       if (!alreadyInPanel && this.tensWrapperDisabled()) return;
       if (!alreadyInPanel) {
@@ -389,16 +475,23 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
           this.tensSlotIndex.set(chosen.id, this.nextTensSlot);
           this.nextTensSlot += 1;
         }
-        this.tensCountAtTheTopPanel.set([...this.tensCountAtTheTopPanel(), chosen]);
+        this.tensCountAtTheTopPanel.set([
+          ...this.tensCountAtTheTopPanel(),
+          chosen,
+        ]);
       } else {
         // Already in panel → remove (return to wrapper)
-        const remaining = this.tensCountAtTheTopPanel().filter(i => i.id !== chosen.id);
+        const remaining = this.tensCountAtTheTopPanel().filter(
+          (i) => i.id !== chosen.id,
+        );
         this.tensCountAtTheTopPanel.set(remaining);
         // Do not delete transform here if we are animating back; scheduleLayoutUpdate handles it
         this.itemTransforms[chosen.id] = 'translate3d(0px, 0px, 0px)';
       }
     } else {
-      const alreadyInPanel = this.onesCountAtTheTopPanel().some(i => i.id === chosen.id);
+      const alreadyInPanel = this.onesCountAtTheTopPanel().some(
+        (i) => i.id === chosen.id,
+      );
       if (!alreadyInPanel && this.onesWrapperDisabled()) return;
       if (!alreadyInPanel) {
         // Remember insertion order for stable FIFO rendering in the upper panel.
@@ -410,9 +503,14 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
           this.onesSlotIndex.set(chosen.id, this.nextOnesSlot);
           this.nextOnesSlot += 1;
         }
-        this.onesCountAtTheTopPanel.set([...this.onesCountAtTheTopPanel(), chosen]);
+        this.onesCountAtTheTopPanel.set([
+          ...this.onesCountAtTheTopPanel(),
+          chosen,
+        ]);
       } else {
-        const remaining = this.onesCountAtTheTopPanel().filter(i => i.id !== chosen.id);
+        const remaining = this.onesCountAtTheTopPanel().filter(
+          (i) => i.id !== chosen.id,
+        );
         this.onesCountAtTheTopPanel.set(remaining);
         this.itemTransforms[chosen.id] = 'translate3d(0px, 0px, 0px)';
       }
@@ -429,11 +527,15 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
   }
 
   private addTransitionDisabled(id: number): void {
-    this.transitionDisabledIds.update(set => updateTransitionDisabledSet(set, id, 'add'));
+    this.transitionDisabledIds.update((set) =>
+      updateTransitionDisabledSet(set, id, 'add'),
+    );
   }
 
   private removeTransitionDisabled(id: number): void {
-    this.transitionDisabledIds.update(set => updateTransitionDisabledSet(set, id, 'remove'));
+    this.transitionDisabledIds.update((set) =>
+      updateTransitionDisabledSet(set, id, 'remove'),
+    );
   }
 
   /**
@@ -447,7 +549,7 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
     if (source === 'tens') {
       if (this.tensWrapperDisabled()) return undefined;
       const all = this.tensArray();
-      const used = new Set(this.tensCountAtTheTopPanel().map(i => i.id));
+      const used = new Set(this.tensCountAtTheTopPanel().map((i) => i.id));
       // Start from the end of the array to achieve LIFO (top-of-stack) picking
       for (let i = all.length - 1; i >= 0; i -= 1) {
         const candidate = all[i];
@@ -459,7 +561,7 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
     }
     if (this.onesWrapperDisabled()) return undefined;
     const all = this.onesArray();
-    const used = new Set(this.onesCountAtTheTopPanel().map(i => i.id));
+    const used = new Set(this.onesCountAtTheTopPanel().map((i) => i.id));
     // Start from the end of the array to achieve LIFO (top-of-stack) picking
     for (let i = all.length - 1; i >= 0; i -= 1) {
       const candidate = all[i];
@@ -494,27 +596,37 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
 
     // Current items in the upper panel
     // eslint-disable-next-line max-len
-    const tens = [...this.tensCountAtTheTopPanel()].sort((a, b) => (this.addedSequence.get(a.id) ?? 0) - (this.addedSequence.get(b.id) ?? 0)
+    const tens = [...this.tensCountAtTheTopPanel()].sort(
+      (a, b) =>
+        (this.addedSequence.get(a.id) ?? 0) -
+        (this.addedSequence.get(b.id) ?? 0),
     );
 
     // eslint-disable-next-line max-len
-    const ones = [...this.onesCountAtTheTopPanel()].sort((a, b) => (this.addedSequence.get(a.id) ?? 0) - (this.addedSequence.get(b.id) ?? 0)
+    const ones = [...this.onesCountAtTheTopPanel()].sort(
+      (a, b) =>
+        (this.addedSequence.get(a.id) ?? 0) -
+        (this.addedSequence.get(b.id) ?? 0),
     );
 
     // Base translate for the first tens item so it lands at the upper panel's top-left (with margin)
-    const baseXTens = deltaXTensToPanel + (elMargin * 2); // 16px margin on the left
+    const baseXTens = deltaXTensToPanel + elMargin * 2; // 16px margin on the left
     const baseYTens = deltaYTensToPanel + elMargin;
-    const marginBetweenRows = InteractionPlaceValueComponent.MARGIN_BETWEEN_ROWS;
+    const marginBetweenRows =
+      InteractionPlaceValueComponent.MARGIN_BETWEEN_ROWS;
     tens.forEach((tensIcon, slot) => {
       const x = baseXTens;
-      const y = baseYTens + (slot * (tensRowH + marginBetweenRows));
+      const y = baseYTens + slot * (tensRowH + marginBetweenRows);
       // Always (re)calculate transforms to reflect current layout
       this.itemTransforms[tensIcon.id] = `translate3d(${x}px, ${y}px, 0px)`;
     });
 
     // Ones: align horizontally next to each other
     // 16px margin on the left + offset to match the tens icons first blue point when stacked above
-    const baseXOnes = deltaXOnesToPanel + (elMargin * 2) + InteractionPlaceValueComponent.TENS_ICON_INTERNAL_PADDING;
+    const baseXOnes =
+      deltaXOnesToPanel +
+      elMargin * 2 +
+      InteractionPlaceValueComponent.TENS_ICON_INTERNAL_PADDING;
     const baseYOnes = deltaYOnesToPanel + elMargin;
     const tensCount = tens.length; // ones should be visually under all tens items
 
@@ -530,11 +642,14 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
       const row = Math.floor(slot / onesPerRow);
       const col = slot % onesPerRow;
       // After 5 items (index 4), add strokeMargin(20px) instead of onesMargin(6px) to match the tens icons visually
-      const extraMargin = col >= 5 ? (strokeMargin - onesMargin) : 0;
-      const x = baseXOnes + (col * onesWidthWithMargin) + extraMargin;
+      const extraMargin = col >= 5 ? strokeMargin - onesMargin : 0;
+      const x = baseXOnes + col * onesWidthWithMargin + extraMargin;
       // Ones start below all tens rows, including the extra margin between tens rows
       // and also use the margin for ones
-      const y = baseYOnes + (tensCount * (tensRowH + marginBetweenRows)) + (row * (onesRowH + marginBetweenRows));
+      const y =
+        baseYOnes +
+        tensCount * (tensRowH + marginBetweenRows) +
+        row * (onesRowH + marginBetweenRows);
       // Always (re)calculate transforms; ones move down when tens grow or wrap when row fills
       this.itemTransforms[oneIcon.id] = `translate3d(${x}px, ${y}px, 0px)`;
     });
@@ -542,7 +657,8 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
 
   /** Restores the upper panel selection (tens and ones) from a former-state response. */
   private restoreFromFormerState(response: Response): void {
-    const { tens: desiredTensRaw, ones: desiredOnesRaw } = this.parseTensAndOnes(response.value);
+    const { tens: desiredTensRaw, ones: desiredOnesRaw } =
+      this.parseTensAndOnes(response.value);
     const desiredTens = Math.min(this.maxNumberOfTens, desiredTensRaw);
     const desiredOnes = Math.min(this.maxNumberOfOnes, desiredOnesRaw);
 
@@ -554,7 +670,11 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
     const onesAll = this.onesArray();
 
     const newTens: CountItem[] = [];
-    for (let i = tensAll.length - 1; i >= 0 && newTens.length < desiredTens; i -= 1) {
+    for (
+      let i = tensAll.length - 1;
+      i >= 0 && newTens.length < desiredTens;
+      i -= 1
+    ) {
       const tensItem = tensAll[i];
       if (tensItem) {
         this.addedSeqCounter += 1;
@@ -566,7 +686,11 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
     }
 
     const newOnes: CountItem[] = [];
-    for (let i = onesAll.length - 1; i >= 0 && newOnes.length < desiredOnes; i -= 1) {
+    for (
+      let i = onesAll.length - 1;
+      i >= 0 && newOnes.length < desiredOnes;
+      i -= 1
+    ) {
       const onesItem = onesAll[i];
       if (onesItem) {
         this.addedSeqCounter += 1;
@@ -584,14 +708,20 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
     // Collect all restored item IDs for animation
     // This allows the UI to animate icons "moving up" from their starting positions
     // to their restored slots in the upper panel
-    const restoredIds = [...newTens.map(t => t.id), ...newOnes.map(o => o.id)];
+    const restoredIds = [
+      ...newTens.map((t) => t.id),
+      ...newOnes.map((o) => o.id),
+    ];
 
     // Recalculate layout and mark items as animating for visual transition
     // Passing the IDs triggers the CSS transition for these specific elements
     this.scheduleLayoutUpdate(restoredIds);
   }
 
-  private scheduleLayoutUpdate(idsToAnimate?: number[], immediate = false): void {
+  private scheduleLayoutUpdate(
+    idsToAnimate?: number[],
+    immediate = false,
+  ): void {
     // Coalesce multiple calls: if an update is already requested, mark as reschedule and exit.
     if (!immediate && this.layoutUpdateRequested) {
       this.layoutUpdateReschedule = true;
@@ -602,7 +732,7 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
       // Mark only the explicitly moved ids as animating and selected
       const ids = Array.isArray(idsToAnimate) ? idsToAnimate : [];
       if (ids.length > 0) {
-        ids.forEach(id => {
+        ids.forEach((id) => {
           this.selectionAnimatingIds.add(id);
           this.setAnimating(id, true);
         });
@@ -610,7 +740,7 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
 
       // If immediate, ensure we are not in a tick where transitions are disabled for these ids
       if (immediate && ids.length > 0) {
-        ids.forEach(id => this.removeTransitionDisabled(id));
+        ids.forEach((id) => this.removeTransitionDisabled(id));
       }
 
       this.recomputeUpperPanelTransforms();
@@ -620,7 +750,7 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
 
       if (ids.length > 0) {
         setTimeout(() => {
-          ids.forEach(id => {
+          ids.forEach((id) => {
             this.setAnimating(id, false);
             this.selectionAnimatingIds.delete(id);
             // If the item is no longer in the upper panel, clear its transform after animation
@@ -649,7 +779,7 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
 
   /** Reactive helper to set/clear animating state */
   private setAnimating(id: number, on: boolean): void {
-    this.animatingFlags.update(curr => {
+    this.animatingFlags.update((curr) => {
       if (on) {
         if (curr[id]) return curr; // no change
         return { ...curr, [id]: true };
@@ -671,8 +801,8 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
         id: this.localParameters?.variableId || 'PLACE_VALUE',
         status: 'VALUE_CHANGED',
         value: `${tensCount * 10}_${onesCount}`,
-        relevantForResponsesProgress: true
-      }
+        relevantForResponsesProgress: true,
+      },
     ]);
   }
 
@@ -705,7 +835,7 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
       variableId: 'PLACE_VALUE',
       value: 0,
       maxNumberOfTens: 3,
-      maxNumberOfOnes: 20
+      maxNumberOfOnes: 20,
     };
   }
 }

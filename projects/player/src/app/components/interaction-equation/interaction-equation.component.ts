@@ -1,7 +1,11 @@
 import {
-  Component, computed, effect, signal, WritableSignal
+  Component,
+  computed,
+  effect,
+  signal,
+  WritableSignal,
+  ChangeDetectionStrategy,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
 import { Response } from '@iqbspecs/response/response.interface';
 
@@ -12,10 +16,9 @@ import { StarsResponse } from '../../services/responses.service';
 @Component({
   selector: 'stars-interaction-equation',
   templateUrl: './interaction-equation.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./interaction-equation.component.scss'],
-  imports: [CommonModule]
 })
-
 export class InteractionEquationComponent extends InteractionComponentDirective {
   /** Local copy of the component parameters with defaults applied. */
   localParameters!: InteractionEquationParams;
@@ -39,10 +42,14 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
   hasHint = signal(false);
 
   /** Tracks which fields are currently displaying a hint (used for coloring) */
-  hintedFields = signal<Set<'operand1' | 'operator' | 'operand2' | 'result'>>(new Set());
+  hintedFields = signal<Set<'operand1' | 'operator' | 'operand2' | 'result'>>(
+    new Set(),
+  );
 
   /** Tracks the currently selected field to manage input and keyboard state */
-  selectedField = signal<'operand1' | 'operator' | 'operand2' | 'result' | undefined>(undefined);
+  selectedField = signal<
+    'operand1' | 'operator' | 'operand2' | 'result' | undefined
+  >(undefined);
 
   /** Tracks the number of empty editable fields in the equation */
   emptyFieldsCount = signal<number>(0);
@@ -75,7 +82,7 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
 
         this.localParameters = {
           ...this.createDefaultParameters(),
-          ...parameters
+          ...parameters,
         };
 
         // Reset selection before restore or initialize to avoid state leakage
@@ -84,8 +91,11 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
         // Initialize values first to ensure fixed fields from parameters are populated
         this.initializeValues();
 
-        const formerStateResponses: Response[] = this.localParameters.formerState || [];
-        const found = formerStateResponses.find(r => r.id === this.localParameters.variableId);
+        const formerStateResponses: Response[] =
+          this.localParameters.formerState || [];
+        const found = formerStateResponses.find(
+          (r) => r.id === this.localParameters.variableId,
+        );
 
         if (found && typeof found.value === 'string' && found.value !== '') {
           this.restoreFromFormerState(found.value);
@@ -118,7 +128,9 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
     const editableFields = this.getEditableFields();
 
     if (parts.length === editableFields.length) {
-      const newHintedFields = new Set<'operand1' | 'operator' | 'operand2' | 'result'>();
+      const newHintedFields = new Set<
+        'operand1' | 'operator' | 'operand2' | 'result'
+      >();
       editableFields.forEach((field, index) => {
         const value = parts[index] || '';
         const targetSignal = this.getFieldSignal(field);
@@ -163,22 +175,34 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
    */
   private constructResponseValue(): string {
     const editableFields = this.getEditableFields();
-    return editableFields.map(field => {
-      if (field === 'operand1') return this.currentOperand1();
-      if (field === 'operator') return this.currentOperator();
-      if (field === 'operand2') return this.currentOperand2();
-      if (field === 'result') return this.currentResult();
-      return '';
-    }).join('_');
+    return editableFields
+      .map((field) => {
+        if (field === 'operand1') return this.currentOperand1();
+        if (field === 'operator') return this.currentOperator();
+        if (field === 'operand2') return this.currentOperand2();
+        if (field === 'result') return this.currentResult();
+        return '';
+      })
+      .join('_');
   }
 
   /**
    * Filters all possible equation fields to return only those that are editable.
    * @returns An array of editable field names.
    */
-  private getEditableFields(): ('operand1' | 'operator' | 'operand2' | 'result')[] {
-    const fields: ('operand1' | 'operator' | 'operand2' | 'result')[] = ['operand1', 'operator', 'operand2', 'result'];
-    return fields.filter(field => this.isFieldEditable(field));
+  private getEditableFields(): (
+    | 'operand1'
+    | 'operator'
+    | 'operand2'
+    | 'result'
+  )[] {
+    const fields: ('operand1' | 'operator' | 'operand2' | 'result')[] = [
+      'operand1',
+      'operator',
+      'operand2',
+      'result',
+    ];
+    return fields.filter((field) => this.isFieldEditable(field));
   }
 
   /**
@@ -202,13 +226,17 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
     }
 
     // Set focus if there's exactly one empty editable field.
-    const emptyFields = editableFields.filter(field => {
+    const emptyFields = editableFields.filter((field) => {
       const targetSignal = this.getFieldSignal(field);
       return targetSignal ? targetSignal() === '' : true;
     });
 
     this.emptyFieldsCount.set(emptyFields.length);
-    if (emptyFields.length === 1 && emptyFields[0] && this.localParameters.operators.length <= 1) {
+    if (
+      emptyFields.length === 1 &&
+      emptyFields[0] &&
+      this.localParameters.operators.length <= 1
+    ) {
       this.selectedField.set(emptyFields[0]);
     } else {
       this.selectedField.set(undefined);
@@ -220,14 +248,19 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
    * @param onlyFixed If true, only initializes fields with fixed values from parameters.
    */
   private initializeValues(onlyFixed: boolean = false) {
-    const fields: ('operand1' | 'operator' | 'operand2' | 'result')[] = ['operand1', 'operator', 'operand2', 'result'];
+    const fields: ('operand1' | 'operator' | 'operand2' | 'result')[] = [
+      'operand1',
+      'operator',
+      'operand2',
+      'result',
+    ];
     const paramKeys = {
       operand1: 'fixOperand1',
       operand2: 'fixOperand2',
-      result: 'fixResult'
+      result: 'fixResult',
     } as const;
 
-    fields.forEach(field => {
+    fields.forEach((field) => {
       const targetSignal = this.getFieldSignal(field);
       if (field === 'operator') {
         if (this.localParameters.operators.length === 1) {
@@ -250,13 +283,17 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
     if (!onlyFixed) {
       // Set initial focus if there's exactly one empty editable field.
       const editableFields = this.getEditableFields();
-      const emptyFields = editableFields.filter(field => {
+      const emptyFields = editableFields.filter((field) => {
         const targetSignal = this.getFieldSignal(field);
         return targetSignal ? targetSignal() === '' : true;
       });
 
       this.emptyFieldsCount.set(emptyFields.length);
-      if (emptyFields.length === 1 && emptyFields[0] && this.localParameters.operators.length <= 1) {
+      if (
+        emptyFields.length === 1 &&
+        emptyFields[0] &&
+        this.localParameters.operators.length <= 1
+      ) {
         this.selectedField.set(emptyFields[0]);
       } else {
         this.selectedField.set(undefined);
@@ -282,13 +319,15 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
    * @param field The field to check.
    * @returns True if the field is editable.
    */
-  isFieldEditable(field: 'operand1' | 'operator' | 'operand2' | 'result' | null | undefined): boolean {
+  isFieldEditable(
+    field: 'operand1' | 'operator' | 'operand2' | 'result' | null | undefined,
+  ): boolean {
     if (!field) return false;
     const editabilityMap = {
       operand1: this.localParameters.fixOperand1 === undefined,
       operator: this.localParameters.operators.length > 1,
       operand2: this.localParameters.fixOperand2 === undefined,
-      result: this.localParameters.fixResult === undefined
+      result: this.localParameters.fixResult === undefined,
     };
     return editabilityMap[field];
   }
@@ -299,13 +338,15 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
    * @returns The Signal for the field, or undefined if not found.
    */
   // eslint-disable-next-line max-len
-  getFieldSignal(field: 'operand1' | 'operator' | 'operand2' | 'result' | undefined): WritableSignal<string> | undefined {
+  getFieldSignal(
+    field: 'operand1' | 'operator' | 'operand2' | 'result' | undefined,
+  ): WritableSignal<string> | undefined {
     if (!field) return undefined;
     const signalMap: Record<string, WritableSignal<string>> = {
       operand1: this.currentOperand1,
       operator: this.currentOperator,
       operand2: this.currentOperand2,
-      result: this.currentResult
+      result: this.currentResult,
     };
     return signalMap[field];
   }
@@ -369,7 +410,12 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
    * Automatically moves focus to the next editable field in sequence.
    */
   private moveToNextField() {
-    const fields: ('operand1' | 'operator' | 'operand2' | 'result')[] = ['operand1', 'operator', 'operand2', 'result'];
+    const fields: ('operand1' | 'operator' | 'operand2' | 'result')[] = [
+      'operand1',
+      'operator',
+      'operand2',
+      'result',
+    ];
     const currentField = this.selectedField();
     if (!currentField) return;
 
@@ -398,7 +444,7 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
       id: this.localParameters.variableId || 'EQUATION',
       status: status,
       value: responseValue,
-      relevantForResponsesProgress: status === 'VALUE_CHANGED'
+      relevantForResponsesProgress: status === 'VALUE_CHANGED',
     };
     this.responses.emit([response]);
   }
@@ -411,7 +457,7 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
       fixOperand2: undefined,
       fixResult: undefined,
       imageSource: '',
-      operators: ['+']
+      operators: ['+'],
     };
   }
 }

@@ -7,16 +7,17 @@
     "esModuleInterop": true,
     "declaration": false,
     "experimentalDecorators": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "importHelpers": true,
     "target": "ES2022",
-    "module": "es2020",
+    "module": "es2022",
     "lib": [
-      "es2020",
+      "es2022",
       "dom"
     ],
     "useDefineForClassFields": false,
     "skipLibCheck": true,
+    "ignoreDeprecations": "6.0",
     "paths": {
       "@styles/*": [
         "src/styles/*"

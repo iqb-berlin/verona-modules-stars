@@ -5,21 +5,23 @@ import {
   ElementRef,
   ViewChild,
   AfterViewInit,
-  OnDestroy
+  OnDestroy,
+  ChangeDetectionStrategy,
 } from '@angular/core';
-import {
-  CdkDrag, CdkDragEnd, CdkDragStart
-} from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragEnd, CdkDragStart } from '@angular/cdk/drag-drop';
 
 import { Response } from '@iqbspecs/response/response.interface';
 import { StarsResponse } from '../../services/responses.service';
 import { InteractionComponentDirective } from '../../directives/interaction-component.directive';
 import { InteractionDropParams } from '../../models/unit-definition';
 import { StandardButtonComponent } from '../../shared/standard-button/standard-button.component';
-import { parseTranslate, updateTransitionDisabledSet } from '../../shared/utils/drag-drop.util';
+import {
+  parseTranslate,
+  updateTransitionDisabledSet,
+} from '../../shared/utils/drag-drop.util';
 import {
   getDropLandingArgs,
-  getDropLandingTranslate
+  getDropLandingTranslate,
 } from '../../shared/utils/interaction-drop.util';
 
 /**
@@ -30,9 +32,13 @@ import {
   selector: 'stars-interaction-drop',
   templateUrl: './interaction-drop.component.html',
   imports: [StandardButtonComponent, CdkDrag],
-  styleUrls: ['./interaction-drop.component.scss']
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrls: ['./interaction-drop.component.scss'],
 })
-export class InteractionDropComponent extends InteractionComponentDirective implements AfterViewInit, OnDestroy {
+export class InteractionDropComponent
+  extends InteractionComponentDirective
+  implements AfterViewInit, OnDestroy
+{
   /** Local parameters for the drop interaction */
   localParameters!: InteractionDropParams;
 
@@ -66,10 +72,12 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
   hasHint = signal(false);
 
   /** Reference to the container element for attaching event listeners */
-  @ViewChild('dropContainer', { static: true }) dropContainerRef!: ElementRef<HTMLElement>;
+  @ViewChild('dropContainer', { static: true })
+  dropContainerRef!: ElementRef<HTMLElement>;
 
   /** Reference to the image element for coordinate calculations */
-  @ViewChild('imageElement', { static: false }) imageRef!: ElementRef<HTMLImageElement>;
+  @ViewChild('imageElement', { static: false })
+  imageRef!: ElementRef<HTMLImageElement>;
 
   /** Tracks if view init completed */
   private viewInited = false;
@@ -94,28 +102,41 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
         this.localParameters.variableId = parameters.variableId || 'DROP';
         this.localParameters.imageSource = parameters.imageSource || '';
         this.localParameters.text = parameters.text || '';
-        this.localParameters.imagePosition = parameters.imagePosition || 'BOTTOM'; // Default to BOTTOM
-        this.localParameters.imageLandingXY = parameters.imageLandingXY || '50, 50';
-        this.localParameters.buttonType = parameters.buttonType || 'SMALL_SQUARE';
+        this.localParameters.imagePosition =
+          parameters.imagePosition || 'BOTTOM'; // Default to BOTTOM
+        this.localParameters.imageLandingXY =
+          parameters.imageLandingXY || '50, 50';
+        this.localParameters.buttonType =
+          parameters.buttonType || 'SMALL_SQUARE';
 
         if (this.viewInited) {
           this.scheduleRecalcAfterLayout();
         }
 
-        const formerStateResponses: StarsResponse[] = (parameters as any).formerState || [];
+        const formerStateResponses: StarsResponse[] =
+          (parameters as any).formerState || [];
 
         // Always reset visual selection and button positions before attempting to restore.
         // This ensures no visual leakage from previously loaded units.
         this.resetSelection();
 
         let restored = false;
-        if (Array.isArray(formerStateResponses) && formerStateResponses.length > 0) {
-          const foundResponse = formerStateResponses.find(r => r.id === this.localParameters.variableId);
+        if (
+          Array.isArray(formerStateResponses) &&
+          formerStateResponses.length > 0
+        ) {
+          const foundResponse = formerStateResponses.find(
+            (r) => r.id === this.localParameters.variableId,
+          );
 
           // Only restore if we have a valid non-zero value.
           // A value of 0 or '0' means no button is currently dropped/selected.
-          if (foundResponse && foundResponse.value != null &&
-            foundResponse.value !== 0 && foundResponse.value !== '0') {
+          if (
+            foundResponse &&
+            foundResponse.value != null &&
+            foundResponse.value !== 0 &&
+            foundResponse.value !== '0'
+          ) {
             this.restoreFromFormerState(foundResponse);
             restored = true;
           }
@@ -123,12 +144,14 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
 
         if (!restored) {
           // No valid former state - initialize as new with a 0 value (no selection)
-          this.responses.emit([{
-            id: this.localParameters.variableId,
-            status: 'DISPLAYED',
-            value: 0,
-            relevantForResponsesProgress: false
-          }]);
+          this.responses.emit([
+            {
+              id: this.localParameters.variableId,
+              status: 'DISPLAYED',
+              value: 0,
+              relevantForResponsesProgress: false,
+            },
+          ]);
         }
       }
     });
@@ -144,7 +167,10 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
       this.removeTransitionDisabled(this.selectedValue());
       this.updateButtonTransform(this.selectedValue(), '');
 
-      if (selectedIndex >= 0 && selectedIndex < this.localParameters.options.length) {
+      if (
+        selectedIndex >= 0 &&
+        selectedIndex < this.localParameters.options.length
+      ) {
         this.selectedValue.set(selectedIndex);
       }
 
@@ -175,21 +201,40 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
     if (img.complete && img.naturalWidth !== 0) {
       schedule();
     } else if ((img as HTMLImageElement).decode) {
-      (img as HTMLImageElement).decode().then(() => {
-        schedule();
-      }).catch(() => {
-        const done = () => {
-          try { img.removeEventListener('load', done); } catch { /* noop */ }
-          try { img.removeEventListener('error', done); } catch { /* noop */ }
+      (img as HTMLImageElement)
+        .decode()
+        .then(() => {
           schedule();
-        };
-        img.addEventListener('load', done, { once: true });
-        img.addEventListener('error', done, { once: true });
-      });
+        })
+        .catch(() => {
+          const done = () => {
+            try {
+              img.removeEventListener('load', done);
+            } catch {
+              /* noop */
+            }
+            try {
+              img.removeEventListener('error', done);
+            } catch {
+              /* noop */
+            }
+            schedule();
+          };
+          img.addEventListener('load', done, { once: true });
+          img.addEventListener('error', done, { once: true });
+        });
     } else {
       const done = () => {
-        try { img.removeEventListener('load', done); } catch { /* noop */ }
-        try { img.removeEventListener('error', done); } catch { /* noop */ }
+        try {
+          img.removeEventListener('load', done);
+        } catch {
+          /* noop */
+        }
+        try {
+          img.removeEventListener('error', done);
+        } catch {
+          /* noop */
+        }
         schedule();
       };
       img.addEventListener('load', done, { once: true });
@@ -201,9 +246,11 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
         this.scheduleRecalcAfterLayout();
       });
       const targets: Element[] = [];
-      if (this.dropContainerRef?.nativeElement) targets.push(this.dropContainerRef.nativeElement);
-      if (this.imageRef?.nativeElement) targets.push(this.imageRef.nativeElement);
-      targets.forEach(t => this.resizeObserver!.observe(t));
+      if (this.dropContainerRef?.nativeElement)
+        targets.push(this.dropContainerRef.nativeElement);
+      if (this.imageRef?.nativeElement)
+        targets.push(this.imageRef.nativeElement);
+      targets.forEach((t) => this.resizeObserver!.observe(t));
     }
   }
 
@@ -244,15 +291,27 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
 
   ngOnDestroy(): void {
     if (this.resizeObserver) {
-      try { this.resizeObserver.disconnect(); } catch { /* noop */ }
+      try {
+        this.resizeObserver.disconnect();
+      } catch {
+        /* noop */
+      }
       this.resizeObserver = undefined;
     }
     if (this.recalcTimer) {
-      try { clearTimeout(this.recalcTimer); } catch { /* noop */ }
+      try {
+        clearTimeout(this.recalcTimer);
+      } catch {
+        /* noop */
+      }
       this.recalcTimer = undefined;
     }
     if (this.windowResizeHandler) {
-      try { window.removeEventListener('resize', this.windowResizeHandler); } catch { /* noop */ }
+      try {
+        window.removeEventListener('resize', this.windowResizeHandler);
+      } catch {
+        /* noop */
+      }
       this.windowResizeHandler = undefined;
     }
   }
@@ -270,12 +329,16 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
 
   /** Adds an ID to the transition-disabled set */
   protected addTransitionDisabled(id: number): void {
-    this.transitionDisabledIds.update(set => updateTransitionDisabledSet(set, id, 'add'));
+    this.transitionDisabledIds.update((set) =>
+      updateTransitionDisabledSet(set, id, 'add'),
+    );
   }
 
   /** Removes an ID from the transition-disabled set */
   protected removeTransitionDisabled(id: number): void {
-    this.transitionDisabledIds.update(set => updateTransitionDisabledSet(set, id, 'remove'));
+    this.transitionDisabledIds.update((set) =>
+      updateTransitionDisabledSet(set, id, 'remove'),
+    );
   }
 
   onDragStarted(event: CdkDragStart, index: number): void {
@@ -297,7 +360,11 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
       this.settledTransform.set(null);
     }
 
-    this.lastDragWasFromSettled = !!(currentSettled !== null && currentSettled === index && this.settledTransform());
+    this.lastDragWasFromSettled = !!(
+      currentSettled !== null &&
+      currentSettled === index &&
+      this.settledTransform()
+    );
 
     // Disable transitions for the dragging button so it keeps up with the pointer
     this.addTransitionDisabled(index);
@@ -308,21 +375,34 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
   }
 
   onDragEnded(event: CdkDragEnd, index: number): void {
-    setTimeout(() => { this.suppressClick = false; }, 0);
+    setTimeout(() => {
+      this.suppressClick = false;
+    }, 0);
     if (this.selectedValue() !== index) return;
     this.draggingIndex.set(null);
     const transforms = this.preCalculatedTransforms();
     // eslint-disable-next-line max-len
-    const shouldReturnToOrigin = (this.settledButtonIndex() === index && !!this.settledTransform()) && this.lastDragWasFromSettled;
-    const targetTransform = shouldReturnToOrigin ? '' : (transforms[index] ?? '');
-    const freePos = (event?.source as CdkDrag)?.getFreeDragPosition?.() ?? { x: 0, y: 0 };
-    const droppedTransform = `translate(${(freePos?.x ?? 0)}px, ${(freePos?.y ?? 0)}px)`;
+    const shouldReturnToOrigin =
+      this.settledButtonIndex() === index &&
+      !!this.settledTransform() &&
+      this.lastDragWasFromSettled;
+    const targetTransform = shouldReturnToOrigin
+      ? ''
+      : (transforms[index] ?? '');
+    const freePos = (event?.source as CdkDrag)?.getFreeDragPosition?.() ?? {
+      x: 0,
+      y: 0,
+    };
+    const droppedTransform = `translate(${freePos?.x ?? 0}px, ${freePos?.y ?? 0}px)`;
     this.updateButtonTransform(index, droppedTransform);
     this.animateFromDroppedToTarget(index, targetTransform);
     this.lastDragWasFromSettled = false;
   }
 
-  private animateFromDroppedToTarget(index: number, targetTransform: string): void {
+  private animateFromDroppedToTarget(
+    index: number,
+    targetTransform: string,
+  ): void {
     const isReturningToOrigin = targetTransform === '';
     this.removeTransitionDisabled(index);
     this.updateButtonTransform(index, targetTransform);
@@ -368,7 +448,10 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
    * Pre-calculates transform values for all buttons when the component is initialized
    */
   calculateButtonTransformValues(): void {
-    if (!this.imageRef?.nativeElement || !this.dropContainerRef?.nativeElement) {
+    if (
+      !this.imageRef?.nativeElement ||
+      !this.dropContainerRef?.nativeElement
+    ) {
       return;
     }
     const transforms: Record<number, string> = {};
@@ -377,11 +460,17 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
     const imgElement = this.imageRef.nativeElement;
 
     for (let index = 0; index < totalButtons; index++) {
-      const buttonElement =
-        this.dropContainerRef.nativeElement.querySelector(`[data-cy="drop-animate-wrapper-${index}"]`) as HTMLElement;
+      const buttonElement = this.dropContainerRef.nativeElement.querySelector(
+        `[data-cy="drop-animate-wrapper-${index}"]`,
+      ) as HTMLElement;
       if (buttonElement) {
         const {
-          buttonCenterX, imgWidth, imgHeight, imageTop, imageLeft, buttonCenterY
+          buttonCenterX,
+          imgWidth,
+          imgHeight,
+          imageTop,
+          imageLeft,
+          buttonCenterY,
         } = getDropLandingArgs(imgElement, buttonElement, containerElement);
 
         const { xPx, yPx } = getDropLandingTranslate(
@@ -391,7 +480,7 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
           imgHeight,
           imageLeft,
           imageTop,
-          buttonCenterY
+          buttonCenterY,
         );
         transforms[index] = `translate(${xPx}, ${yPx})`;
       }
@@ -439,12 +528,13 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
    */
   private updateButtonTransform(index: number, transform: string): void {
     // Normalize empty transform to a stable origin value so tests can assert translate3d(0, 0, 0)
-    const normalized = (transform && transform.trim().length > 0) ?
-      transform :
-      'translate3d(0px, 0px, 0px)';
-    this.buttonTransforms.update(transforms => ({
+    const normalized =
+      transform && transform.trim().length > 0
+        ? transform
+        : 'translate3d(0px, 0px, 0px)';
+    this.buttonTransforms.update((transforms) => ({
       ...transforms,
-      [index]: normalized
+      [index]: normalized,
     }));
   }
 
@@ -464,7 +554,7 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
       id: this.localParameters.variableId ?? 'DROP',
       status: 'VALUE_CHANGED',
       value: this.selectedValue() + 1,
-      relevantForResponsesProgress: true
+      relevantForResponsesProgress: true,
     };
     this.responses.emit([response]);
   }
@@ -474,10 +564,16 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
    * @param {Response} response - The response object containing a string `value`.
    */
   private restoreFromFormerState(response: Response): void {
-    const numeric = typeof response.value === 'string' ? parseInt(response.value, 10) : Number(response.value);
+    const numeric =
+      typeof response.value === 'string'
+        ? parseInt(response.value, 10)
+        : Number(response.value);
     const selectedIndex = !Number.isNaN(numeric) ? numeric - 1 : -1;
 
-    if (selectedIndex >= 0 && selectedIndex < this.localParameters.options.length) {
+    if (
+      selectedIndex >= 0 &&
+      selectedIndex < this.localParameters.options.length
+    ) {
       this.selectedValue.set(selectedIndex);
     }
   }
@@ -493,7 +589,7 @@ export class InteractionDropComponent extends InteractionComponentDirective impl
       imagePosition: 'BOTTOM',
       imageLandingXY: '50, 50',
       text: '',
-      buttonType: 'SMALL_SQUARE'
+      buttonType: 'SMALL_SQUARE',
     };
   }
 }
