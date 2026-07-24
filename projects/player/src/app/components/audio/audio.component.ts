@@ -1,19 +1,27 @@
 import {
-  Component, effect, inject, input, signal
+  Component,
+  effect,
+  inject,
+  input,
+  signal,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 
 import { ResponsesService } from '../../services/responses.service';
 import { AudioService } from '../../services/audio.service';
-import { AudioOptions, FirstAudioOptionsParams } from '../../models/unit-definition';
+import {
+  AudioOptions,
+  FirstAudioOptionsParams,
+} from '../../models/unit-definition';
 import { UnitService } from '../../services/unit.service';
 
 @Component({
   selector: 'stars-audio',
   templateUrl: 'audio.component.html',
   styleUrl: 'audio.component.scss',
-  standalone: true
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: true,
 })
-
 export class AudioComponent {
   audio = input.required<AudioOptions>();
   firstAudioOptions = input<FirstAudioOptionsParams>();
@@ -63,7 +71,10 @@ export class AudioComponent {
     effect(() => {
       // set play style when triggered somewhere else
       // TODO check if can be done in a more elegant way
-      if (this.audioService.isPlaying() && this.audioService.audioId() === this.audio()?.audioId) {
+      if (
+        this.audioService.isPlaying() &&
+        this.audioService.audioId() === this.audio()?.audioId
+      ) {
         this.isPlaying.set(true);
       } else {
         this.isPlaying.set(false);
@@ -78,7 +89,11 @@ export class AudioComponent {
       }
 
       const animateButton = this.firstAudioOptions()?.animateButton;
-      if (animateButton && animateButton !== 'OFF' && !this.unitService.interactionDone()) {
+      if (
+        animateButton &&
+        animateButton !== 'OFF' &&
+        !this.unitService.interactionDone()
+      ) {
         this.movingButton.set('OFF');
         this.animateTimer = setTimeout(() => {
           if (!this.unitService.interactionDone()) {
@@ -122,6 +137,8 @@ export class AudioComponent {
       this.isMaxPlayReached.set(false);
       return;
     }
-    this.isMaxPlayReached.set(this.responsesService.isAudioMaxPlayReached(audioId, maxPlay));
+    this.isMaxPlayReached.set(
+      this.responsesService.isAudioMaxPlayReached(audioId, maxPlay),
+    );
   }
 }

@@ -1,5 +1,9 @@
 import {
-  Component, computed, HostListener, OnInit
+  Component,
+  computed,
+  HostListener,
+  OnInit,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 
 import { VeronaPostService } from './services/verona-post.service';
@@ -14,9 +18,9 @@ import { environment } from '../environments/environment';
   selector: 'stars-player',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
-  standalone: false
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
-
 export class AppComponent implements OnInit {
   isStandalone: boolean | undefined;
   hasRibbonBars(): boolean {
@@ -25,10 +29,10 @@ export class AppComponent implements OnInit {
 
   getParametersWithFormerState = computed(() => {
     const params = this.unitService.parameters();
-    const baseParams = params as Record<string, any> || {};
+    const baseParams = (params as Record<string, any>) || {};
     return {
       ...baseParams,
-      formerState: this.responsesService.formerStateResponses()
+      formerState: this.responsesService.formerStateResponses(),
     };
   });
 
@@ -37,28 +41,35 @@ export class AppComponent implements OnInit {
     public responsesService: ResponsesService,
     public veronaPostService: VeronaPostService,
     private veronaSubscriptionService: VeronaSubscriptionService,
-    private metadataService: MetadataService
-  ) { }
+    private metadataService: MetadataService,
+  ) {}
 
   ngOnInit(): void {
-    this.veronaSubscriptionService.vopStartCommand
-      .subscribe((message: VopStartCommand) => {
-        const unitDefinition = message.unitDefinition ? JSON.parse(message.unitDefinition) : {};
+    this.veronaSubscriptionService.vopStartCommand.subscribe(
+      (message: VopStartCommand) => {
+        const unitDefinition = message.unitDefinition
+          ? JSON.parse(message.unitDefinition)
+          : {};
         this.veronaPostService.sessionID = message.sessionId;
         this.responsesService.setNewData(unitDefinition);
-        this.responsesService.setFormerState(message.unitState ? message.unitState : null);
+        this.responsesService.setFormerState(
+          message.unitState ? message.unitState : null,
+        );
         this.unitService.setNewData(unitDefinition);
-      });
+      },
+    );
     this.isStandalone = window === window.parent;
-    this.veronaPostService.sendReadyNotification(this.metadataService.playerMetadata);
+    this.veronaPostService.sendReadyNotification(
+      this.metadataService.playerMetadata,
+    );
 
     if (environment.production) {
-      window.addEventListener('contextmenu', e => e.preventDefault());
+      window.addEventListener('contextmenu', (e) => e.preventDefault());
       document.body.classList.add('disable-user-interaction');
     }
   }
 
-  sendNavigationRequest($event) {
+  sendNavigationRequest($event: string) {
     if ($event === 'next') {
       this.veronaPostService.sendVopUnitNavigationRequestedNotification('next');
     }

@@ -1,6 +1,14 @@
-import { Component, inject, OnDestroy } from '@angular/core';
 import {
-  CdkMenu, CdkMenuBar, CdkMenuItem, CdkMenuTrigger
+  Component,
+  inject,
+  OnDestroy,
+  ChangeDetectionStrategy,
+} from '@angular/core';
+import {
+  CdkMenu,
+  CdkMenuBar,
+  CdkMenuItem,
+  CdkMenuTrigger,
 } from '@angular/cdk/menu';
 import { Dialog } from '@angular/cdk/dialog';
 import { Subject, takeUntil } from 'rxjs';
@@ -8,34 +16,45 @@ import { FileService } from '../../services/file.service';
 import { UnitService } from '../../services/unit.service';
 import { ResponsesService } from '../../services/responses.service';
 import { ResponsesDialogComponent } from './responses-dialog.component';
-import {EditUnitDialog} from "../edit-unit-dialog/edit-unit.dialog";
+import { EditUnitDialog } from '../edit-unit-dialog/edit-unit.dialog';
 
 @Component({
   selector: 'stars-standalone-menu',
   standalone: true,
-  imports: [
-    CdkMenuTrigger,
-    CdkMenuItem,
-    CdkMenuBar,
-    CdkMenu
-  ],
+  imports: [CdkMenuTrigger, CdkMenuItem, CdkMenuBar, CdkMenu],
   template: `
     <div class="stars-standalone-menu">
       <div cdkMenuBar>
-        <button class="menu-bar-item" cdkMenuItem [cdkMenuTriggerFor]="file">load</button>
+        <button class="menu-bar-item" cdkMenuItem [cdkMenuTriggerFor]="file">
+          load
+        </button>
       </div>
       <ng-template #file>
         <div class="menu" cdkMenu>
-          <button class="menu-item" cdkMenuItem (cdkMenuItemTriggered)="load()">from file</button>
-          <button class="menu-item" cdkMenuItem (cdkMenuItemTriggered)="openDialog()">edit</button>
-          <button class="menu-item" cdkMenuItem (cdkMenuItemTriggered)="showResponses()">view responses</button>
+          <button class="menu-item" cdkMenuItem (cdkMenuItemTriggered)="load()">
+            from file
+          </button>
+          <button
+            class="menu-item"
+            cdkMenuItem
+            (cdkMenuItemTriggered)="openDialog()"
+          >
+            edit
+          </button>
+          <button
+            class="menu-item"
+            cdkMenuItem
+            (cdkMenuItemTriggered)="showResponses()"
+          >
+            view responses
+          </button>
         </div>
       </ng-template>
     </div>
   `,
-  styleUrl: 'standalone-menu.component.css'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: 'standalone-menu.component.css',
 })
-
 export class StandaloneMenuComponent implements OnDestroy {
   dialog = inject(Dialog);
   unitDefinitionAsString = '';
@@ -44,11 +63,11 @@ export class StandaloneMenuComponent implements OnDestroy {
 
   constructor(
     public unitService: UnitService,
-    public responsesService: ResponsesService
-  ) { }
+    public responsesService: ResponsesService,
+  ) {}
 
   async load(): Promise<void> {
-    await FileService.loadFile(['.json', '.voud']).then(fileObject => {
+    await FileService.loadFile(['.json', '.voud']).then((fileObject) => {
       this.unitDefinitionAsString = fileObject.content;
       this.setNewUnitDefinition();
     });
@@ -64,22 +83,20 @@ export class StandaloneMenuComponent implements OnDestroy {
     const dialogRef = this.dialog.open(EditUnitDialog, {
       width: '800px',
       height: '600px',
-      data: this.unitDefinitionAsString
+      data: this.unitDefinitionAsString,
     });
-    dialogRef.closed
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(result => {
-        if (result) {
-          this.unitDefinitionAsString = result as string;
-          this.setNewUnitDefinition();
-        }
-      });
+    dialogRef.closed.pipe(takeUntil(this.ngUnsubscribe)).subscribe((result) => {
+      if (result) {
+        this.unitDefinitionAsString = result as string;
+        this.setNewUnitDefinition();
+      }
+    });
   }
 
   showResponses() {
     this.dialog.open<string>(ResponsesDialogComponent, {
       width: '800px',
-      data: this.responsesService.allResponses
+      data: this.responsesService.allResponses,
     });
   }
 

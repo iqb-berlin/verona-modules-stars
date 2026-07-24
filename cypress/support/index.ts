@@ -143,7 +143,7 @@ declare global {
        * Asserts that the interaction's visual state has been restored correctly from a former unit state
        * This should be used after a former state has been applied (e.g. via vopStartCommand)
        * @param interactionType - the type of interaction
-       * @param expected - Optional expected state descriptor (e.g., for place_value: 'tens,ones' like '1,2' or a number 12)
+       * @param expected - Optional expected state descriptor (e.g., for place_value: '20_2' meaning 2 tens and 2 ones)
        */
       assertRestoredState(interactionType: string, expected?: unknown): Chainable<void>;
 

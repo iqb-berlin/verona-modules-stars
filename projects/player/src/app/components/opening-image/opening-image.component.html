@@ -1,5 +1,11 @@
 <div class="opening-image-wrapper" data-cy="opening-image-wrapper">
   @if (showImage()) {
-    <img [src]="unitService.openingImageParams()?.imageSource" alt="Image" data-cy="opening-image"/>
+    <img
+      [src]="
+        $safeNavigationMigration(unitService.openingImageParams()?.imageSource)
+      "
+      alt="Image"
+      data-cy="opening-image"
+    />
   }
 </div>
