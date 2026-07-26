@@ -71,7 +71,7 @@ Cypress.Commands.add('clearUnitStates', () => {
 Cypress.Commands.add('setupTestData', (configFile: string, interactionType: string) => {
   const fullPath = `interaction-${interactionType}/${configFile}`;
   cy.fixture(fullPath).as('testData');
-  cy.visit('http://localhost:4200', {
+  cy.visit('/', {
     onBeforeLoad(win) {
       const mockParent = {
         postMessage: (data: any) => {
@@ -112,7 +112,7 @@ Cypress.Commands.add('setupTestDataWithPostMessageMock', (configFile: string, in
     cy.wrap(unitJson, { log: false }).as('unitJson');
 
     // 2. THEN visit with mock setup
-    cy.visit('http://localhost:4200', {
+    cy.visit('/', {
       onBeforeLoad(win) {
         // Capture messages from child to parent (outgoing)
         const outgoingMessages: Array<{

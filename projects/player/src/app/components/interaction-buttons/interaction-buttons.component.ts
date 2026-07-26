@@ -5,6 +5,7 @@ import {
   inject,
   ViewChild,
   ElementRef,
+  input,
   output,
   ChangeDetectionStrategy,
 } from '@angular/core';
@@ -31,6 +32,7 @@ import { StarsResponse } from '../../services/responses.service';
 })
 export class InteractionButtonsComponent extends InteractionComponentDirective {
   navigationNextRequest = output<string>();
+  responsesEnabled = input(true);
 
   /** Local copy of the component parameters with defaults applied. */
   localParameters!: InteractionButtonParams;
@@ -57,6 +59,7 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
 
     effect(() => {
       const parameters = this.parameters() as InteractionButtonParams;
+      const responsesEnabled = this.responsesEnabled();
       this.localParameters = this.createDefaultParameters();
       this.disableInteraction.set(false);
 
@@ -102,6 +105,7 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
         const formerStateResponse: Response[] = parameters.formerState || [];
 
         if (
+          responsesEnabled &&
           Array.isArray(formerStateResponse) &&
           formerStateResponse.length > 0
         ) {
@@ -117,14 +121,16 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
 
         // No former state found - initialize as new
         this.resetSelection();
-        this.responses.emit([
-          {
-            id: this.localParameters.variableId,
-            status: 'DISPLAYED',
-            value: 0,
-            relevantForResponsesProgress: false,
-          },
-        ]);
+        if (responsesEnabled) {
+          this.responses.emit([
+            {
+              id: this.localParameters.variableId,
+              status: 'DISPLAYED',
+              value: 0,
+              relevantForResponsesProgress: false,
+            },
+          ]);
+        }
       }
     });
 
@@ -418,6 +424,8 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
     status: 'DISPLAYED' | 'VALUE_CHANGED',
     relevant: boolean,
   ): void {
+    if (!this.responsesEnabled()) return;
+
     const value = this.localParameters.multiSelect
       ? this.selectedValues()
           .map((item) => (item ? 1 : 0))

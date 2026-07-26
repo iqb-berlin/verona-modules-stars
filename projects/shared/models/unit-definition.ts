@@ -42,6 +42,7 @@ export interface UnitDefinition {
   openingImage?: OpeningImageParams;
   mainAudio?: MainAudio;
   interactionType: InteractionEnum;
+  interactionMaxTimeMS?: number;
   interactionParameters?: InteractionParameters;
   variableInfo?: VariableInfo[];
   audioFeedback?: AudioFeedback;
@@ -69,7 +70,7 @@ export interface InteractionOptions {
 
 export interface InteractionButtonParams {
   variableId?: string;
-  options: InteractionOptions;
+  options?: InteractionOptions;
   imageSource?: string;
   imagePosition?: ImagePositionEnum;
   layout?: LayoutEnum;
@@ -146,9 +147,9 @@ export interface InteractionNumberLineParams {
   firstNumber?: number;
   leadingNumbers?: number[];
   lastNumber?: number;
-  numberInput: number;
+  numberInput?: number;
   trailingNumbers?: number[];
-  style?: 'WAVE' | 'RULER' | 'BLOCK' | string;
+  style?: string;
   formerState?: Response[];
 }
 
@@ -210,4 +211,16 @@ export interface ClosingMetaButtonsParams {
   variableIdReference: string;
   variableIdMetaOutcome?: string;
   triggerNavigationOnSelect?: boolean;
+}
+
+export const DEFAULT_META_SELECTION_VARIABLE_ID = 'META';
+
+export function normalizeClosingMetaButtons(
+  parameters: ClosingMetaButtonsParams
+): ClosingMetaButtonsParams {
+  return {
+    ...parameters,
+    variableIdMetaSelection:
+      parameters.variableIdMetaSelection?.trim() || DEFAULT_META_SELECTION_VARIABLE_ID
+  };
 }

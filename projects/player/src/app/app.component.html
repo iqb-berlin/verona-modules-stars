@@ -57,6 +57,7 @@
   @if (!unitService.openingFlowActive() && unitService.interaction() === 'BUTTONS' || unitService.interaction() === 'IMAGE_ONLY') {
     <stars-interaction-buttons class="interaction"
       [parameters]="getParametersWithFormerState()"
+      [responsesEnabled]="unitService.interaction() !== 'IMAGE_ONLY'"
       [showHint]="responsesService.feedbackHint()"
       (responses)="responsesService.newResponses($event)"
       (navigationNextRequest)="sendNavigationRequest($event)">

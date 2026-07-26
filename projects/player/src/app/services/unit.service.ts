@@ -10,6 +10,7 @@ import {
   FirstClickLayerEnum,
   AnimateButtonEnum,
   InteractionEnum, InteractionParameters,
+  normalizeClosingMetaButtons,
   OpeningImageParams,
   UnitDefinition
 } from '../models/unit-definition';
@@ -53,7 +54,7 @@ export class UnitService {
     if (value === false || value === undefined) {
       return false;
     }
-    return value === 'TRANSPARENT' || value === 'BLUR';
+    return value === 'TRANSPARENT' || value === 'BLUR' || value === 'DISABLED';
   }
 
   /** Any interaction done: click layer clicked, audio heard, or response given */
@@ -203,7 +204,9 @@ export class UnitService {
       this.parameters.set(def.interactionParameters);
     }
     if (def.ribbonBars) this.ribbonBars.set(def.ribbonBars);
-    if (def.closingMetaButtons) this.closingMetaButtons.set(def.closingMetaButtons);
+    if (def.closingMetaButtons) {
+      this.closingMetaButtons.set(normalizeClosingMetaButtons(def.closingMetaButtons));
+    }
     if (def.mainAudio?.disableInteractionUntilComplete) {
       this.disableInteractionUntilComplete.set(def.mainAudio.disableInteractionUntilComplete);
     }

@@ -3,7 +3,11 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Response } from '@iqbspecs/response/response.interface';
 import { Progress, UnitState, UnitStateDataType } from '../models/verona';
 import { VeronaPostService } from './verona-post.service';
-import { ClosingMetaButtonsParams, UnitDefinition } from '../models/unit-definition';
+import {
+  ClosingMetaButtonsParams,
+  normalizeClosingMetaButtons,
+  UnitDefinition
+} from '../models/unit-definition';
 import { Code, VariableInfo } from '../models/responses';
 import { FeedbackDefinition, ShowResponse } from '../models/feedback';
 
@@ -34,6 +38,7 @@ export class ResponsesService {
   presentationProgress = signal<Progress>('some');
   closingMetaButtons = signal<ClosingMetaButtonsParams>({} as ClosingMetaButtonsParams);
   metaInteractionDone = signal(false);
+  private videoVariableId = 'VIDEO';
 
   /**
   * Interpret mixed input as a number
@@ -52,6 +57,7 @@ export class ResponsesService {
     return 0;
   }
 
+  // eslint-disable-next-line class-methods-use-this
   private normalizeShowResponse(showResponse: ShowResponse | ShowResponse[] | undefined): ShowResponse {
     if (Array.isArray(showResponse)) {
       return showResponse[0] || { variableId: '', value: '', delayMS: 0 };
@@ -84,6 +90,7 @@ export class ResponsesService {
     this.closingMetaButtons.set({} as ClosingMetaButtonsParams);
     this.closingMetaRunning.set(false);
     this.metaInteractionDone.set(false);
+    this.videoVariableId = 'VIDEO';
   }
 
   /**
@@ -93,8 +100,12 @@ export class ResponsesService {
   setNewData(unitDefinition: UnitDefinition = null) {
     this.reset();
     if (unitDefinition) {
+      if (unitDefinition.interactionType === 'VIDEO') {
+        this.videoVariableId =
+          (unitDefinition.interactionParameters as { variableId?: string })?.variableId || 'VIDEO';
+      }
       if (unitDefinition.closingMetaButtons) {
-        this.closingMetaButtons.set(unitDefinition.closingMetaButtons);
+        this.closingMetaButtons.set(normalizeClosingMetaButtons(unitDefinition.closingMetaButtons));
       }
       const problems: string[] = [];
       if (unitDefinition.variableInfo && unitDefinition.variableInfo.length > 0) {
@@ -177,13 +188,14 @@ export class ResponsesService {
 
         if (this.closingMetaRunning()) {
           const metaId = this.closingMetaButtons().variableIdMetaSelection;
-          const metaTouched = responses.some(r =>
-            r.id === metaId && r.status === 'VALUE_CHANGED' && r.relevantForResponsesProgress);
+          const metaTouched = responses.some(r => (
+            r.id === metaId && r.status === 'VALUE_CHANGED' && r.relevantForResponsesProgress
+          ));
           if (metaTouched) {
             this.metaInteractionDone.set(true);
           }
         }
-        if (response.id === 'VIDEO') {
+        if (response.id === this.videoVariableId) {
           const videoValue = response.value as number;
           this.videoComplete.set(videoValue >= 1);
           if (videoValue >= 1) {
@@ -396,8 +408,8 @@ export class ResponsesService {
             }
           }
         });
-        const allSubValuesPresent = codingScheme.responseComplete !== 'ON_ALL_SUB_VALUES'
-          || !ResponsesService.hasIncompleteSubValues(valueAsString);
+        const allSubValuesPresent = codingScheme.responseComplete !== 'ON_ALL_SUB_VALUES' ||
+          !ResponsesService.hasIncompleteSubValues(valueAsString);
         if (allSubValuesPresent) {
           newResponse.status = 'CODING_COMPLETE';
         }
@@ -604,7 +616,7 @@ export class ResponsesService {
             }
 
             // Restore VIDEO completion from saved responses
-            const videoResp = parsedResponses.find(r => r.id === 'VIDEO');
+            const videoResp = parsedResponses.find(r => r.id === this.videoVariableId);
             if (videoResp) {
               const videoValue = this.asNumberOrZero(videoResp.value);
               this.videoComplete.set(videoValue >= 1);
@@ -614,10 +626,10 @@ export class ResponsesService {
               this.presentationProgress.set('complete');
             }
 
-            // Restore responseProgress: if any interaction response has VALUE_CHANGED (or CODING_COMPLETE), mark complete
+            // Restore responseProgress from interaction responses with VALUE_CHANGED or CODING_COMPLETE.
             const hasInteractionValueChanged =
               parsedResponses.some(r => (r.status === 'VALUE_CHANGED' || r.status === 'CODING_COMPLETE') &&
-                r.id !== 'mainAudio' && r.id !== 'VIDEO');
+                r.id !== 'mainAudio' && r.id !== this.videoVariableId);
             if (hasInteractionValueChanged) {
               this.responseProgress.set('complete');
             } else if (unitState.responseProgress) {

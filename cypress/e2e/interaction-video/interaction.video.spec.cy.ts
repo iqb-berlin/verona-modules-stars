@@ -3,7 +3,8 @@ import {
   UnitDefinition
 } from '../../../projects/player/src/app/models/unit-definition';
 import { testRibbonBars } from '../shared/ribbon-bar.spec.cy';
-import { testContinueButtonFeatures } from "../shared/continue-button.spec.cy";
+import { testContinueButtonFeatures } from '../shared/continue-button.spec.cy';
+import { MockMessage } from '../../support/utils';
 
 describe('Interaction VIDEO Component', () => {
   const interactionType = 'video';
@@ -142,6 +143,40 @@ describe('Interaction VIDEO Component', () => {
         cy.get('[data-cy="text-wrapper"]').should('not.exist');
       }
     });
+  });
+
+  it('uses a custom variableId for every playback response', () => {
+    cy.setupTestDataWithPostMessageMock(`${defaultTestFile}.json`, interactionType);
+    cy.get('@testData').then(data => {
+      const unit = JSON.parse(JSON.stringify(data)) as UnitDefinition;
+      (unit.interactionParameters as InteractionVideoParams).variableId = 'CUSTOM_VIDEO';
+      cy.sendMessageFromParent({
+        type: 'vopStartCommand',
+        sessionId: 'custom-video-id',
+        unitDefinition: JSON.stringify(unit)
+      }, '*');
+    });
+
+    cy.get('[data-cy="video-player"]').then($video => {
+      const video = $video[0] as HTMLVideoElement;
+      Object.defineProperty(video, 'duration', { configurable: true, value: 10 });
+      video.currentTime = 10;
+      video.dispatchEvent(new Event('timeupdate'));
+    });
+
+    cy.get('@outgoingMessages').should(messages => {
+      const stateMessages = (messages as unknown as MockMessage[])
+        .filter(message => message.data.type === 'vopStateChangedNotification');
+      const responses = stateMessages.flatMap(message => {
+        const serialized = message.data.unitState?.dataParts?.responses;
+        return serialized ? JSON.parse(serialized as string) as Array<{ id: string, status: string }> : [];
+      });
+      expect(responses.some(response => (
+        response.id === 'CUSTOM_VIDEO' && response.status === 'VALUE_CHANGED'
+      ))).to.equal(true);
+      expect(responses.some(response => response.id === 'VIDEO')).to.equal(false);
+    });
+    cy.assertContinueButtonExistsAndVisible();
   });
 
   describe('Navigation on triggerNavigationOnEnd', () => {

@@ -71,8 +71,10 @@ export class InteractionVideoComponent
           parameters.triggerNavigationOnEnd || false;
         this.localParameters.variableId = parameters.variableId || 'VIDEO';
 
-        const formerStateResponses: Response[] =
-          (parameters as any).formerState || [];
+        const formerStateResponses =
+          (
+            parameters as InteractionVideoParams & { formerState?: Response[] }
+          ).formerState || [];
 
         if (
           Array.isArray(formerStateResponses) &&
@@ -187,7 +189,7 @@ export class InteractionVideoComponent
     // Only send VALUE_CHANGED if there's actual progress (not initial 0)
     if (videoValue > 0) {
       const response: StarsResponse = {
-        id: 'VIDEO',
+        id: this.localParameters.variableId || 'VIDEO',
         value: videoValue,
         status: 'VALUE_CHANGED',
         relevantForResponsesProgress: false,
