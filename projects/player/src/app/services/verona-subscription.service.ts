@@ -7,7 +7,7 @@ import {
   VopPageNavigationCommand,
   VopPlayerConfigChangedNotification,
   VopStartCommand
-} from '../models/verona';
+} from '../../../../shared/models/verona';
 
 @Injectable({
   providedIn: 'root'
@@ -41,7 +41,7 @@ export class VeronaSubscriptionService {
         this._vopPageNavigationCommand.next(messageData);
         break;
       default:
-        console.error(`player: got message of unknown type ${messageData.type}`);
+        // ignore unknown messages
     }
   }
 

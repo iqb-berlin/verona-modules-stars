@@ -1,0 +1,59 @@
+<div class="editor-container" [class.preview-hidden]="!showPreview">
+  <!-- Left Side: Form Editor -->
+  <aside class="sidebar-editor">
+    <header class="editor-header">
+      <div class="logo">
+        <span class="stars-icon">★</span>
+        <span class="stars-text">STARS Editor</span>
+      </div>
+      <button class="preview-toggle" (click)="togglePreview()">
+        {{ showPreview ? 'JSON ausblenden' : 'JSON einblenden' }}
+      </button>
+    </header>
+
+    <div class="editor-scroll">
+      <!-- Section 1: General -->
+      <stars-general-settings></stars-general-settings>
+
+      <!-- Section 2: Main Audio -->
+      <stars-main-audio-settings></stars-main-audio-settings>
+
+      <!-- Section 3: Opening Image -->
+      <stars-opening-image-settings></stars-opening-image-settings>
+
+      <!-- Section 4: Interaction Selector -->
+      <stars-interaction-selector></stars-interaction-selector>
+
+      <!-- Section 5: Dynamic Interaction Editor -->
+      <section class="editor-section interaction-body-section">
+        <h3 class="section-title">
+          <span class="collapse-icon">▼</span>
+          Interaktions-Parameter
+        </h3>
+        <div class="section-body">
+          @if (interactionEditorComponent; as editorComponent) {
+            <ng-container *ngComponentOutlet="editorComponent"></ng-container>
+          } @else {
+            <div class="no-interaction">Wähle einen Interaktionstyp</div>
+          }
+          @for (issue of state.validationIssues('interactionParameters.'); track issue.path) {
+            <div class="validation-error">{{ issue.message }}</div>
+          }
+        </div>
+      </section>
+
+      <!-- Section 6: Variable Info -->
+      <stars-variable-info-editor></stars-variable-info-editor>
+
+      <!-- Section 7: Audio Feedback -->
+      <stars-audio-feedback-editor></stars-audio-feedback-editor>
+    </div>
+  </aside>
+
+  <!-- Right Side: Preview -->
+  @if (showPreview) {
+    <main class="preview-area">
+      <stars-preview-container></stars-preview-container>
+    </main>
+  }
+</div>

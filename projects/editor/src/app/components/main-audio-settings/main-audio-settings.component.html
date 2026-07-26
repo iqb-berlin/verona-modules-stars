@@ -1,0 +1,84 @@
+<section class="editor-section">
+  <h3 class="section-title" (click)="collapsed = !collapsed">
+    <span class="collapse-icon">{{ collapsed ? '▶' : '▼' }}</span>
+    Haupt-Audio
+  </h3>
+  @if (!collapsed) {
+    <div class="section-body">
+      <div class="field field-row">
+        <label>
+          <input
+            type="checkbox"
+            [checked]="state.mainAudioEnabled()"
+            (change)="toggleMainAudio($any($event.target).checked)"
+          />
+          Haupt-Audio aktivieren
+        </label>
+      </div>
+      @if (state.mainAudioEnabled()) {
+        <stars-media-upload
+          label="Audio-Datei"
+          type="audio"
+          [source]="state.mainAudioSource()"
+          (sourceChange)="state.updateMainAudioSource($event)"
+        ></stars-media-upload>
+
+        @for (issue of state.validationIssues('mainAudio.audioSource'); track issue.path) {
+          <div class="validation-error">{{ issue.message }}</div>
+        }
+
+        <div class="field-row-group">
+          <div class="field field-row">
+            <label>
+              <input
+                type="checkbox"
+                [checked]="state.mainAudioDisableInteractionUntilComplete()"
+                (change)="state.updateMainAudioDisableInteractionUntilComplete($any($event.target).checked)"
+              />
+              Interaktion deaktivieren bis Audio fertig
+            </label>
+          </div>
+          <div class="field">
+            <label>Max. Wiederholungen</label>
+            <input
+              type="number"
+              [value]="state.mainAudioMaxPlay()"
+              (input)="state.updateMainAudioMaxPlay(+$any($event.target).value)"
+              min="0"
+              max="99"
+            />
+          </div>
+        </div>
+      }
+
+      <div class="sub-section">
+        <div class="sub-header">Optionen für den ersten Audiostart</div>
+        <div class="field">
+          <label>First Click Layer</label>
+          <select
+            [value]="state.firstClickLayerSelection()"
+            (change)="updateFirstClickLayer($any($event.target).value)"
+          >
+            <option value="OFF">Aus</option>
+            <option value="TRANSPARENT">Transparent</option>
+            <option value="BLUR">Blur</option>
+            <option value="DISABLED">Disabled</option>
+            <option value="true">Legacy: Ein</option>
+          </select>
+        </div>
+        <div class="field field-row">
+          <label>Audio-Button Animation</label>
+          <select
+            [value]="state.animateButtonSelection()"
+            (change)="updateAnimateButton($any($event.target).value)"
+          >
+            <option value="OFF">Aus</option>
+            <option value="KIND">Kind</option>
+            <option value="BOLD">Bold</option>
+            <option value="true">Legacy: Ein</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  }
+</section>

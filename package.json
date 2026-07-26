@@ -11,13 +11,27 @@
   },
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve player --port 4200",
+    "start:player": "ng serve player --port 4200",
+    "start:editor": "ng serve editor --port 4201",
+    "start:all": "concurrently \"npm run start:player\" \"npm run start:editor\"",
     "validate-data": "validate-json cypress/fixtures/interaction-polygon_buttons stars-unit-definition 1.10",
-    "build": "ng build --configuration production --output-hashing=none",
+    "build": "ng build player --configuration production --output-hashing=none",
     "postbuild": "node projects/tools/distpacker.js dist/stars-player/browser index_packed.html",
+    "build:editor": "ng build editor --configuration production",
+    "postbuild:editor": "node projects/tools/distpacker.js dist/stars-editor/browser index_packed.html",
+    "build:editor-bundled": "node projects/tools/build-editor-bundled.js",
+    "test:editor-architecture": "TS_NODE_PROJECT=tsconfig.base.json TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\",\"moduleResolution\":\"node\",\"types\":[\"node\"]}' node -r ts-node/register -r tsconfig-paths/register projects/editor/tests/editor-state-builders.test.ts",
+    "test:player-services": "TS_NODE_PROJECT=tsconfig.base.json TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\",\"moduleResolution\":\"node\",\"types\":[\"node\"]}' node -r ts-node/register -r tsconfig-paths/register projects/player/tests/responses-feedback.test.ts",
+    "e2e:editor": "wait-on http://localhost:4210 http://localhost:4211/preview-player.html && cypress run --config-file cypress.editor.config.ts",
+    "e2e:editor-bundled": "cypress run --config-file cypress.editor-bundled.config.ts",
+    "start:editor-e2e": "concurrently \"ng serve player --port 4210\" \"ng serve editor --port 4201\" \"node projects/tools/serve-static.js cypress/fixtures/editor-player 4211\"",
+    "serve:editor-bundled": "node projects/tools/serve-static.js dist/stars-editor/browser 4212",
+    "test:editor-e2e": "start-server-and-test start:editor-e2e http://localhost:4201 e2e:editor",
+    "test:editor-bundled-e2e": "npm run build:editor-bundled && start-server-and-test serve:editor-bundled http://localhost:4212/index_packed.html e2e:editor-bundled",
     "e2e": "npx cypress run",
     "cy:open": "cypress open --browser chrome cypress/e2e/interaction-find-on-image",
-    "test": "start-server-and-test start http://localhost:4200 cy:open"
+    "test": "start-server-and-test start:player http://localhost:4200 cy:open"
   },
   "dependencies": {
     "@angular/animations": "^22.0.7",
@@ -31,31 +45,21 @@
     "rxjs": "~7.8.1"
   },
   "devDependencies": {
-    "@angular-eslint/builder": "^22.1.0",
-    "@angular-eslint/eslint-plugin": "^22.1.0",
-    "@angular-eslint/eslint-plugin-template": "^22.1.0",
-    "@angular-eslint/schematics": "^22.1.0",
-    "@angular-eslint/template-parser": "^22.1.0",
+    "@eslint/js": "^9.39.5",
     "@angular/build": "^22.0.7",
     "@angular/cli": "~22.0.7",
     "@angular/compiler-cli": "^22.0.7",
-    "@iqb/eslint-config": "^2.0.0",
     "@iqbspecs/validate-json": "^0.1.0",
     "@types/jasmine": "~3.6.0",
     "@types/jasminewd2": "~2.0.10",
     "@types/karma": "~6.3.3",
     "@types/karma-jasmine": "~4.0.2",
     "@types/node": "^22.13.4",
-    "@typescript-eslint/parser": "7.18.0",
-    "@typescript-eslint/utils": "^8.65.0",
+    "angular-eslint": "^22.1.0",
     "chromedriver": "119.0.1",
+    "concurrently": "^8.0.0",
     "cypress": "^15.0.0",
-    "eslint": "^10.7.0",
-    "eslint-config-airbnb-typescript": "^18.0.0",
-    "eslint-config-prettier": "10.1.5",
-    "eslint-plugin-cypress": "2.15.1",
-    "eslint-plugin-html": "^7.1.0",
-    "eslint-plugin-import": "^2.27.5",
+    "eslint": "^9.39.5",
     "htmlhint": "^1.1.4",
     "jasmine": "^3.6.4",
     "jasmine-core": "~4.5.0",
@@ -69,40 +73,9 @@
     "selenium-webdriver": "^4.29.0",
     "start-server-and-test": "^2.1.0",
     "ts-node": "~10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "tslib": "^2.8.1",
-    "typescript": "~6.0.3"
-  },
-  "eslintConfig": {
-    "extends": "@iqb/eslint-config",
-    "parserOptions": {
-      "project": "./tsconfig.base.json"
-    },
-    "rules": {
-      "@typescript-eslint/quotes": [
-        "error",
-        "single"
-      ]
-    },
-    "overrides": [
-      {
-        "files": [
-          "e2e-tests/**/*.ts"
-        ],
-        "rules": {
-          "@typescript-eslint/no-unused-expressions": [
-            "error",
-            {
-              "allowTaggedTemplates": true
-            }
-          ],
-          "newline-per-chained-call": [
-            "off"
-          ]
-        },
-        "plugins": [
-          "html"
-        ]
-      }
-    ]
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.65.0"
   }
 }

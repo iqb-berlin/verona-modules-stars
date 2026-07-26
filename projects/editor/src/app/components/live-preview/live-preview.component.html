@@ -1,0 +1,25 @@
+<div class="live-preview-container">
+  @if (active && iframeVisible()) {
+    <iframe
+      #playerIframe
+      [src]="playerSafeUrl"
+      (load)="onPlayerLoad()"
+      title="Eingebettete STARS-Player-Vorschau"
+      frameborder="0"
+      allow="autoplay; camera; microphone"
+    ></iframe>
+  }
+
+  @if (controller.state() !== 'ready') {
+    <div class="preview-status" [class.preview-status-error]="controller.state() === 'player-error'">
+      <strong>{{ controller.state() === 'invalid-definition' ? 'Definition unvollständig' : 'Live-Vorschau' }}</strong>
+      <span>{{ controller.message() }}</span>
+      @for (issue of controller.validationIssues(); track issue.path) {
+        <span class="validation-message">{{ issue.message }}</span>
+      }
+      @if (controller.state() === 'unavailable' || controller.state() === 'player-error') {
+        <button type="button" (click)="retry()">Erneut laden</button>
+      }
+    </div>
+  }
+</div>

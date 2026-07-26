@@ -1,0 +1,43 @@
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { InteractionPlaceValueParams } from '@shared/models/unit-definition';
+import { EditorStateService } from '../../services/editor-state.service';
+
+@Component({
+  selector: 'stars-interaction-place-value-editor',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
+    <div class="interaction-editor">
+      <div class="field">
+        <label>Variablen-ID</label>
+        <input type="text" [value]="params.variableId || ''" (input)="updateField('variableId', $any($event.target).value)">
+      </div>
+      <div class="field">
+        <label>Wert</label>
+        <input type="number" [value]="params.value" (input)="updateField('value', +$any($event.target).value)" min="0">
+      </div>
+      <div class="field">
+        <label>Max. Zehner</label>
+        <input type="number" [value]="params.maxNumberOfTens" (input)="updateField('maxNumberOfTens', +$any($event.target).value)" min="0" max="20">
+      </div>
+      <div class="field">
+        <label>Max. Einer</label>
+        <input type="number" [value]="params.maxNumberOfOnes" (input)="updateField('maxNumberOfOnes', +$any($event.target).value)" min="0" max="20">
+      </div>
+    </div>
+  `
+})
+export class InteractionPlaceValueEditorComponent {
+  state = inject(EditorStateService);
+
+  get params(): InteractionPlaceValueParams {
+    return this.state.interactionParams() as InteractionPlaceValueParams;
+  }
+
+  updateField<K extends keyof InteractionPlaceValueParams>(field: K, value: InteractionPlaceValueParams[K]): void {
+    const current = { ...this.params };
+    current[field] = value;
+    this.state.setInteractionParams(current);
+  }
+}

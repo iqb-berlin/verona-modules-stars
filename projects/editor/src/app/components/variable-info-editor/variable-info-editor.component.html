@@ -1,0 +1,146 @@
+<section class="editor-section">
+  <h3 class="section-title" (click)="collapsed = !collapsed">
+    <span class="collapse-icon">{{ collapsed ? '▶' : '▼' }}</span>
+    Coding-Definitionen ({{ variables.length }})
+  </h3>
+  @if (!collapsed) {
+    <div class="section-body">
+      <p class="hint">Hier definierst du Variablen, Coding-Schemata und Scores.</p>
+      <div class="toolbar">
+        <button class="btn-add" [disabled]="!canAddVariable" (click)="addVariable()">
+          + Variable hinzufügen
+        </button>
+      </div>
+
+      @if (variables.length === 0) {
+        <div class="empty-state">Noch keine Coding-Definition vorhanden.</div>
+      }
+
+      @for (variable of variables; track $index; let variableIndex = $index) {
+        <div class="variable-card">
+          <div class="var-header">
+            <span class="var-id">{{ variable.variableId || 'Neue Variable' }}</span>
+            <button class="btn-icon btn-remove-sm" (click)="removeVariable(variableIndex)">✕</button>
+          </div>
+
+          <div class="field">
+            <label>Variablen-ID</label>
+            <input
+              type="text"
+              [value]="variable.variableId"
+              (input)="updateVariable(variableIndex, 'variableId', $any($event.target).value)"
+            />
+          </div>
+
+          <div class="field-row-group">
+            <div class="field">
+              <label>Vollständigkeit</label>
+              <select
+                [value]="variable.responseComplete"
+                (change)="updateVariable(variableIndex, 'responseComplete', $any($event.target).value)"
+              >
+                <option value="ALWAYS">Immer</option>
+                <option value="ON_ANY_RESPONSE">Bei jeder Antwort</option>
+                <option value="ON_FULL_CREDIT">Bei voller Punktzahl</option>
+                <option value="ON_ALL_SUB_VALUES">Alle Teilwerte vorhanden</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Coding-Quelle</label>
+              <select
+                [value]="variable.codingSource"
+                (change)="updateVariable(variableIndex, 'codingSource', $any($event.target).value)"
+              >
+                <option value="VALUE">Wert</option>
+                <option value="VALUE_TO_UPPER">Wert in Großbuchstaben</option>
+                <option value="SUM">Summe</option>
+                <option value="SUM_CHAR_MATCHES">Zeichen-Matches summieren</option>
+              </select>
+            </div>
+          </div>
+
+          @if (requiresCodingSourceParameter(variable)) {
+            <div class="field">
+              <label>Coding-Parameter</label>
+              <input
+                type="text"
+                [value]="variable.codingSourceParameter || ''"
+                (input)="updateVariable(variableIndex, 'codingSourceParameter', $any($event.target).value)"
+              />
+            </div>
+          }
+
+          @for (issue of state.validationIssues('variableInfo[' + variableIndex + ']'); track issue.path) {
+            <div class="validation-error">{{ issue.message }}</div>
+          }
+
+          <div class="sub-section">
+            <div class="sub-header">
+              <span>Codes ({{ variable.codes.length }})</span>
+              <button class="btn-add" (click)="addCode(variableIndex)">+ Code</button>
+            </div>
+
+            @if (variable.codes.length === 0) {
+              <div class="empty-sub-state">Noch keine Code-Regel vorhanden.</div>
+            }
+
+            @for (code of variable.codes; track $index; let codeIndex = $index) {
+              <div class="code-card">
+                <div class="option-header">
+                  <span class="option-index">Code #{{ codeIndex + 1 }}</span>
+                  <button
+                    class="btn-icon btn-remove-sm"
+                    (click)="removeCode(variableIndex, codeIndex)"
+                  >✕</button>
+                </div>
+
+                <div class="field-row-group">
+                  <div class="field">
+                    <label>Methode</label>
+                    <select
+                      [value]="code.method"
+                      (change)="updateCode(variableIndex, codeIndex, 'method', $any($event.target).value)"
+                    >
+                      <option value="EQUALS">Gleich</option>
+                      <option value="GREATER_THAN">Größer als</option>
+                      <option value="LESS_THAN">Kleiner als</option>
+                      <option value="IN_POSITION_RANGE">Im Positionsbereich</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>Parameter</label>
+                    <input
+                      type="text"
+                      [value]="code.parameter"
+                      (input)="updateCode(variableIndex, codeIndex, 'parameter', $any($event.target).value)"
+                    />
+                  </div>
+                </div>
+
+                <div class="field-row-group">
+                  <div class="field">
+                    <label>Code</label>
+                    <input
+                      type="number"
+                      [value]="code.code"
+                      (input)="updateCode(variableIndex, codeIndex, 'code', +$any($event.target).value)"
+                    />
+                  </div>
+                  <div class="field">
+                    <label>Score</label>
+                    <input
+                      type="number"
+                      [value]="code.score"
+                      (input)="updateCode(variableIndex, codeIndex, 'score', +$any($event.target).value)"
+                    />
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</section>

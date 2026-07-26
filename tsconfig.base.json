@@ -21,6 +21,9 @@
     "paths": {
       "@styles/*": [
         "src/styles/*"
+      ],
+      "@shared/*": [
+        "projects/shared/*"
       ]
     }
   }

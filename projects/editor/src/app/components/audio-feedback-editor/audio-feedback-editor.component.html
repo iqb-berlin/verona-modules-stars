@@ -1,0 +1,164 @@
+<section class="editor-section">
+  <h3 class="section-title" (click)="collapsed = !collapsed">
+    <span class="collapse-icon">{{ collapsed ? '▶' : '▼' }}</span>
+    Audio-Feedback ({{ feedbackItems.length }})
+  </h3>
+  @if (!collapsed) {
+    <div class="section-body">
+      <div class="field field-row">
+        <label>
+          <input
+            type="checkbox"
+            [checked]="state.audioFeedbackEnabled()"
+            (change)="toggleFeedback($any($event.target).checked)"
+          />
+          Feedback aktivieren
+        </label>
+      </div>
+      @if (state.audioFeedbackEnabled() && state.audioFeedback()) {
+        <div class="field">
+          <label>Auslöser</label>
+          <select
+            [value]="state.audioFeedback()?.trigger"
+            (change)="updateFeedback('trigger', $any($event.target).value)"
+          >
+            <option value="CONTINUE_BUTTON_CLICK">Weiter-Button Klick</option>
+            <option value="ANY_RESPONSE">Bei jeder Antwort</option>
+          </select>
+        </div>
+
+        <div class="sub-section">
+          <div class="sub-header">
+            <span>Regeln</span>
+            <button class="btn-add" (click)="addRule()">+ Regel</button>
+          </div>
+
+          @if (feedbackItems.length === 0) {
+            <div class="empty-state">Noch keine Feedback-Regel vorhanden.</div>
+          }
+
+          @for (rule of feedbackItems; track $index; let ruleIndex = $index) {
+            <div class="option-card">
+              <div class="option-header">
+                <span class="option-index">Regel #{{ ruleIndex + 1 }}</span>
+                <button class="btn-icon btn-remove-sm" (click)="removeRule(ruleIndex)">✕</button>
+              </div>
+
+              <div class="field">
+                <label>Variable</label>
+                <input
+                  type="text"
+                  [value]="rule.variableId"
+                  (input)="updateRule(ruleIndex, 'variableId', $any($event.target).value)"
+                />
+              </div>
+
+              <div class="field-row-group">
+                <div class="field">
+                  <label>Quelle</label>
+                  <select
+                    [value]="rule.source || 'CODE'"
+                    (change)="updateRule(ruleIndex, 'source', $any($event.target).value)"
+                  >
+                    <option value="CODE">Code</option>
+                    <option value="VALUE">Wert</option>
+                    <option value="SCORE">Score</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Methode</label>
+                  <select
+                    [value]="rule.method || 'EQUALS'"
+                    (change)="updateRule(ruleIndex, 'method', $any($event.target).value)"
+                  >
+                    <option value="EQUALS">Gleich (=)</option>
+                    <option value="GREATER_THAN">Größer (&gt;)</option>
+                    <option value="LESS_THAN">Kleiner (&lt;)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Parameter</label>
+                <input
+                  type="text"
+                  [value]="rule.parameter"
+                  (input)="updateRule(ruleIndex, 'parameter', $any($event.target).value)"
+                />
+              </div>
+
+              <stars-media-upload
+                label="Audio"
+                type="audio"
+                [source]="rule.audioSource"
+                (sourceChange)="updateRule(ruleIndex, 'audioSource', $event)"
+              ></stars-media-upload>
+
+              @for (
+                issue of state.validationIssues('audioFeedback.feedback[' + ruleIndex + ']');
+                track issue.path
+              ) {
+                <div class="validation-error">{{ issue.message }}</div>
+              }
+
+              <div class="sub-section nested">
+                <div class="sub-header">
+                  <span>Show Responses ({{ getShowResponses(rule).length }})</span>
+                  <button class="btn-add" (click)="addShowResponse(ruleIndex)">+ Response</button>
+                </div>
+
+                @for (
+                  showResponse of getShowResponses(rule);
+                  track $index;
+                  let responseIndex = $index
+                ) {
+                  <div class="response-card">
+                    <div class="option-header">
+                      <span class="option-index">Response #{{ responseIndex + 1 }}</span>
+                      <button
+                        class="btn-icon btn-remove-sm"
+                        (click)="removeShowResponse(ruleIndex, responseIndex)"
+                      >✕</button>
+                    </div>
+                    <div class="field">
+                      <label>Response-Variable</label>
+                      <input
+                        type="text"
+                        [value]="showResponse.variableId"
+                        (input)="updateShowResponse(
+                          ruleIndex, responseIndex, 'variableId', $any($event.target).value
+                        )"
+                      />
+                    </div>
+                    <div class="field">
+                      <label>Response-Wert</label>
+                      <input
+                        type="text"
+                        [value]="showResponse.value"
+                        (input)="updateShowResponse(
+                          ruleIndex, responseIndex, 'value', $any($event.target).value
+                        )"
+                      />
+                    </div>
+                    <div class="field">
+                      <label>Verzögerung (ms)</label>
+                      <input
+                        type="number"
+                        [value]="showResponse.delayMS || 0"
+                        (input)="updateShowResponse(
+                          ruleIndex, responseIndex, 'delayMS', +$any($event.target).value
+                        )"
+                        min="0"
+                        step="100"
+                      />
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</section>

@@ -34,8 +34,7 @@ export class StandardIconComponent {
 
     const html = this.renderIconHtml(
       iconKey,
-      !!this.selected?.() || !!this.hint?.(),
-      !!this.hint?.(),
+      !!this.selected?.() || !!this.hint?.()
     );
     return this.sanitizer.bypassSecurityTrustHtml(html);
   });
@@ -44,8 +43,7 @@ export class StandardIconComponent {
 
   private renderIconHtml(
     iconKey: string,
-    selected: boolean,
-    hint: boolean,
+    selected: boolean
   ): string {
     const smileyIconClass = iconKey.startsWith('SMILEY') ? 'smiley-icon' : '';
 

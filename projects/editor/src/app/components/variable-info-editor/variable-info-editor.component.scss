@@ -1,0 +1,88 @@
+.hint {
+  margin-bottom: 12px;
+  color: #94a3b8;
+  font-size: 11px;
+  font-style: italic;
+}
+
+.toolbar,
+.var-header,
+.option-header,
+.sub-header {
+  margin-bottom: 8px;
+}
+
+.var-header,
+.option-header,
+.sub-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.empty-state,
+.empty-sub-state,
+.validation-error {
+  padding: 8px 0;
+  font-size: 12px;
+}
+
+.empty-state,
+.empty-sub-state,
+.option-index,
+.sub-header {
+  color: #64748b;
+}
+
+.validation-error {
+  color: #fca5a5;
+}
+
+.variable-card,
+.code-card {
+  margin-bottom: 8px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.var-id {
+  color: #38bdf8;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.option-index,
+.sub-header {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.field-row-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.sub-section {
+  margin-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 8px;
+}
+
+.btn-add {
+  padding: 3px 10px;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 4px;
+  background: rgba(139, 92, 246, 0.2);
+  color: #a78bfa;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.btn-remove-sm {
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
+}

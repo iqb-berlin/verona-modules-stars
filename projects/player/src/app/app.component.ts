@@ -36,6 +36,11 @@ export class AppComponent implements OnInit {
     };
   });
 
+  feedbackHint = computed(() => {
+    const variableId = (this.unitService.parameters() as { variableId?: string })?.variableId;
+    return this.responsesService.feedbackHintFor(variableId);
+  });
+
   constructor(
     public unitService: UnitService,
     public responsesService: ResponsesService,

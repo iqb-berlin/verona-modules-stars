@@ -7,6 +7,7 @@ import { testResponsiveImageFeatures } from '../shared/responsive-image.spec.cy'
 import { testFormerStateFeatures } from '../shared/former-state.spec.cy';
 import { testCodingSumCharMatches } from '../shared/coding-sum-char-matches.spec.cy';
 import { testClosingMetaButtons } from '../shared/closing-meta-buttons.spec.cy';
+import { MockMessage } from '../../support/utils';
 
 describe('Interaction BUTTONS Component', () => {
   const interactionType = 'buttons';
@@ -293,4 +294,71 @@ describe('Interaction BUTTONS Component', () => {
   testCodingSumCharMatches('buttons_multiselect_test.json', interactionType);
   // Test closing meta buttons for the BUTTONS interaction type
   testClosingMetaButtons(interactionType);
+
+  it('applies every configured showResponse entry', () => {
+    cy.setupTestData('buttons_feedback_test', interactionType);
+    cy.get('@testData').then(testData => {
+      const unitDefinition = JSON.parse(JSON.stringify(testData)) as UnitDefinition;
+      const incorrectFeedback = unitDefinition.audioFeedback?.feedback
+        .find(feedback => feedback.parameter === '0');
+      if (!incorrectFeedback) throw new Error('Incorrect-answer feedback is missing from test data.');
+      incorrectFeedback.showResponse = [
+        { variableId: 'BUTTONS', value: '', delayMS: 0 },
+        { variableId: 'BUTTONS', value: '4', delayMS: 0 }
+      ];
+
+      cy.window().then(playerWindow => {
+        playerWindow.postMessage({
+          type: 'vopStartCommand',
+          sessionId: 'cypress-test-session',
+          unitDefinition: JSON.stringify(unitDefinition)
+        }, '*');
+      });
+      cy.applyStandardScenarios(interactionType, unitDefinition);
+      cy.clickContinueButton();
+      cy.waitUntilFeedbackIsFinishedPlaying();
+      cy.get('[data-cy=interaction-disabled-overlay]').should('be.visible').invoke('remove');
+      cy.get('input.hint').should('exist');
+    });
+  });
+
+  it('uses META consistently when the closing meta selection ID is omitted', () => {
+    const configFile = 'buttons_with_closingMetaButtons_with_variableInfo_test.json';
+    cy.setupTestDataWithPostMessageMock(configFile, interactionType);
+
+    cy.get('@testData').then(testData => {
+      const unitDefinition = JSON.parse(JSON.stringify(testData)) as UnitDefinition;
+      if (!unitDefinition.closingMetaButtons) {
+        throw new Error('Closing-meta configuration missing from test data.');
+      }
+      delete unitDefinition.closingMetaButtons.variableIdMetaSelection;
+      unitDefinition.closingMetaButtons.triggerNavigationOnSelect = false;
+
+      cy.window().then(playerWindow => {
+        playerWindow.postMessage({
+          type: 'vopStartCommand',
+          sessionId: 'cypress-test-session',
+          unitDefinition: JSON.stringify(unitDefinition)
+        }, '*');
+      });
+      cy.applyCorrectAnswerScenarios(interactionType, unitDefinition);
+      cy.get('[data-cy="continue-button"]').click();
+      cy.get('[data-cy="interaction-meta"]').should('exist');
+      cy.get('[data-cy="button-2"]').click();
+      cy.get('[data-cy="continue-button"]').should('exist').and('be.visible');
+
+      cy.get('@outgoingMessages').then(messages => {
+        const stateMessages = (messages as unknown as MockMessage[])
+          .filter(message => message.data.type === 'vopStateChangedNotification');
+        const latestState = stateMessages[stateMessages.length - 1]?.data.unitState;
+        if (!latestState) throw new Error('No player state notification received.');
+
+        cy.parseDataPartsResponses(latestState.dataParts).then(responseArrays => {
+          const responses = responseArrays.flat();
+          expect(responses.find(response => response.id === 'META')?.value).to.equal('3');
+          expect(responses.find(response => response.id === 'META_OUTCOME')?.value).to.equal('1_3');
+        });
+      });
+    });
+  });
 });

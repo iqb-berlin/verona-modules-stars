@@ -24,7 +24,11 @@ export class FileService {
         });
         reader.onerror = errorEvent => reject(errorEvent);
         if (uploadedFile) {
-          asBase64 ? reader.readAsDataURL(uploadedFile) : reader.readAsText(uploadedFile);
+          if (asBase64) {
+            reader.readAsDataURL(uploadedFile);
+          } else {
+            reader.readAsText(uploadedFile);
+          }
         }
       });
       fileUploadElement.click();

@@ -43,7 +43,7 @@ export class OpeningImageComponent extends InteractionComponentDirective {
           params.presentationDurationMS || 0;
 
         // If there is no opening audio, show image immediately and schedule finish based on duration
-        if (params.audioSource === '') {
+        if (!params.audioSource?.trim()) {
           if (!this.showImage()) {
             this.showImage.set(true);
             this.unitService.showingOpeningImage.set(true);
@@ -93,10 +93,7 @@ export class OpeningImageComponent extends InteractionComponentDirective {
     // After opening flow, disable the first click layer for the main audio
     const currentOpts = this.unitService.firstAudioOptions() || {};
     if (currentOpts.firstClickLayer) {
-      this.unitService.firstAudioOptions.set({
-        ...currentOpts,
-        firstClickLayer: false,
-      });
+      this.unitService.firstAudioOptions.set({ ...currentOpts, firstClickLayer: 'OFF' });
     }
     // Now that the opening image has disappeared, switch to main audio and auto-play once
     const main = this.unitService.mainAudio();
