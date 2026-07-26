@@ -1,0 +1,20 @@
+<div class="preview-container">
+  <nav class="preview-tabs">
+    <button [class.active]="activeTab() === 'LIVE'" (click)="activeTab.set('LIVE')">
+      <span class="tab-icon">▶</span> Live-Vorschau
+    </button>
+    <button [class.active]="activeTab() === 'JSON'" (click)="activeTab.set('JSON')">
+      <span class="tab-icon">{{ '{' }} {{ '}' }}</span> JSON-Definition
+    </button>
+  </nav>
+
+  <main class="preview-content">
+    <stars-live-preview
+      [active]="activeTab() === 'LIVE'"
+      [hidden]="activeTab() !== 'LIVE'"
+    ></stars-live-preview>
+    @if (activeTab() === 'JSON') {
+      <stars-json-preview></stars-json-preview>
+    }
+  </main>
+</div>

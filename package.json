@@ -22,6 +22,12 @@
     "postbuild:editor": "node projects/tools/distpacker.js dist/stars-editor/browser index_packed.html",
     "build:editor-bundled": "node projects/tools/build-editor-bundled.js",
     "test:editor-architecture": "TS_NODE_PROJECT=tsconfig.base.json TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' node -r ts-node/register -r tsconfig-paths/register projects/editor/tests/editor-state-builders.test.ts",
+    "e2e:editor": "wait-on http://localhost:4210 http://localhost:4211/preview-player.html && cypress run --config-file cypress.editor.config.ts",
+    "e2e:editor-bundled": "cypress run --config-file cypress.editor-bundled.config.ts",
+    "start:editor-e2e": "concurrently \"ng serve player --port 4210\" \"ng serve editor --port 4201\" \"node projects/tools/serve-static.js cypress/fixtures/editor-player 4211\"",
+    "serve:editor-bundled": "node projects/tools/serve-static.js dist/stars-editor/browser 4212",
+    "test:editor-e2e": "start-server-and-test start:editor-e2e http://localhost:4201 e2e:editor",
+    "test:editor-bundled-e2e": "npm run build:editor-bundled && start-server-and-test serve:editor-bundled http://localhost:4212/index_packed.html e2e:editor-bundled",
     "e2e": "npx cypress run",
     "cy:open": "cypress open --browser chrome cypress/e2e/interaction-find-on-image",
     "test": "start-server-and-test start:player http://localhost:4200 cy:open"

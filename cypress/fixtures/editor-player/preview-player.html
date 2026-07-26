@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <title>STARS Preview Test Player</title>
+  </head>
+  <body>
+    <script>
+      const editorOrigin = 'http://localhost:4201';
+      const query = new URLSearchParams(window.location.search);
+      const order = query.get('order');
+      const readyMode = query.get('ready') || 'always';
+      const readyStorageKey = `preview-ready:${window.location.search}`;
+      const notifyReady = () => window.parent.postMessage({
+        type: 'vopReadyNotification',
+        metadata: {}
+      }, editorOrigin);
+
+      window.addEventListener('message', event => {
+        if (event.origin !== editorOrigin || event.data?.type !== 'vopStartCommand') return;
+        const definition = JSON.parse(event.data.unitDefinition || '{}');
+        window.parent.postMessage({
+          type: 'preview-test-start',
+          definitionId: definition.id
+        }, editorOrigin);
+      });
+
+      const shouldNotifyReady = readyMode !== 'once' || !sessionStorage.getItem(readyStorageKey);
+      if (shouldNotifyReady) {
+        sessionStorage.setItem(readyStorageKey, 'true');
+        if (order === 'ready-load') {
+          notifyReady();
+        } else {
+          window.addEventListener('load', () => window.setTimeout(notifyReady, 25));
+        }
+      }
+    </script>
+  </body>
+</html>
