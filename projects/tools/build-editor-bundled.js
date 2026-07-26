@@ -68,44 +68,71 @@ log(`Player base64 length: ${playerBase64.length}`);
 
 // Step 4: Backup original environment.prod.ts
 log("Backing up environment.prod.ts...");
+if (fs.existsSync(editorEnvProdBackup)) {
+  console.error(
+    `Backup already exists at ${editorEnvProdBackup}. ` +
+      "Restore or remove it before starting another bundled build.",
+  );
+  process.exit(1);
+}
 fs.copyFileSync(editorEnvProdFile, editorEnvProdBackup);
 
-// Step 5: Write new environment.prod.ts with embedded player HTML as base64
-log("Creating environment.prod.ts with embedded player HTML...");
-const newEnvContent = `export const environment = {
+let environmentRestored = false;
+function restoreEnvironment() {
+  if (environmentRestored || !fs.existsSync(editorEnvProdBackup)) return;
+  log("Restoring environment.prod.ts...");
+  fs.copyFileSync(editorEnvProdBackup, editorEnvProdFile);
+  fs.unlinkSync(editorEnvProdBackup);
+  environmentRestored = true;
+}
+
+const handledSignals = ["SIGINT", "SIGTERM", "SIGHUP"];
+const signalHandlers = new Map();
+handledSignals.forEach((signal) => {
+  const handler = () => {
+    restoreEnvironment();
+    process.removeListener(signal, handler);
+    process.kill(process.pid, signal);
+  };
+  signalHandlers.set(signal, handler);
+  process.on(signal, handler);
+});
+
+try {
+  // Step 5: Write new environment.prod.ts with embedded player HTML as base64
+  log("Creating environment.prod.ts with embedded player HTML...");
+  const newEnvContent = `export const environment = {
   production: true,
   playerUrl: 'http://localhost:4200',
   playerHtmlBase64: '${playerBase64}'
 };
 `;
-fs.writeFileSync(editorEnvProdFile, newEnvContent, "utf8");
+  fs.writeFileSync(editorEnvProdFile, newEnvContent, "utf8");
 
-// Verify written content
-const writtenContent = fs.readFileSync(editorEnvProdFile, "utf8");
-const match = writtenContent.match(/playerHtmlBase64: '([^']*)'/);
-if (match) {
+  const writtenContent = fs.readFileSync(editorEnvProdFile, "utf8");
+  const match = writtenContent.match(/playerHtmlBase64: '([^']*)'/);
+  if (!match) {
+    throw new Error(
+      "playerHtmlBase64 not found in written environment.prod.ts",
+    );
+  }
   log(`Written playerHtmlBase64 length: ${match[1].length}`);
-} else {
-  log("ERROR: playerHtmlBase64 not found in written environment.prod.ts");
-}
 
-// Step 6: Build editor (this also triggers postbuild:editor which packs the editor)
-log("Building editor...");
-try {
+  // Step 6: Build editor (this also triggers postbuild:editor which packs the editor)
+  log("Building editor...");
   execSync("npm run build:editor", { cwd: rootDir, stdio: "inherit" });
 } catch (error) {
   console.error("Failed to build editor:", error);
-  // Restore backup before exiting
-  fs.copyFileSync(editorEnvProdBackup, editorEnvProdFile);
-  fs.unlinkSync(editorEnvProdBackup);
-  process.exit(1);
+  process.exitCode = 1;
+} finally {
+  restoreEnvironment();
+  signalHandlers.forEach((handler, signal) => {
+    process.removeListener(signal, handler);
+  });
 }
 
-// Step 7: Restore original environment.prod.ts
-log("Restoring environment.prod.ts...");
-fs.copyFileSync(editorEnvProdBackup, editorEnvProdFile);
-fs.unlinkSync(editorEnvProdBackup);
-
-log(
-  "Done. Editor bundled with embedded player at dist/stars-editor/browser/index_packed.html",
-);
+if (process.exitCode !== 1) {
+  log(
+    "Done. Editor bundled with embedded player at dist/stars-editor/browser/index_packed.html",
+  );
+}
