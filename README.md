@@ -61,8 +61,12 @@ The editor contains a live preview that starts the STARS player inside an iframe
 In development, the preview uses `environment.playerUrl`, which points to the local player by default. You can override the player URL from the browser address bar:
 
 ```text
-http://localhost:4201/?playerUrl=http://localhost:4202
+http://localhost:4201/?playerUrl=http://localhost:4200
 ```
+
+For local development, use `npm run start:all` so that the editor and its embedded
+player preview are started together. A player opened separately in another tab is
+independent and is not synchronized with the editor.
 
 The bundled editor build embeds the packed player HTML as base64. This allows `dist/stars-editor/browser/index_packed.html` to run the live preview without a separate player server.
 
