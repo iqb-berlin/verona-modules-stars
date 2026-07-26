@@ -22,6 +22,7 @@
     "postbuild:editor": "node projects/tools/distpacker.js dist/stars-editor/browser index_packed.html",
     "build:editor-bundled": "node projects/tools/build-editor-bundled.js",
     "test:editor-architecture": "TS_NODE_PROJECT=tsconfig.base.json TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' node -r ts-node/register -r tsconfig-paths/register projects/editor/tests/editor-state-builders.test.ts",
+    "test:player-services": "TS_NODE_PROJECT=tsconfig.base.json TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' node -r ts-node/register -r tsconfig-paths/register projects/player/tests/responses-feedback.test.ts",
     "e2e:editor": "wait-on http://localhost:4210 http://localhost:4211/preview-player.html && cypress run --config-file cypress.editor.config.ts",
     "e2e:editor-bundled": "cypress run --config-file cypress.editor-bundled.config.ts",
     "start:editor-e2e": "concurrently \"ng serve player --port 4210\" \"ng serve editor --port 4201\" \"node projects/tools/serve-static.js cypress/fixtures/editor-player 4211\"",
@@ -116,6 +117,15 @@
         "plugins": [
           "html"
         ]
+      },
+      {
+        "files": [
+          "projects/editor/src/app/services/editor-interaction-adapters.ts"
+        ],
+        "rules": {
+          "class-methods-use-this": "off",
+          "max-classes-per-file": "off"
+        }
       }
     ]
   }

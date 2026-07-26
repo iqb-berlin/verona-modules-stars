@@ -4,6 +4,7 @@ import {
   OpeningImageParams,
   UnitDefinition
 } from '@shared/models/unit-definition';
+import { ShowResponse } from '@shared/models/feedback';
 import { EditorStateSnapshot } from './editor-state.model';
 import { EditorInteractionAdapterRegistry } from './editor-interaction-adapters';
 import {
@@ -57,12 +58,10 @@ export class EditorDefinitionBuilderService {
 
     if (snapshot.openingImageEnabled) {
       const params: OpeningImageParams = {
-        imageSource: snapshot.openingImageSource
+        imageSource: snapshot.openingImageSource,
+        presentationDurationMS: snapshot.openingPresentationDurationMS
       };
       if (snapshot.openingAudioSource) params.audioSource = snapshot.openingAudioSource;
-      if (snapshot.openingPresentationDurationMS !== 1500) {
-        params.presentationDurationMS = snapshot.openingPresentationDurationMS;
-      }
       def.openingImage = params;
       if (!snapshot.openingImageSource.trim()) {
         issues.push(this.error(
@@ -88,7 +87,12 @@ export class EditorDefinitionBuilderService {
       snapshot.unsupportedInteractionType || snapshot.interactionType
     ) as UnitDefinition['interactionType'];
     if (snapshot.interactionMaxTimeMS !== undefined) def.interactionMaxTimeMS = snapshot.interactionMaxTimeMS;
-    def.interactionParameters = snapshot.interactionParams;
+    def.interactionParameters = snapshot.unsupportedInteractionType ?
+      snapshot.interactionParams :
+      this.interactionAdapters.serialize(
+        snapshot.interactionType,
+        snapshot.interactionParams
+      );
     if (snapshot.variableInfo.length > 0) def.variableInfo = snapshot.variableInfo;
     if (snapshot.audioFeedbackEnabled && snapshot.audioFeedback) def.audioFeedback = snapshot.audioFeedback;
 
@@ -100,7 +104,8 @@ export class EditorDefinitionBuilderService {
       issues.push(this.error(
         'interactionType',
         `Der Interaktionstyp ${snapshot.unsupportedInteractionType} wird nicht unterstützt.`
-      ));
+      )
+      );
     }
     this.validateVariableInfo(snapshot, issues);
     this.validateAudioFeedback(snapshot, issues);
@@ -111,14 +116,22 @@ export class EditorDefinitionBuilderService {
     return {
       draft: def,
       issues,
-      runtimeDefinition: issues.some(issue => issue.severity === 'error') ? undefined : def
+      runtimeDefinition: issues.some(issue => issue.severity === 'error') ?
+        undefined :
+        def
     };
   }
 
-  private validateVariableInfo(snapshot: EditorStateSnapshot, issues: ValidationIssue[]): void {
-    const ids = snapshot.variableInfo.map(variable => variable.variableId.trim());
+  private validateVariableInfo(
+    snapshot: EditorStateSnapshot,
+    issues: ValidationIssue[]
+  ): void {
+    const ids = snapshot.variableInfo.map(variable => variable.variableId.trim()
+    );
     const responseVariableIds = this.responseVariableIds(snapshot);
-    const interactionVariableId = (snapshot.interactionParams as { variableId?: string }).variableId?.trim();
+    const interactionVariableId = (
+      snapshot.interactionParams as { variableId?: string }
+    ).variableId?.trim();
     const selectionMetadata = this.interactionAdapters
       .get(snapshot.interactionType)
       .selectionMetadata(snapshot.interactionParams);
@@ -127,140 +140,275 @@ export class EditorDefinitionBuilderService {
       const rawVariableId = variable.variableId;
       const variableId = rawVariableId.trim();
       if (!variableId) {
-        issues.push(this.error(`${path}.variableId`, 'Die Variablen-ID darf nicht leer sein.'));
+        issues.push(
+          this.error(
+            `${path}.variableId`,
+            'Die Variablen-ID darf nicht leer sein.'
+          )
+        );
       } else if (rawVariableId !== variableId) {
-        issues.push(this.error(
-          `${path}.variableId`,
-          'Die Variablen-ID darf keine Leerzeichen am Anfang oder Ende enthalten.'
-        ));
+        issues.push(
+          this.error(
+            `${path}.variableId`,
+            'Die Variablen-ID darf keine Leerzeichen am Anfang oder Ende enthalten.'
+          )
+        );
       } else if (ids.filter(id => id === variableId).length > 1) {
-        issues.push(this.error(`${path}.variableId`, 'Die Variablen-ID muss eindeutig sein.'));
+        issues.push(
+          this.error(
+            `${path}.variableId`,
+            'Die Variablen-ID muss eindeutig sein.'
+          )
+        );
       } else if (!responseVariableIds.has(variableId)) {
-        issues.push(this.error(
-          `${path}.variableId`,
-          'Für diese Coding-Variable wird keine Response erzeugt.'
-        ));
+        issues.push(
+          this.error(
+            `${path}.variableId`,
+            'Für diese Coding-Variable wird keine Response erzeugt.'
+          )
+        );
       }
 
-      const usesMultiSelectCoding = variable.codingSource === 'SUM' ||
+      const usesMultiSelectCoding =
+        variable.codingSource === 'SUM' ||
         variable.codingSource === 'SUM_CHAR_MATCHES';
-      const isMatchingMultiSelect = variableId === interactionVariableId && selectionMetadata?.multiple === true;
+      const isMatchingMultiSelect =
+        variableId === interactionVariableId &&
+        selectionMetadata?.multiple === true;
       if (usesMultiSelectCoding && !isMatchingMultiSelect) {
-        issues.push(this.error(
-          `${path}.codingSource`,
-          `${variable.codingSource} ist nur für die Variable einer Mehrfachauswahl verfügbar.`
-        ));
+        issues.push(
+          this.error(
+            `${path}.codingSource`,
+            `${variable.codingSource} ist nur für die Variable einer Mehrfachauswahl verfügbar.`
+          )
+        );
       }
       if (variable.codingSource === 'SUM_CHAR_MATCHES') {
         const parameter = variable.codingSourceParameter || '';
         if (!/^[01]+$/.test(parameter)) {
-          issues.push(this.error(
-            `${path}.codingSourceParameter`,
-            'SUM_CHAR_MATCHES benötigt eine nichtleere Folge aus 0 und 1.'
-          ));
-        } else if (isMatchingMultiSelect && parameter.length !== selectionMetadata.labels.length) {
-          issues.push(this.error(
-            `${path}.codingSourceParameter`,
-            `SUM_CHAR_MATCHES benötigt genau ${selectionMetadata.labels.length} Stellen.`
-          ));
+          issues.push(
+            this.error(
+              `${path}.codingSourceParameter`,
+              'SUM_CHAR_MATCHES benötigt eine nichtleere Folge aus 0 und 1.'
+            )
+          );
+        } else if (
+          isMatchingMultiSelect &&
+          parameter.length !== selectionMetadata.labels.length
+        ) {
+          issues.push(
+            this.error(
+              `${path}.codingSourceParameter`,
+              `SUM_CHAR_MATCHES benötigt genau ${selectionMetadata.labels.length} Stellen.`
+            )
+          );
         }
       }
       if (variable.codes.length === 0) {
-        issues.push(this.error(
-          `${path}.codes`,
-          'Für die Coding-Variable ist mindestens eine Code-Regel erforderlich.'
-        ));
+        issues.push(
+          this.error(
+            `${path}.codes`,
+            'Für die Coding-Variable ist mindestens eine Code-Regel erforderlich.'
+          )
+        );
       }
       variable.codes.forEach((code, codeIndex) => {
         if (!code.parameter.trim()) {
-          issues.push(this.error(
-            `${path}.codes[${codeIndex}].parameter`,
-            'Der Code-Parameter darf nicht leer sein.'
-          ));
+          issues.push(
+            this.error(
+              `${path}.codes[${codeIndex}].parameter`,
+              'Der Code-Parameter darf nicht leer sein.'
+            )
+          );
         }
       });
     });
   }
 
-  private validateAudioFeedback(snapshot: EditorStateSnapshot, issues: ValidationIssue[]): void {
+  private validateAudioFeedback(
+    snapshot: EditorStateSnapshot,
+    issues: ValidationIssue[]
+  ): void {
     if (!snapshot.audioFeedbackEnabled || !snapshot.audioFeedback) return;
     const knownVariableIds = this.responseVariableIds(snapshot);
 
     snapshot.audioFeedback.feedback.forEach((feedback, index) => {
       const path = `audioFeedback.feedback[${index}]`;
       if (!feedback.variableId.trim()) {
-        issues.push(this.error(`${path}.variableId`, 'Für die Feedback-Regel ist eine Variable erforderlich.'));
+        issues.push(
+          this.error(
+            `${path}.variableId`,
+            'Für die Feedback-Regel ist eine Variable erforderlich.'
+          )
+        );
       } else if (!knownVariableIds.has(feedback.variableId)) {
-        issues.push(this.error(`${path}.variableId`, 'Die Feedback-Variable ist in dieser Unit nicht definiert.'));
+        issues.push(
+          this.error(
+            `${path}.variableId`,
+            'Die Feedback-Variable ist in dieser Unit nicht definiert.'
+          )
+        );
       }
       if (!feedback.parameter.trim()) {
-        issues.push(this.error(`${path}.parameter`, 'Für die Feedback-Regel ist ein Parameter erforderlich.'));
+        issues.push(
+          this.error(
+            `${path}.parameter`,
+            'Für die Feedback-Regel ist ein Parameter erforderlich.'
+          )
+        );
       }
       if (!feedback.audioSource.trim()) {
-        issues.push(this.error(`${path}.audioSource`, 'Für die Feedback-Regel ist eine Audioquelle erforderlich.'));
+        issues.push(
+          this.error(
+            `${path}.audioSource`,
+            'Für die Feedback-Regel ist eine Audioquelle erforderlich.'
+          )
+        );
       }
+      let showResponses: ShowResponse[] = [];
+      if (feedback.showResponse) {
+        showResponses = Array.isArray(feedback.showResponse) ?
+          feedback.showResponse : [feedback.showResponse];
+      }
+      showResponses.forEach((showResponse, responseIndex) => {
+        const responsePath = `${path}.showResponse[${responseIndex}]`;
+        const rawVariableId = showResponse.variableId;
+        if (!rawVariableId.trim()) {
+          issues.push(
+            this.error(
+              `${responsePath}.variableId`,
+              'Für Show Response ist eine Variable erforderlich.'
+            )
+          );
+        } else if (rawVariableId !== rawVariableId.trim()) {
+          issues.push(
+            this.error(
+              `${responsePath}.variableId`,
+              'Die Show-Response-Variable darf keine Leerzeichen am Anfang oder Ende enthalten.'
+            )
+          );
+        } else if (!knownVariableIds.has(rawVariableId)) {
+          issues.push(
+            this.error(
+              `${responsePath}.variableId`,
+              'Die Show-Response-Variable ist in dieser Unit nicht definiert.'
+            )
+          );
+        }
+        if (
+          showResponse.delayMS !== undefined &&
+          (!Number.isFinite(showResponse.delayMS) || showResponse.delayMS < 0)
+        ) {
+          issues.push(
+            this.error(
+              `${responsePath}.delayMS`,
+              'Die Show-Response-Verzögerung muss eine endliche, nichtnegative Zahl sein.'
+            )
+          );
+        }
+      });
     });
   }
 
   responseVariableIds(snapshot: EditorStateSnapshot): Set<string> {
     return new Set(
-      collectResponseVariables(snapshot, this.interactionAdapters).map(variable => variable.id)
+      collectResponseVariables(snapshot, this.interactionAdapters).map(
+        variable => variable.id
+      )
     );
   }
 
-  private validateClosingMetaButtons(snapshot: EditorStateSnapshot, issues: ValidationIssue[]): void {
+  private validateClosingMetaButtons(
+    snapshot: EditorStateSnapshot,
+    issues: ValidationIssue[]
+  ): void {
     if (!snapshot.closingMetaButtons) return;
-    const metaVariableFields = ['variableIdMetaSelection', 'variableIdMetaOutcome'] as const;
+    const metaVariableFields = [
+      'variableIdMetaSelection',
+      'variableIdMetaOutcome'
+    ] as const;
     metaVariableFields.forEach(field => {
       const rawVariableId = snapshot.closingMetaButtons?.[field];
-      if (rawVariableId !== undefined && rawVariableId !== rawVariableId.trim()) {
-        issues.push(this.error(
-          `closingMetaButtons.${field}`,
-          'Die Variablen-ID darf keine Leerzeichen am Anfang oder Ende enthalten.'
-        ));
+      if (
+        rawVariableId !== undefined &&
+        rawVariableId !== rawVariableId.trim()
+      ) {
+        issues.push(
+          this.error(
+            `closingMetaButtons.${field}`,
+            'Die Variablen-ID darf keine Leerzeichen am Anfang oder Ende enthalten.'
+          )
+        );
       }
     });
-    const rawReferenceId = snapshot.closingMetaButtons.variableIdReference || '';
+    const rawReferenceId =
+      snapshot.closingMetaButtons.variableIdReference || '';
     const referenceId = rawReferenceId.trim();
-    const interactionVariableId =
-      (snapshot.interactionParams as { variableId?: string }).variableId?.trim();
+    const interactionVariableId = (
+      snapshot.interactionParams as { variableId?: string }
+    ).variableId?.trim();
     if (!referenceId) {
-      issues.push(this.error(
-        'closingMetaButtons.variableIdReference',
-        'Für die Abschlussauswahl ist eine Referenzvariable erforderlich.'
-      ));
+      issues.push(
+        this.error(
+          'closingMetaButtons.variableIdReference',
+          'Für die Abschlussauswahl ist eine Referenzvariable erforderlich.'
+        )
+      );
     } else if (rawReferenceId !== referenceId) {
-      issues.push(this.error(
-        'closingMetaButtons.variableIdReference',
-        'Die Referenzvariable darf keine Leerzeichen am Anfang oder Ende enthalten.'
-      ));
+      issues.push(
+        this.error(
+          'closingMetaButtons.variableIdReference',
+          'Die Referenzvariable darf keine Leerzeichen am Anfang oder Ende enthalten.'
+        )
+      );
     } else if (referenceId !== interactionVariableId) {
-      issues.push(this.error(
-        'closingMetaButtons.variableIdReference',
-        'Die Referenzvariable muss der Variablen-ID der Hauptinteraktion entsprechen.'
-      ));
+      issues.push(
+        this.error(
+          'closingMetaButtons.variableIdReference',
+          'Die Referenzvariable muss der Variablen-ID der Hauptinteraktion entsprechen.'
+        )
+      );
     }
   }
 
-  private validateResponseVariables(snapshot: EditorStateSnapshot, issues: ValidationIssue[]): void {
-    const candidates = collectResponseVariableCandidates(snapshot, this.interactionAdapters);
+  private validateResponseVariables(
+    snapshot: EditorStateSnapshot,
+    issues: ValidationIssue[]
+  ): void {
+    const candidates = collectResponseVariableCandidates(
+      snapshot,
+      this.interactionAdapters
+    );
     candidates
-      .filter(candidate => candidate.id === 'mainAudio' && candidate.source !== 'mainAudio')
-      .forEach(candidate => issues.push(this.error(
-        this.responseVariablePath(candidate.source),
-        'Die Variablen-ID „mainAudio“ ist für das Haupt-Audio reserviert.'
-      )));
+      .filter(
+        candidate => candidate.id === 'mainAudio' && candidate.source !== 'mainAudio'
+      )
+      .forEach(candidate => issues.push(
+        this.error(
+          this.responseVariablePath(candidate.source),
+          'Die Variablen-ID „mainAudio“ ist für das Haupt-Audio reserviert.'
+        )
+      )
+      );
 
     const candidatesById = new Map<string, typeof candidates>();
     candidates.forEach(candidate => {
-      candidatesById.set(candidate.id, [...(candidatesById.get(candidate.id) || []), candidate]);
+      candidatesById.set(candidate.id, [
+        ...(candidatesById.get(candidate.id) || []),
+        candidate
+      ]);
     });
     candidatesById.forEach(sameIdCandidates => {
       if (sameIdCandidates.length < 2 || sameIdCandidates[0].id === 'mainAudio') return;
-      sameIdCandidates.slice(1).forEach(candidate => issues.push(this.error(
-        this.responseVariablePath(candidate.source),
-        `Die Response-ID „${candidate.id}“ wird von mehreren Bereichen verwendet.`
-      )));
+      sameIdCandidates
+        .slice(1)
+        .forEach(candidate => issues.push(
+          this.error(
+            this.responseVariablePath(candidate.source),
+            `Die Response-ID „${candidate.id}“ wird von mehreren Bereichen verwendet.`
+          )
+        )
+        );
     });
   }
 
@@ -272,13 +420,16 @@ export class EditorDefinitionBuilderService {
     return 'mainAudio';
   }
 
-  private validateInteractionParameters(snapshot: EditorStateSnapshot, issues: ValidationIssue[]): void {
+  private validateInteractionParameters(
+    snapshot: EditorStateSnapshot,
+    issues: ValidationIssue[]
+  ): void {
     this.interactionAdapters
       .validate(snapshot.interactionType, snapshot.interactionParams)
-      .forEach(issue => issues.push(this.error(
-        `interactionParameters.${issue.path}`,
-        issue.message
-      )));
+      .forEach(issue => issues.push(
+        this.error(`interactionParameters.${issue.path}`, issue.message)
+      )
+      );
   }
 
   // eslint-disable-next-line class-methods-use-this

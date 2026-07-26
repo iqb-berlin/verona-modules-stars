@@ -105,9 +105,9 @@ export class InteractionDropEditorComponent {
     return this.params.options || [];
   }
 
-  updateField(field: string, value: any): void {
+  updateField<K extends keyof InteractionDropParams>(field: K, value: InteractionDropParams[K]): void {
     const current = { ...this.params };
-    (current as any)[field] = value;
+    current[field] = value;
     this.state.setInteractionParams(current);
   }
 
@@ -127,7 +127,7 @@ export class InteractionDropEditorComponent {
     this.state.setInteractionParams(current);
   }
 
-  updateOption(index: number, field: string, value: any): void {
+  updateOption<K extends keyof SelectionOption>(index: number, field: K, value: SelectionOption[K]): void {
     const current = { ...this.params };
     const options = [...(current.options || [])];
     options[index] = { ...options[index], [field]: value };
@@ -143,6 +143,8 @@ export class InteractionDropEditorComponent {
     this.readFile(event, r => this.updateOption(index, 'imageSource', r));
   }
 
+  // Kept as an instance method because it is shared by the component's upload handlers.
+  // eslint-disable-next-line class-methods-use-this
   private readFile(event: Event, cb: (r: string) => void): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;

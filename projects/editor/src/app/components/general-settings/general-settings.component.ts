@@ -171,7 +171,7 @@ export class GeneralSettingsComponent {
 
   toggleClosingMetaButtons(enabled: boolean): void {
     if (enabled) {
-      const currentVariableId = (this.state.interactionParams() as any)?.variableId || 'BUTTONS';
+      const currentVariableId = (this.state.interactionParams() as { variableId?: string }).variableId || 'BUTTONS';
       this.state.setClosingMetaButtons({
         audioSource: '',
         autoPlay: false,

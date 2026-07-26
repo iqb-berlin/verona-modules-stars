@@ -61,9 +61,9 @@ export class InteractionVideoEditorComponent {
     return this.state.interactionParams() as InteractionVideoParams;
   }
 
-  updateField(field: string, value: any): void {
+  updateField<K extends keyof InteractionVideoParams>(field: K, value: InteractionVideoParams[K]): void {
     const current = { ...this.params };
-    (current as any)[field] = value;
+    current[field] = value;
     this.state.setInteractionParams(current);
   }
 
@@ -75,6 +75,8 @@ export class InteractionVideoEditorComponent {
     this.readFile(event, r => this.updateField('imageSource', r));
   }
 
+  // Kept as an instance method because it is shared by the component's upload handlers.
+  // eslint-disable-next-line class-methods-use-this
   private readFile(event: Event, cb: (r: string) => void): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;

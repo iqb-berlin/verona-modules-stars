@@ -56,9 +56,9 @@ export class InteractionFindOnImageEditorComponent {
     return this.state.interactionParams() as InteractionFindOnImageParams;
   }
 
-  updateField(field: string, value: any): void {
+  updateField<K extends keyof InteractionFindOnImageParams>(field: K, value: InteractionFindOnImageParams[K]): void {
     const current = { ...this.params };
-    (current as any)[field] = value;
+    current[field] = value;
     this.state.setInteractionParams(current);
   }
 

@@ -45,6 +45,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.veronaSubscriptionService.voeStartCommand.subscribe(command => {
+      this.state.setUnitDefinitionType(command.unitDefinitionType);
       if (command.unitDefinition) {
         this.state.loadFromDefinition(command.unitDefinition);
       }
@@ -56,5 +57,4 @@ export class AppComponent implements OnInit {
   togglePreview() {
     this.showPreview = !this.showPreview;
   }
-
 }

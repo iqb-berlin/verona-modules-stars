@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { FeedbackDefinition, ShowResponse } from '@shared/models/feedback';
+import { AudioFeedback, FeedbackDefinition, ShowResponse } from '@shared/models/feedback';
 import { EditorStateService } from '../../services/editor-state.service';
 import { MediaUploadComponent } from '../media-upload/media-upload.component';
 
@@ -23,7 +23,7 @@ export class AudioFeedbackEditorComponent {
     this.state.setAudioFeedbackEnabled(enabled);
   }
 
-  updateFeedback(field: string, value: any): void {
+  updateFeedback<K extends keyof AudioFeedback>(field: K, value: AudioFeedback[K]): void {
     const current = this.state.audioFeedback();
     if (current) this.state.setAudioFeedback({ ...current, [field]: value });
   }
@@ -50,7 +50,7 @@ export class AudioFeedbackEditorComponent {
     this.state.setAudioFeedback({ ...current, feedback });
   }
 
-  updateRule(index: number, field: keyof FeedbackDefinition, value: any): void {
+  updateRule<K extends keyof FeedbackDefinition>(index: number, field: K, value: FeedbackDefinition[K]): void {
     const current = this.state.audioFeedback();
     if (!current) return;
     const feedback = [...(current.feedback || [])];
@@ -70,12 +70,19 @@ export class AudioFeedbackEditorComponent {
     this.setShowResponses(ruleIndex, responses);
   }
 
-  updateShowResponse(ruleIndex: number, responseIndex: number, field: keyof ShowResponse, value: any): void {
+  updateShowResponse<K extends keyof ShowResponse>(
+    ruleIndex: number,
+    responseIndex: number,
+    field: K,
+    value: ShowResponse[K]
+  ): void {
     const responses = [...this.getShowResponses(this.feedbackItems[ruleIndex])];
     responses[responseIndex] = { ...responses[responseIndex], [field]: value };
     this.setShowResponses(ruleIndex, responses);
   }
 
+  // Used directly from the template; it intentionally depends only on its argument.
+  // eslint-disable-next-line class-methods-use-this
   getShowResponses(rule: FeedbackDefinition): ShowResponse[] {
     if (!rule.showResponse) return [];
     return Array.isArray(rule.showResponse) ? rule.showResponse : [rule.showResponse];

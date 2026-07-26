@@ -77,9 +77,12 @@ export class InteractionPolygonButtonsEditorComponent {
     return this.params.options || [];
   }
 
-  updateField(field: string, value: any): void {
+  updateField<K extends keyof InteractionPolygonButtonsParams>(
+    field: K,
+    value: InteractionPolygonButtonsParams[K]
+  ): void {
     const current = { ...this.params };
-    (current as any)[field] = value;
+    current[field] = value;
     this.state.setInteractionParams(current);
   }
 
@@ -99,7 +102,7 @@ export class InteractionPolygonButtonsEditorComponent {
     this.state.setInteractionParams(current);
   }
 
-  updateOption(index: number, field: string, value: any): void {
+  updateOption<K extends keyof SelectionOption>(index: number, field: K, value: SelectionOption[K]): void {
     const current = { ...this.params };
     const options = [...(current.options || [])];
     options[index] = { ...options[index], [field]: value };

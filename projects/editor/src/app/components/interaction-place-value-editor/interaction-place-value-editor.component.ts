@@ -35,9 +35,9 @@ export class InteractionPlaceValueEditorComponent {
     return this.state.interactionParams() as InteractionPlaceValueParams;
   }
 
-  updateField(field: string, value: any): void {
+  updateField<K extends keyof InteractionPlaceValueParams>(field: K, value: InteractionPlaceValueParams[K]): void {
     const current = { ...this.params };
-    (current as any)[field] = value;
+    current[field] = value;
     this.state.setInteractionParams(current);
   }
 }

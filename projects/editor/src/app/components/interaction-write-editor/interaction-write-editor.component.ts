@@ -98,16 +98,16 @@ export class InteractionWriteEditorComponent {
     return this.hasAllUmlautKeys(this.params.keysLine4 || []);
   }
 
-  updateField(field: string, value: any): void {
+  updateField<K extends keyof InteractionWriteParams>(field: K, value: InteractionWriteParams[K]): void {
     const current = { ...this.params };
-    (current as any)[field] = value;
+    current[field] = value;
     this.state.setInteractionParams(current);
   }
 
   updateKeysLine(field: 'keysLine1' | 'keysLine2' | 'keysLine3' | 'keysLine4', value: string): void {
     const keys = value.split(',').map(k => k.trim()).filter(k => k.length > 0);
     const current = { ...this.params };
-    (current as any)[field] = keys;
+    current[field] = keys;
     if (field === 'keysLine4') {
       current.addUmlautKeys = this.hasAllUmlautKeys(keys);
     }
@@ -120,9 +120,9 @@ export class InteractionWriteEditorComponent {
       .filter(key => !InteractionWriteEditorComponent.UMLAUT_KEYS.includes(key));
 
     current.addUmlautKeys = enabled;
-    current.keysLine4 = enabled
-      ? [...InteractionWriteEditorComponent.UMLAUT_KEYS, ...line4WithoutUmlauts]
-      : line4WithoutUmlauts;
+    current.keysLine4 = enabled ?
+      [...InteractionWriteEditorComponent.UMLAUT_KEYS, ...line4WithoutUmlauts] :
+      line4WithoutUmlauts;
 
     this.state.setInteractionParams(current);
   }
@@ -135,6 +135,8 @@ export class InteractionWriteEditorComponent {
     reader.readAsDataURL(file);
   }
 
+  // Kept as an instance method because the template-facing getter and update path share it.
+  // eslint-disable-next-line class-methods-use-this
   private hasAllUmlautKeys(keys: string[]): boolean {
     return InteractionWriteEditorComponent.UMLAUT_KEYS.every(umlaut => keys.includes(umlaut));
   }

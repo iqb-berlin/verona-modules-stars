@@ -63,9 +63,9 @@ export class InteractionEquationEditorComponent {
     return (this.params.operators || []).join(', ');
   }
 
-  updateField(field: string, value: any): void {
+  updateField<K extends keyof InteractionEquationParams>(field: K, value: InteractionEquationParams[K]): void {
     const current = { ...this.params };
-    (current as any)[field] = value;
+    current[field] = value;
     this.state.setInteractionParams(current);
   }
 
@@ -74,7 +74,7 @@ export class InteractionEquationEditorComponent {
     this.updateField('operators', ops);
   }
 
-  updateOptionalNumber(field: string, value: any): void {
+  updateOptionalNumber(field: 'fixOperand1' | 'fixOperand2' | 'fixResult', value: string | number | null): void {
     const num = value === '' || value === null || value === undefined ? undefined : Number(value);
     this.updateField(field, num);
   }

@@ -69,9 +69,9 @@ export class InteractionNumberLineEditorComponent {
     return this.state.interactionParams() as InteractionNumberLineParams;
   }
 
-  updateField(field: string, value: any): void {
+  updateField<K extends keyof InteractionNumberLineParams>(field: K, value: InteractionNumberLineParams[K]): void {
     const current = { ...this.params };
-    (current as any)[field] = value;
+    current[field] = value;
     this.state.setInteractionParams(current);
   }
 
@@ -85,6 +85,8 @@ export class InteractionNumberLineEditorComponent {
     this.updateField(field, numbers.length > 0 ? numbers : undefined);
   }
 
+  // Used directly from the template; it intentionally depends only on its argument.
+  // eslint-disable-next-line class-methods-use-this
   numberListToString(values?: number[]): string {
     return values?.join(', ') || '';
   }

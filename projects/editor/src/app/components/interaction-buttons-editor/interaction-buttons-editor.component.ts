@@ -14,6 +14,7 @@ import { EditorStateService } from '../../services/editor-state.service';
   imports: [CommonModule],
   template: `
     <div class="interaction-editor">
+      @if (!isImageOnly) {
       <div class="field">
         <label>Variablen-ID</label>
         <input
@@ -33,7 +34,6 @@ import { EditorStateService } from '../../services/editor-state.service';
           }
         </select>
       </div>
-      <div class="field-row-group">
         <div class="field">
           <label>Zeilen</label>
           <input
@@ -44,6 +44,7 @@ import { EditorStateService } from '../../services/editor-state.service';
             max="5"
           />
         </div>
+      }
         <div class="field">
           <label>Bildposition</label>
           <select
@@ -54,7 +55,6 @@ import { EditorStateService } from '../../services/editor-state.service';
             <option value="TOP">Oben</option>
           </select>
         </div>
-      </div>
       <div class="field">
         <label>Layout</label>
         <select
@@ -67,6 +67,7 @@ import { EditorStateService } from '../../services/editor-state.service';
           <option value="LEFT_CENTER_50">Links zentriert 50%</option>
         </select>
       </div>
+      @if (!isImageOnly) {
       <div class="field field-row">
         <label
           ><input
@@ -92,6 +93,7 @@ import { EditorStateService } from '../../services/editor-state.service';
           Navigation bei Auswahl</label
         >
       </div>
+      }
       <div class="field field-row">
         <label
           ><input
@@ -137,6 +139,7 @@ import { EditorStateService } from '../../services/editor-state.service';
         </div>
       </div>
 
+      @if (!isImageOnly) {
       <div class="field">
         <label>Options-Modus</label>
         <select
@@ -159,7 +162,12 @@ import { EditorStateService } from '../../services/editor-state.service';
             <input
               type="number"
               [value]="repeatButton.numberOfOptions"
-              (input)="updateRepeatButton('numberOfOptions', +$any($event.target).value)"
+                (input)="
+                  updateRepeatButton(
+                    'numberOfOptions',
+                    +$any($event.target).value
+                  )
+                "
               min="1"
               max="20"
             />
@@ -171,14 +179,21 @@ import { EditorStateService } from '../../services/editor-state.service';
               <input
                 type="text"
                 [value]="repeatButton.option.text || ''"
-                (input)="updateRepeatButtonOption('text', $any($event.target).value)"
+                  (input)="
+                    updateRepeatButtonOption('text', $any($event.target).value)
+                  "
               />
             </div>
             <div class="field">
               <label>Vorlagen-Icon</label>
               <select
                 [value]="repeatButton.option.icon || ''"
-                (change)="updateRepeatButtonOption('icon', $any($event.target).value || undefined)"
+                  (change)="
+                    updateRepeatButtonOption(
+                      'icon',
+                      $any($event.target).value || undefined
+                    )
+                  "
               >
                 <option value="">Kein Icon</option>
                 @for (icon of iconTypes; track icon) {
@@ -220,7 +235,9 @@ import { EditorStateService } from '../../services/editor-state.service';
       <div class="sub-section">
         <div class="sub-header">
           <span>Optionen ({{ buttons.length }})</span>
-          <button class="btn-add" (click)="addButton()">+ Hinzufügen</button>
+              <button class="btn-add" (click)="addButton()">
+                + Hinzufügen
+              </button>
         </div>
         @for (btn of buttons; track $index) {
           <div class="option-card">
@@ -316,6 +333,7 @@ import { EditorStateService } from '../../services/editor-state.service';
           </div>
         }
       </div>
+      }
       }
     </div>
   `,
@@ -430,6 +448,10 @@ export class InteractionButtonsEditorComponent {
     return this.state.interactionParams() as InteractionButtonParams;
   }
 
+  get isImageOnly(): boolean {
+    return this.state.interactionType() === 'IMAGE_ONLY';
+  }
+
   get buttons(): SelectionOption[] {
     return this.params.options?.buttons || [];
   }
@@ -439,15 +461,20 @@ export class InteractionButtonsEditorComponent {
   }
 
   get repeatButton(): RepeatButtonConfig {
-    return this.params.options?.repeatButton || {
-      option: {},
-      numberOfOptions: 1
-    };
+    return (
+      this.params.options?.repeatButton || {
+        option: {},
+        numberOfOptions: 1
+      }
+    );
   }
 
-  updateField(field: string, value: any): void {
+  updateField<K extends keyof InteractionButtonParams>(
+    field: K,
+    value: InteractionButtonParams[K]
+  ): void {
     const current = { ...this.params };
-    (current as any)[field] = value;
+    current[field] = value;
     this.state.setInteractionParams(current);
   }
 
@@ -462,9 +489,9 @@ export class InteractionButtonsEditorComponent {
       };
     } else {
       current.options = {
-        buttons: current.options?.buttons?.length
-          ? [...current.options.buttons]
-          : [{ text: 'Option 1' }]
+        buttons: current.options?.buttons?.length ?
+          [...current.options.buttons] :
+          [{ text: 'Option 1' }]
       };
     }
     this.state.setInteractionParams(current);
@@ -486,7 +513,11 @@ export class InteractionButtonsEditorComponent {
     this.state.setInteractionParams(current);
   }
 
-  updateButton(index: number, field: string, value: any): void {
+  updateButton<K extends keyof SelectionOption>(
+    index: number,
+    field: K,
+    value: SelectionOption[K]
+  ): void {
     const current = { ...this.params };
     const buttons = [...(current.options?.buttons || [])];
     buttons[index] = { ...buttons[index], [field]: value };
@@ -494,7 +525,10 @@ export class InteractionButtonsEditorComponent {
     this.state.setInteractionParams(current);
   }
 
-  updateRepeatButton(field: keyof RepeatButtonConfig, value: any): void {
+  updateRepeatButton<K extends keyof RepeatButtonConfig>(
+    field: K,
+    value: RepeatButtonConfig[K]
+  ): void {
     const current = { ...this.params };
     current.options = {
       repeatButton: {
@@ -505,7 +539,10 @@ export class InteractionButtonsEditorComponent {
     this.state.setInteractionParams(current);
   }
 
-  updateRepeatButtonOption(field: keyof SelectionOption, value: any): void {
+  updateRepeatButtonOption<K extends keyof SelectionOption>(
+    field: K,
+    value: SelectionOption[K]
+  ): void {
     const current = { ...this.params };
     current.options = {
       repeatButton: {
@@ -532,9 +569,12 @@ export class InteractionButtonsEditorComponent {
   }
 
   onRepeatButtonImageSelected(event: Event): void {
-    this.readFile(event, r => this.updateRepeatButtonOption('imageSource', r));
+    this.readFile(event, r => this.updateRepeatButtonOption('imageSource', r)
+    );
   }
 
+  // Kept as an instance method because it is shared by the component's upload handlers.
+  // eslint-disable-next-line class-methods-use-this
   private readFile(event: Event, cb: (r: string) => void): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;

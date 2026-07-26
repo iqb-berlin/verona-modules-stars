@@ -39,10 +39,11 @@ export function collectResponseVariableCandidates(
 
   const interactionAdapter = interactionAdapters.get(snapshot.interactionType);
   if (interactionAdapter.hasVariable) {
-    addVariable(
-      (snapshot.interactionParams as { variableId?: string }).variableId,
-      'interaction'
-    );
+    const variableId = (snapshot.interactionParams as { variableId?: string }).variableId;
+    addVariable(variableId, 'interaction');
+    if (snapshot.interactionType === 'PLACE_VALUE' && variableId?.trim()) {
+      addVariable(`${variableId.trim()}_TENS`, 'interaction');
+    }
   }
   if (snapshot.mainAudioEnabled) addVariable('mainAudio', 'mainAudio');
   if (snapshot.closingMetaButtons) {

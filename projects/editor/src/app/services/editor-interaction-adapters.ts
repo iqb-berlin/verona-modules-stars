@@ -17,7 +17,12 @@ import {
 } from '@shared/models/unit-definition';
 import { VariableInfo } from '@shared/models/responses';
 
-export type VeronaVariableType = 'string' | 'integer' | 'number' | 'boolean' | 'coded';
+export type VeronaVariableType =
+  | 'string'
+  | 'integer'
+  | 'number'
+  | 'boolean'
+  | 'coded';
 
 export interface SelectionMetadata {
   labels: string[];
@@ -29,23 +34,34 @@ export interface InteractionValidationIssue {
   message: string;
 }
 
-export interface EditorInteractionAdapter<T extends InteractionParameters = InteractionParameters> {
+export interface EditorInteractionAdapter<
+  T extends InteractionParameters = InteractionParameters
+> {
   readonly type: InteractionEnum;
   readonly hasVariable: boolean;
   defaultParams(): T;
   normalize(params: InteractionParameters): T;
+  serialize(params: InteractionParameters): T;
   variableType(variableInfo?: VariableInfo): VeronaVariableType;
-  selectionMetadata(params: InteractionParameters): SelectionMetadata | undefined;
+  selectionMetadata(
+    params: InteractionParameters,
+  ): SelectionMetadata | undefined;
   validate(params: InteractionParameters): InteractionValidationIssue[];
 }
 
-abstract class BaseEditorInteractionAdapter<T extends InteractionParameters> implements EditorInteractionAdapter<T> {
+abstract class BaseEditorInteractionAdapter<
+  T extends InteractionParameters
+> implements EditorInteractionAdapter<T> {
   abstract readonly type: InteractionEnum;
   readonly hasVariable: boolean = true;
   abstract defaultParams(): T;
 
   normalize(params: InteractionParameters): T {
     return { ...this.defaultParams(), ...(params as T) };
+  }
+
+  serialize(params: InteractionParameters): T {
+    return { ...(params as T) };
   }
 
   variableType(variableInfo?: VariableInfo): VeronaVariableType {
@@ -63,14 +79,15 @@ abstract class BaseEditorInteractionAdapter<T extends InteractionParameters> imp
   }
 }
 
-function labelForOption(option: SelectionOption | undefined, index: number): string {
+function labelForOption(
+  option: SelectionOption | undefined,
+  index: number
+): string {
   return option?.text || option?.label || `Option ${index + 1}`;
 }
 
 function labelsFromRepeatButton(config: RepeatButtonConfig): string[] {
-  return Array.from(
-    { length: config.numberOfOptions },
-    (_, index) => labelForOption(config.option, index)
+  return Array.from({ length: config.numberOfOptions }, (_, index) => labelForOption(config.option, index)
   );
 }
 
@@ -89,23 +106,32 @@ export class ButtonsEditorAdapter extends BaseEditorInteractionAdapter<Interacti
     };
   }
 
-  selectionMetadata(params: InteractionParameters): SelectionMetadata | undefined {
+  selectionMetadata(
+    params: InteractionParameters
+  ): SelectionMetadata | undefined {
     const buttonParams = params as InteractionButtonParams;
     const repeatButton = buttonParams.options?.repeatButton;
     const labels = repeatButton ?
       labelsFromRepeatButton(repeatButton) :
       (buttonParams.options?.buttons || []).map(labelForOption);
-    return labels.length > 0 ? { labels, multiple: !!buttonParams.multiSelect } : undefined;
+    return labels.length > 0 ?
+      { labels, multiple: !!buttonParams.multiSelect } :
+      undefined;
   }
 
   validate(params: InteractionParameters): InteractionValidationIssue[] {
     const buttonParams = params as InteractionButtonParams;
-    const repeatCount = buttonParams.options?.repeatButton?.numberOfOptions || 0;
+    const repeatCount =
+      buttonParams.options?.repeatButton?.numberOfOptions || 0;
     const buttonCount = buttonParams.options?.buttons?.length || 0;
-    return repeatCount > 0 || buttonCount > 0 ? [] : [{
-      path: 'options',
-      message: 'BUTTONS benötigt mindestens eine Option.'
-    }];
+    return repeatCount > 0 || buttonCount > 0 ?
+      [] :
+      [
+        {
+          path: 'options',
+          message: 'BUTTONS benötigt mindestens eine Option.'
+        }
+      ];
   }
 }
 
@@ -115,27 +141,51 @@ export class ImageOnlyEditorAdapter extends ButtonsEditorAdapter {
 
   override normalize(params: InteractionParameters): InteractionButtonParams {
     const normalized = super.normalize(params);
-    delete normalized.variableId;
-    return normalized;
+    return this.staticImageParams(normalized);
+  }
+
+  override serialize(params: InteractionParameters): InteractionButtonParams {
+    return this.staticImageParams(params as InteractionButtonParams);
   }
 
   override defaultParams(): InteractionButtonParams {
     return {
-      options: { buttons: [] },
-      buttonType: 'BIG_SQUARE',
-      numberOfRows: 1,
-      multiSelect: false,
       imagePosition: 'LEFT',
       layout: 'LEFT_CENTER'
     };
   }
 
-  override validate(params: InteractionParameters): InteractionValidationIssue[] {
+  override validate(
+    params: InteractionParameters
+  ): InteractionValidationIssue[] {
     const imageSource = (params as InteractionButtonParams).imageSource;
-    return imageSource?.trim() ? [] : [{
-      path: 'imageSource',
-      message: 'IMAGE_ONLY benötigt eine Bildquelle.'
-    }];
+    return imageSource?.trim() ?
+      [] :
+      [
+        {
+          path: 'imageSource',
+          message: 'IMAGE_ONLY benötigt eine Bildquelle.'
+        }
+      ];
+  }
+
+  private staticImageParams(
+    params: InteractionButtonParams
+  ): InteractionButtonParams {
+    const result: InteractionButtonParams = {};
+    const staticFields = [
+      'imageSource',
+      'imagePosition',
+      'layout',
+      'imageUseFullArea',
+      'text'
+    ] as const;
+    staticFields.forEach(field => {
+      if (params[field] !== undefined) {
+        result[field] = params[field] as never;
+      }
+    });
+    return result;
   }
 }
 
@@ -150,24 +200,35 @@ export class PolygonButtonsEditorAdapter extends BaseEditorInteractionAdapter<In
     };
   }
 
-  selectionMetadata(params: InteractionParameters): SelectionMetadata | undefined {
+  selectionMetadata(
+    params: InteractionParameters
+  ): SelectionMetadata | undefined {
     const polygonParams = params as InteractionPolygonButtonsParams;
     const labels = (polygonParams.options || []).map(labelForOption);
-    return labels.length > 0 ? { labels, multiple: !!polygonParams.multiSelect } : undefined;
+    return labels.length > 0 ?
+      { labels, multiple: !!polygonParams.multiSelect } :
+      undefined;
   }
 
   validate(params: InteractionParameters): InteractionValidationIssue[] {
     const options = (params as InteractionPolygonButtonsParams).options || [];
     if (options.length === 0) {
-      return [{
-        path: 'options',
-        message: 'POLYGON_BUTTONS benötigt mindestens eine Option.'
-      }];
+      return [
+        {
+          path: 'options',
+          message: 'POLYGON_BUTTONS benötigt mindestens eine Option.'
+        }
+      ];
     }
-    return options.flatMap((option, index) => option.svgPath?.trim() ? [] : [{
-      path: `options[${index}].svgPath`,
-      message: 'Für jede Polygon-Option ist ein SVG-Pfad erforderlich.'
-    }]);
+    return options.flatMap((option, index) => (option.svgPath?.trim() ?
+      [] :
+      [
+        {
+          path: `options[${index}].svgPath`,
+          message: 'Für jede Polygon-Option ist ein SVG-Pfad erforderlich.'
+        }
+      ])
+    );
   }
 }
 
@@ -210,7 +271,8 @@ export class WriteEditorAdapter extends BaseEditorInteractionAdapter<Interaction
       }
       writeParams.keysLine4 = keysLine4;
     }
-    writeParams.addUmlautKeys = ['ä', 'ö', 'ü'].every(umlaut => writeParams.keysLine4?.includes(umlaut));
+    writeParams.addUmlautKeys = ['ä', 'ö', 'ü'].every(umlaut => writeParams.keysLine4?.includes(umlaut)
+    );
     return writeParams;
   }
 }
@@ -227,17 +289,23 @@ export class DropEditorAdapter extends BaseEditorInteractionAdapter<InteractionD
     };
   }
 
-  selectionMetadata(params: InteractionParameters): SelectionMetadata | undefined {
+  selectionMetadata(
+    params: InteractionParameters
+  ): SelectionMetadata | undefined {
     const dropParams = params as InteractionDropParams;
     const labels = (dropParams.options || []).map(labelForOption);
     return labels.length > 0 ? { labels, multiple: false } : undefined;
   }
 
   validate(params: InteractionParameters): InteractionValidationIssue[] {
-    return (params as InteractionDropParams).options?.length > 0 ? [] : [{
-      path: 'options',
-      message: 'DROP benötigt mindestens eine Option.'
-    }];
+    return (params as InteractionDropParams).options?.length > 0 ?
+      [] :
+      [
+        {
+          path: 'options',
+          message: 'DROP benötigt mindestens eine Option.'
+        }
+      ];
   }
 }
 
@@ -253,15 +321,23 @@ export class FindOnImageEditorAdapter extends BaseEditorInteractionAdapter<Inter
   }
 
   validate(params: InteractionParameters): InteractionValidationIssue[] {
-    return (params as InteractionFindOnImageParams).imageSource?.trim() ? [] : [{
-      path: 'imageSource',
-      message: 'FIND_ON_IMAGE benötigt eine Bildquelle.'
-    }];
+    return (params as InteractionFindOnImageParams).imageSource?.trim() ?
+      [] :
+      [
+        {
+          path: 'imageSource',
+          message: 'FIND_ON_IMAGE benötigt eine Bildquelle.'
+        }
+      ];
   }
 }
 
 export class VideoEditorAdapter extends BaseEditorInteractionAdapter<InteractionVideoParams> {
   readonly type = 'VIDEO' as const;
+
+  override variableType(variableInfo?: VariableInfo): VeronaVariableType {
+    return variableInfo?.codes?.length ? 'coded' : 'number';
+  }
 
   defaultParams(): InteractionVideoParams {
     return {
@@ -271,14 +347,20 @@ export class VideoEditorAdapter extends BaseEditorInteractionAdapter<Interaction
   }
 
   validate(params: InteractionParameters): InteractionValidationIssue[] {
-    return (params as InteractionVideoParams).videoSource?.trim() ? [] : [{
-      path: 'videoSource',
-      message: 'VIDEO benötigt eine Videoquelle.'
-    }];
+    return (params as InteractionVideoParams).videoSource?.trim() ?
+      [] :
+      [
+        {
+          path: 'videoSource',
+          message: 'VIDEO benötigt eine Videoquelle.'
+        }
+      ];
   }
 }
 
-abstract class IntegerVariableEditorAdapter<T extends InteractionParameters> extends BaseEditorInteractionAdapter<T> {
+abstract class IntegerVariableEditorAdapter<
+  T extends InteractionParameters
+> extends BaseEditorInteractionAdapter<T> {
   override variableType(variableInfo?: VariableInfo): VeronaVariableType {
     return variableInfo?.codes?.length ? 'coded' : 'integer';
   }
@@ -322,7 +404,7 @@ export class PyramidEditorAdapter extends BaseEditorInteractionAdapter<Interacti
   }
 }
 
-export class EquationEditorAdapter extends IntegerVariableEditorAdapter<InteractionEquationParams> {
+export class EquationEditorAdapter extends BaseEditorInteractionAdapter<InteractionEquationParams> {
   readonly type = 'EQUATION' as const;
 
   defaultParams(): InteractionEquationParams {
@@ -333,10 +415,14 @@ export class EquationEditorAdapter extends IntegerVariableEditorAdapter<Interact
   }
 
   validate(params: InteractionParameters): InteractionValidationIssue[] {
-    return (params as InteractionEquationParams).operators?.length > 0 ? [] : [{
-      path: 'operators',
-      message: 'EQUATION benötigt mindestens einen Operator.'
-    }];
+    return (params as InteractionEquationParams).operators?.length > 0 ?
+      [] :
+      [
+        {
+          path: 'operators',
+          message: 'EQUATION benötigt mindestens einen Operator.'
+        }
+      ];
   }
 }
 
@@ -391,27 +477,47 @@ export class EditorInteractionAdapterRegistry {
     return this.get(type).defaultParams();
   }
 
-  normalize(type: InteractionEnum, params: InteractionParameters): InteractionParameters {
+  normalize(
+    type: InteractionEnum,
+    params: InteractionParameters
+  ): InteractionParameters {
     return this.get(type).normalize(params);
   }
 
-  validate(type: InteractionEnum, params: InteractionParameters): InteractionValidationIssue[] {
+  serialize(
+    type: InteractionEnum,
+    params: InteractionParameters
+  ): InteractionParameters {
+    return this.get(type).serialize(params);
+  }
+
+  validate(
+    type: InteractionEnum,
+    params: InteractionParameters
+  ): InteractionValidationIssue[] {
     const adapter = this.get(type);
     const issues = adapter.validate(params);
     if (!adapter.hasVariable) return issues;
 
     const variableId = (params as { variableId?: string }).variableId || '';
     if (!variableId.trim()) {
-      return [{
-        path: 'variableId',
-        message: `${type} benötigt eine Variablen-ID.`
-      }, ...issues];
+      return [
+        {
+          path: 'variableId',
+          message: `${type} benötigt eine Variablen-ID.`
+        },
+        ...issues
+      ];
     }
     if (variableId !== variableId.trim()) {
-      return [{
-        path: 'variableId',
-        message: 'Die Variablen-ID darf keine Leerzeichen am Anfang oder Ende enthalten.'
-      }, ...issues];
+      return [
+        {
+          path: 'variableId',
+          message:
+            'Die Variablen-ID darf keine Leerzeichen am Anfang oder Ende enthalten.'
+        },
+        ...issues
+      ];
     }
     return issues;
   }

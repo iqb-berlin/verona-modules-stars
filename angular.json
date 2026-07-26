@@ -181,6 +181,15 @@
             }
           },
           "defaultConfiguration": "development"
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/editor/src/**/*.ts",
+              "projects/editor/src/**/*.html"
+            ]
+          }
         }
       }
     }

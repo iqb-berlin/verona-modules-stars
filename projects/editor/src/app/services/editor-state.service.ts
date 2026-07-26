@@ -28,6 +28,7 @@ export class EditorStateService {
   private definitionLoader = new EditorDefinitionLoaderService(this.interactionAdapters);
   private variableMetadataBuilder = new EditorVariableMetadataBuilderService(this.interactionAdapters);
   private changeSubject = new Subject<void>();
+  private unitDefinitionType = signal<string | undefined>(undefined);
 
   // Unit definition fields
   unitId = signal('stars-unit-definition');
@@ -82,6 +83,10 @@ export class EditorStateService {
 
   notifyChange(): void {
     this.changeSubject.next();
+  }
+
+  setUnitDefinitionType(unitDefinitionType?: string): void {
+    this.unitDefinitionType.set(unitDefinitionType?.trim() || undefined);
   }
 
   updateUnitVersion(value: string): void {
@@ -181,6 +186,7 @@ export class EditorStateService {
   }
 
   resetState(): void {
+    this.unitDefinitionType.set(undefined);
     this.unitId.set('stars-unit-definition');
     this.unitVersion.set('');
     this.backgroundColor.set('#EEE');
@@ -301,7 +307,7 @@ export class EditorStateService {
     const variables = this.buildVariables();
     this.veronaPostService.sendDefinitionChangedNotification(
       defString,
-      `iqb-stars@${this.unitVersion() || '1.0'}`,
+      this.unitDefinitionType() || `${this.unitId()}@${this.unitVersion() || '1.0'}`,
       variables
     );
   }

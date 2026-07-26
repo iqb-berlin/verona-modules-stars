@@ -57,9 +57,9 @@ export class InteractionPyramidEditorComponent {
     return this.state.interactionParams() as InteractionPyramidParams;
   }
 
-  updateField(field: string, value: any): void {
+  updateField<K extends keyof InteractionPyramidParams>(field: K, value: InteractionPyramidParams[K]): void {
     const current = { ...this.params };
-    (current as any)[field] = value;
+    current[field] = value;
     this.state.setInteractionParams(current);
   }
 
@@ -74,7 +74,7 @@ export class InteractionPyramidEditorComponent {
     this.state.setInteractionParams(current);
   }
 
-  updateExample(field: string, value: number): void {
+  updateExample(field: keyof NonNullable<InteractionPyramidParams['example']>, value: number): void {
     const current = { ...this.params };
     if (current.example) {
       current.example = { ...current.example, [field]: value };
