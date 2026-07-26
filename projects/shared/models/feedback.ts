@@ -11,6 +11,7 @@ export interface FeedbackDefinition {
 
 export interface AudioFeedback {
   trigger: 'CONTINUE_BUTTON_CLICK' | 'ANY_RESPONSE';
+  triggerNavigationOnEnd?: boolean;
   feedback: FeedbackDefinition[];
 }
 

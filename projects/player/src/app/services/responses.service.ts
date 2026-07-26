@@ -102,7 +102,7 @@ export class ResponsesService {
    * Initializes the service with a new unit definition.
    * Calls reset() at the beginning to ensure any previous unit state is cleared.
    */
-  setNewData(unitDefinition: UnitDefinition = null) {
+  setNewData(unitDefinition: UnitDefinition | null = null) {
     this.reset();
     if (unitDefinition) {
       if (unitDefinition.interactionType === 'VIDEO') {
@@ -502,7 +502,7 @@ export class ResponsesService {
         const myResponse = this.allResponses.find(
           r => r.id === vi.variableId && r.status === 'CODING_COMPLETE'
         );
-        if (!myResponse || myResponse.score < maxScore) isComplete = false;
+        if (!myResponse || (myResponse.score ?? 0) < maxScore) isComplete = false;
       });
     }
     return isComplete ? 'complete' : 'some';

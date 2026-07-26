@@ -20,7 +20,7 @@ export type InteractionEnum = 'BUTTONS' |
 'NONE';
 export type IconButtonTypeEnum = 'CHECK_GREEN' | 'CLOSE_RED' | 'CLAP_HANDS' | 'SMILEY_1' | 'SMILEY_2' |
 'SMILEY_3' | 'SMILEY_4' | 'SMILEY_5' | 'ONES' | 'TENS';
-export type ButtonTypeEnum = 'MEDIUM_SQUARE' | 'BIG_SQUARE' | 'SMALL_SQUARE' | 'TEXT' | 'CIRCLE' |
+export type ButtonTypeEnum = 'MEDIUM_SQUARE' | 'BIG_SQUARE' | 'SMALL_SQUARE' | 'EXTRA_SMALL_SQUARE' | 'TEXT' | 'CIRCLE' |
 'EXTRA_LARGE_SQUARE' | 'LONG_RECTANGLE' | 'TALL_RECTANGLE';
 export type DropButtonTypeEnum = 'SMALL_SQUARE' | 'EXTRA_SMALL_SQUARE';
 export type ImagePositionEnum = 'TOP' | 'LEFT' | 'BOTTOM';
