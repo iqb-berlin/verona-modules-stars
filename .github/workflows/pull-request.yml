@@ -1,0 +1,72 @@
+name: Pull request checks
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pull-request-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Lint, test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint player
+        run: npx ng lint player
+
+      - name: Lint editor
+        run: npx ng lint editor
+
+      - name: Test player services
+        run: npm run test:player-services
+
+      - name: Test editor architecture
+        run: npm run test:editor-architecture
+
+      - name: Build player
+        run: npm run build
+
+      - name: Build editor
+        run: npm run build:editor
+
+  editor-e2e:
+    name: Editor end-to-end tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run editor end-to-end tests
+        run: npm run test:editor-e2e
+
+      - name: Run bundled editor end-to-end tests
+        run: npm run test:editor-bundled-e2e
