@@ -26,11 +26,13 @@ projects/
 
 ## Development
 
-Install dependencies after cloning the repository:
+Install the locked dependencies after cloning the repository:
 
 ```sh
-npm install
+npm ci
 ```
+
+Use `npm install` only when intentionally updating dependencies and the lockfile.
 
 Start the player:
 
