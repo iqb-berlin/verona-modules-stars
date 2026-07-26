@@ -198,6 +198,34 @@ describe('PLACE_VALUE Interaction E2E Tests', () => {
     cy.get('[data-cy="icon-item-ones-moved"]').should('not.exist');
   });
 
+  it('applies base and tens showResponse entries independently', () => {
+    cy.setupTestData('place_value_feedback_test', interactionType);
+    cy.get('@testData').then(testData => {
+      const unitDefinition = JSON.parse(JSON.stringify(testData)) as UnitDefinition;
+      const incorrectFeedback = unitDefinition.audioFeedback?.feedback
+        .find(feedback => feedback.parameter === '0');
+      if (!incorrectFeedback) throw new Error('Incorrect-answer feedback is missing from test data.');
+      incorrectFeedback.showResponse = [
+        { variableId: 'PLACE_VALUE', value: '13', delayMS: 0 },
+        { variableId: 'PLACE_VALUE_TENS', value: '2', delayMS: 100 }
+      ];
+
+      cy.window().then(playerWindow => {
+        playerWindow.postMessage({
+          type: 'vopStartCommand',
+          sessionId: 'cypress-test-session',
+          unitDefinition: JSON.stringify(unitDefinition)
+        }, '*');
+      });
+      cy.applyStandardScenarios(interactionType);
+      cy.clickContinueButton();
+      cy.waitUntilFeedbackIsFinishedPlaying();
+      cy.get('[data-cy=interaction-disabled-overlay]').should('be.visible').invoke('remove');
+      cy.get('[data-cy="icon-item-tens-moved"]').should('have.length', 2);
+      cy.get('[data-cy="icon-item-ones-moved"]').should('have.length', 3);
+    });
+  });
+
   // Test base features for the PLACE_VALUE interaction type
   testBaseFeatures(interactionType, defaultTestFile);
   // Test former state features for the PLACE_VALUE interaction type

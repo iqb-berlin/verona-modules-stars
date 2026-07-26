@@ -295,6 +295,33 @@ describe('Interaction BUTTONS Component', () => {
   // Test closing meta buttons for the BUTTONS interaction type
   testClosingMetaButtons(interactionType);
 
+  it('applies every configured showResponse entry', () => {
+    cy.setupTestData('buttons_feedback_test', interactionType);
+    cy.get('@testData').then(testData => {
+      const unitDefinition = JSON.parse(JSON.stringify(testData)) as UnitDefinition;
+      const incorrectFeedback = unitDefinition.audioFeedback?.feedback
+        .find(feedback => feedback.parameter === '0');
+      if (!incorrectFeedback) throw new Error('Incorrect-answer feedback is missing from test data.');
+      incorrectFeedback.showResponse = [
+        { variableId: 'BUTTONS', value: '', delayMS: 0 },
+        { variableId: 'BUTTONS', value: '4', delayMS: 0 }
+      ];
+
+      cy.window().then(playerWindow => {
+        playerWindow.postMessage({
+          type: 'vopStartCommand',
+          sessionId: 'cypress-test-session',
+          unitDefinition: JSON.stringify(unitDefinition)
+        }, '*');
+      });
+      cy.applyStandardScenarios(interactionType, unitDefinition);
+      cy.clickContinueButton();
+      cy.waitUntilFeedbackIsFinishedPlaying();
+      cy.get('[data-cy=interaction-disabled-overlay]').should('be.visible').invoke('remove');
+      cy.get('input.hint').should('exist');
+    });
+  });
+
   it('uses META consistently when the closing meta selection ID is omitted', () => {
     const configFile = 'buttons_with_closingMetaButtons_with_variableInfo_test.json';
     cy.setupTestDataWithPostMessageMock(configFile, interactionType);

@@ -3,7 +3,9 @@ import {
   computed,
   effect,
   ElementRef,
+  input,
   signal,
+  untracked,
   ViewChild,
   ChangeDetectionStrategy,
 } from '@angular/core';
@@ -27,6 +29,8 @@ import {
   imports: [CdkDrag],
 })
 export class InteractionPlaceValueComponent extends InteractionComponentDirective {
+  readonly showHints = input<Record<string, string>>({});
+
   /** Debounce time for clicks in milliseconds */
   private static readonly CLICK_DEBOUNCE_MS = 500;
   /** Maximum number of ones items to display in the upper panel in a row */
@@ -110,8 +114,7 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
         this.maxNumberOfOnes = this.localParameters.maxNumberOfOnes;
 
         // Restore from former state once, if available; otherwise emit DISPLAYED
-        const formerStateResponses: Response[] =
-          (parameters as any).formerState || [];
+        const formerStateResponses: Response[] = parameters.formerState || [];
         if (
           Array.isArray(formerStateResponses) &&
           formerStateResponses.length > 0
@@ -154,17 +157,31 @@ export class InteractionPlaceValueComponent extends InteractionComponentDirectiv
     });
 
     effect(() => {
-      const hints = this.showHint();
-      if (!hints || hints.length === 0) {
+      const variableId = this.localParameters.variableId || 'PLACE_VALUE';
+      const hints = this.showHints();
+      const baseHint = hints[variableId] ?? this.showHint();
+      const tensHint = hints[`${variableId}_TENS`];
+      const hasBaseHint = baseHint !== undefined && baseHint.length > 0;
+      const hasTensHint = tensHint !== undefined && tensHint.length > 0;
+
+      if (!hasBaseHint && !hasTensHint) {
         this.hasHint.set(false);
         return;
       }
 
       this.hasHint.set(true);
-      const { tens: desiredTensRaw, ones: desiredOnesRaw } =
-        this.parseTensAndOnes(hints);
-      const desiredTens = Math.min(this.maxNumberOfTens, desiredTensRaw);
-      const desiredOnes = Math.min(this.maxNumberOfOnes, desiredOnesRaw);
+      const currentOnes = untracked(() => this.onesCountAtTheTopPanel().length);
+      const parsedBase = hasBaseHint ?
+        this.parseTensAndOnes(baseHint ?? '') :
+        { tens: 0, ones: currentOnes };
+      const numericTens = hasTensHint ?
+        Number.parseInt(tensHint ?? '', 10) :
+        parsedBase.tens;
+      const tens = Number.isFinite(numericTens) ? Math.max(0, numericTens) : 0;
+
+      // Determine desired tens and ones within configured caps
+      const desiredTens = Math.min(this.maxNumberOfTens, tens);
+      const desiredOnes = Math.min(this.maxNumberOfOnes, parsedBase.ones);
 
       // Reset internal state
       this.resetSelection();
