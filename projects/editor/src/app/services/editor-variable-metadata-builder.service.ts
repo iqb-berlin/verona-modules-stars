@@ -1,26 +1,28 @@
 import { VeronaVariableInfo } from '../models/verona-editor';
 import { EditorStateSnapshot } from './editor-state.model';
 import { EditorInteractionAdapterRegistry } from './editor-interaction-adapters';
+import {
+  collectResponseVariables,
+  EditorResponseVariable
+} from './editor-response-variables';
 
 export class EditorVariableMetadataBuilderService {
   constructor(private interactionAdapters: EditorInteractionAdapterRegistry = new EditorInteractionAdapterRegistry()) {}
 
   build(snapshot: EditorStateSnapshot): VeronaVariableInfo[] {
     const variables: VeronaVariableInfo[] = [];
-    const params = snapshot.interactionParams as any;
+    const params = snapshot.interactionParams as { variableId?: string };
     const declaredVariables = snapshot.variableInfo;
-    const variableIds = declaredVariables.length > 0
-      ? declaredVariables.map(variable => variable.variableId)
-      : (params?.variableId ? [params.variableId] : []);
     const adapter = this.interactionAdapters.get(snapshot.interactionType);
-
-    variableIds
-      .filter((value, index, values) => !!value && values.indexOf(value) === index)
-      .forEach(variableId => {
+    collectResponseVariables(snapshot, this.interactionAdapters)
+      .forEach(responseVariable => {
+        const variableId = responseVariable.id;
         const currentVariableInfo = declaredVariables.find(variable => variable.variableId === variableId);
         const variable: VeronaVariableInfo = {
           id: variableId,
-          type: adapter.variableType(currentVariableInfo),
+          type: responseVariable.source === 'interaction' ?
+            adapter.variableType(currentVariableInfo) :
+            this.nonInteractionVariableType(responseVariable, !!currentVariableInfo?.codes.length),
           multiple: false,
           nullable: false,
           page: '1'
@@ -45,5 +47,14 @@ export class EditorVariableMetadataBuilderService {
         variables.push(variable);
       });
     return variables;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private nonInteractionVariableType(
+    responseVariable: EditorResponseVariable,
+    coded: boolean
+  ): VeronaVariableInfo['type'] {
+    if (coded) return 'coded';
+    return responseVariable.source === 'mainAudio' ? 'number' : 'string';
   }
 }

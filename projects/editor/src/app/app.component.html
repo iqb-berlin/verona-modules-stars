@@ -31,35 +31,13 @@
           Interaktions-Parameter
         </h3>
         <div class="section-body">
-          @switch (state.interactionType()) {
-            @case ('BUTTONS') { <stars-interaction-buttons-editor></stars-interaction-buttons-editor> }
-            @case ('IMAGE_ONLY') { <stars-interaction-buttons-editor></stars-interaction-buttons-editor> }
-            @case ('WRITE') { <stars-interaction-write-editor></stars-interaction-write-editor> }
-            @case ('DROP') { <stars-interaction-drop-editor></stars-interaction-drop-editor> }
-            @case ('FIND_ON_IMAGE') { <stars-interaction-find-on-image-editor></stars-interaction-find-on-image-editor> }
-            @case ('VIDEO') { <stars-interaction-video-editor></stars-interaction-video-editor> }
-            @case ('POLYGON_BUTTONS') { <stars-interaction-polygon-buttons-editor></stars-interaction-polygon-buttons-editor> }
-            @case ('PLACE_VALUE') { <stars-interaction-place-value-editor></stars-interaction-place-value-editor> }
-            @case ('NUMBER_LINE') { <stars-interaction-number-line-editor></stars-interaction-number-line-editor> }
-            @case ('PYRAMID') { <stars-interaction-pyramid-editor></stars-interaction-pyramid-editor> }
-            @case ('EQUATION') { <stars-interaction-equation-editor></stars-interaction-equation-editor> }
-            @case ('META') {
-              <div class="interaction-editor">
-                <div class="field">
-                  <label>Variablen-ID</label>
-                  <input
-                    type="text"
-                    [value]="$any(state.interactionParams()).variableId || ''"
-                    (input)="updateMetaButtonsVariableId($any($event.target).value)"
-                  />
-                </div>
-                <div class="no-interaction">
-                  Die Meta-Interaktion wird im Player ueber die Closing-Meta-Konfiguration
-                  und die Variable-ID gesteuert.
-                </div>
-              </div>
-            }
-            @default { <div class="no-interaction">Wähle einen Interaktionstyp</div> }
+          @if (interactionEditorComponent; as editorComponent) {
+            <ng-container *ngComponentOutlet="editorComponent"></ng-container>
+          } @else {
+            <div class="no-interaction">Wähle einen Interaktionstyp</div>
+          }
+          @for (issue of state.validationIssues('interactionParameters.'); track issue.path) {
+            <div class="validation-error">{{ issue.message }}</div>
           }
         </div>
       </section>

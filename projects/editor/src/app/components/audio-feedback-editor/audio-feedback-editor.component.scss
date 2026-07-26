@@ -1,0 +1,75 @@
+.sub-section {
+  margin-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 8px;
+}
+
+.sub-section.nested {
+  margin-top: 10px;
+}
+
+.sub-header,
+.option-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  color: #e2e8f0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.empty-state,
+.validation-error {
+  padding: 8px 0;
+  font-size: 12px;
+}
+
+.empty-state,
+.option-index {
+  color: #64748b;
+}
+
+.validation-error {
+  color: #fca5a5;
+}
+
+.btn-add {
+  padding: 3px 10px;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 4px;
+  background: rgba(139, 92, 246, 0.2);
+  color: #a78bfa;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.option-card,
+.response-card {
+  margin-bottom: 6px;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.response-card {
+  margin-top: 8px;
+}
+
+.option-index {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.field-row-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.btn-remove-sm {
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
+}

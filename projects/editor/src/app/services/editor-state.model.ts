@@ -16,6 +16,8 @@ export interface EditorStateSnapshot {
   ribbonBars: boolean;
   continueButtonShow: ContinueButtonEnum;
   interactionType: InteractionEnum;
+  unsupportedInteractionType?: string;
+  interactionMaxTimeMS?: number;
   mainAudioEnabled: boolean;
   mainAudioSource: string;
   mainAudioMaxPlay: number;
@@ -28,6 +30,7 @@ export interface EditorStateSnapshot {
   openingPresentationDurationMS: number;
   interactionParams: InteractionParameters;
   variableInfo: VariableInfo[];
+  audioFeedbackEnabled: boolean;
   audioFeedback?: AudioFeedback;
   closingMetaButtons?: ClosingMetaButtonsParams;
 }

@@ -7,54 +7,8 @@ import { MediaUploadComponent } from '../media-upload/media-upload.component';
   selector: 'stars-opening-image-settings',
   standalone: true,
   imports: [CommonModule, MediaUploadComponent],
-  template: `
-    <section class="editor-section">
-      <h3 class="section-title" (click)="collapsed = !collapsed">
-        <span class="collapse-icon">{{ collapsed ? '▶' : '▼' }}</span>
-        Einführungs-Bild
-      </h3>
-      @if (!collapsed) {
-        <div class="section-body">
-          <div class="field field-row">
-            <label>
-              <input
-                type="checkbox"
-                [checked]="state.openingImageEnabled()"
-                (change)="toggleOpeningImage($any($event.target).checked)"
-              >
-              Einführungs-Bild aktivieren
-            </label>
-          </div>
-          @if (state.openingImageEnabled()) {
-            <stars-media-upload
-              label="Bild-Datei"
-              type="image"
-              [source]="state.openingImageSource()"
-              (sourceChange)="state.updateOpeningImageSource($event)">
-            </stars-media-upload>
-
-            <stars-media-upload
-              label="Begleit-Audio"
-              type="audio"
-              [source]="state.openingAudioSource()"
-              (sourceChange)="state.updateOpeningAudioSource($event)">
-            </stars-media-upload>
-
-            <div class="field">
-              <label>Präsentationsdauer (ms)</label>
-              <input
-                type="number"
-                [value]="state.openingPresentationDurationMS()"
-                (input)="state.updateOpeningPresentationDurationMS(+$any($event.target).value)"
-                min="0"
-                step="100"
-              />
-            </div>
-          }
-        </div>
-      }
-    </section>
-  `
+  templateUrl: './opening-image-settings.component.html',
+  styleUrl: './opening-image-settings.component.scss'
 })
 export class OpeningImageSettingsComponent {
   state = inject(EditorStateService);

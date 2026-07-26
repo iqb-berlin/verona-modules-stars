@@ -10,37 +10,10 @@ import { GeneralSettingsComponent } from './components/general-settings/general-
 import { MainAudioSettingsComponent } from './components/main-audio-settings/main-audio-settings.component';
 import { OpeningImageSettingsComponent } from './components/opening-image-settings/opening-image-settings.component';
 import { InteractionSelectorComponent } from './components/interaction-selector/interaction-selector.component';
-import {
-  InteractionButtonsEditorComponent
-} from './components/interaction-buttons-editor/interaction-buttons-editor.component';
-import {
-  InteractionWriteEditorComponent
-} from './components/interaction-write-editor/interaction-write-editor.component';
-import { InteractionDropEditorComponent } from './components/interaction-drop-editor/interaction-drop-editor.component';
-import {
-  InteractionFindOnImageEditorComponent
-} from './components/interaction-find-on-image-editor/interaction-find-on-image-editor.component';
-import {
-  InteractionVideoEditorComponent
-} from './components/interaction-video-editor/interaction-video-editor.component';
-import {
-  InteractionPolygonButtonsEditorComponent
-} from './components/interaction-polygon-buttons-editor/interaction-polygon-buttons-editor.component';
-import {
-  InteractionPlaceValueEditorComponent
-} from './components/interaction-place-value-editor/interaction-place-value-editor.component';
-import {
-  InteractionNumberLineEditorComponent
-} from './components/interaction-number-line-editor/interaction-number-line-editor.component';
-import {
-  InteractionPyramidEditorComponent
-} from './components/interaction-pyramid-editor/interaction-pyramid-editor.component';
-import {
-  InteractionEquationEditorComponent
-} from './components/interaction-equation-editor/interaction-equation-editor.component';
 import { VariableInfoEditorComponent } from './components/variable-info-editor/variable-info-editor.component';
 import { AudioFeedbackEditorComponent } from './components/audio-feedback-editor/audio-feedback-editor.component';
 import { PreviewContainerComponent } from './components/preview-container/preview-container.component';
+import { INTERACTION_TYPE_DESCRIPTORS } from './services/interaction-type-registry';
 
 @Component({
   selector: 'stars-editor',
@@ -51,16 +24,6 @@ import { PreviewContainerComponent } from './components/preview-container/previe
     MainAudioSettingsComponent,
     OpeningImageSettingsComponent,
     InteractionSelectorComponent,
-    InteractionButtonsEditorComponent,
-    InteractionWriteEditorComponent,
-    InteractionDropEditorComponent,
-    InteractionFindOnImageEditorComponent,
-    InteractionVideoEditorComponent,
-    InteractionPolygonButtonsEditorComponent,
-    InteractionPlaceValueEditorComponent,
-    InteractionNumberLineEditorComponent,
-    InteractionPyramidEditorComponent,
-    InteractionEquationEditorComponent,
     VariableInfoEditorComponent,
     AudioFeedbackEditorComponent,
     PreviewContainerComponent
@@ -76,6 +39,10 @@ export class AppComponent implements OnInit {
 
   showPreview = true;
 
+  get interactionEditorComponent() {
+    return INTERACTION_TYPE_DESCRIPTORS[this.state.interactionType()]?.editorComponent || null;
+  }
+
   ngOnInit(): void {
     this.veronaSubscriptionService.voeStartCommand.subscribe(command => {
       if (command.unitDefinition) {
@@ -90,10 +57,4 @@ export class AppComponent implements OnInit {
     this.showPreview = !this.showPreview;
   }
 
-  updateMetaButtonsVariableId(value: string): void {
-    this.state.updateInteractionParams(params => ({
-      ...(params as any),
-      variableId: value
-    }));
-  }
 }

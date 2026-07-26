@@ -24,16 +24,24 @@ export interface SelectionMetadata {
   multiple: boolean;
 }
 
+export interface InteractionValidationIssue {
+  path: string;
+  message: string;
+}
+
 export interface EditorInteractionAdapter<T extends InteractionParameters = InteractionParameters> {
   readonly type: InteractionEnum;
+  readonly hasVariable: boolean;
   defaultParams(): T;
   normalize(params: InteractionParameters): T;
   variableType(variableInfo?: VariableInfo): VeronaVariableType;
   selectionMetadata(params: InteractionParameters): SelectionMetadata | undefined;
+  validate(params: InteractionParameters): InteractionValidationIssue[];
 }
 
 abstract class BaseEditorInteractionAdapter<T extends InteractionParameters> implements EditorInteractionAdapter<T> {
   abstract readonly type: InteractionEnum;
+  readonly hasVariable: boolean = true;
   abstract defaultParams(): T;
 
   normalize(params: InteractionParameters): T {
@@ -47,6 +55,11 @@ abstract class BaseEditorInteractionAdapter<T extends InteractionParameters> imp
   // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
   selectionMetadata(params: InteractionParameters): SelectionMetadata | undefined {
     return undefined;
+  }
+
+  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
+  validate(params: InteractionParameters): InteractionValidationIssue[] {
+    return [];
   }
 }
 
@@ -84,10 +97,46 @@ export class ButtonsEditorAdapter extends BaseEditorInteractionAdapter<Interacti
       (buttonParams.options?.buttons || []).map(labelForOption);
     return labels.length > 0 ? { labels, multiple: !!buttonParams.multiSelect } : undefined;
   }
+
+  validate(params: InteractionParameters): InteractionValidationIssue[] {
+    const buttonParams = params as InteractionButtonParams;
+    const repeatCount = buttonParams.options?.repeatButton?.numberOfOptions || 0;
+    const buttonCount = buttonParams.options?.buttons?.length || 0;
+    return repeatCount > 0 || buttonCount > 0 ? [] : [{
+      path: 'options',
+      message: 'BUTTONS benötigt mindestens eine Option.'
+    }];
+  }
 }
 
 export class ImageOnlyEditorAdapter extends ButtonsEditorAdapter {
   override readonly type: InteractionEnum = 'IMAGE_ONLY';
+  override readonly hasVariable: boolean = false;
+
+  override normalize(params: InteractionParameters): InteractionButtonParams {
+    const normalized = super.normalize(params);
+    delete normalized.variableId;
+    return normalized;
+  }
+
+  override defaultParams(): InteractionButtonParams {
+    return {
+      options: { buttons: [] },
+      buttonType: 'BIG_SQUARE',
+      numberOfRows: 1,
+      multiSelect: false,
+      imagePosition: 'LEFT',
+      layout: 'LEFT_CENTER'
+    };
+  }
+
+  override validate(params: InteractionParameters): InteractionValidationIssue[] {
+    const imageSource = (params as InteractionButtonParams).imageSource;
+    return imageSource?.trim() ? [] : [{
+      path: 'imageSource',
+      message: 'IMAGE_ONLY benötigt eine Bildquelle.'
+    }];
+  }
 }
 
 export class PolygonButtonsEditorAdapter extends BaseEditorInteractionAdapter<InteractionPolygonButtonsParams> {
@@ -105,6 +154,20 @@ export class PolygonButtonsEditorAdapter extends BaseEditorInteractionAdapter<In
     const polygonParams = params as InteractionPolygonButtonsParams;
     const labels = (polygonParams.options || []).map(labelForOption);
     return labels.length > 0 ? { labels, multiple: !!polygonParams.multiSelect } : undefined;
+  }
+
+  validate(params: InteractionParameters): InteractionValidationIssue[] {
+    const options = (params as InteractionPolygonButtonsParams).options || [];
+    if (options.length === 0) {
+      return [{
+        path: 'options',
+        message: 'POLYGON_BUTTONS benötigt mindestens eine Option.'
+      }];
+    }
+    return options.flatMap((option, index) => option.svgPath?.trim() ? [] : [{
+      path: `options[${index}].svgPath`,
+      message: 'Für jede Polygon-Option ist ein SVG-Pfad erforderlich.'
+    }]);
   }
 }
 
@@ -163,6 +226,19 @@ export class DropEditorAdapter extends BaseEditorInteractionAdapter<InteractionD
       imagePosition: 'BOTTOM'
     };
   }
+
+  selectionMetadata(params: InteractionParameters): SelectionMetadata | undefined {
+    const dropParams = params as InteractionDropParams;
+    const labels = (dropParams.options || []).map(labelForOption);
+    return labels.length > 0 ? { labels, multiple: false } : undefined;
+  }
+
+  validate(params: InteractionParameters): InteractionValidationIssue[] {
+    return (params as InteractionDropParams).options?.length > 0 ? [] : [{
+      path: 'options',
+      message: 'DROP benötigt mindestens eine Option.'
+    }];
+  }
 }
 
 export class FindOnImageEditorAdapter extends BaseEditorInteractionAdapter<InteractionFindOnImageParams> {
@@ -175,6 +251,13 @@ export class FindOnImageEditorAdapter extends BaseEditorInteractionAdapter<Inter
       size: 'MEDIUM'
     };
   }
+
+  validate(params: InteractionParameters): InteractionValidationIssue[] {
+    return (params as InteractionFindOnImageParams).imageSource?.trim() ? [] : [{
+      path: 'imageSource',
+      message: 'FIND_ON_IMAGE benötigt eine Bildquelle.'
+    }];
+  }
 }
 
 export class VideoEditorAdapter extends BaseEditorInteractionAdapter<InteractionVideoParams> {
@@ -185,6 +268,13 @@ export class VideoEditorAdapter extends BaseEditorInteractionAdapter<Interaction
       variableId: 'VIDEO',
       videoSource: ''
     };
+  }
+
+  validate(params: InteractionParameters): InteractionValidationIssue[] {
+    return (params as InteractionVideoParams).videoSource?.trim() ? [] : [{
+      path: 'videoSource',
+      message: 'VIDEO benötigt eine Videoquelle.'
+    }];
   }
 }
 
@@ -241,6 +331,13 @@ export class EquationEditorAdapter extends IntegerVariableEditorAdapter<Interact
       operators: ['+']
     };
   }
+
+  validate(params: InteractionParameters): InteractionValidationIssue[] {
+    return (params as InteractionEquationParams).operators?.length > 0 ? [] : [{
+      path: 'operators',
+      message: 'EQUATION benötigt mindestens einen Operator.'
+    }];
+  }
 }
 
 export class MetaEditorAdapter extends BaseEditorInteractionAdapter<InteractionMetaParams> {
@@ -255,6 +352,7 @@ export class MetaEditorAdapter extends BaseEditorInteractionAdapter<InteractionM
 
 class NoneEditorAdapter extends BaseEditorInteractionAdapter<InteractionMetaParams> {
   readonly type = 'NONE' as const;
+  override readonly hasVariable: boolean = false;
 
   defaultParams(): InteractionMetaParams {
     return {
@@ -263,25 +361,30 @@ class NoneEditorAdapter extends BaseEditorInteractionAdapter<InteractionMetaPara
   }
 }
 
+export const INTERACTION_ADAPTERS = {
+  BUTTONS: new ButtonsEditorAdapter(),
+  IMAGE_ONLY: new ImageOnlyEditorAdapter(),
+  WRITE: new WriteEditorAdapter(),
+  DROP: new DropEditorAdapter(),
+  FIND_ON_IMAGE: new FindOnImageEditorAdapter(),
+  VIDEO: new VideoEditorAdapter(),
+  POLYGON_BUTTONS: new PolygonButtonsEditorAdapter(),
+  PLACE_VALUE: new PlaceValueEditorAdapter(),
+  NUMBER_LINE: new NumberLineEditorAdapter(),
+  PYRAMID: new PyramidEditorAdapter(),
+  EQUATION: new EquationEditorAdapter(),
+  META: new MetaEditorAdapter(),
+  NONE: new NoneEditorAdapter()
+} satisfies Record<InteractionEnum, EditorInteractionAdapter>;
+
 export class EditorInteractionAdapterRegistry {
-  private readonly adapters = new Map<InteractionEnum, EditorInteractionAdapter>([
-    ['BUTTONS', new ButtonsEditorAdapter()],
-    ['IMAGE_ONLY', new ImageOnlyEditorAdapter()],
-    ['WRITE', new WriteEditorAdapter()],
-    ['DROP', new DropEditorAdapter()],
-    ['FIND_ON_IMAGE', new FindOnImageEditorAdapter()],
-    ['VIDEO', new VideoEditorAdapter()],
-    ['POLYGON_BUTTONS', new PolygonButtonsEditorAdapter()],
-    ['PLACE_VALUE', new PlaceValueEditorAdapter()],
-    ['NUMBER_LINE', new NumberLineEditorAdapter()],
-    ['PYRAMID', new PyramidEditorAdapter()],
-    ['EQUATION', new EquationEditorAdapter()],
-    ['META', new MetaEditorAdapter()],
-    ['NONE', new NoneEditorAdapter()]
-  ]);
+  // eslint-disable-next-line class-methods-use-this
+  isSupported(type: string): type is InteractionEnum {
+    return Object.prototype.hasOwnProperty.call(INTERACTION_ADAPTERS, type);
+  }
 
   get(type: InteractionEnum): EditorInteractionAdapter {
-    return this.adapters.get(type) || this.adapters.get('NONE') as EditorInteractionAdapter;
+    return INTERACTION_ADAPTERS[type] || INTERACTION_ADAPTERS.NONE;
   }
 
   defaultParams(type: InteractionEnum): InteractionParameters {
@@ -290,5 +393,26 @@ export class EditorInteractionAdapterRegistry {
 
   normalize(type: InteractionEnum, params: InteractionParameters): InteractionParameters {
     return this.get(type).normalize(params);
+  }
+
+  validate(type: InteractionEnum, params: InteractionParameters): InteractionValidationIssue[] {
+    const adapter = this.get(type);
+    const issues = adapter.validate(params);
+    if (!adapter.hasVariable) return issues;
+
+    const variableId = (params as { variableId?: string }).variableId || '';
+    if (!variableId.trim()) {
+      return [{
+        path: 'variableId',
+        message: `${type} benötigt eine Variablen-ID.`
+      }, ...issues];
+    }
+    if (variableId !== variableId.trim()) {
+      return [{
+        path: 'variableId',
+        message: 'Die Variablen-ID darf keine Leerzeichen am Anfang oder Ende enthalten.'
+      }, ...issues];
+    }
+    return issues;
   }
 }

@@ -1,6 +1,6 @@
 import {
-  FirstClickLayerEnum,
   InteractionEnum,
+  InteractionParameters,
   UnitDefinition
 } from '@shared/models/unit-definition';
 import { EditorStatePatch } from './editor-state.model';
@@ -12,7 +12,8 @@ export class EditorDefinitionLoaderService {
   loadFromJson(json: string): EditorStatePatch {
     const rawDef = JSON.parse(json) as Record<string, unknown>;
     const def = rawDef as unknown as UnitDefinition;
-    const interactionType = this.readInteractionType(rawDef);
+    const interactionTypeResult = this.readInteractionType(rawDef);
+    const interactionType = interactionTypeResult.interactionType;
     const patch: EditorStatePatch = {
       unitId: def.id || 'stars-unit-definition',
       unitVersion: def.version || '',
@@ -20,6 +21,8 @@ export class EditorDefinitionLoaderService {
       ribbonBars: def.ribbonBars ?? false,
       continueButtonShow: def.continueButtonShow || 'ALWAYS',
       interactionType,
+      unsupportedInteractionType: interactionTypeResult.unsupportedInteractionType,
+      interactionMaxTimeMS: def.interactionMaxTimeMS,
       mainAudioEnabled: !!def.mainAudio,
       mainAudioSource: def.mainAudio?.audioSource || '',
       mainAudioMaxPlay: def.mainAudio?.maxPlay ?? 0,
@@ -30,10 +33,9 @@ export class EditorDefinitionLoaderService {
       openingImageSource: def.openingImage?.imageSource || '',
       openingAudioSource: def.openingImage?.audioSource || '',
       openingPresentationDurationMS: def.openingImage?.presentationDurationMS ?? 1500,
-      interactionParams: def.interactionParameters ?
-        this.interactionAdapters.normalize(interactionType, def.interactionParameters) :
-        this.interactionAdapters.defaultParams(interactionType),
+      interactionParams: this.readInteractionParameters(def, interactionTypeResult),
       variableInfo: def.variableInfo || [],
+      audioFeedbackEnabled: !!def.audioFeedback,
       audioFeedback: def.audioFeedback,
       closingMetaButtons: def.closingMetaButtons
     };
@@ -51,13 +53,40 @@ export class EditorDefinitionLoaderService {
     return patch;
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  private readInteractionType(rawDef: Record<string, unknown>): InteractionEnum {
+  private readInteractionType(rawDef: Record<string, unknown>): InteractionTypeLoadResult {
     if (typeof rawDef.interactionType !== 'string') {
-      return 'BUTTONS';
+      return { interactionType: 'BUTTONS' };
     }
-    return rawDef.interactionType === 'META' || rawDef.interactionType === 'META_BUTTONS' ?
-      'META' :
-      rawDef.interactionType as InteractionEnum;
+    if (rawDef.interactionType === 'META_BUTTONS') {
+      return { interactionType: 'META' };
+    }
+    if (this.interactionAdapters.isSupported(rawDef.interactionType)) {
+      return { interactionType: rawDef.interactionType };
+    }
+    return {
+      interactionType: 'NONE',
+      unsupportedInteractionType: rawDef.interactionType
+    };
   }
+
+  private readInteractionParameters(
+    def: UnitDefinition,
+    interactionTypeResult: InteractionTypeLoadResult
+  ): InteractionParameters {
+    if (interactionTypeResult.unsupportedInteractionType) {
+      return def.interactionParameters || ({} as InteractionParameters);
+    }
+    if (def.interactionParameters) {
+      return this.interactionAdapters.normalize(
+        interactionTypeResult.interactionType,
+        def.interactionParameters
+      );
+    }
+    return this.interactionAdapters.defaultParams(interactionTypeResult.interactionType);
+  }
+}
+
+interface InteractionTypeLoadResult {
+  interactionType: InteractionEnum;
+  unsupportedInteractionType?: string;
 }

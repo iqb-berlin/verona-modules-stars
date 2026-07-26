@@ -1,4 +1,6 @@
-import { Injectable, signal, inject } from '@angular/core';
+import {
+  computed, Injectable, signal, inject
+} from '@angular/core';
 import { Subject, debounceTime } from 'rxjs';
 import {
   UnitDefinition, InteractionEnum, ContinueButtonEnum,
@@ -9,7 +11,11 @@ import { AudioFeedback } from '@shared/models/feedback';
 import { VeronaVariableInfo } from '../models/verona-editor';
 import { EditorVeronaPostService } from './editor-verona-post.service';
 import { EditorInteractionAdapterRegistry } from './editor-interaction-adapters';
-import { EditorDefinitionBuilderService } from './editor-definition-builder.service';
+import {
+  DefinitionBuildResult,
+  EditorDefinitionBuilderService,
+  ValidationIssue
+} from './editor-definition-builder.service';
 import { EditorDefinitionLoaderService } from './editor-definition-loader.service';
 import { EditorVariableMetadataBuilderService } from './editor-variable-metadata-builder.service';
 import { EditorStatePatch, EditorStateSnapshot } from './editor-state.model';
@@ -30,6 +36,8 @@ export class EditorStateService {
   ribbonBars = signal(false);
   continueButtonShow = signal<ContinueButtonEnum>('ALWAYS');
   interactionType = signal<InteractionEnum>('BUTTONS');
+  unsupportedInteractionType = signal<string | undefined>(undefined);
+  interactionMaxTimeMS = signal<number | undefined>(undefined);
 
   // MainAudio
   mainAudioEnabled = signal(false);
@@ -60,8 +68,10 @@ export class EditorStateService {
   variableInfo = signal<VariableInfo[]>([]);
 
   // Audio feedback
+  audioFeedbackEnabled = signal(false);
   audioFeedback = signal<AudioFeedback | undefined>(undefined);
   closingMetaButtons = signal<ClosingMetaButtonsParams | undefined>(undefined);
+  definitionResult = computed<DefinitionBuildResult>(() => this.definitionBuilder.buildResult(this.snapshot()));
 
   constructor() {
     this.resetState();
@@ -126,6 +136,7 @@ export class EditorStateService {
 
   setInteractionType(type: InteractionEnum): void {
     this.interactionType.set(type);
+    this.unsupportedInteractionType.set(undefined);
     this.resetInteractionParams(type);
     this.notifyChange();
   }
@@ -153,6 +164,17 @@ export class EditorStateService {
     this.notifyChange();
   }
 
+  setAudioFeedbackEnabled(enabled: boolean): void {
+    this.audioFeedbackEnabled.set(enabled);
+    if (enabled && !this.audioFeedback()) {
+      this.audioFeedback.set({
+        trigger: 'CONTINUE_BUTTON_CLICK',
+        feedback: []
+      });
+    }
+    this.notifyChange();
+  }
+
   setClosingMetaButtons(closingMetaButtons: ClosingMetaButtonsParams | undefined): void {
     this.closingMetaButtons.set(closingMetaButtons);
     this.notifyChange();
@@ -165,6 +187,8 @@ export class EditorStateService {
     this.ribbonBars.set(false);
     this.continueButtonShow.set('ALWAYS');
     this.interactionType.set('BUTTONS');
+    this.unsupportedInteractionType.set(undefined);
+    this.interactionMaxTimeMS.set(undefined);
 
     this.mainAudioEnabled.set(false);
     this.mainAudioSource.set('');
@@ -181,6 +205,7 @@ export class EditorStateService {
 
     this.resetInteractionParams('BUTTONS');
     this.variableInfo.set([]);
+    this.audioFeedbackEnabled.set(false);
     this.audioFeedback.set(undefined);
     this.closingMetaButtons.set(undefined);
   }
@@ -195,21 +220,11 @@ export class EditorStateService {
 
   setMainAudioEnabled(enabled: boolean): void {
     this.mainAudioEnabled.set(enabled);
-    if (!enabled) {
-      this.mainAudioSource.set('');
-      this.mainAudioMaxPlay.set(0);
-      this.mainAudioDisableInteractionUntilComplete.set(false);
-    }
     this.notifyChange();
   }
 
   setOpeningImageEnabled(enabled: boolean): void {
     this.openingImageEnabled.set(enabled);
-    if (!enabled) {
-      this.openingImageSource.set('');
-      this.openingAudioSource.set('');
-      this.openingPresentationDurationMS.set(1500);
-    }
     this.notifyChange();
   }
 
@@ -260,11 +275,24 @@ export class EditorStateService {
   }
 
   buildUnitDefinition(): UnitDefinition {
-    return this.definitionBuilder.build(this.snapshot());
+    return this.definitionResult().draft;
+  }
+
+  buildRuntimeDefinition(): UnitDefinition | undefined {
+    return this.definitionResult().runtimeDefinition;
+  }
+
+  validationIssues(pathPrefix?: string): ValidationIssue[] {
+    const issues = this.definitionResult().issues;
+    return pathPrefix ? issues.filter(issue => issue.path.startsWith(pathPrefix)) : issues;
   }
 
   buildVariables(): VeronaVariableInfo[] {
     return this.variableMetadataBuilder.build(this.snapshot());
+  }
+
+  availableResponseVariableIds(): string[] {
+    return [...this.definitionBuilder.responseVariableIds(this.snapshot())];
   }
 
   private emitDefinitionChanged(): void {
@@ -286,6 +314,8 @@ export class EditorStateService {
       ribbonBars: this.ribbonBars(),
       continueButtonShow: this.continueButtonShow(),
       interactionType: this.interactionType(),
+      unsupportedInteractionType: this.unsupportedInteractionType(),
+      interactionMaxTimeMS: this.interactionMaxTimeMS(),
       mainAudioEnabled: this.mainAudioEnabled(),
       mainAudioSource: this.mainAudioSource(),
       mainAudioMaxPlay: this.mainAudioMaxPlay(),
@@ -298,6 +328,7 @@ export class EditorStateService {
       openingPresentationDurationMS: this.openingPresentationDurationMS(),
       interactionParams: this.interactionParams(),
       variableInfo: this.variableInfo(),
+      audioFeedbackEnabled: this.audioFeedbackEnabled(),
       audioFeedback: this.audioFeedback(),
       closingMetaButtons: this.closingMetaButtons()
     };
@@ -310,6 +341,10 @@ export class EditorStateService {
     if (patch.ribbonBars !== undefined) this.ribbonBars.set(patch.ribbonBars);
     if (patch.continueButtonShow !== undefined) this.continueButtonShow.set(patch.continueButtonShow);
     if (patch.interactionType !== undefined) this.interactionType.set(patch.interactionType);
+    if ('unsupportedInteractionType' in patch) {
+      this.unsupportedInteractionType.set(patch.unsupportedInteractionType);
+    }
+    if ('interactionMaxTimeMS' in patch) this.interactionMaxTimeMS.set(patch.interactionMaxTimeMS);
     if (patch.mainAudioEnabled !== undefined) this.mainAudioEnabled.set(patch.mainAudioEnabled);
     if (patch.mainAudioSource !== undefined) this.mainAudioSource.set(patch.mainAudioSource);
     if (patch.mainAudioMaxPlay !== undefined) this.mainAudioMaxPlay.set(patch.mainAudioMaxPlay);
@@ -326,6 +361,7 @@ export class EditorStateService {
     }
     if (patch.interactionParams !== undefined) this.interactionParams.set(patch.interactionParams);
     if (patch.variableInfo !== undefined) this.variableInfo.set(patch.variableInfo);
+    if (patch.audioFeedbackEnabled !== undefined) this.audioFeedbackEnabled.set(patch.audioFeedbackEnabled);
     if ('audioFeedback' in patch) this.audioFeedback.set(patch.audioFeedback);
     if ('closingMetaButtons' in patch) this.closingMetaButtons.set(patch.closingMetaButtons);
   }

@@ -2,6 +2,10 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { InteractionEnum } from '@shared/models/unit-definition';
 import { EditorStateService } from '../../services/editor-state.service';
+import {
+  INTERACTION_TYPE_DESCRIPTORS,
+  InteractionTypeDescriptor
+} from '../../services/interaction-type-registry';
 
 @Component({
   selector: 'stars-interaction-selector',
@@ -17,8 +21,8 @@ import { EditorStateService } from '../../services/editor-state.service';
         <div class="field">
           <label>Typ auswählen</label>
           <select [value]="state.interactionType()" (change)="onTypeChange($any($event.target).value)">
-            @for (type of interactionTypes; track type.value) {
-              <option [value]="type.value">{{ type.label }}</option>
+            @for (type of interactionTypes; track type.type) {
+              <option [value]="type.type">{{ type.label }} — {{ type.description }}</option>
             }
           </select>
         </div>
@@ -29,20 +33,8 @@ import { EditorStateService } from '../../services/editor-state.service';
 export class InteractionSelectorComponent {
   state = inject(EditorStateService);
 
-  interactionTypes: { value: InteractionEnum; label: string }[] = [
-    { value: 'BUTTONS', label: 'Buttons (Auswahl)' },
-    { value: 'IMAGE_ONLY', label: 'Nur Bild (statisch)' },
-    { value: 'WRITE', label: 'Schreiben / Tastatur' },
-    { value: 'DROP', label: 'Drag & Drop' },
-    { value: 'FIND_ON_IMAGE', label: 'Auf Bild finden' },
-    { value: 'VIDEO', label: 'Video Player' },
-    { value: 'POLYGON_BUTTONS', label: 'Polygon-Regionen' },
-    { value: 'PLACE_VALUE', label: 'Stellenwerttafel' },
-    { value: 'NUMBER_LINE', label: 'Zahlenstrahl' },
-    { value: 'PYRAMID', label: 'Rechenpyramide' },
-    { value: 'EQUATION', label: 'Gleichung / Term' },
-    { value: 'META', label: 'Meta Buttons' }
-  ];
+  interactionTypes: InteractionTypeDescriptor[] = Object.values(INTERACTION_TYPE_DESCRIPTORS)
+    .filter(descriptorValue => descriptorValue.visible);
 
   onTypeChange(newType: string): void {
     this.state.setInteractionType(newType as InteractionEnum);
