@@ -140,6 +140,8 @@ $border-width: 3px;
     padding: 0;
     width: auto;
     height: auto;
+    transform: translateZ(0); /* Safari fix: keep stimulus images painted with filtered siblings */
+    -webkit-transform: translateZ(0);
   }
 }
 
