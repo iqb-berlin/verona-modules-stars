@@ -12,6 +12,7 @@
           <img #imageElement
                [src]="localParameters.imageSource"
                [alt]=""
+               (load)="onStimulusImageLoad()"
                data-cy="stimulus-image">
         </div>
       }
