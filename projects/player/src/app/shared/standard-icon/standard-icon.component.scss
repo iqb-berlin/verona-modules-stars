@@ -9,6 +9,12 @@
   .smiley-icon-wrap {
     display: block;
     line-height: 0;
+    /* WebKit (Safari/SEB) fix: keep smiley/hint layer from dropping during feedback updates */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    will-change: transform;
 
     &.has-hint {
       border-radius: 50%;
@@ -23,7 +29,12 @@
     overflow: visible;
     filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, 0.2));
     -webkit-filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, 0.2)); /* Safari and SEB fix for broken drop-shadow on filter */
+    /* WebKit (Safari/SEB) fix: force repaint/compositing for feedback-highlighted icons */
     transform: translateZ(0); /* Safari and SEB fix for broken drop-shadow on filter */
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    will-change: transform;
   }
 
   .smiley-icon-wrap.has-hint .smiley-icon,
