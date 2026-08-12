@@ -1,8 +1,6 @@
-# Release Note 0.7.0 #
+# Release Note 0.7.1 #
 
-## Neu
-+ Kodierung der Ergebnisse für Legeaufgaben, so dass 10er und 1er Streifen in der Variablen unterschieden werden können
 
 ## Updates
++ WebKit-Fixes für ältere iOS-Versionen sowie Safe Exam Browser (SEB): Hinweise/Feedback-Darstellung und fehlerhaft ausgeblendete Stimulus-Elemente wurden stabilisiert.
 
-+ Update auf Angular 22 incl. es-lint
