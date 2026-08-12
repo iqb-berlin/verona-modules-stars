@@ -20,7 +20,8 @@ import {
 } from '../../models/unit-definition';
 import { StandardButtonComponent } from '../../shared/standard-button/standard-button.component';
 import { AudioButtonComponent } from '../../shared/audio-button/audio-button.component';
-import { StarsResponse } from '../../services/responses.service';
+import { StarsResponse, ResponsesService } from '../../services/responses.service';
+import { UnitService } from '../../services/unit.service';
 
 @Component({
   selector: 'stars-interaction-buttons',
@@ -47,6 +48,8 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
   useFullArea = false;
 
   veronaPostService = inject(VeronaPostService);
+  private unitService = inject(UnitService);
+  private responsesService = inject(ResponsesService);
 
   /** Reference to the image element for aspect ratio detection. */
   @ViewChild('imageElement', { static: false })
@@ -54,6 +57,13 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
 
   constructor() {
     super();
+
+    effect(() => {
+      // Nudge Safari to repaint the stimulus image when the click layer / audio state changes.
+      this.unitService.firstClickLayerClicked();
+      this.responsesService.mainAudioComplete();
+      this.nudgeStimulusImageRepaint();
+    });
 
     effect(() => {
       const parameters = this.parameters() as InteractionButtonParams;
@@ -152,6 +162,21 @@ export class InteractionButtonsComponent extends InteractionComponentDirective {
         this.hintValues.set(selectedStates);
         this.selectedValues.set([]);
       }
+    });
+  }
+
+  onStimulusImageLoad(): void {
+    this.nudgeStimulusImageRepaint();
+  }
+
+  private nudgeStimulusImageRepaint(): void {
+    const img = this.imageRef?.nativeElement;
+    if (!img) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      void img.offsetHeight;
     });
   }
 

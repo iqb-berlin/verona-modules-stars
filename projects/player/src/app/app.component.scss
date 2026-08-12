@@ -11,6 +11,24 @@
   flex-direction: column;
   align-content: stretch;
   background-color: transparent;
+  /* WebKit (Safari/SEB) fix: force stable compositing for feedback repaint */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform;
+  isolation: isolate;
+}
+
+.interaction-body .hint,
+.interaction-body .has-hint,
+.interaction-body input.hint + label {
+  /* WebKit (Safari/SEB) fix: ensure hint states are painted immediately */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform;
 }
 
 .interaction {
