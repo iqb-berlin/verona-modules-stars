@@ -4,6 +4,7 @@ import {
   HostListener,
   OnInit,
   ChangeDetectionStrategy,
+  effect,
 } from '@angular/core';
 
 import { VeronaPostService } from './services/verona-post.service';
@@ -23,6 +24,8 @@ import { environment } from '../environments/environment';
 })
 export class AppComponent implements OnInit {
   isStandalone: boolean | undefined;
+  private lastFeedbackHint = '';
+
   hasRibbonBars(): boolean {
     return this.unitService.ribbonBars();
   }
@@ -42,7 +45,44 @@ export class AppComponent implements OnInit {
     public veronaPostService: VeronaPostService,
     private veronaSubscriptionService: VeronaSubscriptionService,
     private metadataService: MetadataService,
-  ) {}
+  ) {
+    effect(() => {
+      // WebKit (Safari/SEB) workaround:
+      // feedback hints can update in state but miss an immediate paint,
+      // especially for soft color/border-only hints on iPad Mini.
+      // Trigger a repaint only when the feedback hint value actually changes.
+      const hint = this.responsesService.feedbackHint();
+      if (hint === this.lastFeedbackHint) {
+        return;
+      }
+      this.lastFeedbackHint = hint;
+      this.nudgeFeedbackRepaint();
+    });
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private nudgeFeedbackRepaint(): void {
+    // Double rAF waits for hint class/style updates to settle before forcing layout.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const targets = document.querySelectorAll(
+          '.interaction-body .hint, .interaction-body .has-hint, .interaction-body input.hint + label',
+        );
+        if (targets.length === 0) {
+          const interactionBody = document.querySelector(
+            '.interaction-body',
+          ) as HTMLElement | null;
+          if (interactionBody) {
+            void interactionBody.offsetHeight;
+          }
+          return;
+        }
+        targets.forEach((el) => {
+          void (el as HTMLElement).offsetHeight;
+        });
+      });
+    });
+  }
 
   ngOnInit(): void {
     this.veronaSubscriptionService.vopStartCommand.subscribe(
