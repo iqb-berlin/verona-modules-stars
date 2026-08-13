@@ -1,6 +1,4 @@
-# Release Note 0.7.1 #
-
+# Release Note 0.7.2 #
 
 ## Updates
-+ WebKit-Fixes für ältere iOS-Versionen sowie Safe Exam Browser (SEB): Hinweise/Feedback-Darstellung und fehlerhaft ausgeblendete Stimulus-Elemente wurden stabilisiert.
-
++ WebKit-Fix für Safari/SEB: Feedback-Hinweise wurden gesetzt, aber oft nicht gezeichnet. Hinweis wird jetzt vor dem Overlay gesetzt, Overlay ohne `backdrop-filter`, gezieltes Repaint nach Hinweiswechsel.
