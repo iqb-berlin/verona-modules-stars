@@ -47,7 +47,9 @@
     min-height: 3.4rem;
 
     &.hint {
+      /* Stronger than color-only so WebKit is more likely to repaint the hint. */
       color: colors.$hint;
+      text-shadow: 0 0 1px colors.$hint;
     }
   }
 }
