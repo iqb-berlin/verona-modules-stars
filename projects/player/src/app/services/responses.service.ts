@@ -501,15 +501,36 @@ export class ResponsesService {
   }
 
   startFeedback() {
-    this.feedbackActive.set(true);
-    if (this.pendingFeedbackHint === '') return;
-    if (this.pendingHintDelay > 0) {
-      setTimeout(() => {
-        this.feedbackHint.set(this.pendingFeedbackHint);
-      }, this.pendingHintDelay);
-    } else {
-      this.feedbackHint.set(this.pendingFeedbackHint);
+    // WebKit (Safari/SEB): apply hint before the blocking overlay when possible,
+    // so hint styles paint before the overlay covers the interaction.
+    if (this.pendingFeedbackHint === '') {
+      this.feedbackActive.set(true);
+      return;
     }
+
+    const applyHint = () => {
+      this.feedbackHint.set(this.pendingFeedbackHint);
+    };
+
+    const activateOverlayAfterPaint = () => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          this.feedbackActive.set(true);
+        });
+      });
+    };
+
+    if (this.pendingHintDelay > 0) {
+      // Keep interaction blocked during the delay, then refresh hint paint.
+      this.feedbackActive.set(true);
+      setTimeout(() => {
+        applyHint();
+      }, this.pendingHintDelay);
+      return;
+    }
+
+    applyHint();
+    activateOverlayAfterPaint();
   }
 
   private provideFeedback(startVariable: string): void {
