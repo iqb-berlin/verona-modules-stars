@@ -100,6 +100,8 @@ export class ResponsesService {
               codes: []
             };
             if (vInfo.codingSource) newVInfo.codingSource = vInfo.codingSource;
+            if (vInfo.responseComplete) newVInfo.responseComplete = vInfo.responseComplete;
+            if (vInfo.codingSourceParameter) newVInfo.codingSourceParameter = vInfo.codingSourceParameter;
             vInfo.codes.forEach(c => {
               const newCode: Code = {
                 method: 'EQUALS',
@@ -113,7 +115,7 @@ export class ResponsesService {
               if (c.score) newCode.score = c.score;
               newVInfo.codes.push(newCode);
             });
-            this.variableInfo.push(vInfo);
+            this.variableInfo.push(newVInfo);
           } else {
             problems.push('variableInfo: variableId or codes missing');
           }

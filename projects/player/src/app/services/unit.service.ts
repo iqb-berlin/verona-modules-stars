@@ -114,6 +114,7 @@ export class UnitService {
   reset() {
     this.audioService.reset();
     this.mainAudio.set({} as AudioOptions);
+    this._currentAudioSrc.set({} as AudioOptions);
     this.firstAudioOptions.set(undefined);
     this.backgroundColor.set('#EEE');
     this.continueButton.set('NO');
