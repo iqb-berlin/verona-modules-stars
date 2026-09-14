@@ -22,6 +22,10 @@ export class ResponsesService {
   veronaPostService = inject(VeronaPostService);
   hasParentWindow = window === window.parent;
   lastResponsesString = '';
+  /** Feedback clip most recently played, so identical consecutive feedback is not replayed.
+   *  Unit-scoped: lives here rather than on ContinueButtonComponent because that component
+   *  instance survives a unit change whenever the button is visible in both units. */
+  lastAudioFeedbackSource = '';
   pendingAudioFeedback = signal(false);
   feedbackHint = signal('');
   feedbackActive = signal(false);
@@ -62,6 +66,7 @@ export class ResponsesService {
     this.variableInfo = [];
     this.allResponses = [];
     this.lastResponsesString = '';
+    this.lastAudioFeedbackSource = '';
     this.pendingAudioFeedback.set(false);
     this.pendingAudioFeedbackSource = '';
     this.feedbackHint.set('');
@@ -296,6 +301,11 @@ export class ResponsesService {
   }
 
   startClosingMeta() {
+    // The feedback phase for the main interaction is over: drop its blocking overlay and hint.
+    // Otherwise the overlay (z-index 150) keeps covering the META buttons, and the stale hint is
+    // fed to the META component's hint effect and parsed as a meta option index.
+    this.feedbackActive.set(false);
+    this.feedbackHint.set('');
     this.closingMetaRunning.set(true);
     this.metaInteractionDone.set(false);
     this.updateClosingMetaOutcome();

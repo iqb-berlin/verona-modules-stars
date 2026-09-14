@@ -61,10 +61,13 @@ export class InteractionPyramidComponent extends InteractionComponentDirective {
           (r) => r.id === this.localParameters.variableId,
         );
 
+        // Reset first on BOTH paths: restoreFromFormerState only assigns when the stored value
+        // splits into exactly two parts, so without this a malformed/legacy value would leave the
+        // previous unit's digits in place while still being reported as the student's answer.
+        this.resetSelection();
         if (found && typeof found.value === 'string') {
           this.restoreFromFormerState(found.value);
         } else {
-          this.resetSelection();
           this.emitResponses('DISPLAYED');
         }
         this.updateButtonStates();

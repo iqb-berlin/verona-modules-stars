@@ -159,6 +159,7 @@ export class InteractionDropComponent
     effect(() => {
       const hints = this.showHint();
       if (!hints || hints.length === 0) {
+        this.hasHint.set(false);
         return;
       }
       const numeric = parseInt(hints, 10);
@@ -422,6 +423,7 @@ export class InteractionDropComponent
    * Resets all component state to initial values
    */
   private resetSelection(): void {
+    this.hasHint.set(false);
     this.selectedValue.set(-1);
     this.settledTransform.set(null);
     this.preCalculatedTransforms.set({});

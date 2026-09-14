@@ -160,6 +160,7 @@ export class InteractionFindOnImageComponent
     effect(() => {
       const hints = this.showHint();
       if (!hints || hints.length === 0) {
+        this.hasHint.set(false);
         return;
       }
       const parts = hints.split(',').map((p) => p.trim());
@@ -195,6 +196,7 @@ export class InteractionFindOnImageComponent
    * This is called whenever the component parameters change to ensure no leakage between units.
    */
   private resetVisualState(): void {
+    this.hasHint.set(false);
     this.buttonDisabled.set(true);
     this.clickTargetTop.set('0px');
     this.clickTargetLeft.set('0px');

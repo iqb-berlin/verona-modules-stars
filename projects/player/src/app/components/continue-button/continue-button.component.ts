@@ -26,8 +26,6 @@ export class ContinueButtonComponent {
 
   clicked = signal(false);
 
-  lastAudioSource = '';
-
   isFeedbackPlaying(): boolean {
     return (
       this.audioService.isPlaying() &&
@@ -45,7 +43,7 @@ export class ContinueButtonComponent {
 
     if (this.responseService.pendingAudioFeedback()) {
       const newAudioSource = this.responseService.getAudioFeedback(true);
-      if (newAudioSource !== this.lastAudioSource) {
+      if (newAudioSource !== this.responseService.lastAudioFeedbackSource) {
         this.audioService
           .setAudioSrc({
             audioSource: newAudioSource,
@@ -61,7 +59,7 @@ export class ContinueButtonComponent {
             });
             this.responseService.startFeedback();
           });
-        this.lastAudioSource = newAudioSource;
+        this.responseService.lastAudioFeedbackSource = newAudioSource;
       } else {
         setTimeout(() => {
           this.navigate.emit();
