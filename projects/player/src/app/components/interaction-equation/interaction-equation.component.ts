@@ -134,11 +134,15 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
       editableFields.forEach((field, index) => {
         const value = parts[index] || '';
         const targetSignal = this.getFieldSignal(field);
+        var isHinted = false;
+
+        // only show hint when value is different
         if (targetSignal) {
+          isHinted = targetSignal() !== value;
           targetSignal.set(value);
         }
 
-        if (value !== '' && this.isFieldEditable(field)) {
+        if (value !== '' && this.isFieldEditable(field) && isHinted) {
           newHintedFields.add(field);
         }
       });
@@ -363,17 +367,20 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
     if (this.hintedFields().size !== 0) this.hintedFields.set(new Set());
 
     const targetSignal = this.getFieldSignal(field);
+
+    // don't move to next field
+    // TODO remove if approved
     if (targetSignal) {
       if (field === 'operator') {
         targetSignal.set(button);
         this.emitResponse('VALUE_CHANGED');
-        this.moveToNextField();
+        // this.moveToNextField();
       } else {
         const newValue = targetSignal() + button;
         targetSignal.set(newValue);
         this.emitResponse('VALUE_CHANGED');
         if (newValue.length >= 2) {
-          this.moveToNextField();
+          // this.moveToNextField();
         }
       }
     }
