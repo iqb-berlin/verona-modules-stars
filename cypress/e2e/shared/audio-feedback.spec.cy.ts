@@ -2,6 +2,50 @@ import {
   UnitDefinition
 } from '../../../projects/player/src/app/models/unit-definition';
 
+// Hint color from projects/player/src/styles/_colors.scss ($hint: #EE00FF)
+const HINT_COLOR = 'rgb(238, 0, 255)';
+
+interface HintField {
+  selector: string;
+  // CSS property that gets the hint color when the field is hinted
+  colorProperty: string;
+}
+
+interface WrongFieldsHintConfig {
+  // Feedback fixture with more than one editable field, the correct answer is shown via showResponse
+  configFile: string;
+  fields: Record<string, HintField>;
+  correctAnswer: Record<string, string>;
+  partiallyWrongAnswer: Record<string, string>;
+  allWrongAnswer: Record<string, string>;
+}
+
+// Interaction types that show the hint only on the wrong fields
+const wrongFieldsHintConfigs: Record<string, WrongFieldsHintConfig> = {
+  // __ + __ = 22, correct answer 13 + 9
+  equation: {
+    configFile: 'equation_feedback_multiple_fields_test.json',
+    fields: {
+      operand1: { selector: '[data-cy="operand1"]', colorProperty: 'color' },
+      operand2: { selector: '[data-cy="operand2"]', colorProperty: 'color' }
+    },
+    correctAnswer: { operand1: '13', operand2: '9' },
+    partiallyWrongAnswer: { operand1: '13', operand2: '5' },
+    allWrongAnswer: { operand1: '3', operand2: '5' }
+  },
+  // top 13, correct answer 10 and 3
+  pyramid: {
+    configFile: 'pyramid_feedback_test.json',
+    fields: {
+      left: { selector: '[data-cy="interactive-pyramid-input-left"]', colorProperty: 'border-top-color' },
+      right: { selector: '[data-cy="interactive-pyramid-input-right"]', colorProperty: 'border-top-color' }
+    },
+    correctAnswer: { left: '10', right: '3' },
+    partiallyWrongAnswer: { left: '10', right: '5' },
+    allWrongAnswer: { left: '9', right: '5' }
+  }
+};
+
 export function testAudioFeedback(interactionType: string, configFile: string) {
   describe(`Audio Feedback Features for interactionType - ${interactionType}`, () => {
 
@@ -79,6 +123,54 @@ export function testAudioFeedback(interactionType: string, configFile: string) {
         cy.get(hintSelector).should('not.exist');
       });
     });
+
+    // The following tests only run for the interactionTypes EQUATION and PYRAMID (see wrongFieldsHintConfigs),
+    // because only these show the hint on the wrong fields and not on the fields that are already correct.
+    // All other interactionTypes skip them.
+    const wrongFieldsHintConfig = wrongFieldsHintConfigs[interactionType];
+    if (wrongFieldsHintConfig) {
+      const answerAndWaitForFeedback = (answer: Record<string, string>) => {
+        cy.setupTestData(wrongFieldsHintConfig.configFile, interactionType);
+        cy.assertInteractionComponentVisible(interactionType);
+
+        Object.entries(answer).forEach(([field, value]) => {
+          cy.get(wrongFieldsHintConfig.fields[field].selector).click();
+          value.split('').forEach(digit => cy.get(`[data-cy="keyboard-button-${digit}"]`).click());
+        });
+
+        cy.clickContinueButton();
+        cy.waitUntilFeedbackIsFinishedPlaying();
+
+        // First check that the overlay is visible and then remove it to inspect the fields
+        cy.get('[data-cy=interaction-disabled-overlay]').should('be.visible').invoke('remove');
+
+        // The correct answer is shown in all fields
+        Object.entries(wrongFieldsHintConfig.correctAnswer).forEach(([field, value]) => {
+          cy.get(wrongFieldsHintConfig.fields[field].selector)
+            .invoke('text')
+            .then(text => expect(text.trim()).to.equal(value));
+        });
+      };
+
+      const assertHinted = (field: string, hinted: boolean) => {
+        const { selector, colorProperty } = wrongFieldsHintConfig.fields[field];
+        cy.get(selector).should(hinted ? 'have.class' : 'not.have.class', 'hint');
+        cy.get(selector).should(hinted ? 'have.css' : 'not.have.css', colorProperty, HINT_COLOR);
+      };
+
+      it('shows the hint color only on the wrong fields after feedback, if the answer is partially wrong', () => {
+        const { partiallyWrongAnswer, correctAnswer, fields } = wrongFieldsHintConfig;
+        answerAndWaitForFeedback(partiallyWrongAnswer);
+
+        Object.keys(fields).forEach(field => assertHinted(field, partiallyWrongAnswer[field] !== correctAnswer[field]));
+      });
+
+      it('shows the hint color on all fields after feedback, if all fields are wrong', () => {
+        answerAndWaitForFeedback(wrongFieldsHintConfig.allWrongAnswer);
+
+        Object.keys(wrongFieldsHintConfig.fields).forEach(field => assertHinted(field, true));
+      });
+    }
 
     it('does not requests navigation to next unit when triggerNavigationOnEnd is false and feedback audio ends', () => {
 
