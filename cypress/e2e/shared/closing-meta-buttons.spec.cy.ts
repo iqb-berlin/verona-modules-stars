@@ -52,6 +52,41 @@ export function testClosingMetaButtons(interactionType: string) {
       cy.get('[data-cy="continue-button"]').should('exist').and('be.visible');
     });
 
+    it('adds continueButton response when a meta button is selected and triggerNavigationOnSelect is true', () => {
+      const configFile = `${interactionType}_with_closingMetaButtons_triggerNavigationOnSelect_true_test.json`;
+      cy.setupTestDataWithPostMessageMock(configFile, interactionType);
+      cy.loadUnit(`interaction-${interactionType}/${configFile}`);
+      cy.applyStandardScenarios(interactionType);
+
+      // First click opens the closing meta buttons and does not navigate
+      cy.clickContinueButton();
+      cy.get('[data-cy="interaction-meta"]').should('exist');
+      cy.assertNoContinueButtonResponse();
+
+      // Selecting a meta button navigates to the next unit
+      cy.get('[data-cy="button-2"]').click();
+      cy.assertContinueButtonResponseSentBeforeNavigation();
+    });
+
+    // eslint-disable-next-line max-len
+    it('adds continueButton response only after the second continue button click when triggerNavigationOnSelect is false', () => {
+      const configFile = `${interactionType}_with_closingMetaButtons_triggerNavigationOnSelect_false_test.json`;
+      cy.setupTestDataWithPostMessageMock(configFile, interactionType);
+      cy.loadUnit(`interaction-${interactionType}/${configFile}`);
+      cy.applyStandardScenarios(interactionType);
+
+      // First click opens the closing meta buttons and does not navigate
+      cy.clickContinueButton();
+      cy.get('[data-cy="interaction-meta"]').should('exist');
+      cy.assertNoContinueButtonResponse();
+
+      cy.get('[data-cy="button-2"]').click();
+
+      // Second click navigates to the next unit
+      cy.clickContinueButton();
+      cy.assertContinueButtonResponseSentBeforeNavigation();
+    });
+
     it('should not show the speaker icon when closing meta buttons has no audio source', () => {
       const configFile = `${interactionType}_with_closingMetaButtons_without_audioSource_test.json`;
       cy.setupTestDataWithPostMessageMock(configFile, interactionType);

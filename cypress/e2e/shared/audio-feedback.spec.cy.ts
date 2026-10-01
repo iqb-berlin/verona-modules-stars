@@ -129,5 +129,35 @@ export function testAudioFeedback(interactionType: string, configFile: string) {
         origin: '*'
       });
     });
+
+    // eslint-disable-next-line max-len
+    it('adds continueButton response only after the second continue button click when triggerNavigationOnEnd is false', () => {
+      cy.setupTestDataWithPostMessageMock(configFile, interactionType);
+      cy.loadUnit(`interaction-${interactionType}/${configFile}`);
+
+      cy.applyStandardScenarios(interactionType);
+
+      // First click plays the feedback and does not navigate
+      cy.clickContinueButton();
+      cy.waitUntilFeedbackIsFinishedPlaying();
+      cy.assertNoContinueButtonResponse();
+
+      // Second click navigates to the next unit
+      cy.clickContinueButton();
+      cy.assertContinueButtonResponseSentBeforeNavigation();
+    });
+
+    it('adds continueButton response when triggerNavigationOnEnd is true and feedback audio ends', () => {
+      const configFile = `${interactionType}_feedback_triggerNavigationOnEnd_true_test.json`;
+      cy.setupTestDataWithPostMessageMock(configFile, interactionType);
+      cy.loadUnit(`interaction-${interactionType}/${configFile}`);
+
+      cy.applyStandardScenarios(interactionType);
+
+      cy.clickContinueButton();
+      cy.waitUntilFeedbackIsFinishedPlaying();
+
+      cy.assertContinueButtonResponseSentBeforeNavigation();
+    });
   });
 }
