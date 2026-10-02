@@ -6,6 +6,7 @@ import { testBaseFeatures } from '../shared/base-features.spec.cy';
 import { testFormerStateFeatures } from '../shared/former-state.spec.cy';
 import { testKeyboardInteractions } from '../shared/keyboard-interactions.spec.cy';
 import { testClosingMetaButtons } from '../shared/closing-meta-buttons.spec.cy';
+import { testCodingRegexFraction } from '../shared/coding-regex-fraction.spec.cy';
 
 describe('PYRAMID Interaction E2E Tests', () => {
   const interactionType = 'pyramid';
@@ -122,4 +123,6 @@ describe('PYRAMID Interaction E2E Tests', () => {
   testKeyboardInteractions(interactionType, defaultTestFile);
   // Test closing meta buttons for the PYRAMID interaction type
   testClosingMetaButtons(interactionType);
+  // Test coding with REGEX_FRACTION and REGEX_MATCH
+  testCodingRegexFraction('pyramid_with_codingSource_regexFraction_test.json', interactionType);
 });

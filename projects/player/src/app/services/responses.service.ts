@@ -366,7 +366,13 @@ export class ResponsesService {
             }
             valueAsString = count.toString();
           }
+        } else if (codingScheme.codingSource === 'REGEX_FRACTION') {
+          // use regex to extract parts of value
+          const regex = codingScheme.codingSourceParameter || '';
+          const match = valueAsString.match(new RegExp(regex));
+          valueAsString = (match ? match[1] : valueAsString) || valueAsString;
         }
+        console.log('value', valueAsString);
         let newCode = Number.MIN_VALUE;
         let newScore = Number.MIN_VALUE;
         codingScheme.codes.forEach(c => {
@@ -376,6 +382,10 @@ export class ResponsesService {
               codeFound = valueAsString === c.parameter;
             } else if (c.method === 'IN_POSITION_RANGE') {
               codeFound = ResponsesService.isPositionInRange(valueAsString, c.parameter);
+            } else if (c.method === 'REGEX_MATCH') {
+              const regex = new RegExp(c.parameter || '');
+              console.log(regex);
+              codeFound = regex.test(valueAsString);
             } else {
               if (!Array.isArray(givenResponse.value) && typeof givenResponse.value === 'string') {
                 valueAsNumber = Number.parseInt(givenResponse.value, 10);
