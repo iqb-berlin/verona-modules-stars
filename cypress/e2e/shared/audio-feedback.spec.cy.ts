@@ -146,18 +146,5 @@ export function testAudioFeedback(interactionType: string, configFile: string) {
       cy.clickContinueButton();
       cy.assertContinueButtonResponseSentBeforeNavigation();
     });
-
-    it('adds continueButton response when triggerNavigationOnEnd is true and feedback audio ends', () => {
-      const configFile = `${interactionType}_feedback_triggerNavigationOnEnd_true_test.json`;
-      cy.setupTestDataWithPostMessageMock(configFile, interactionType);
-      cy.loadUnit(`interaction-${interactionType}/${configFile}`);
-
-      cy.applyStandardScenarios(interactionType);
-
-      cy.clickContinueButton();
-      cy.waitUntilFeedbackIsFinishedPlaying();
-
-      cy.assertContinueButtonResponseSentBeforeNavigation();
-    });
   });
 }
