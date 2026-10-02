@@ -159,6 +159,17 @@ declare global {
        * Parse Verona unitState `dataParts` into response arrays (JSON strings → objects).
        */
       parseDataPartsResponses(dataParts: Record<string, unknown>): Chainable<CypressResponseItem[][]>;
+
+      /**
+       * Asserts that a continueButton response (value '1', status VALUE_CHANGED) is sent
+       * in the latest vopStateChangedNotification before the navigation request to the next unit
+       */
+      assertContinueButtonResponseSentBeforeNavigation(): Chainable<void>;
+
+      /**
+       * Asserts that the latest vopStateChangedNotification contains no continueButton response
+       */
+      assertNoContinueButtonResponse(): Chainable<void>;
     }
   }
 }

@@ -32,6 +32,28 @@ export function testContinueButtonFeatures(interactionType: string) {
       }));
     };
 
+    it('adds continueButton response with value 1 and VALUE_CHANGED on continue button click', () => {
+      cy.setupTestDataWithPostMessageMock(`${interactionType}_test.json`, interactionType);
+
+      cy.get('@testData').then(data => {
+        const dataToCheck = data as unknown as UnitDefinition;
+        // Visibility of the continue button is covered by the continueButtonShow tests
+        cy.sendMessageFromParent({
+          type: 'vopStartCommand',
+          sessionId: 'test-session-123',
+          unitDefinition: JSON.stringify({ ...dataToCheck, continueButtonShow: 'ALWAYS' })
+        }, '*');
+
+        if (dataToCheck.firstAudioOptions?.firstClickLayer && dataToCheck.firstAudioOptions.firstClickLayer !== 'OFF') {
+          cy.removeClickLayer();
+        }
+
+        cy.clickContinueButton();
+
+        cy.assertContinueButtonResponseSentBeforeNavigation();
+      });
+    });
+
     const continueButtonConfigs = [
       { continueButtonShow: 'NO', file: `${interactionType}_continueButtonShow_no_test.json` },
       { continueButtonShow: 'ALWAYS', file: `${interactionType}_continueButtonShow_always_test.json` }
