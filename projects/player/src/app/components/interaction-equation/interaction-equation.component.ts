@@ -384,14 +384,10 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
       if (field === 'operator') {
         targetSignal.set(button);
         this.emitResponse('VALUE_CHANGED');
-        // this.moveToNextField();
       } else {
         const newValue = targetSignal() + button;
         targetSignal.set(newValue);
         this.emitResponse('VALUE_CHANGED');
-        if (newValue.length >= 2) {
-          // this.moveToNextField();
-        }
       }
     }
   }

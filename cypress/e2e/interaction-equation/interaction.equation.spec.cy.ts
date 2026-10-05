@@ -116,21 +116,6 @@ describe('EQUATION Interaction E2E Tests', () => {
     cy.get('[data-cy="backspace-button"]').should('be.disabled');
   });
 
-  // moveToNextField() is disabled in the component until the behavior change is approved
-  // TODO remove or re-enable together with moveToNextField()
-  // it('keyboard focus moves to next field after entering 2 digits if available', () => {
-  //   setupAndAssert('equation_without_fixOperand1_without_fixOperand2_test.json');
-  //
-  //   // select and enter 2 digits to operand1
-  //   cy.get('[data-cy="operand1"]').click();
-  //   cy.get('[data-cy="keyboard-button-1"]').click();
-  //   cy.get('[data-cy="keyboard-button-2"]').click();
-  //
-  //   // focus should move to operand2
-  //   cy.get('[data-cy="operand1"]').should('not.have.class', 'selected');
-  //   cy.get('[data-cy="operand2"]').should('have.class', 'selected');
-  // });
-
   it('hides number keyboard initially and toggles correctly between keyboards if operators length > 1', () => {
     setupAndAssert('equation_without_operator_without_fixOperand2_test.json');
 
