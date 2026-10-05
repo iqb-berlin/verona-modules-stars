@@ -63,6 +63,7 @@
 .characters-type {
   .keyboard-wrapper {
     width: calc(65px * 9);
+    left: 0; // undo the -50px shift from keyboard-numbers-button-wrapper so the letters line up with the image
   }
 }
 
