@@ -2,6 +2,8 @@ import {
   Component,
   effect,
   signal,
+  untracked,
+  WritableSignal,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { Response } from '@iqbspecs/response/response.interface';
@@ -47,57 +49,80 @@ export class InteractionPyramidComponent extends InteractionComponentDirective {
 
       if (!parameters) return;
 
-      const isNewParametersObject = this.lastParametersRef !== parameters;
+      // Only parameters() must be tracked: the setup below reads and writes the
+      // value signals, so tracking them would re-trigger this effect.
+      untracked(() => {
+        const isNewParametersObject = this.lastParametersRef !== parameters;
 
-      if (isNewParametersObject) {
-        this.localParameters = {
-          ...this.createDefaultParameters(),
-          ...parameters,
-        };
+        if (isNewParametersObject) {
+          this.localParameters = {
+            ...this.createDefaultParameters(),
+            ...parameters,
+          };
 
-        const formerStateResponses: Response[] =
-          this.localParameters.formerState || [];
-        const found = formerStateResponses.find(
-          (r) => r.id === this.localParameters.variableId,
-        );
+          const formerStateResponses: Response[] =
+            this.localParameters.formerState || [];
+          const found = formerStateResponses.find(
+            (r) => r.id === this.localParameters.variableId,
+          );
 
-        if (found && typeof found.value === 'string') {
-          this.restoreFromFormerState(found.value);
-        } else {
-          this.resetSelection();
-          this.emitResponses('DISPLAYED');
+          if (found && typeof found.value === 'string') {
+            this.restoreFromFormerState(found.value);
+          } else {
+            this.resetSelection();
+            this.emitResponses('DISPLAYED');
+          }
+          this.updateButtonStates();
+          this.lastParametersRef = parameters;
         }
-        this.updateButtonStates();
-        this.lastParametersRef = parameters;
-      }
+      });
     });
 
     effect(() => {
-      const hints = this.showHint();
-      if (!hints || hints.length === 0) {
-        this.hasLeftHint.set(false);
-        this.hasRightHint.set(false);
-        return;
-      }
-      const parts = hints.split('_');
-      if (parts.length === 2) {
-        if (parts[0]) {
-          this.bottomLeftValue.set(parts[0]);
-          this.hasLeftHint.set(true);
+      const hint = this.showHint();
+      // Only showHint() must be tracked: applyHint() both reads and writes the
+      // value signals, so tracking them would re-trigger this effect and the
+      // second pass would clear the freshly set hint state.
+      untracked(() => {
+        if (hint) {
+          this.applyHint(hint);
         } else {
-          this.bottomLeftValue.set('');
-          this.hasLeftHint.set(false);
+          this.clearHint();
         }
-        if (parts[1]) {
-          this.bottomRightValue.set(parts[1]);
-          this.hasRightHint.set(true);
-        } else {
-          this.bottomRightValue.set('');
-          this.hasRightHint.set(false);
-        }
-      }
-      this.updateButtonStates();
+      });
     });
+  }
+
+  /**
+   * Shows the correct values and marks only the fields whose entered value was wrong.
+   * @param hint The hint string to apply, in the format "left_right".
+   */
+  private applyHint(hint: string) {
+    const parts = hint.split('_');
+    if (parts.length !== 2) return;
+
+    const applyToField = (
+      valueSignal: WritableSignal<string>,
+      hintSignal: WritableSignal<boolean>,
+      value: string,
+    ) => {
+      // only show hint when value is different
+      const isHinted = value !== '' && valueSignal() !== value;
+      valueSignal.set(value);
+      hintSignal.set(isHinted);
+    };
+
+    applyToField(this.bottomLeftValue, this.hasLeftHint, parts[0]);
+    applyToField(this.bottomRightValue, this.hasRightHint, parts[1]);
+    this.updateButtonStates();
+  }
+
+  /**
+   * Clears currently displayed hints.
+   */
+  private clearHint() {
+    this.hasLeftHint.set(false);
+    this.hasRightHint.set(false);
   }
 
   private resetSelection(): void {
