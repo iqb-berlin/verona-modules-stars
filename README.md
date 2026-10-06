@@ -39,6 +39,30 @@ npm test
 
 You can run the end-to-end tests via this command.
 
+### E2E test coverage
+
+```
+npm run e2e-coverage
+```
+
+Runs the whole Cypress suite headless against an instrumented build of the player and writes an Istanbul coverage report. Open `coverage/e2e/index.html` in a browser to see the coverage of every file, down to the single line. A summary is also printed at the end of the run.
+
+The script starts the instrumented player itself (`npm run serve-coverage`, on port 4200) and stops it afterwards, so make sure nothing else (e.g. `ng serve`) is running on that port. Arguments are passed on to `cypress run`, e.g. to measure a single spec:
+
+```
+npm run e2e-coverage -- --spec "cypress/e2e/interaction-write/**"
+```
+
+Coverage is switched off for all other e2e runs (`npm test`, `npm run e2e`, `npm run cy:open`): the plain dev server carries no coverage counters, so they would only produce an empty report.
+
+The instrumented build uses Angular's webpack builder (`@angular-devkit/build-angular`, together with `@angular-builders/custom-webpack`), while the normal build uses `@angular/build`. `@angular-devkit/build-angular` is pinned to the exact version of `@angular/build` and has to be updated together with it whenever Angular is updated, e.g.:
+
+```
+npm install --save-dev --save-exact --legacy-peer-deps @angular-devkit/build-angular@<new version>
+```
+
+Otherwise npm installs a second `@angular/build` for the coverage build or fails to resolve the dependencies.
+
 ### Build Stars Player Html File
 The Verona Interface Specification requires all programming to be built in one single html file. All styles and images need to be packed in one file.
 
