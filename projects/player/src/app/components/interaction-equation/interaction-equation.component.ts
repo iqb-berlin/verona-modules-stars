@@ -3,6 +3,7 @@ import {
   computed,
   effect,
   signal,
+  untracked,
   WritableSignal,
   ChangeDetectionStrategy,
 } from '@angular/core';
@@ -75,47 +76,56 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
       const parameters = this.parameters() as InteractionEquationParams;
       if (!parameters) return;
 
-      const isNewParametersObject = this.lastParametersRef !== parameters;
+      // Only parameters() must be tracked: the setup below reads and writes the
+      // field signals, so tracking them would re-trigger this effect.
+      untracked(() => {
+        const isNewParametersObject = this.lastParametersRef !== parameters;
 
-      if (isNewParametersObject) {
-        this.lastParametersRef = parameters;
+        if (isNewParametersObject) {
+          this.lastParametersRef = parameters;
 
-        this.localParameters = {
-          ...this.createDefaultParameters(),
-          ...parameters,
-        };
+          this.localParameters = {
+            ...this.createDefaultParameters(),
+            ...parameters,
+          };
 
-        // Reset selection before restore or initialize to avoid state leakage
-        this.resetSelection();
+          // Reset selection before restore or initialize to avoid state leakage
+          this.resetSelection();
 
-        // Initialize values first to ensure fixed fields from parameters are populated
-        this.initializeValues();
+          // Initialize values first to ensure fixed fields from parameters are populated
+          this.initializeValues();
 
-        const formerStateResponses: Response[] =
-          this.localParameters.formerState || [];
-        const found = formerStateResponses.find(
-          (r) => r.id === this.localParameters.variableId,
-        );
+          const formerStateResponses: Response[] =
+            this.localParameters.formerState || [];
+          const found = formerStateResponses.find(
+            (r) => r.id === this.localParameters.variableId,
+          );
 
-        if (found && typeof found.value === 'string' && found.value !== '') {
-          this.restoreFromFormerState(found.value);
+          if (found && typeof found.value === 'string' && found.value !== '') {
+            this.restoreFromFormerState(found.value);
+          } else {
+            // No valid former state - already initialized with defaults by initializeValues()
+            this.emitResponse('DISPLAYED');
+          }
         } else {
-          // No valid former state - already initialized with defaults by initializeValues()
-          this.emitResponse('DISPLAYED');
+          // Same unit, just keep localParameters' formerState in sync if needed
+          this.localParameters.formerState = parameters.formerState;
         }
-      } else {
-        // Same unit, just keep localParameters' formerState in sync if needed
-        this.localParameters.formerState = parameters.formerState;
-      }
+      });
     });
 
     effect(() => {
       const hint = this.showHint();
-      if (hint) {
-        this.applyHint(hint);
-      } else {
-        this.clearHint();
-      }
+      // Only showHint() must be tracked: applyHint() both reads and writes the
+      // field signals, so tracking them would re-trigger this effect and the
+      // second pass would clear the freshly set hint state.
+      untracked(() => {
+        if (hint) {
+          this.applyHint(hint);
+        } else {
+          this.clearHint();
+        }
+      });
     });
   }
 
@@ -134,11 +144,15 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
       editableFields.forEach((field, index) => {
         const value = parts[index] || '';
         const targetSignal = this.getFieldSignal(field);
+        let isHinted = false;
+
+        // only show hint when value is different
         if (targetSignal) {
+          isHinted = targetSignal() !== value;
           targetSignal.set(value);
         }
 
-        if (value !== '' && this.isFieldEditable(field)) {
+        if (value !== '' && this.isFieldEditable(field) && isHinted) {
           newHintedFields.add(field);
         }
       });
@@ -363,18 +377,17 @@ export class InteractionEquationComponent extends InteractionComponentDirective 
     if (this.hintedFields().size !== 0) this.hintedFields.set(new Set());
 
     const targetSignal = this.getFieldSignal(field);
+
+    // don't move to next field
+    // TODO remove if approved
     if (targetSignal) {
       if (field === 'operator') {
         targetSignal.set(button);
         this.emitResponse('VALUE_CHANGED');
-        this.moveToNextField();
       } else {
         const newValue = targetSignal() + button;
         targetSignal.set(newValue);
         this.emitResponse('VALUE_CHANGED');
-        if (newValue.length >= 2) {
-          this.moveToNextField();
-        }
       }
     }
   }
