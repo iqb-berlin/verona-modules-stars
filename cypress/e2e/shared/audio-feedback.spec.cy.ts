@@ -221,5 +221,22 @@ export function testAudioFeedback(interactionType: string, configFile: string) {
         origin: '*'
       });
     });
+
+    // eslint-disable-next-line max-len
+    it('adds continueButton response only after the second continue button click when triggerNavigationOnEnd is false', () => {
+      cy.setupTestDataWithPostMessageMock(configFile, interactionType);
+      cy.loadUnit(`interaction-${interactionType}/${configFile}`);
+
+      cy.applyStandardScenarios(interactionType);
+
+      // First click plays the feedback and does not navigate
+      cy.clickContinueButton();
+      cy.waitUntilFeedbackIsFinishedPlaying();
+      cy.assertNoContinueButtonResponse();
+
+      // Second click navigates to the next unit
+      cy.clickContinueButton();
+      cy.assertContinueButtonResponseSentBeforeNavigation();
+    });
   });
 }

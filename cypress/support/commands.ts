@@ -45,6 +45,7 @@ import {
   getButtonOptions,
   getCorrectAnswerParam,
   getIndexByOneBasedInput,
+  MockMessage,
   parseDataPartsResponses,
   parsePlaceValueParam
 } from './utils';
@@ -1085,4 +1086,39 @@ Cypress.Commands.add('clickIncorrectMultiselectButtons', (interactionType: strin
 
 Cypress.Commands.add('parseDataPartsResponses', (dataParts: Record<string, unknown>) => {
   return cy.wrap(parseDataPartsResponses(dataParts), { log: false });
+});
+
+const findContinueButtonResponse = (stateMessages: MockMessage[]) => {
+  const latestMessage = stateMessages[stateMessages.length - 1];
+  if (!latestMessage?.data?.unitState) {
+    throw new Error('Latest message or unitState is undefined');
+  }
+  return parseDataPartsResponses(latestMessage.data.unitState.dataParts)
+    .flat()
+    .find(response => response.id === 'continueButton');
+};
+
+Cypress.Commands.add('assertContinueButtonResponseSentBeforeNavigation', () => {
+  cy.get('@outgoingMessages').should(messages => {
+    const arr = messages as unknown as MockMessage[];
+    const navigationIndex = arr.findIndex(msg => msg.data.type === 'vopUnitNavigationRequestedNotification' &&
+      msg.data.target === 'next');
+    expect(navigationIndex, 'vopUnitNavigationRequestedNotification should be sent').to.be.greaterThan(-1);
+
+    // The response must be sent before the navigation request
+    const stateMessages = arr.slice(0, navigationIndex)
+      .filter(msg => msg.data.type === 'vopStateChangedNotification');
+    const continueButtonResponse = findContinueButtonResponse(stateMessages);
+    expect(continueButtonResponse, 'continueButton response should exist').to.not.equal(undefined);
+    expect(continueButtonResponse?.value, 'continueButton value').to.equal('1');
+    expect(continueButtonResponse?.status, 'continueButton status').to.equal('VALUE_CHANGED');
+  });
+});
+
+Cypress.Commands.add('assertNoContinueButtonResponse', () => {
+  cy.get('@outgoingMessages').then(messages => {
+    const arr = messages as unknown as MockMessage[];
+    const stateMessages = arr.filter(msg => msg.data.type === 'vopStateChangedNotification');
+    expect(findContinueButtonResponse(stateMessages), 'continueButton response should not exist').to.equal(undefined);
+  });
 });
