@@ -89,6 +89,42 @@
           },
           "defaultConfiguration": "development"
         },
+        "build-coverage": {
+          "builder": "@angular-builders/custom-webpack:browser",
+          "options": {
+            "customWebpackConfig": {
+              "path": "./webpack.coverage.config.js",
+              "mergeStrategies": {
+                "module.rules": "append"
+              }
+            },
+            "outputPath": "dist/stars-player-coverage",
+            "index": "projects/player/src/index.html",
+            "main": "projects/player/src/main.ts",
+            "tsConfig": "projects/player/tsconfig.app.json",
+            "aot": true,
+            "sourceMap": true,
+            "optimization": false,
+            "assets": [
+              "projects/player/src/assets"
+            ],
+            "styles": [
+              "projects/player/src/styles.css"
+            ],
+            "scripts": [],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "projects/player/src/styles"
+              ]
+            }
+          }
+        },
+        "serve-coverage": {
+          "builder": "@angular-builders/custom-webpack:dev-server",
+          "options": {
+            "buildTarget": "player:build-coverage"
+          }
+        },
         "extract-i18n": {
           "builder": "@angular/build:extract-i18n",
           "options": {
