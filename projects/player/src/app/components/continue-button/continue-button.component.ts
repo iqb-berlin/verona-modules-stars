@@ -1,13 +1,11 @@
 import {
   Component,
-  EventEmitter,
   inject,
-  Output,
   signal,
-  ChangeDetectionStrategy,
+  ChangeDetectionStrategy, output,
 } from '@angular/core';
 
-import { ResponsesService } from '../../services/responses.service';
+import { ResponsesService, StarsResponse } from '../../services/responses.service';
 import { AudioService } from '../../services/audio.service';
 import { UnitService } from '../../services/unit.service';
 
@@ -19,7 +17,7 @@ import { UnitService } from '../../services/unit.service';
   styleUrls: ['./continue-button.component.scss'],
 })
 export class ContinueButtonComponent {
-  @Output() navigate = new EventEmitter();
+  navigate = output();
   responseService = inject(ResponsesService);
   audioService = inject(AudioService);
   unitService = inject(UnitService);
@@ -63,9 +61,7 @@ export class ContinueButtonComponent {
           });
         this.lastAudioSource = newAudioSource;
       } else {
-        setTimeout(() => {
-          this.navigate.emit();
-        }, 200);
+        this.navigateNext();
       }
     } else if (
       this.unitService.closingMetaButtons()?.variableIdReference &&
@@ -73,9 +69,22 @@ export class ContinueButtonComponent {
     ) {
       this.unitService.startClosingMeta();
     } else {
-      setTimeout(() => {
-        this.navigate.emit();
-      }, 200);
+      this.navigateNext();
     }
+  }
+
+  navigateNext() {
+    const response: StarsResponse = {
+      id: 'continueButton',
+      value: '1',
+      status: 'VALUE_CHANGED',
+      relevantForResponsesProgress: false,
+    };
+
+    this.responseService.newResponses([response]);
+
+    setTimeout(() => {
+      this.navigate.emit();
+    }, 200);
   }
 }

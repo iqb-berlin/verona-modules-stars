@@ -111,8 +111,6 @@
   }
 
   &.has-smiley-icon {
-    margin-right: 15px;
-
     label {
       box-shadow: none;
     }
@@ -123,6 +121,22 @@
 
     &:has(input:checked) {
       box-shadow: none;
+    }
+
+    /* Smiley SVGs are 124px (selected) / 130px (incl. drop-shadow) and are injected via innerHTML,
+       so they can't be scaled from here. Size the button to the smiley circle so the layout reserves its space. */
+    &.circle-type {
+      width: 124px;
+      height: 124px;
+
+      label,
+      input:checked + label {
+        padding: 0;
+        border: none;
+        background-color: transparent;
+        justify-content: flex-start;
+        align-items: flex-start;
+      }
     }
   }
 

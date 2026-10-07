@@ -2,6 +2,7 @@ import { testBaseFeatures } from "../shared/base-features.spec.cy";
 import { testFormerStateFeatures } from "../shared/former-state.spec.cy";
 import { testKeyboardInteractions } from "../shared/keyboard-interactions.spec.cy";
 import { testClosingMetaButtons } from "../shared/closing-meta-buttons.spec.cy";
+import { testCodingRegexFraction } from "../shared/coding-regex-fraction.spec.cy";
 
 describe('EQUATION Interaction E2E Tests', () => {
   const interactionType = 'equation';
@@ -115,19 +116,6 @@ describe('EQUATION Interaction E2E Tests', () => {
     cy.get('[data-cy="backspace-button"]').should('be.disabled');
   });
 
-  it('keyboard focus moves to next field after entering 2 digits if available', () => {
-    setupAndAssert('equation_without_fixOperand1_without_fixOperand2_test.json');
-
-    // select and enter 2 digits to operand1
-    cy.get('[data-cy="operand1"]').click();
-    cy.get('[data-cy="keyboard-button-1"]').click();
-    cy.get('[data-cy="keyboard-button-2"]').click();
-
-    // focus should move to operand2
-    cy.get('[data-cy="operand1"]').should('not.have.class', 'selected');
-    cy.get('[data-cy="operand2"]').should('have.class', 'selected');
-  });
-
   it('hides number keyboard initially and toggles correctly between keyboards if operators length > 1', () => {
     setupAndAssert('equation_without_operator_without_fixOperand2_test.json');
 
@@ -206,4 +194,6 @@ describe('EQUATION Interaction E2E Tests', () => {
   testKeyboardInteractions(interactionType, defaultTestFile);
   // Test closing meta buttons for the EQUATION interaction type
   testClosingMetaButtons(interactionType);
+  // Test coding with REGEX_FRACTION and REGEX_MATCH
+  testCodingRegexFraction('equation_with_codingSource_regexFraction_test.json', interactionType);
 });

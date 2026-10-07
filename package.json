@@ -1,6 +1,6 @@
 {
   "name": "verona-modules-stars",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "license": "MIT",
   "engines": {
     "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
@@ -17,7 +17,9 @@
     "postbuild": "node projects/tools/distpacker.js dist/stars-player/browser index_packed.html",
     "e2e": "npx cypress run",
     "cy:open": "cypress open --browser chrome cypress/e2e/interaction-find-on-image",
-    "test": "start-server-and-test start http://localhost:4200 cy:open"
+    "test": "start-server-and-test start http://localhost:4200 cy:open",
+    "serve-coverage": "ng run player:serve-coverage",
+    "e2e-coverage": "scripts/e2e-coverage.sh"
   },
   "dependencies": {
     "@angular/animations": "^22.0.7",
@@ -31,6 +33,8 @@
     "rxjs": "~7.8.1"
   },
   "devDependencies": {
+    "@angular-builders/custom-webpack": "^22.0.1",
+    "@angular-devkit/build-angular": "22.0.7",
     "@angular-eslint/builder": "^22.1.0",
     "@angular-eslint/eslint-plugin": "^22.1.0",
     "@angular-eslint/eslint-plugin-template": "^22.1.0",
@@ -39,8 +43,10 @@
     "@angular/build": "^22.0.7",
     "@angular/cli": "~22.0.7",
     "@angular/compiler-cli": "^22.0.7",
+    "@cypress/code-coverage": "^4.0.3",
     "@iqb/eslint-config": "^2.0.0",
     "@iqbspecs/validate-json": "^0.1.0",
+    "@jsdevtools/coverage-istanbul-loader": "^3.0.5",
     "@types/jasmine": "~3.6.0",
     "@types/jasminewd2": "~2.0.10",
     "@types/karma": "~6.3.3",
