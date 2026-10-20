@@ -64,6 +64,24 @@ export function firstAudioOptionsFeatures(interactionType: string) {
       cy.applyStandardScenarios(interactionType);
     });
 
+    it('should cover the audio button with the first click layer when firstClickLayer: "DISABLED"', () => {
+      // Setup test data
+      cy.setupTestData(`${interactionType}_firstClickLayer_disabled_test.json`, interactionType);
+
+      // Click layer should exists
+      cy.get('[data-cy="click-layer"]').should('exist');
+
+      // Click layer sits above the audio button: clicking on the button hits the layer
+      cy.get('[data-cy="custom-audio-button"]').then($button => {
+        const rect = $button[0].getBoundingClientRect();
+        cy.get('[data-cy="click-layer"]').click(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      });
+
+      // Click layer cannot be seen and main audio is playing
+      cy.get('[data-cy="click-layer"]').should('not.exist');
+      cy.get('[data-cy="custom-audio-button"]').should('have.class', 'playing');
+    });
+
     it('should show and hide first click layer correctly when firstClickLayer: "OFF"', () => {
       // Setup test data
       cy.setupTestData(`${interactionType}_firstClickLayer_off_test.json`, interactionType);
