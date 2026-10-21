@@ -144,6 +144,19 @@ describe('Interaction VIDEO Component', () => {
     });
   });
 
+  describe('Audio icon', () => {
+    it('does not keep the speaker icon of the previous unit when the new unit has no mainAudio', () => {
+      // Load a unit with mainAudio first
+      cy.loadUnit('interaction-buttons/buttons_test');
+      cy.get('stars-audio [data-cy="speaker-icon"]').should('exist');
+
+      // Then load a video unit without mainAudio
+      cy.loadUnit(`interaction-${interactionType}/${defaultTestFile}`);
+      cy.get('[data-cy="video-player"]').should('exist');
+      cy.get('stars-audio [data-cy="speaker-icon"]').should('not.exist');
+    });
+  });
+
   describe('Navigation on triggerNavigationOnEnd', () => {
     it('requests navigation to next unit when triggerNavigationOnEnd is true and video ends', () => {
 

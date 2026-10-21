@@ -282,6 +282,22 @@ describe('Interaction BUTTONS Component', () => {
     });
   });
 
+  describe('Audio icon', () => {
+    it('does not keep the opening image audio when there is no mainAudio', () => {
+      setupAndAssert('buttons_with_openingImage_without_mainAudio_test');
+
+      // The speaker icon plays the opening image audio
+      cy.get('stars-audio [data-cy="speaker-icon"]').should('be.visible').click();
+      // Wait for the opening audio to finish
+      cy.get('[data-cy="opening-image"]', { timeout: 15000 }).should('be.visible');
+
+      // After the opening image is gone, there is no audio left to play
+      cy.get('[data-cy="opening-image"]').should('not.exist');
+      assertButtonExists();
+      cy.get('stars-audio [data-cy="speaker-icon"]').should('not.exist');
+    });
+  });
+
   // Test base features for the BUTTONS interaction type
   testBaseFeatures(interactionType, defaultTestFile);
   // Test former state features for the BUTTONS interaction type
