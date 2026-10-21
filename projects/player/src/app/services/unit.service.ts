@@ -73,8 +73,9 @@ export class UnitService {
     this.responsesService.updatePresentationProgress('some');
   }
 
-  finishOpeningFlow() {    this._openingFlowActive.set(false);
-    if (this.mainAudio().audioSource) this._currentAudioSrc.set(this.mainAudio());
+  finishOpeningFlow() {
+    this._openingFlowActive.set(false);
+    this._currentAudioSrc.set(this.mainAudio());
   }
 
   /** Starts the closing meta phase */
@@ -114,6 +115,7 @@ export class UnitService {
   reset() {
     this.audioService.reset();
     this.mainAudio.set({} as AudioOptions);
+    this._currentAudioSrc.set({} as AudioOptions);
     this.firstAudioOptions.set(undefined);
     this.backgroundColor.set('#EEE');
     this.continueButton.set('NO');
