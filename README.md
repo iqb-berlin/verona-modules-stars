@@ -2,7 +2,7 @@
 ![GitHub package.json version](https://img.shields.io/github/package-json/v/iqb-berlin/verona-modules-stars?style=flat-square)
 
 # IQB Stars Player
-version: 0.7.2
+version: 0.7.4
 
 ## Prerequisites
 
