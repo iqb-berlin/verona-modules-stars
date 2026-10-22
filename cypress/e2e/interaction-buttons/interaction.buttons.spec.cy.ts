@@ -282,6 +282,80 @@ describe('Interaction BUTTONS Component', () => {
     });
   });
 
+  describe('Audio icon', () => {
+    it('does not keep the opening image audio when there is no mainAudio', () => {
+      setupAndAssert('buttons_with_openingImage_without_mainAudio_test');
+
+      // The speaker icon plays the opening image audio
+      cy.get('stars-audio [data-cy="speaker-icon"]').should('be.visible').click();
+      // Wait for the opening audio to finish
+      cy.get('[data-cy="opening-image"]', { timeout: 15000 }).should('be.visible');
+
+      // After the opening image is gone, there is no audio left to play
+      cy.get('[data-cy="opening-image"]').should('not.exist');
+      assertButtonExists();
+      cy.get('stars-audio [data-cy="speaker-icon"]').should('not.exist');
+    });
+  });
+
+  describe('Opening image without opening audio', () => {
+    // presentationDurationMS is 1000 and firstClickLayer is OFF
+    const openingImageFile = 'buttons_with_openingImage_without_openingAudio_test';
+
+    it('does not show the click layer after the opening image when firstClickLayer is OFF', () => {
+      setupAndAssert(openingImageFile);
+      cy.get('[data-cy="opening-image"]').should('be.visible');
+
+      cy.get('[data-cy="opening-image"]').should('not.exist');
+      assertButtonExists();
+      cy.get('[data-cy="click-layer"]').should('not.exist');
+      cy.get('[data-cy="custom-audio-button"]').should('have.class', 'playing');
+    });
+
+    it('shows and finishes the opening image when audioSource is missing', () => {
+      setupAndAssert('buttons_with_openingImage_missing_audioSource_test');
+      cy.get('[data-cy="opening-image"]').should('be.visible');
+
+      cy.get('[data-cy="opening-image"]').should('not.exist');
+      assertButtonExists();
+    });
+
+    it('does not finish the opening flow in the next unit', () => {
+      setupAndAssert(openingImageFile);
+      cy.get('[data-cy="opening-image"]').should('be.visible');
+
+      // The next unit does not play audio on its own, so any play() call comes from the previous unit
+      cy.window().then(win => {
+        cy.spy(win.HTMLMediaElement.prototype, 'play').as('audioPlay');
+      });
+
+      // Load a unit with mainAudio before presentationDurationMS has passed
+      cy.loadUnit(`interaction-${interactionType}/buttons_firstClickLayer_off_test`);
+      assertButtonExists();
+
+      // Wait until the timer of the previous unit would have fired
+      cy.wait(1000);
+      cy.get('[data-cy="click-layer"]').should('not.exist');
+      cy.get('@audioPlay').should('not.have.been.called');
+    });
+
+    it('does not finish the opening flow of the next unit with opening image', () => {
+      setupAndAssert(openingImageFile);
+      cy.get('[data-cy="opening-image"]').should('be.visible');
+
+      // Load a unit with opening image and opening audio before presentationDurationMS has passed
+      cy.loadUnit(`interaction-${interactionType}/buttons_with_openingImage_test`);
+      cy.get('[data-cy="opening-image"]').should('not.exist');
+      // The speaker icon is covered by the click layer, so check existence instead of visibility
+      cy.get('stars-audio [data-cy="speaker-icon"]').should('exist');
+
+      // Wait until the timer of the previous unit would have fired
+      cy.wait(1000);
+      cy.get('[data-cy="button-0"]').should('not.exist');
+      cy.get('stars-audio [data-cy="speaker-icon"]').should('exist');
+    });
+  });
+
   // Test base features for the BUTTONS interaction type
   testBaseFeatures(interactionType, defaultTestFile);
   // Test former state features for the BUTTONS interaction type

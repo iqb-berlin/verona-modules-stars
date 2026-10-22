@@ -6,7 +6,7 @@
   height: 100%;
   background-color: transparent;
   cursor: pointer;
-  z-index: 151;
+  z-index: 300; // above everything except the standalone menu (350), incl. audio button (200)
   -webkit-tap-highlight-color: transparent;
 
   &.blur {
