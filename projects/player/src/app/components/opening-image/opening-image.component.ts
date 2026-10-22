@@ -111,22 +111,10 @@ export class OpeningImageComponent extends InteractionComponentDirective {
         firstClickLayer: 'OFF',
       });
     }
-    // Now that the opening image has disappeared, switch to main audio and auto-play once
-    const main = this.unitService.mainAudio();
-    if (main?.audioSource) {
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      this.audioService
-        .setAudioSrc({ ...main, audioId: 'mainAudio' })
-        .then((ready) => {
-          if (ready) {
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            this.audioService.getPlayFinished('mainAudio');
-          }
-        })
-        .catch((err) => {
-          // eslint-disable-next-line no-console
-          console.error('Failed to load main audio after opening image', err);
-        });
+    // Now that the opening image has disappeared, the audio component loads the main audio
+    // (currentAudioSrc switches to it) and plays it once after loading
+    if (this.unitService.mainAudio()?.audioSource) {
+      this.unitService.requestAutoPlay('mainAudio');
     }
   }
 
