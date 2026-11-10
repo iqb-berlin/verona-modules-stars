@@ -58,6 +58,12 @@ declare global {
       assertContinueButtonNotExists(): Chainable<void>;
 
       /**
+       * Waits until the player has rendered what the last action changed (at most 50ms).
+       * Use it before checks that something did NOT happen.
+       * */
+      waitForRender(): Chainable<void>;
+
+      /**
        * Click on the continue button
        * */
       clickContinueButton(): Chainable<void>;
@@ -68,9 +74,21 @@ declare global {
       clickButtonAtIndexOne(): Chainable<void>;
 
       /**
-       * Assert that the audio is played until the end
+       * Skips to the end of the playing audio and asserts that the player noticed the end.
+       * Passes as well if no audio plays. An audio that has already ended only counts with mayHaveEnded,
+       * otherwise it waits for the next audio to start.
        * */
-      waitUntilAudioIsFinishedPlaying(): Chainable<void>;
+      waitUntilAudioIsFinishedPlaying(options?: { mayHaveEnded?: boolean }): Chainable<void>;
+
+      /**
+       * Waits until the current audio plays and skips to its end (nothing to do if no audio plays)
+       * */
+      skipToEndOfAudio(): Chainable<void>;
+
+      /**
+       * Moves the faked Date 500ms forward, so that place value accepts the next click
+       * */
+      skipPlaceValueClickDebounce(): Chainable<void>;
 
       /**
        * Writes text on keyboard
@@ -79,7 +97,7 @@ declare global {
       writeTextOnKeyboard(text: string): Chainable<void>;
 
       /**
-       * Assert that the feedback is played until the end
+       * Waits until the feedback starts, skips to its end and asserts that the player noticed the end
        * */
       waitUntilFeedbackIsFinishedPlaying(): Chainable<void>;
 

@@ -56,16 +56,17 @@ describe('PLACE_VALUE Interaction E2E Tests', () => {
     setupAndAssert(`${defaultTestFile}.json`);
 
     // Click a "one" icon
+    cy.skipPlaceValueClickDebounce();
     cy.get('[data-cy="icon-item-ones"]').last().click({ force: true });
     cy.get('[data-cy="icon-item-ones-moved"]').should('have.length', 1);
-    cy.wait(500); // Wait for debounce
 
     // Click another "one" icon
+    cy.skipPlaceValueClickDebounce();
     cy.get('[data-cy="icon-item-ones"]').last().click({ force: true });
     cy.get('[data-cy="icon-item-ones-moved"]').should('have.length', 2);
-    cy.wait(500); // Wait for debounce
 
     // Click a "ten" icon
+    cy.skipPlaceValueClickDebounce();
     cy.get('[data-cy="icon-item-tens"]').last().click({ force: true });
     cy.get('[data-cy="icon-item-tens-moved"]').should('have.length', 1);
   });
@@ -74,18 +75,19 @@ describe('PLACE_VALUE Interaction E2E Tests', () => {
     setupAndAssert(`${defaultTestFile}.json`);
 
     // Move some icons first
+    cy.skipPlaceValueClickDebounce();
     cy.get('[data-cy="icon-item-ones"]').last().click({ force: true });
-    cy.wait(500); // Wait for debounce
+    cy.skipPlaceValueClickDebounce();
     cy.get('[data-cy="icon-item-tens"]').last().click({ force: true });
-    cy.wait(500); // Wait for debounce
     cy.get('[data-cy="icon-item-ones-moved"]').should('have.length', 1);
     cy.get('[data-cy="icon-item-tens-moved"]').should('have.length', 1);
 
     // Click the moved icons again to move them back
+    cy.skipPlaceValueClickDebounce();
     cy.get('[data-cy="icon-item-ones-moved"]').first().click({ force: true });
     cy.get('[data-cy="icon-item-ones-moved"]').should('not.exist');
-    cy.wait(500); // Wait for debounce
 
+    cy.skipPlaceValueClickDebounce();
     cy.get('[data-cy="icon-item-tens-moved"]').first().click({ force: true });
     cy.get('[data-cy="icon-item-tens-moved"]').should('not.exist');
   });
@@ -93,15 +95,16 @@ describe('PLACE_VALUE Interaction E2E Tests', () => {
   it('prevents multiple moves on rapid double-click (debounce)', () => {
     setupAndAssert(`${defaultTestFile}.json`);
 
-    // Rapidly click a "one" icon twice
+    // Rapidly click a "one" icon twice (with the faked Date both clicks come at the same time)
+    cy.skipPlaceValueClickDebounce();
     cy.get('[data-cy="icon-item-ones"]').last().click({ force: true });
     cy.get('[data-cy="icon-item-ones"]').last().click({ force: true });
 
     // Only one should have moved due to the 500ms debounce
     cy.get('[data-cy="icon-item-ones-moved"]').should('have.length', 1);
 
-    // Wait for debounce to expire
-    cy.wait(500);
+    // Let the debounce expire
+    cy.skipPlaceValueClickDebounce();
 
     // Click again, now it should work
     cy.get('[data-cy="icon-item-ones"]').last().click({ force: true });
@@ -124,13 +127,13 @@ describe('PLACE_VALUE Interaction E2E Tests', () => {
       cy.get('[data-cy="ones-wrapper"]').should('have.class', 'disabled');
 
       // Move one ten back and check if it is enabled again
+      cy.skipPlaceValueClickDebounce();
       cy.get('[data-cy="icon-item-tens-moved"]').first().click({ force: true });
-      cy.wait(500); // Wait for debounce
       cy.get('[data-cy="tens-wrapper"]').should('not.have.class', 'disabled');
 
       // Move one one back and check if it is enabled again
+      cy.skipPlaceValueClickDebounce();
       cy.get('[data-cy="icon-item-ones-moved"]').first().click({ force: true });
-      cy.wait(500); // Wait for debounce
       cy.get('[data-cy="ones-wrapper"]').should('not.have.class', 'disabled');
     });
   });
@@ -165,8 +168,8 @@ describe('PLACE_VALUE Interaction E2E Tests', () => {
     setupAndAssert(`${defaultTestFile}.json`);
 
     // Move a "ten" icon to the upper panel first
+    cy.skipPlaceValueClickDebounce();
     cy.get('[data-cy="icon-item-tens"]').last().click({ force: true });
-    cy.wait(500); // Wait for debounce
     cy.get('[data-cy="icon-item-tens-moved"]').should('have.length', 1);
 
     // Drag the moved "ten" icon back to its wrapper
@@ -179,11 +182,10 @@ describe('PLACE_VALUE Interaction E2E Tests', () => {
       .trigger('mouseup', { button: 0, bubbles: true, force: true });
 
     cy.get('[data-cy="icon-item-tens-moved"]').should('not.exist');
-    cy.wait(500); // Wait for debounce
 
     // Move a "one" icon to the upper panel first
+    cy.skipPlaceValueClickDebounce();
     cy.get('[data-cy="icon-item-ones"]').last().click({ force: true });
-    cy.wait(500); // Wait for debounce
     cy.get('[data-cy="icon-item-ones-moved"]').should('have.length', 1);
 
     // Drag the moved "one" icon back to its wrapper

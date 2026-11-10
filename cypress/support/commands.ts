@@ -177,7 +177,21 @@ Cypress.Commands.add('assertContinueButtonExistsAndVisible', () => {
   cy.get('[data-cy="continue-button"]').should('exist').and('be.visible');
 });
 
+// Lets the player render what the last action changed: change detection runs at the latest in the next
+// animation frame. Needed before checks that something did NOT happen, otherwise they would only check
+// the state before the change. The browser pauses animation frames while the window is in the
+// background (e.g. in `cypress open`), so the wait ends after RENDER_WAIT_MAX_MS in any case.
+const RENDER_WAIT_MAX_MS = 50;
+Cypress.Commands.add('waitForRender', () => {
+  cy.window({ log: false }).then(win => new Cypress.Promise(resolve => {
+    // The setTimeout of the spec window, the clock of a test only replaces the one of the player
+    setTimeout(resolve, RENDER_WAIT_MAX_MS);
+    win.requestAnimationFrame(() => win.requestAnimationFrame(resolve));
+  }));
+});
+
 Cypress.Commands.add('assertContinueButtonNotExists', () => {
+  cy.waitForRender();
   cy.get('[data-cy="continue-button"]').should('not.exist');
 });
 
@@ -189,12 +203,83 @@ Cypress.Commands.add('clickButtonAtIndexOne', () => {
   cy.get('[data-cy="button-1"]').click();
 });
 
-Cypress.Commands.add('waitUntilAudioIsFinishedPlaying', () => {
-  cy.get('[data-cy="custom-audio-button"]', { timeout: 60000 }) // wait up to 60s
-    .should($el => {
-      // check that the class 'playing' is not present
-      expect($el).not.to.have.class('playing');
+// The player plays all audio (main, opening image, feedback, closing meta) through one Audio element
+// of the AudioService, which is not part of the DOM. It is remembered here when it starts playing,
+// so that the tests can skip to its end instead of listening to the whole audio.
+Cypress.on('window:before:load', win => {
+  const originalPlay = win.HTMLMediaElement.prototype.play;
+  // eslint-disable-next-line func-names
+  win.HTMLMediaElement.prototype.play = function (this: HTMLMediaElement) {
+    if (this instanceof win.HTMLAudioElement) {
+      (win as any).cyCurrentAudio = this;
+    }
+    return originalPlay.call(this);
+  };
+});
+
+// The player starts an audio a moment after the click (it loads the source first) or in a later change
+// detection (autoplay). If no audio plays after this time, none is going to play.
+const AUDIO_START_GRACE_MS = 2000;
+
+/**
+ * Skips to the end of the current audio, so that the player gets its usual ended event.
+ * Waits until the audio really plays first: the player only listens for the end 50ms after play()
+ * (AudioService.getPlayFinished), an earlier end would go unnoticed.
+ * An audio that has already ended does not count: the player uses one Audio element for all audio,
+ * so it may be the previous audio, while the next one is about to start. Only with mayHaveEnded it is
+ * accepted, for tests in which the expected audio may have ended before.
+ * If no audio plays within AUDIO_START_GRACE_MS, there is nothing to skip.
+ */
+const skipToEndOfCurrentAudio = (mayHaveEnded = false) => {
+  cy.window({ log: false })
+    // Skips inside the promise: Cypress would hand on the audio element wrapped in jQuery
+    .then({ timeout: 15000 }, win => new Cypress.Promise<boolean>(resolve => {
+      // The setTimeout of the spec window, the clock of a test only replaces the one of the player
+      const start = Date.now();
+      const check = () => {
+        const audio = (win as any).cyCurrentAudio as HTMLAudioElement | undefined;
+        if (audio && !audio.paused && audio.currentTime >= 0.1) {
+          audio.currentTime = audio.duration;
+          resolve(true);
+        } else if (mayHaveEnded && audio?.ended) {
+          resolve(false);
+        } else if ((!audio || audio.paused) && Date.now() - start > AUDIO_START_GRACE_MS) {
+          resolve(false);
+        } else {
+          setTimeout(check, 20);
+        }
+      };
+      check();
+    }))
+    .then(skipped => {
+      cy.log(skipped ? 'Skipped to the end of the audio' : 'No audio is playing');
     });
+};
+
+Cypress.Commands.add('skipToEndOfAudio', () => {
+  skipToEndOfCurrentAudio();
+});
+
+// Place value ignores clicks that come less than CLICK_DEBOUNCE_MS (500ms, measured with Date.now()) after
+// the previous one. Instead of waiting, the faked Date is moved forward. cy.clock() returns the clock
+// that is already installed, so this can be called before every click.
+Cypress.Commands.add('skipPlaceValueClickDebounce', () => {
+  cy.clock(Date.now(), ['Date'], { log: false }).then(clock => {
+    cy.window({ log: false }).then(win => {
+      const before = win.Date.now();
+      clock.tick(500);
+      // An already installed clock is returned as it is, even if it does not replace Date
+      if (win.Date.now() - before < 500) {
+        throw new Error('skipPlaceValueClickDebounce needs a clock that replaces Date, ' +
+          'add \'Date\' to the methods of the cy.clock() call of this test');
+      }
+    });
+  });
+});
+
+Cypress.Commands.add('waitUntilAudioIsFinishedPlaying', (options: { mayHaveEnded?: boolean } = {}) => {
+  skipToEndOfCurrentAudio(options.mayHaveEnded);
+  cy.get('[data-cy="custom-audio-button"]').should('not.have.class', 'playing');
 });
 
 Cypress.Commands.add('writeTextOnKeyboard', (text: string) => {
@@ -231,18 +316,11 @@ Cypress.Commands.add('writeTextOnKeyboard', (text: string) => {
 
 Cypress.Commands.add('waitUntilFeedbackIsFinishedPlaying', () => {
   // First, wait for the audio to start playing (indicated by the is-playing class)
-  cy.get('[data-cy="continue-button"]', { timeout: 10000 })
-    .should('have.class', 'is-playing')
-    .then(() => {
-      cy.log('Feedback audio started playing, waiting for it to finish...');
+  cy.get('[data-cy="continue-button"]', { timeout: 10000 }).should('have.class', 'is-playing');
 
-      // Then wait for it to stop playing
-      cy.get('[data-cy="continue-button"]', { timeout: 60000 })
-        .should('not.have.class', 'is-playing')
-        .then(() => {
-          cy.log('Feedback audio finished playing');
-        });
-    });
+  // Then skip to its end and check that the player noticed it
+  skipToEndOfCurrentAudio();
+  cy.get('[data-cy="continue-button"]').should('not.have.class', 'is-playing');
 });
 
 /**
@@ -495,16 +573,16 @@ Cypress.Commands.add('movePlaceValueIcons', (targetTens: number, targetOnes: num
 
     // Move tens
     for (let i = initialTensMoved; i < targetTens; i++) {
+      cy.skipPlaceValueClickDebounce();
       cy.get('[data-cy="icon-item-tens"]').first().click({ force: true });
       cy.get('[data-cy="icon-item-tens-moved"]').should('have.length', i + 1);
-      cy.wait(500); // Wait for debounce
     }
 
     // Move ones
     for (let i = initialOnesMoved; i < targetOnes; i++) {
+      cy.skipPlaceValueClickDebounce();
       cy.get('[data-cy="icon-item-ones"]').first().click({ force: true });
       cy.get('[data-cy="icon-item-ones-moved"]').should('have.length', i + 1);
-      cy.wait(500); // Wait for debounce
     }
   });
 });
@@ -627,8 +705,8 @@ Cypress.Commands.add('applyStandardScenarios', (interactionType: string, navigat
       return;
     }
     // Default behavior
+    cy.skipPlaceValueClickDebounce();
     cy.get('[data-cy="icon-item-ones"]').first().click({ force: true });
-    cy.wait(500); // Wait for debounce
     return;
   }
 
@@ -640,21 +718,18 @@ Cypress.Commands.add('applyStandardScenarios', (interactionType: string, navigat
         if (numMatch && numMatch[0]) {
           const num = numMatch[0];
           cy.get(`[data-cy=keyboard-button-${num}]`).click();
-          cy.wait(500); // Wait for potential state changes
           return;
         }
         const btnMatch = navigator.match(/^keyboard-button-(\d)$/);
         if (btnMatch && btnMatch[1]) {
           const num = btnMatch[1];
           cy.get(`[data-cy=keyboard-button-${num}]`).click();
-          cy.wait(500);
           return;
         }
       }
     }
     // Default behavior
     cy.get('[data-cy=keyboard-button-1]').click();
-    cy.wait(500);
     return;
   }
 
@@ -672,7 +747,6 @@ Cypress.Commands.add('applyStandardScenarios', (interactionType: string, navigat
         right.split('').forEach(char => {
           cy.get(`[data-cy="keyboard-button-${char}"]`).click();
         });
-        cy.wait(500);
         return;
       }
     }
@@ -684,7 +758,6 @@ Cypress.Commands.add('applyStandardScenarios', (interactionType: string, navigat
     cy.get('[data-cy="interactive-pyramid-input-right"]').click();
     cy.get('[data-cy="keyboard-button-3"]').click();
     cy.get('[data-cy="keyboard-button-4"]').click();
-    cy.wait(500);
     return;
   }
 
@@ -705,7 +778,6 @@ Cypress.Commands.add('applyStandardScenarios', (interactionType: string, navigat
           }
         }
       });
-      cy.wait(500);
       return;
     }
     // Default behavior
@@ -717,7 +789,6 @@ Cypress.Commands.add('applyStandardScenarios', (interactionType: string, navigat
         cy.get('[data-cy="keyboard-button-1"]').click();
       }
     });
-    cy.wait(500);
     return;
   }
 
@@ -795,7 +866,6 @@ Cypress.Commands.add('applyCorrectAnswerScenarios', (interactionType: string, da
 
     if (parts.length === editableFields.length) {
       cy.clearEquationInput();
-      cy.wait(500);
       cy.get('.field-container.editable').each(($el, index) => {
         if (index >= parts.length) return;
         const val = parts[index] || '';
@@ -809,7 +879,6 @@ Cypress.Commands.add('applyCorrectAnswerScenarios', (interactionType: string, da
           });
         }
       });
-      cy.wait(500);
     }
   } else if (interactionType === 'meta') {
     // For meta, we always have 4 stars (buttons), so we use a dummy array of length 4

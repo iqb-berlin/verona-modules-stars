@@ -144,11 +144,10 @@ export function testAudioFeedback(interactionType: string, configFile: string) {
         // First check that the overlay is visible and then remove it to inspect the fields
         cy.get('[data-cy=interaction-disabled-overlay]').should('be.visible').invoke('remove');
 
-        // The correct answer is shown in all fields
+        // The correct answer is shown in all fields, after showResponse.delayMS counted from the start of the feedback
         Object.entries(wrongFieldsHintConfig.correctAnswer).forEach(([field, value]) => {
           cy.get(wrongFieldsHintConfig.fields[field].selector)
-            .invoke('text')
-            .then(text => expect(text.trim()).to.equal(value));
+            .should($el => expect($el.text().trim()).to.equal(value));
         });
       };
 
@@ -184,6 +183,8 @@ export function testAudioFeedback(interactionType: string, configFile: string) {
 
       cy.waitUntilFeedbackIsFinishedPlaying();
 
+      // A navigation would be requested 500ms after the end of the feedback, so wait a bit longer
+      // before checking that there is none
       cy.wait(600);
 
       cy.get('@outgoingMessages').should('not.contain.deep', {
@@ -210,8 +211,7 @@ export function testAudioFeedback(interactionType: string, configFile: string) {
 
       cy.waitUntilFeedbackIsFinishedPlaying();
 
-      cy.wait(600);
-
+      // The navigation is requested 500ms after the end of the feedback, the assertion retries until then
       cy.get('@outgoingMessages').should('contain.deep', {
         data: {
           type: 'vopUnitNavigationRequestedNotification',

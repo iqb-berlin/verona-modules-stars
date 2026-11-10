@@ -2,6 +2,9 @@ export function testOpeningImageFeatures(interactionType: string, configFile: st
   describe(`Opening Image Features for interactionType - ${interactionType}`, () => {
 
     beforeEach(() => {
+      // The opening image stays presentationDurationMS (setTimeout in OpeningImageComponent),
+      // the clock is faked so that the test does not have to wait for it
+      cy.clock(Date.now(), ['setTimeout', 'clearTimeout']);
       cy.setupTestData(configFile, interactionType);
     });
 
@@ -17,7 +20,10 @@ export function testOpeningImageFeatures(interactionType: string, configFile: st
 
       // After the audio is played
       cy.get('[data-cy="speaker-icon"]').click();
-      cy.wait(1000);
+      // The player only listens for the end of the audio 50ms after it started (AudioService.getPlayFinished)
+      cy.get('[data-cy="custom-audio-button"]').should('have.class', 'playing');
+      cy.tick(50);
+      cy.skipToEndOfAudio();
 
       // data-cy="opening-image" can be seen
       cy.get('[data-cy="opening-image"]').should('be.visible');
@@ -29,7 +35,12 @@ export function testOpeningImageFeatures(interactionType: string, configFile: st
       // and stays presentationDurationMS milliseconds
       cy.get('@testData').then((data: any) => {
         const duration = data.openingImage?.presentationDurationMS || 0;
-        cy.wait(duration);
+        // Without a duration the player ends the opening image right away (no timer)
+        if (duration > 0) {
+          cy.tick(duration - 1);
+          cy.get('[data-cy="opening-image"]').should('be.visible');
+          cy.tick(1);
+        }
       });
 
       // then it can not be seen anymore
