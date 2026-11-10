@@ -312,6 +312,19 @@ describe('Interaction BUTTONS Component', () => {
       cy.get('[data-cy="custom-audio-button"]').should('have.class', 'playing');
     });
 
+    it('loads the main audio only once after the opening image', () => {
+      setupAndAssert(openingImageFile);
+      cy.get('[data-cy="opening-image"]').should('be.visible');
+
+      cy.window().then(win => {
+        cy.spy(win.HTMLMediaElement.prototype, 'load').as('audioLoad');
+      });
+
+      cy.get('[data-cy="opening-image"]').should('not.exist');
+      cy.get('[data-cy="custom-audio-button"]').should('have.class', 'playing');
+      cy.get('@audioLoad').should('have.been.calledOnce');
+    });
+
     it('shows and finishes the opening image when audioSource is missing', () => {
       setupAndAssert('buttons_with_openingImage_missing_audioSource_test');
       cy.get('[data-cy="opening-image"]').should('be.visible');

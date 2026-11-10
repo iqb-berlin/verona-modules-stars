@@ -1,5 +1,6 @@
 import {
   Component,
+  DestroyRef,
   effect,
   inject,
   input,
@@ -39,7 +40,12 @@ export class AudioComponent {
 
   private prevFirstClickLayerClicked: boolean | undefined;
 
+  /** setAudioSrc() also resolves on a later READY, so a destroyed instance must not handle autoplay */
+  private destroyed = false;
+
   constructor() {
+    inject(DestroyRef).onDestroy(() => { this.destroyed = true; });
+
     effect(() => {
       // Re-sync maxPlay disabled state when the unit/audio config changes.
       this.audio();
@@ -48,8 +54,16 @@ export class AudioComponent {
 
     effect(() => {
       // Only the component-provided input should trigger a load.
-      if (this.audio()?.audioSource) {
-        this.audioService.setAudioSrc(this.audio()).then(() => {});
+      // When the phase changes (opening, main, closing meta), the audio is loaded only here;
+      // autoplay requests are handled after loading.
+      const audio = this.audio();
+      if (audio?.audioSource) {
+        this.audioService.setAudioSrc(audio).then(ready => {
+          if (this.destroyed || !ready) return;
+          if (this.unitService.consumeAutoPlay(audio.audioId) && !this.isMaxPlayReached()) {
+            this.startPlayback(audio.audioId);
+          }
+        });
       }
     });
 
@@ -114,15 +128,19 @@ export class AudioComponent {
 
     if (audio && audio.audioId) {
       this.audioService.setAudioSrc(audio).then(() => {
-        this.isPlaying.set(true);
-        this.audioService.getPlayFinished(audio.audioId).then(() => {
-          this.isPlaying.set(false);
-          this.syncMaxPlayDisabled();
-        });
+        this.startPlayback(audio.audioId);
       });
     }
 
     this.movingButton.set('OFF');
+  }
+
+  private startPlayback(audioId: string) {
+    this.isPlaying.set(true);
+    this.audioService.getPlayFinished(audioId).then(() => {
+      this.isPlaying.set(false);
+      this.syncMaxPlayDisabled();
+    });
   }
 
   disabled() {

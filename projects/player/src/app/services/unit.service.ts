@@ -63,9 +63,27 @@ export class UnitService {
   private _openingFlowActive = signal<boolean>(false);
   openingFlowActive = this._openingFlowActive.asReadonly();
 
-  /** current audio source for the main audio */
-  private _currentAudioSrc = signal<AudioOptions>({} as AudioOptions);
-  currentAudioSrc = this._currentAudioSrc.asReadonly();
+  /**
+   * Audio of the current phase, shown and played by the audio component:
+   * opening audio during the opening flow, closing meta audio during closing meta (none if not configured),
+   * otherwise the main audio
+   */
+  currentAudioSrc = computed<AudioOptions>(() => {
+    const openingAudioSource = this.openingImageParams()?.audioSource?.trim();
+    if (this._openingFlowActive() && openingAudioSource) {
+      return { audioSource: openingAudioSource, audioId: 'openingAudio' } as AudioOptions;
+    }
+    if (this.responsesService.closingMetaRunning()) {
+      const closingMetaAudioSource = this.closingMetaButtons()?.audioSource?.trim();
+      return closingMetaAudioSource ?
+        { audioSource: closingMetaAudioSource, audioId: 'closingMetaButtonsAudio' } as AudioOptions :
+        {} as AudioOptions;
+    }
+    return this.mainAudio();
+  });
+
+  /** audioId that the audio component should play once as soon as it has loaded it */
+  private autoPlayAudioId: string | undefined;
 
   /** Marks the first click as done to hide the layer and allow audio playback */
   setFirstClickLayerClicked() {
@@ -75,7 +93,18 @@ export class UnitService {
 
   finishOpeningFlow() {
     this._openingFlowActive.set(false);
-    this._currentAudioSrc.set(this.mainAudio());
+  }
+
+  /** Requests the audio component to play the audio with this audioId once after loading it */
+  requestAutoPlay(audioId: string) {
+    this.autoPlayAudioId = audioId;
+  }
+
+  /** Returns whether autoplay was requested for this audioId and clears the request */
+  consumeAutoPlay(audioId: string): boolean {
+    if (!audioId || this.autoPlayAudioId !== audioId) return false;
+    this.autoPlayAudioId = undefined;
+    return true;
   }
 
   /** Starts the closing meta phase */
@@ -91,31 +120,17 @@ export class UnitService {
     parameters.variableId = this.closingMetaButtons().variableIdMetaSelection;
     this.parameters.set(parameters);
     this.interaction.set('META');
-    if (this.closingMetaButtons()?.audioSource?.trim()) {
-      const audioOptions: AudioOptions = {
-        audioSource: this.closingMetaButtons().audioSource as string,
-        audioId: 'closingMetaButtonsAudio'
-      };
-      this._currentAudioSrc.set(audioOptions);
-      if (this.closingMetaButtons().autoPlay) {
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this.audioService.setAudioSrc(audioOptions).then(ready => {
-          if (ready) {
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            this.audioService.getPlayFinished('closingMetaButtonsAudio');
-          }
-        });
-      }
-    } else {
-      this._currentAudioSrc.set({} as AudioOptions);
+    if (this.closingMetaButtons()?.audioSource?.trim() && this.closingMetaButtons().autoPlay) {
+      this.requestAutoPlay('closingMetaButtonsAudio');
     }
+    // switches currentAudioSrc to the closing meta audio
     this.responsesService.startClosingMeta();
   }
 
   reset() {
     this.audioService.reset();
     this.mainAudio.set({} as AudioOptions);
-    this._currentAudioSrc.set({} as AudioOptions);
+    this.autoPlayAudioId = undefined;
     this.firstAudioOptions.set(undefined);
     this.backgroundColor.set('#EEE');
     this.continueButton.set('NO');
@@ -205,17 +220,5 @@ export class UnitService {
     }
 
     if (mainAudio) this.mainAudio.set(mainAudio);
-
-    const openingAudioSource = def.openingImage?.audioSource?.trim();
-    const openingParams = def.openingImage;
-    if (openingAudioSource && openingParams) {
-      this.openingImageParams.set(openingParams);
-      this._currentAudioSrc.set({
-        audioSource: openingAudioSource,
-        audioId: 'openingAudio'
-      } as AudioOptions);
-    } else if (mainAudio?.audioSource) {
-      this._currentAudioSrc.set(mainAudio);
-    }
   }
 }
