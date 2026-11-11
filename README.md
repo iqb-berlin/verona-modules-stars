@@ -39,6 +39,20 @@ npm test
 
 You can run the end-to-end tests via this command.
 
+### E2E tests in parallel
+
+```
+npm run e2e-parallel
+```
+
+Runs the spec files headless in parallel, by default with 4 workers (about 2 minutes instead of about 5 minutes for `npm run e2e`). Every worker takes the next spec file from a common queue and runs it with its own `cypress run`. While the specs run, a status line shows how many specs are finished and running and the elapsed time, and every finished spec gets a line with its number (e.g. `[5/12] PASS  40s  ...`). At the end, the console shows the failures of the failed specs and a summary of how many specs and tests passed and failed. The full output of every spec is written to a log directory, which is printed at the start.
+
+The script does not start the player, so start it first with `npm start`. The number of workers can be passed as an argument; more than 4 hardly helps, as the runs then mainly compete for the CPU and the dev server:
+
+```
+npm run e2e-parallel -- 6
+```
+
 ### E2E test coverage
 
 ```

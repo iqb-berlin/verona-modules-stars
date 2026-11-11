@@ -62,9 +62,8 @@ describe('PYRAMID Interaction E2E Tests', () => {
 
   it('renders the interactive pyramid if there is no example', () => {
     setupAndAssert('pyramid_without_example_test.json');
-    cy.wait(500);
-    cy.get('[data-cy="example-pyramid"]').should('not.exist');
     cy.get('[data-cy="interactive-pyramid"]').should('be.visible');
+    cy.get('[data-cy="example-pyramid"]').should('not.exist');
   });
 
   it('allows entering numbers into both input fields', () => {

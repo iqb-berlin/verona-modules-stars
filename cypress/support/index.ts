@@ -58,6 +58,12 @@ declare global {
       assertContinueButtonNotExists(): Chainable<void>;
 
       /**
+       * Waits until the player has rendered what the last action changed (at most 50ms).
+       * Use it before checks that something did NOT happen.
+       * */
+      waitForRender(): Chainable<void>;
+
+      /**
        * Click on the continue button
        * */
       clickContinueButton(): Chainable<void>;
@@ -68,9 +74,29 @@ declare global {
       clickButtonAtIndexOne(): Chainable<void>;
 
       /**
-       * Assert that the audio is played until the end
+       * Skips to the end of the playing audio and asserts that the player noticed the end.
+       * Passes as well if no audio plays. An audio that has already ended only counts with mayHaveEnded,
+       * otherwise it waits for the next audio to start.
        * */
-      waitUntilAudioIsFinishedPlaying(): Chainable<void>;
+      waitUntilAudioIsFinishedPlaying(options?: { mayHaveEnded?: boolean }): Chainable<void>;
+
+      /**
+       * Waits until the current audio plays and skips to its end (nothing to do if no audio plays)
+       * */
+      skipToEndOfAudio(): Chainable<void>;
+
+      /**
+       * Clicks a place value icon after moving the faked Date 500ms forward, so that the click debounce
+       * of place value does not swallow it
+       * @param dataCy - The data-cy of the icon, e.g. 'icon-item-ones'
+       * @param position - Which of the matching icons to click (default: 'first')
+       * */
+      clickPlaceValueIcon(dataCy: string, position?: 'first' | 'last'): Chainable<void>;
+
+      /**
+       * Fakes setTimeout and clearTimeout of the player, so that the test can fire them with cy.tick()
+       * */
+      fakeTimers(): Chainable<void>;
 
       /**
        * Writes text on keyboard
@@ -79,7 +105,7 @@ declare global {
       writeTextOnKeyboard(text: string): Chainable<void>;
 
       /**
-       * Assert that the feedback is played until the end
+       * Waits until the feedback starts, skips to its end and asserts that the player noticed the end
        * */
       waitUntilFeedbackIsFinishedPlaying(): Chainable<void>;
 

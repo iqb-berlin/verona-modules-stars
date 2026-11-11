@@ -116,6 +116,10 @@ export function firstAudioOptionsFeatures(interactionType: string) {
     });
 
     it('animates audio button when animateButton is KIND', () => {
+      // The button starts moving after 5 seconds without interaction (setTimeout in AudioComponent),
+      // the clock is faked so that the test does not have to wait for it
+      cy.fakeTimers();
+
       // Set up test data
       cy.setupTestData(`${interactionType}_animateButton_kind_test.json`, interactionType);
 
@@ -126,16 +130,23 @@ export function firstAudioOptionsFeatures(interactionType: string) {
           // The button should NOT be moving initially
           cy.get('[data-cy="custom-audio-button"]').should('exist').and('not.have.class', 'moving-button-kind');
 
-          // Do not interact with the page; wait slightly over 5 seconds
-          cy.wait(6000);
+          // Shortly before 5 seconds without interaction it is still not moving
+          cy.tick(4900);
+          cy.waitForRender();
+          cy.get('[data-cy="custom-audio-button"]').should('not.have.class', 'moving-button-kind');
 
-          // After 10s of inactivity (and before first interaction), it should start moving
+          // After 5 seconds without interaction (and before first interaction), it should start moving
+          cy.tick(100);
           cy.get('[data-cy="custom-audio-button"]').should('have.class', 'moving-button-kind');
         }
       });
     });
 
     it('animates audio button when animateButton is BOLD', () => {
+      // The button starts moving after 5 seconds without interaction (setTimeout in AudioComponent),
+      // the clock is faked so that the test does not have to wait for it
+      cy.fakeTimers();
+
       // Set up test data
       cy.setupTestData(`${interactionType}_animateButton_bold_test.json`, interactionType);
 
@@ -146,10 +157,13 @@ export function firstAudioOptionsFeatures(interactionType: string) {
           // The button should NOT be moving initially
           cy.get('[data-cy="custom-audio-button"]').should('exist').and('not.have.class', 'moving-button-bold');
 
-          // Do not interact with the page; wait slightly over 5 seconds
-          cy.wait(6000);
+          // Shortly before 5 seconds without interaction it is still not moving
+          cy.tick(4900);
+          cy.waitForRender();
+          cy.get('[data-cy="custom-audio-button"]').should('not.have.class', 'moving-button-bold');
 
-          // After 10s of inactivity (and before first interaction), it should start moving
+          // After 5 seconds without interaction (and before first interaction), it should start moving
+          cy.tick(100);
           cy.get('[data-cy="custom-audio-button"]').should('have.class', 'moving-button-bold');
         }
       });

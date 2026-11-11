@@ -50,7 +50,7 @@ export function testFormerStateFeatures(interactionType: string, defaultTestFile
       });
     });
 
-    it('preserves the click-layer state when navigating between multiple units', () => {
+    it('keeps the click layer hidden when coming back to a unit whose main audio was heard completely', () => {
       const firstTestFile = `${interactionType}_firstClickLayer_transparent_test`;
       const secondTestFile = `${interactionType}_firstClickLayer_transparent_second_test`;
 
@@ -59,29 +59,33 @@ export function testFormerStateFeatures(interactionType: string, defaultTestFile
         return;
       }
 
-      // 1. Load and resolve Unit A
-      cy.log('First load Unit A and click on click-layer');
+      // 1. Load Unit A, click on the click layer and hear the main audio until the end
+      cy.log('First load Unit A, click on click-layer and hear the main audio completely');
       cy.setupTestData(firstTestFile, interactionType);
       cy.get('[data-cy="click-layer"]').should('exist');
       cy.get('[data-cy="click-layer"]').click();
-      cy.wait(1000);
       cy.get('[data-cy="click-layer"]').should('not.exist');
       cy.assertInteractionComponentVisible(interactionType);
-      cy.wait(1000);
+      // The click on the layer starts the main audio. The click layer stays hidden only once the main audio
+      // was heard until the end (ResponsesService.setFormerState), a click alone is not enough.
+      cy.waitUntilAudioIsFinishedPlaying();
 
-      // 2. Load and DO NOT resolve Unit B
+      // 2. Load Unit B and DO NOT click on the click layer
       cy.log('First load Unit B and DO NOT click on click-layer');
       cy.setupTestData(secondTestFile, interactionType);
       cy.get('[data-cy="click-layer"]', { timeout: 10000 }).should('exist');
 
-      // 3. Reload Unit A and verify it's still resolved
+      // 3. Reload Unit A and verify that the click layer stays hidden
       cy.log('Second load Unit A and check click-layer DOES NOT exist');
       cy.setupTestData(firstTestFile, interactionType);
-      cy.wait(1000);
+      // Wait until the unit is rendered, otherwise the click layer does not exist yet anyway.
+      // (assertInteractionComponentVisible does not work here: Cypress considers the component not visible)
+      cy.get('[data-cy="custom-audio-button"]').should('exist');
+      // Let the player apply the restored state, otherwise the check only sees the state before it
+      cy.waitForRender();
       cy.get('[data-cy="click-layer"]').should('not.exist');
-      // cy.assertInteractionComponentVisible(interactionType);
 
-      // 4. Reload Unit B and verify it's still NOT resolved
+      // 4. Reload Unit B and verify that the click layer is still shown
       cy.log('Second load Unit B and check that click-layer exists');
       cy.setupTestData(secondTestFile, interactionType);
       cy.get('[data-cy="click-layer"]', { timeout: 10000 }).should('exist');

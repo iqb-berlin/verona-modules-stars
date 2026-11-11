@@ -221,8 +221,12 @@ describe('Interaction DROP Component', () => {
       // First click - button should move down
       cy.get(`[data-cy="button-${buttonIndex}"]`).click();
 
-      // Wait for animation to complete
-      cy.wait(3000);
+      cy.get(`[data-cy="drop-animate-wrapper-${buttonIndex}"]`)
+        .should($el => {
+          const style = $el.attr('style') || '';
+          expect(style).to.contain('transform');
+          expect(style.replace(/\s+/g, ' ').trim()).not.to.include('transform: translate3d(0px, 0px, 0px)');
+        });
 
       // Second click - should return to original position
       cy.get(`[data-cy="button-${buttonIndex}"]`).click();
@@ -253,9 +257,6 @@ describe('Interaction DROP Component', () => {
           cy.get(dropImage) // droppable
             .trigger('mousemove', { force: true })
             .trigger('mouseup', { force: true });
-
-          // Wait for animation to complete
-          cy.wait(2000);
 
           assertTransformTranslate(xPx, yPx);
         }

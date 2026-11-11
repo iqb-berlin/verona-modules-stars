@@ -23,8 +23,7 @@ export function testContinueButtonFeatures(interactionType: string) {
 
       cy.clickContinueButton();
 
-      cy.wait(600);
-
+      // The navigation is requested 200ms after the click, the assertions retry until then
       cy.get('@postMessage').should('have.been.called');
       cy.get('@postMessage').should('have.been.calledWithMatch', Cypress.sinon.match({
         type: 'vopUnitNavigationRequestedNotification',
@@ -174,8 +173,8 @@ export function testContinueButtonFeatures(interactionType: string) {
           // Continue button still should not exist
           cy.assertContinueButtonNotExists();
 
-          // Wait for audio to complete
-          cy.waitUntilAudioIsFinishedPlaying();
+          // Wait for audio to complete. Entering the correct answer may take longer than the audio.
+          cy.waitUntilAudioIsFinishedPlaying({ mayHaveEnded: true });
 
           // Continue button should appear
           cy.assertContinueButtonExistsAndVisible();

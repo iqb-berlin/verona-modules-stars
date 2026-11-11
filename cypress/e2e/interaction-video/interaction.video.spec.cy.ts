@@ -171,9 +171,7 @@ describe('Interaction VIDEO Component', () => {
 
       playVideoFaster();
 
-      // Wait for navigation after small delay in component
-      cy.wait(600);
-
+      // The navigation is requested after a small delay in the component, the assertion retries until then
       cy.get('@outgoingMessages').should('contain.deep', {
         data: {
           type: 'vopUnitNavigationRequestedNotification',

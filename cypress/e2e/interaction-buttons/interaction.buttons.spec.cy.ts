@@ -267,9 +267,9 @@ describe('Interaction BUTTONS Component', () => {
       assertButtonExists();
 
       cy.get('[data-cy="button-0"]').click();
-      cy.wait(50);
       cy.get('[data-cy="buttons-container"]').should('have.attr', 'data-state', 'buttons-deactivated');
-      cy.wait(600);
+
+      // The navigation is requested 500ms after the click, the assertion retries until then
 
       cy.get('@outgoingMessages').should('contain.deep', {
         data: {
@@ -288,8 +288,8 @@ describe('Interaction BUTTONS Component', () => {
 
       // The speaker icon plays the opening image audio
       cy.get('stars-audio [data-cy="speaker-icon"]').should('be.visible').click();
-      // Wait for the opening audio to finish
-      cy.get('[data-cy="opening-image"]', { timeout: 15000 }).should('be.visible');
+      cy.skipToEndOfAudio();
+      cy.get('[data-cy="opening-image"]').should('be.visible');
 
       // After the opening image is gone, there is no audio left to play
       cy.get('[data-cy="opening-image"]').should('not.exist');
@@ -334,6 +334,8 @@ describe('Interaction BUTTONS Component', () => {
     });
 
     it('does not finish the opening flow in the next unit', () => {
+      // The clock is faked, so that the timer of the previous unit can be fired without waiting for it
+      cy.fakeTimers();
       setupAndAssert(openingImageFile);
       cy.get('[data-cy="opening-image"]').should('be.visible');
 
@@ -346,13 +348,16 @@ describe('Interaction BUTTONS Component', () => {
       cy.loadUnit(`interaction-${interactionType}/buttons_firstClickLayer_off_test`);
       assertButtonExists();
 
-      // Wait until the timer of the previous unit would have fired
-      cy.wait(1000);
+      // Let the timer of the previous unit (presentationDurationMS 1000) fire and the player render the result
+      cy.tick(1000);
+      cy.waitForRender();
       cy.get('[data-cy="click-layer"]').should('not.exist');
       cy.get('@audioPlay').should('not.have.been.called');
     });
 
     it('does not finish the opening flow of the next unit with opening image', () => {
+      // The clock is faked, so that the timer of the previous unit can be fired without waiting for it
+      cy.fakeTimers();
       setupAndAssert(openingImageFile);
       cy.get('[data-cy="opening-image"]').should('be.visible');
 
@@ -362,8 +367,9 @@ describe('Interaction BUTTONS Component', () => {
       // The speaker icon is covered by the click layer, so check existence instead of visibility
       cy.get('stars-audio [data-cy="speaker-icon"]').should('exist');
 
-      // Wait until the timer of the previous unit would have fired
-      cy.wait(1000);
+      // Let the timer of the previous unit (presentationDurationMS 1000) fire and the player render the result
+      cy.tick(1000);
+      cy.waitForRender();
       cy.get('[data-cy="button-0"]').should('not.exist');
       cy.get('stars-audio [data-cy="speaker-icon"]').should('exist');
     });
