@@ -86,9 +86,17 @@ declare global {
       skipToEndOfAudio(): Chainable<void>;
 
       /**
-       * Moves the faked Date 500ms forward, so that place value accepts the next click
+       * Clicks a place value icon after moving the faked Date 500ms forward, so that the click debounce
+       * of place value does not swallow it
+       * @param dataCy - The data-cy of the icon, e.g. 'icon-item-ones'
+       * @param position - Which of the matching icons to click (default: 'first')
        * */
-      skipPlaceValueClickDebounce(): Chainable<void>;
+      clickPlaceValueIcon(dataCy: string, position?: 'first' | 'last'): Chainable<void>;
+
+      /**
+       * Fakes setTimeout and clearTimeout of the player, so that the test can fire them with cy.tick()
+       * */
+      fakeTimers(): Chainable<void>;
 
       /**
        * Writes text on keyboard

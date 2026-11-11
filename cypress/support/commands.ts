@@ -263,18 +263,30 @@ Cypress.Commands.add('skipToEndOfAudio', () => {
 // Place value ignores clicks that come less than CLICK_DEBOUNCE_MS (500ms, measured with Date.now()) after
 // the previous one. Instead of waiting, the faked Date is moved forward. cy.clock() returns the clock
 // that is already installed, so this can be called before every click.
-Cypress.Commands.add('skipPlaceValueClickDebounce', () => {
+const skipPlaceValueClickDebounce = () => {
   cy.clock(Date.now(), ['Date'], { log: false }).then(clock => {
     cy.window({ log: false }).then(win => {
       const before = win.Date.now();
       clock.tick(500);
       // An already installed clock is returned as it is, even if it does not replace Date
       if (win.Date.now() - before < 500) {
-        throw new Error('skipPlaceValueClickDebounce needs a clock that replaces Date, ' +
-          'add \'Date\' to the methods of the cy.clock() call of this test');
+        throw new Error('clickPlaceValueIcon needs a clock that replaces Date, but this test already ' +
+          'installed one without it (cy.fakeTimers() only fakes setTimeout and clearTimeout). ' +
+          'Install the clock with cy.clock(Date.now(), [\'Date\', \'setTimeout\', \'clearTimeout\']) instead.');
       }
     });
   });
+};
+
+Cypress.Commands.add('clickPlaceValueIcon', (dataCy: string, position: 'first' | 'last' = 'first') => {
+  skipPlaceValueClickDebounce();
+  cy.get(`[data-cy="${dataCy}"]`)[position]().click({ force: true });
+});
+
+// Fakes the timers of the player, so that a test can fire them with cy.tick() instead of waiting.
+// Has to be called before the unit is loaded, the timers that already run stay real.
+Cypress.Commands.add('fakeTimers', () => {
+  cy.clock(Date.now(), ['setTimeout', 'clearTimeout']);
 });
 
 Cypress.Commands.add('waitUntilAudioIsFinishedPlaying', (options: { mayHaveEnded?: boolean } = {}) => {
@@ -573,15 +585,13 @@ Cypress.Commands.add('movePlaceValueIcons', (targetTens: number, targetOnes: num
 
     // Move tens
     for (let i = initialTensMoved; i < targetTens; i++) {
-      cy.skipPlaceValueClickDebounce();
-      cy.get('[data-cy="icon-item-tens"]').first().click({ force: true });
+      cy.clickPlaceValueIcon('icon-item-tens', 'first');
       cy.get('[data-cy="icon-item-tens-moved"]').should('have.length', i + 1);
     }
 
     // Move ones
     for (let i = initialOnesMoved; i < targetOnes; i++) {
-      cy.skipPlaceValueClickDebounce();
-      cy.get('[data-cy="icon-item-ones"]').first().click({ force: true });
+      cy.clickPlaceValueIcon('icon-item-ones', 'first');
       cy.get('[data-cy="icon-item-ones-moved"]').should('have.length', i + 1);
     }
   });
@@ -705,8 +715,7 @@ Cypress.Commands.add('applyStandardScenarios', (interactionType: string, navigat
       return;
     }
     // Default behavior
-    cy.skipPlaceValueClickDebounce();
-    cy.get('[data-cy="icon-item-ones"]').first().click({ force: true });
+    cy.clickPlaceValueIcon('icon-item-ones', 'first');
     return;
   }
 

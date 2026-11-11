@@ -4,7 +4,7 @@ export function testOpeningImageFeatures(interactionType: string, configFile: st
     beforeEach(() => {
       // The opening image stays presentationDurationMS (setTimeout in OpeningImageComponent),
       // the clock is faked so that the test does not have to wait for it
-      cy.clock(Date.now(), ['setTimeout', 'clearTimeout']);
+      cy.fakeTimers();
       cy.setupTestData(configFile, interactionType);
     });
 

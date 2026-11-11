@@ -81,6 +81,8 @@ export function testFormerStateFeatures(interactionType: string, defaultTestFile
       // Wait until the unit is rendered, otherwise the click layer does not exist yet anyway.
       // (assertInteractionComponentVisible does not work here: Cypress considers the component not visible)
       cy.get('[data-cy="custom-audio-button"]').should('exist');
+      // Let the player apply the restored state, otherwise the check only sees the state before it
+      cy.waitForRender();
       cy.get('[data-cy="click-layer"]').should('not.exist');
 
       // 4. Reload Unit B and verify that the click layer is still shown

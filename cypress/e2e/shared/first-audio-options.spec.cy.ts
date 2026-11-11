@@ -118,7 +118,7 @@ export function firstAudioOptionsFeatures(interactionType: string) {
     it('animates audio button when animateButton is KIND', () => {
       // The button starts moving after 5 seconds without interaction (setTimeout in AudioComponent),
       // the clock is faked so that the test does not have to wait for it
-      cy.clock(Date.now(), ['setTimeout', 'clearTimeout']);
+      cy.fakeTimers();
 
       // Set up test data
       cy.setupTestData(`${interactionType}_animateButton_kind_test.json`, interactionType);
@@ -145,7 +145,7 @@ export function firstAudioOptionsFeatures(interactionType: string) {
     it('animates audio button when animateButton is BOLD', () => {
       // The button starts moving after 5 seconds without interaction (setTimeout in AudioComponent),
       // the clock is faked so that the test does not have to wait for it
-      cy.clock(Date.now(), ['setTimeout', 'clearTimeout']);
+      cy.fakeTimers();
 
       // Set up test data
       cy.setupTestData(`${interactionType}_animateButton_bold_test.json`, interactionType);

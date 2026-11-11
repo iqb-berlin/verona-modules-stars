@@ -335,7 +335,7 @@ describe('Interaction BUTTONS Component', () => {
 
     it('does not finish the opening flow in the next unit', () => {
       // The clock is faked, so that the timer of the previous unit can be fired without waiting for it
-      cy.clock(Date.now(), ['setTimeout', 'clearTimeout']);
+      cy.fakeTimers();
       setupAndAssert(openingImageFile);
       cy.get('[data-cy="opening-image"]').should('be.visible');
 
@@ -357,7 +357,7 @@ describe('Interaction BUTTONS Component', () => {
 
     it('does not finish the opening flow of the next unit with opening image', () => {
       // The clock is faked, so that the timer of the previous unit can be fired without waiting for it
-      cy.clock(Date.now(), ['setTimeout', 'clearTimeout']);
+      cy.fakeTimers();
       setupAndAssert(openingImageFile);
       cy.get('[data-cy="opening-image"]').should('be.visible');
 
